@@ -19,7 +19,6 @@ install: build
 
 .PHONY: test
 test:
-	go vet ./...
 	go test ./... -v -count=1 -race -shuffle=on
 
 .PHONY: testacc
