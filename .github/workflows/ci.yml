@@ -1,0 +1,121 @@
+name: CI
+
+on:
+  pull_request:
+    paths:
+      - "**.go"
+      - go.mod
+      - go.sum
+      - .golangci.yml
+
+concurrency:
+  group: ci-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version-file: go.mod
+          cache: true
+      - run: go mod download
+      - run: go build -v ./...
+      - run: go fmt ./...
+      - name: Verify no changes
+        run: |
+          git diff --exit-code
+
+  docs:
+    name: Check to generate documents
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version-file: go.mod
+          cache: true
+      - run: go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name neon
+      - name: Verify no changes to generated docs
+        run: |
+          git diff --compact-summary --exit-code -- docs/ || \
+            (echo "::error::Generated docs are out of date. Run 'go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name neon' and commit the changes." && exit 1)
+
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version-file: go.mod
+          cache: true
+      - uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
+        with:
+          version: latest
+
+  unit:
+    name: Unit Test
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version-file: go.mod
+          cache: true
+      - run: go mod download
+      - run: make test
+
+  summary:
+    name: CI Summary
+    if: always()
+    needs:
+      - build
+      - docs
+      - lint
+      - unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Check results
+        run: |
+          results=(
+            "${{ needs.build.result }}"
+            "${{ needs.docs.result }}"
+            "${{ needs.lint.result }}"
+            "${{ needs.unit.result }}"
+          )
+          for result in "${results[@]}"; do
+            if [[ "$result" == "failure" || "$result" == "cancelled" ]]; then
+              echo "One or more jobs failed or were cancelled."
+              exit 1
+            fi
+          done
+          echo "All jobs passed."

@@ -1,0 +1,173 @@
+package restore_branch_test
+
+import (
+	"context"
+	"net/http"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-framework/action"
+	actionschema "github.com/hashicorp/terraform-plugin-framework/action/schema"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
+	"github.com/jarcoal/httpmock"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/services/branch/restore_branch"
+	"github.com/kenchan0130/terraform-provider-neon/internal/testutil"
+)
+
+type testSecuritySource struct{}
+
+func (s *testSecuritySource) BearerAuth(_ context.Context, _ string) (neon.BearerAuth, error) {
+	return neon.BearerAuth{Token: "test-api-key"}, nil
+}
+
+func (s *testSecuritySource) CookieAuth(_ context.Context, _ string) (neon.CookieAuth, error) {
+	return neon.CookieAuth{}, nil
+}
+
+func (s *testSecuritySource) TokenCookieAuth(_ context.Context, _ string) (neon.TokenCookieAuth, error) {
+	return neon.TokenCookieAuth{}, nil
+}
+
+func setupAction(t *testing.T, transport *httpmock.MockTransport) action.Action {
+	t.Helper()
+
+	httpClient := &http.Client{Transport: transport}
+	client, err := neon.NewClient("https://neon.example.com/api/v2", &testSecuritySource{}, neon.WithClient(httpClient))
+	if err != nil {
+		t.Fatalf("failed to create neon client: %v", err)
+	}
+
+	a := restore_branch.NewAction()
+
+	configResp := &action.ConfigureResponse{}
+	a.(action.ActionWithConfigure).Configure(context.Background(), action.ConfigureRequest{
+		ProviderData: client,
+	}, configResp)
+	if configResp.Diagnostics.HasError() {
+		t.Fatalf("configure failed: %s", configResp.Diagnostics.Errors())
+	}
+
+	return a
+}
+
+func getActionSchema() actionschema.Schema {
+	a := restore_branch.NewAction()
+	schemaResp := &action.SchemaResponse{}
+	a.Schema(context.Background(), action.SchemaRequest{}, schemaResp)
+	return schemaResp.Schema
+}
+
+func newInvokeConfig(projectID, branchID, sourceBranchID string, sourceLsn, sourceTimestamp, preserveUnderName *string) tfsdk.Config {
+	s := getActionSchema()
+	schemaType := s.Type().TerraformType(context.Background())
+
+	sourceLsnValue := tftypes.NewValue(tftypes.String, nil)
+	if sourceLsn != nil {
+		sourceLsnValue = tftypes.NewValue(tftypes.String, *sourceLsn)
+	}
+
+	sourceTimestampValue := tftypes.NewValue(tftypes.String, nil)
+	if sourceTimestamp != nil {
+		sourceTimestampValue = tftypes.NewValue(tftypes.String, *sourceTimestamp)
+	}
+
+	preserveUnderNameValue := tftypes.NewValue(tftypes.String, nil)
+	if preserveUnderName != nil {
+		preserveUnderNameValue = tftypes.NewValue(tftypes.String, *preserveUnderName)
+	}
+
+	return tfsdk.Config{
+		Schema: s,
+		Raw: tftypes.NewValue(schemaType, map[string]tftypes.Value{
+			"project_id":         tftypes.NewValue(tftypes.String, projectID),
+			"branch_id":          tftypes.NewValue(tftypes.String, branchID),
+			"source_branch_id":   tftypes.NewValue(tftypes.String, sourceBranchID),
+			"source_lsn":         sourceLsnValue,
+			"source_timestamp":   sourceTimestampValue,
+			"preserve_under_name": preserveUnderNameValue,
+		}),
+	}
+}
+
+func TestRestoreBranchAction_Invoke(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/projects/proj-001/branches/br-001/restore",
+		testutil.JSONResponder(200, `{
+			"branch": {
+				"id":"br-001","project_id":"proj-001","name":"main","primary":true,"default":true,
+				"created_at":"2025-01-01T00:00:00Z","updated_at":"2025-01-01T00:00:00Z",
+				"state_changed_at":"2025-01-01T00:00:00Z","current_state":"ready",
+				"creation_source":"console","protected":false,
+				"cpu_used_sec":0,"compute_time_seconds":0,"active_time_seconds":0,
+				"written_data_bytes":0,"data_transfer_bytes":0,"logical_size":0
+			},
+			"operations": []
+		}`),
+	)
+
+	a := setupAction(t, transport)
+
+	resp := &action.InvokeResponse{}
+	a.Invoke(context.Background(), action.InvokeRequest{
+		Config: newInvokeConfig("proj-001", "br-001", "br-002", nil, nil, nil),
+	}, resp)
+
+	if resp.Diagnostics.HasError() {
+		t.Fatalf("unexpected error: %s", resp.Diagnostics.Errors())
+	}
+}
+
+func TestRestoreBranchAction_WithOptionalFields(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/projects/proj-001/branches/br-001/restore",
+		testutil.JSONResponder(200, `{
+			"branch": {
+				"id":"br-001","project_id":"proj-001","name":"main","primary":true,"default":true,
+				"created_at":"2025-01-01T00:00:00Z","updated_at":"2025-01-01T00:00:00Z",
+				"state_changed_at":"2025-01-01T00:00:00Z","current_state":"ready",
+				"creation_source":"console","protected":false,
+				"cpu_used_sec":0,"compute_time_seconds":0,"active_time_seconds":0,
+				"written_data_bytes":0,"data_transfer_bytes":0,"logical_size":0
+			},
+			"operations": []
+		}`),
+	)
+
+	a := setupAction(t, transport)
+
+	lsn := "0/1234567"
+	preserveName := "backup-branch"
+	resp := &action.InvokeResponse{}
+	a.Invoke(context.Background(), action.InvokeRequest{
+		Config: newInvokeConfig("proj-001", "br-001", "br-002", &lsn, nil, &preserveName),
+	}, resp)
+
+	if resp.Diagnostics.HasError() {
+		t.Fatalf("unexpected error: %s", resp.Diagnostics.Errors())
+	}
+}
+
+func TestRestoreBranchAction_APIError(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/projects/proj-001/branches/br-001/restore",
+		testutil.JSONResponder(500, `{"message":"internal error"}`),
+	)
+
+	a := setupAction(t, transport)
+
+	resp := &action.InvokeResponse{}
+	a.Invoke(context.Background(), action.InvokeRequest{
+		Config: newInvokeConfig("proj-001", "br-001", "br-002", nil, nil, nil),
+	}, resp)
+
+	if !resp.Diagnostics.HasError() {
+		t.Fatal("expected error but got none")
+	}
+}

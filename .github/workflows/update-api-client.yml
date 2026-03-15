@@ -1,0 +1,48 @@
+name: Update API Client
+
+on:
+  schedule:
+    - cron: "0 0 * * 1" # Every Monday at 00:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  update-api-client:
+    name: Update API Client
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Generate API client
+        run: |
+          go run github.com/ogen-go/ogen/cmd/ogen --target internal/neon -package neon --clean https://neon.com/api_spec/release/v2.json
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet -- internal/neon/; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Create pull request
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
+        with:
+          commit-message: "Update auto-generated API client from OpenAPI spec"
+          branch: automated/update-api-client
+          title: "Update auto-generated API client from OpenAPI spec"
+          body: |
+            This PR was automatically created because the [Neon API spec](https://neon.com/api_spec/release/v2.json) has changed.
+
+            Please review the generated changes in `internal/neon/`.
