@@ -60,7 +60,7 @@ You can debug developing provider using following steps:
 
 1. `make local_install`
 1. Edit `~/.terraformrc` using the output comment
-1. `cd examples/resources/zoom_phone_autoreceiptionist`
+1. `cd examples/resources/neon_project`
 1. `TF_LOG_PROVIDER=debug terraform apply`
 
 ### Case 2. Using Visual Studio Code
@@ -70,7 +70,7 @@ You can debug developing provider using following steps:
 1. Launch your Visual Studio Code app
 1. Select `Debug Terraform Provier` configuration and start a debugging session from "Run and Debug" view
 1. Copy a `TF_REATTACH_PROVIDERS={...}` output from "Debug Console" tab
-1. `cd examples/resources/zoom_phone_autoreceiptionist`
+1. `cd examples/resources/neon_project`
 1. `TF_REATTACH_PROVIDERS={...} TF_LOG_PROVIDER=debug terraform apply`
 
 ## Release
