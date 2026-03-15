@@ -212,6 +212,7 @@ func (p *NeonProvider) Actions(_ context.Context) []func() action.Action {
 func (p *NeonProvider) EphemeralResources(_ context.Context) []func() ephemeral.EphemeralResource {
 	return []func() ephemeral.EphemeralResource{
 		role_password.NewEphemeralResource,
+		neon_auth_oauth_provider.NewEphemeralResource,
 	}
 }
 
@@ -239,6 +240,7 @@ func (p *NeonProvider) DataSources(_ context.Context) []func() datasource.DataSo
 		snapshot_schedule.NewDataSource,
 		neon_auth.NewDataSource,
 		neon_auth_oauth_provider.NewDataSource,
+		role_password.NewDataSource,
 		projects.NewDataSource,
 		branches.NewDataSource,
 	}

@@ -56,7 +56,6 @@ resource "neon_role" "test" {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testutil.CheckResourceAttr("neon_role.test", "name", "myrole"),
 					testutil.CheckResourceAttr("neon_role.test", "branch_id", "br-test-001"),
-					testutil.CheckResourceAttr("neon_role.test", "password", "generated-password-123"),
 				),
 			},
 		},
@@ -87,7 +86,6 @@ resource "neon_role" "test" {
 				ImportStateId:                        "test-project-id/br-test-001/myrole",
 				ImportStateVerify:                    true,
 				ImportStateVerifyIdentifierAttribute: "name",
-				ImportStateVerifyIgnore:              []string{"password"},
 			},
 		},
 	})

@@ -4,26 +4,31 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
+	"github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
 )
 
-type neonAuthOauthProviderDataSource struct {
+var (
+	_ ephemeral.EphemeralResource              = &neonAuthOauthProviderEphemeral{}
+	_ ephemeral.EphemeralResourceWithConfigure = &neonAuthOauthProviderEphemeral{}
+)
+
+type neonAuthOauthProviderEphemeral struct {
 	client *neon.Client
 }
 
-func NewDataSource() datasource.DataSource {
-	return &neonAuthOauthProviderDataSource{}
+func NewEphemeralResource() ephemeral.EphemeralResource {
+	return &neonAuthOauthProviderEphemeral{}
 }
 
-func (d *neonAuthOauthProviderDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (e *neonAuthOauthProviderEphemeral) Metadata(_ context.Context, req ephemeral.MetadataRequest, resp *ephemeral.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_branch_neon_auth_oauth_provider"
 }
 
-func (d *neonAuthOauthProviderDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (e *neonAuthOauthProviderEphemeral) Schema(_ context.Context, _ ephemeral.SchemaRequest, resp *ephemeral.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Retrieves information about a NeonAuth OAuth provider on a branch.",
+		Description: "Retrieves information about a NeonAuth OAuth provider on a branch. The sensitive fields (client_id, client_secret) are ephemeral and will not be stored in Terraform state.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description: "The OAuth provider ID (e.g. `google`, `github`, `microsoft`, `vercel`).",
@@ -54,7 +59,7 @@ func (d *neonAuthOauthProviderDataSource) Schema(_ context.Context, _ datasource
 	}
 }
 
-func (d *neonAuthOauthProviderDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (e *neonAuthOauthProviderEphemeral) Configure(_ context.Context, req ephemeral.ConfigureRequest, resp *ephemeral.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -68,20 +73,20 @@ func (d *neonAuthOauthProviderDataSource) Configure(_ context.Context, req datas
 		return
 	}
 
-	d.client = client
+	e.client = client
 }
 
-func (d *neonAuthOauthProviderDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (e *neonAuthOauthProviderEphemeral) Open(ctx context.Context, req ephemeral.OpenRequest, resp *ephemeral.OpenResponse) {
 	var data oauthProviderModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(fetchOauthProvider(ctx, d.client, &data)...)
+	resp.Diagnostics.Append(fetchOauthProvider(ctx, e.client, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.Result.Set(ctx, &data)...)
 }

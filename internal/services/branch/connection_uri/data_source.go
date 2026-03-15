@@ -63,7 +63,6 @@ func (d *connectionURIDataSource) Schema(_ context.Context, _ datasource.SchemaR
 			"uri": schema.StringAttribute{
 				Description: "The connection URI.",
 				Computed:    true,
-				Sensitive:   true,
 			},
 		},
 	}

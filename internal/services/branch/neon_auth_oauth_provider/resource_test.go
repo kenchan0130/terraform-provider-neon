@@ -63,8 +63,40 @@ resource "neon_branch_neon_auth_oauth_provider" "test" {
 					testutil.CheckResourceAttr("neon_branch_neon_auth_oauth_provider.test", "project_id", "test-project-id"),
 					testutil.CheckResourceAttr("neon_branch_neon_auth_oauth_provider.test", "branch_id", "br-test-001"),
 					testutil.CheckResourceAttr("neon_branch_neon_auth_oauth_provider.test", "type", "standard"),
-					testutil.CheckResourceAttr("neon_branch_neon_auth_oauth_provider.test", "client_id", "my-client-id"),
 					testutil.CheckResourceAttr("neon_branch_neon_auth_oauth_provider.test", "client_secret", "my-client-secret"),
+				),
+			},
+		},
+	})
+}
+
+func TestNeonAuthOauthProviderResource_CreateWithWriteOnly(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	setupOauthProviderMocks(transport)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_branch_neon_auth_oauth_provider" "test" {
+  project_id               = "test-project-id"
+  branch_id                = "br-test-001"
+  type                     = "standard"
+  client_id                = "my-client-id"
+  client_secret_wo         = "my-client-secret"
+  client_secret_wo_version = "1"
+}
+`),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testutil.CheckResourceAttr("neon_branch_neon_auth_oauth_provider.test", "id", "google"),
+					testutil.CheckResourceAttr("neon_branch_neon_auth_oauth_provider.test", "project_id", "test-project-id"),
+					testutil.CheckResourceAttr("neon_branch_neon_auth_oauth_provider.test", "branch_id", "br-test-001"),
+					testutil.CheckResourceAttr("neon_branch_neon_auth_oauth_provider.test", "type", "standard"),
+					testutil.CheckResourceAttr("neon_branch_neon_auth_oauth_provider.test", "client_secret_wo_version", "1"),
+					// client_secret_wo is write-only and not stored in state
 				),
 			},
 		},
@@ -92,10 +124,11 @@ resource "neon_branch_neon_auth_oauth_provider" "test" {
 `),
 			},
 			{
-				ResourceName:      "neon_branch_neon_auth_oauth_provider.test",
-				ImportState:       true,
-				ImportStateId:     "test-project-id/br-test-001/google",
-				ImportStateVerify: true,
+				ResourceName:            "neon_branch_neon_auth_oauth_provider.test",
+				ImportState:             true,
+				ImportStateId:           "test-project-id/br-test-001/google",
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"client_secret"},
 			},
 		},
 	})
@@ -124,6 +157,54 @@ resource "neon_branch_neon_auth_oauth_provider" "test" {
 }
 `),
 				ExpectError: regexp.MustCompile(`Failed to add NeonAuth OAuth provider`),
+			},
+		},
+	})
+}
+
+func TestNeonAuthOauthProviderResource_ConflictingSecrets(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_branch_neon_auth_oauth_provider" "test" {
+  project_id               = "test-project-id"
+  branch_id                = "br-test-001"
+  type                     = "standard"
+  client_id                = "my-client-id"
+  client_secret            = "my-client-secret"
+  client_secret_wo         = "my-client-secret"
+  client_secret_wo_version = "1"
+}
+`),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
+			},
+		},
+	})
+}
+
+func TestNeonAuthOauthProviderResource_WriteOnlyWithoutVersion(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_branch_neon_auth_oauth_provider" "test" {
+  project_id       = "test-project-id"
+  branch_id        = "br-test-001"
+  type             = "standard"
+  client_id        = "my-client-id"
+  client_secret_wo = "my-client-secret"
+}
+`),
+				ExpectError: regexp.MustCompile(`Invalid Attribute Combination`),
 			},
 		},
 	})

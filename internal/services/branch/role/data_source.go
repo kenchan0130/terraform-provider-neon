@@ -6,23 +6,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
 )
 
 type roleDataSource struct {
 	client *neon.Client
-}
-
-type roleDataSourceModel struct {
-	ProjectID            types.String `tfsdk:"project_id"`
-	BranchID             types.String `tfsdk:"branch_id"`
-	Name                 types.String `tfsdk:"name"`
-	Password             types.String `tfsdk:"password"`
-	Protected            types.Bool   `tfsdk:"protected"`
-	AuthenticationMethod types.String `tfsdk:"authentication_method"`
-	CreatedAt            types.String `tfsdk:"created_at"`
-	UpdatedAt            types.String `tfsdk:"updated_at"`
 }
 
 func NewDataSource() datasource.DataSource {
@@ -48,11 +36,6 @@ func (d *roleDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 			"name": schema.StringAttribute{
 				Description: "The role name.",
 				Required:    true,
-			},
-			"password": schema.StringAttribute{
-				Description: "The role password.",
-				Computed:    true,
-				Sensitive:   true,
 			},
 			"protected": schema.BoolAttribute{
 				Description: "Whether the role is protected.",
@@ -92,46 +75,16 @@ func (d *roleDataSource) Configure(_ context.Context, req datasource.ConfigureRe
 }
 
 func (d *roleDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data roleDataSourceModel
+	var data roleModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	result, err := d.client.GetProjectBranchRole(ctx, neon.GetProjectBranchRoleParams{
-		ProjectID: data.ProjectID.ValueString(),
-		BranchID:  data.BranchID.ValueString(),
-		RoleName:  data.Name.ValueString(),
-	})
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to read role", err.Error())
+	resp.Diagnostics.Append(fetchRole(ctx, d.client, &data)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	r := &result.Role
-	data.BranchID = types.StringValue(r.BranchID)
-	data.Name = types.StringValue(r.Name)
-
-	if r.Password.IsSet() {
-		data.Password = types.StringValue(r.Password.Value)
-	} else {
-		data.Password = types.StringNull()
-	}
-
-	if r.Protected.IsSet() {
-		data.Protected = types.BoolValue(r.Protected.Value)
-	} else {
-		data.Protected = types.BoolNull()
-	}
-
-	if r.AuthenticationMethod.IsSet() {
-		data.AuthenticationMethod = types.StringValue(r.AuthenticationMethod.Value)
-	} else {
-		data.AuthenticationMethod = types.StringNull()
-	}
-
-	data.CreatedAt = types.StringValue(r.CreatedAt.String())
-	data.UpdatedAt = types.StringValue(r.UpdatedAt.String())
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

@@ -31,7 +31,6 @@ type roleResourceModel struct {
 	BranchID             types.String `tfsdk:"branch_id"`
 	Name                 types.String `tfsdk:"name"`
 	NoLogin              types.Bool   `tfsdk:"no_login"`
-	Password             types.String `tfsdk:"password"`
 	Protected            types.Bool   `tfsdk:"protected"`
 	AuthenticationMethod types.String `tfsdk:"authentication_method"`
 	CreatedAt            types.String `tfsdk:"created_at"`
@@ -77,11 +76,6 @@ func (r *roleResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.RequiresReplace(),
 				},
-			},
-			"password": schema.StringAttribute{
-				Description: "The role password. Only available if `store_passwords` is enabled on the project.",
-				Computed:    true,
-				Sensitive:   true,
 			},
 			"protected": schema.BoolAttribute{
 				Description: "Whether the role is protected.",
@@ -221,12 +215,6 @@ func (r *roleResource) ImportState(ctx context.Context, req resource.ImportState
 func (r *roleResource) mapRoleToModel(role *neon.Role, data *roleResourceModel) {
 	data.BranchID = types.StringValue(role.BranchID)
 	data.Name = types.StringValue(role.Name)
-
-	if v, ok := role.Password.Get(); ok {
-		data.Password = types.StringValue(v)
-	} else {
-		data.Password = types.StringNull()
-	}
 
 	if role.Protected.IsSet() {
 		data.Protected = types.BoolValue(role.Protected.Value)
