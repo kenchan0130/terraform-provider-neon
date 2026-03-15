@@ -1,0 +1,41 @@
+service/project:
+  - changed-files:
+      - any-glob-to-any-file: internal/services/project/**/*
+
+service/branch:
+  - changed-files:
+      - any-glob-to-any-file: internal/services/branch/**/*
+
+service/endpoint:
+  - changed-files:
+      - any-glob-to-any-file: internal/services/endpoint/**/*
+
+service/organization:
+  - changed-files:
+      - any-glob-to-any-file: internal/services/organization/**/*
+
+service/database:
+  - changed-files:
+      - any-glob-to-any-file: internal/services/database/**/*
+
+service/role:
+  - changed-files:
+      - any-glob-to-any-file: internal/services/role/**/*
+
+apiclient:
+  - changed-files:
+      - any-glob-to-any-file: internal/neon/**/*
+
+provider:
+  - changed-files:
+      - any-glob-to-any-file: internal/provider/**/*
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file: .github/**/*
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "*.md"
+          - docs/**/*
