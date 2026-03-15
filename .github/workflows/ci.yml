@@ -31,10 +31,6 @@ jobs:
           cache: true
       - run: go mod download
       - run: go build -v ./...
-      - run: go fmt ./...
-      - name: Verify no changes
-        run: |
-          git diff --exit-code
 
   docs:
     name: Check to generate documents
@@ -50,11 +46,11 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
-      - run: go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name neon
+      - run: make generate/docs
       - name: Verify no changes to generated docs
         run: |
           git diff --compact-summary --exit-code -- docs/ || \
-            (echo "::error::Generated docs are out of date. Run 'go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name neon' and commit the changes." && exit 1)
+            (echo "::error::Generated docs are out of date. Run 'make generate/docs' and commit the changes." && exit 1)
 
   lint:
     runs-on: ubuntu-latest

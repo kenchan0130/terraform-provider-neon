@@ -25,8 +25,7 @@ jobs:
           go-version-file: go.mod
           cache: true
       - name: Generate API client
-        run: |
-          go run github.com/ogen-go/ogen/cmd/ogen --target internal/neon -package neon --clean https://neon.com/api_spec/release/v2.json
+        run: make generate/api-client
       - name: Check for changes
         id: changes
         run: |

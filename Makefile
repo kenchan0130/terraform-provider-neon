@@ -26,9 +26,16 @@ test:
 testacc:
 	TF_ACC=1 go test ./... -v -count=1 -timeout 120m
 
+.PHONY: generate/api-client
+generate/api-client:
+	go run github.com/ogen-go/ogen/cmd/ogen --target internal/neon -package neon --clean https://neon.com/api_spec/release/v2.json
+
+.PHONY: generate/docs
+generate/docs:
+	go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-name neon
+
 .PHONY: generate
-generate:
-	go generate ./...
+generate: generate/api-client generate/docs
 
 .PHONY: fmt
 fmt:
