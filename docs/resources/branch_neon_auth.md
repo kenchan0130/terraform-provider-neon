@@ -40,3 +40,13 @@ resource "neon_branch_neon_auth" "example" {
 - `created_at` (String) The creation timestamp.
 - `db_name` (String) The database name used by the integration.
 - `jwks_url` (String) The JWKS URL for the NeonAuth integration.
+
+## Import
+
+Import is supported using the following syntax:
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
+```shell
+terraform import neon_branch_neon_auth.example <project_id>/<branch_id>
+```

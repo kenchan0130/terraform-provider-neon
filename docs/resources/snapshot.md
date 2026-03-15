@@ -41,3 +41,13 @@ resource "neon_snapshot" "example" {
 - `id` (String) The snapshot ID.
 - `manual` (Boolean) Whether the snapshot was manually created.
 - `source_branch_id` (String) The ID of the branch the snapshot was created from.
+
+## Import
+
+Import is supported using the following syntax:
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
+```shell
+terraform import neon_snapshot.example <project_id>/<snapshot_id>
+```

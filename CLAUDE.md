@@ -30,6 +30,7 @@ API client is auto-generated from OpenAPI spec using ogen (`internal/neon/` - DO
 - Model struct with `tfsdk` tags, use `types.String`, `types.Int64`, `types.Bool`, etc.
 - Handle Opt* fields: `if v, ok := field.Get(); ok { ... } else { types.StringNull() }`
 - Import format: `{parent_id}/{child_id}` parsed with `strings.SplitN(req.ID, "/", N)`
+- When a resource implements `ResourceWithImportState`, add `examples/resources/neon_<name>/import.sh` with the import command (e.g., `terraform import neon_<name>.example <id_format>`)
 - Collection attributes: prefer `SetAttribute`/`SetNestedAttribute` over `ListAttribute`/`ListNestedAttribute` unless element ordering is semantically meaningful. Use List only when the API requires or returns ordered elements.
 
 ### Data Source Pattern

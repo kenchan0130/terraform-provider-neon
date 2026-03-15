@@ -41,7 +41,7 @@ func (r *organizationApiKeyResource) Metadata(_ context.Context, req resource.Me
 
 func (r *organizationApiKeyResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Manages an organization-scoped Neon API key.",
+		Description: "Manages an organization-scoped Neon API key. Import is not supported because the API key secret is only available at creation time.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
 				Description: "The API key ID.",

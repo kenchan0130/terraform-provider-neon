@@ -3,12 +3,12 @@
 page_title: "neon_organization_api_key Resource - neon"
 subcategory: ""
 description: |-
-  Manages an organization-scoped Neon API key.
+  Manages an organization-scoped Neon API key. Import is not supported because the API key secret is only available at creation time.
 ---
 
 # neon_organization_api_key (Resource)
 
-Manages an organization-scoped Neon API key.
+Manages an organization-scoped Neon API key. Import is not supported because the API key secret is only available at creation time.
 
 ## Example Usage
 

@@ -33,3 +33,13 @@ resource "neon_branch_data_api" "example" {
 
 - `status` (String) The status of the Data API.
 - `url` (String) The Data API URL.
+
+## Import
+
+Import is supported using the following syntax:
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
+```shell
+terraform import neon_branch_data_api.example <project_id>/<branch_id>/<database_name>
+```

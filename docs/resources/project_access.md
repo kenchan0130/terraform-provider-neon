@@ -31,3 +31,13 @@ resource "neon_project_access" "example" {
 
 - `granted_at` (String) The timestamp when the permission was granted.
 - `permission_id` (String) The permission ID.
+
+## Import
+
+Import is supported using the following syntax:
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
+```shell
+terraform import neon_project_access.example <project_id>/<permission_id>
+```
