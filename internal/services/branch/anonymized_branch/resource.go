@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -255,6 +256,7 @@ func (r *anonymizedBranchResource) Read(ctx context.Context, req resource.ReadRe
 }
 
 func (r *anonymizedBranchResource) readState(ctx context.Context, data *anonymizedBranchResourceModel, resp any) {
+	diagsPtr := getDiagnostics(resp)
 	projectID := data.ProjectID.ValueString()
 	branchID := data.ID.ValueString()
 
@@ -263,14 +265,7 @@ func (r *anonymizedBranchResource) readState(ctx context.Context, data *anonymiz
 		BranchID:  branchID,
 	})
 	if err != nil {
-		switch v := resp.(type) {
-		case *resource.CreateResponse:
-			v.Diagnostics.AddError("Failed to read branch", err.Error())
-		case *resource.ReadResponse:
-			v.Diagnostics.AddError("Failed to read branch", err.Error())
-		case *resource.UpdateResponse:
-			v.Diagnostics.AddError("Failed to read branch", err.Error())
-		}
+		diagsPtr.AddError("Failed to read branch", err.Error())
 		return
 	}
 
@@ -286,14 +281,7 @@ func (r *anonymizedBranchResource) readState(ctx context.Context, data *anonymiz
 		BranchID:  branchID,
 	})
 	if err != nil {
-		switch v := resp.(type) {
-		case *resource.CreateResponse:
-			v.Diagnostics.AddError("Failed to read masking rules", err.Error())
-		case *resource.ReadResponse:
-			v.Diagnostics.AddError("Failed to read masking rules", err.Error())
-		case *resource.UpdateResponse:
-			v.Diagnostics.AddError("Failed to read masking rules", err.Error())
-		}
+		diagsPtr.AddError("Failed to read masking rules", err.Error())
 		return
 	}
 
@@ -303,14 +291,7 @@ func (r *anonymizedBranchResource) readState(ctx context.Context, data *anonymiz
 	}
 
 	maskingRulesList, diags := types.ListValueFrom(ctx, types.ObjectType{AttrTypes: maskingRuleAttrTypes()}, maskingRuleValues)
-	switch v := resp.(type) {
-	case *resource.CreateResponse:
-		v.Diagnostics.Append(diags...)
-	case *resource.ReadResponse:
-		v.Diagnostics.Append(diags...)
-	case *resource.UpdateResponse:
-		v.Diagnostics.Append(diags...)
-	}
+	diagsPtr.Append(diags...)
 	if diags.HasError() {
 		return
 	}
@@ -321,14 +302,7 @@ func (r *anonymizedBranchResource) readState(ctx context.Context, data *anonymiz
 		BranchID:  branchID,
 	})
 	if err != nil {
-		switch v := resp.(type) {
-		case *resource.CreateResponse:
-			v.Diagnostics.AddError("Failed to read anonymized branch status", err.Error())
-		case *resource.ReadResponse:
-			v.Diagnostics.AddError("Failed to read anonymized branch status", err.Error())
-		case *resource.UpdateResponse:
-			v.Diagnostics.AddError("Failed to read anonymized branch status", err.Error())
-		}
+		diagsPtr.AddError("Failed to read anonymized branch status", err.Error())
 		return
 	}
 
@@ -336,6 +310,23 @@ func (r *anonymizedBranchResource) readState(ctx context.Context, data *anonymiz
 	data.CreatedAt = types.StringValue(statusResult.CreatedAt.Format("2006-01-02T15:04:05Z07:00"))
 	data.UpdatedAt = types.StringValue(statusResult.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"))
 
+	setStateFromResp(ctx, resp, data)
+}
+
+func getDiagnostics(resp any) *diag.Diagnostics {
+	switch v := resp.(type) {
+	case *resource.CreateResponse:
+		return &v.Diagnostics
+	case *resource.ReadResponse:
+		return &v.Diagnostics
+	case *resource.UpdateResponse:
+		return &v.Diagnostics
+	default:
+		return nil
+	}
+}
+
+func setStateFromResp(ctx context.Context, resp any, data *anonymizedBranchResourceModel) {
 	switch v := resp.(type) {
 	case *resource.CreateResponse:
 		v.Diagnostics.Append(v.State.Set(ctx, data)...)
@@ -490,7 +481,7 @@ func fromAPIMaskingRule(rule neon.MaskingRule) maskingRuleModel {
 
 // startAnonymizationPlanModifier implements a custom plan modifier for the start_anonymization attribute.
 // false → true: in-place update (StartAnonymization API call)
-// true → false: RequiresReplace (resource must be recreated)
+// true → false: RequiresReplace (resource must be recreated).
 type startAnonymizationPlanModifier struct{}
 
 func (m startAnonymizationPlanModifier) Description(_ context.Context) string {

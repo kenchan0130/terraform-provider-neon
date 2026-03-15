@@ -52,7 +52,7 @@ func (s *testSecuritySource) TokenCookieAuth(_ context.Context, _ string) (neon.
 	return neon.TokenCookieAuth{}, nil
 }
 
-func newInvokeConfig(sourceOrgID, destOrgID string, projectIDs []string) tfsdk.Config {
+func newInvokeConfig(projectIDs []string) tfsdk.Config {
 	s := getActionSchema()
 	schemaType := s.Type().TerraformType(context.Background())
 
@@ -64,8 +64,8 @@ func newInvokeConfig(sourceOrgID, destOrgID string, projectIDs []string) tfsdk.C
 	return tfsdk.Config{
 		Schema: s,
 		Raw: tftypes.NewValue(schemaType, map[string]tftypes.Value{
-			"source_org_id":      tftypes.NewValue(tftypes.String, sourceOrgID),
-			"destination_org_id": tftypes.NewValue(tftypes.String, destOrgID),
+			"source_org_id":      tftypes.NewValue(tftypes.String, "org-source-001"),
+			"destination_org_id": tftypes.NewValue(tftypes.String, "org-dest-001"),
 			"project_ids":        tftypes.NewValue(tftypes.Set{ElementType: tftypes.String}, projectIDValues),
 		}),
 	}
@@ -90,7 +90,7 @@ func TestProjectTransferAction_Invoke(t *testing.T) {
 
 	resp := &action.InvokeResponse{}
 	a.Invoke(context.Background(), action.InvokeRequest{
-		Config: newInvokeConfig("org-source-001", "org-dest-001", []string{"proj-001", "proj-002"}),
+		Config: newInvokeConfig([]string{"proj-001", "proj-002"}),
 	}, resp)
 
 	if resp.Diagnostics.HasError() {
@@ -110,7 +110,7 @@ func TestProjectTransferAction_LimitsError(t *testing.T) {
 
 	resp := &action.InvokeResponse{}
 	a.Invoke(context.Background(), action.InvokeRequest{
-		Config: newInvokeConfig("org-source-001", "org-dest-001", []string{"proj-001"}),
+		Config: newInvokeConfig([]string{"proj-001"}),
 	}, resp)
 
 	if !resp.Diagnostics.HasError() {
@@ -130,7 +130,7 @@ func TestProjectTransferAction_IntegrationError(t *testing.T) {
 
 	resp := &action.InvokeResponse{}
 	a.Invoke(context.Background(), action.InvokeRequest{
-		Config: newInvokeConfig("org-source-001", "org-dest-001", []string{"proj-001"}),
+		Config: newInvokeConfig([]string{"proj-001"}),
 	}, resp)
 
 	if !resp.Diagnostics.HasError() {
@@ -150,7 +150,7 @@ func TestProjectTransferAction_APIError(t *testing.T) {
 
 	resp := &action.InvokeResponse{}
 	a.Invoke(context.Background(), action.InvokeRequest{
-		Config: newInvokeConfig("org-source-001", "org-dest-001", []string{"proj-001"}),
+		Config: newInvokeConfig([]string{"proj-001"}),
 	}, resp)
 
 	if !resp.Diagnostics.HasError() {

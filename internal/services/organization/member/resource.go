@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -28,11 +29,11 @@ type organizationMemberRoleResource struct {
 }
 
 type organizationMemberRoleResourceModel struct {
-	OrgID types.String `tfsdk:"org_id"`
-	MemberID       types.String `tfsdk:"member_id"`
-	Role           types.String `tfsdk:"role"`
-	UserID         types.String `tfsdk:"user_id"`
-	JoinedAt       types.String `tfsdk:"joined_at"`
+	OrgID    types.String `tfsdk:"org_id"`
+	MemberID types.String `tfsdk:"member_id"`
+	Role     types.String `tfsdk:"role"`
+	UserID   types.String `tfsdk:"user_id"`
+	JoinedAt types.String `tfsdk:"joined_at"`
 }
 
 func NewResource() resource.Resource {
@@ -107,24 +108,11 @@ func (r *organizationMemberRoleResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	memberUUID, err := uuid.Parse(data.MemberID.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Invalid member ID", fmt.Sprintf("Failed to parse member_id as UUID: %s", err))
+	r.createOrUpdate(ctx, &data, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	result, err := r.client.UpdateOrganizationMember(ctx, &neon.OrganizationMemberUpdateRequest{
-		Role: neon.MemberRole(data.Role.ValueString()),
-	}, neon.UpdateOrganizationMemberParams{
-		OrgID:    data.OrgID.ValueString(),
-		MemberID: memberUUID,
-	})
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to update organization member role", err.Error())
-		return
-	}
-
-	mapMemberToModel(result, &data)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -165,9 +153,18 @@ func (r *organizationMemberRoleResource) Update(ctx context.Context, req resourc
 		return
 	}
 
+	r.createOrUpdate(ctx, &data, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func (r *organizationMemberRoleResource) createOrUpdate(ctx context.Context, data *organizationMemberRoleResourceModel, diagnostics *diag.Diagnostics) {
 	memberUUID, err := uuid.Parse(data.MemberID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Invalid member ID", fmt.Sprintf("Failed to parse member_id as UUID: %s", err))
+		diagnostics.AddError("Invalid member ID", fmt.Sprintf("Failed to parse member_id as UUID: %s", err))
 		return
 	}
 
@@ -178,12 +175,11 @@ func (r *organizationMemberRoleResource) Update(ctx context.Context, req resourc
 		MemberID: memberUUID,
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to update organization member role", err.Error())
+		diagnostics.AddError("Failed to update organization member role", err.Error())
 		return
 	}
 
-	mapMemberToModel(result, &data)
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	mapMemberToModel(result, data)
 }
 
 func (r *organizationMemberRoleResource) Delete(_ context.Context, _ resource.DeleteRequest, _ *resource.DeleteResponse) {

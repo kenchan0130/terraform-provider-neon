@@ -151,36 +151,7 @@ func (r *snapshotScheduleResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	var scheduleModels []scheduleItemModel
-	resp.Diagnostics.Append(data.Schedule.ElementsAs(ctx, &scheduleModels, false)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	apiSchedule := toAPISchedule(scheduleModels)
-
-	err := r.client.SetSnapshotSchedule(ctx, &neon.BackupSchedule{
-		Schedule: apiSchedule,
-	}, neon.SetSnapshotScheduleParams{
-		ProjectID: data.ProjectID.ValueString(),
-		BranchID:  data.BranchID.ValueString(),
-	})
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to create snapshot schedule", err.Error())
-		return
-	}
-
-	// Read back to get full state.
-	result, err := r.client.GetSnapshotSchedule(ctx, neon.GetSnapshotScheduleParams{
-		ProjectID: data.ProjectID.ValueString(),
-		BranchID:  data.BranchID.ValueString(),
-	})
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to read snapshot schedule after create", err.Error())
-		return
-	}
-
-	mapScheduleToModel(ctx, result.Schedule, &data, &resp.Diagnostics)
+	r.createOrUpdate(ctx, &data, &resp.Diagnostics, "create")
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -223,9 +194,18 @@ func (r *snapshotScheduleResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	var scheduleModels []scheduleItemModel
-	resp.Diagnostics.Append(plan.Schedule.ElementsAs(ctx, &scheduleModels, false)...)
+	r.createOrUpdate(ctx, &plan, &resp.Diagnostics, "update")
 	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+}
+
+func (r *snapshotScheduleResource) createOrUpdate(ctx context.Context, data *snapshotScheduleResourceModel, diagnostics *diag.Diagnostics, operation string) {
+	var scheduleModels []scheduleItemModel
+	diagnostics.Append(data.Schedule.ElementsAs(ctx, &scheduleModels, false)...)
+	if diagnostics.HasError() {
 		return
 	}
 
@@ -234,30 +214,25 @@ func (r *snapshotScheduleResource) Update(ctx context.Context, req resource.Upda
 	err := r.client.SetSnapshotSchedule(ctx, &neon.BackupSchedule{
 		Schedule: apiSchedule,
 	}, neon.SetSnapshotScheduleParams{
-		ProjectID: plan.ProjectID.ValueString(),
-		BranchID:  plan.BranchID.ValueString(),
+		ProjectID: data.ProjectID.ValueString(),
+		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to update snapshot schedule", err.Error())
+		diagnostics.AddError(fmt.Sprintf("Failed to %s snapshot schedule", operation), err.Error())
 		return
 	}
 
 	// Read back to get full state.
 	result, err := r.client.GetSnapshotSchedule(ctx, neon.GetSnapshotScheduleParams{
-		ProjectID: plan.ProjectID.ValueString(),
-		BranchID:  plan.BranchID.ValueString(),
+		ProjectID: data.ProjectID.ValueString(),
+		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read snapshot schedule after update", err.Error())
+		diagnostics.AddError(fmt.Sprintf("Failed to read snapshot schedule after %s", operation), err.Error())
 		return
 	}
 
-	mapScheduleToModel(ctx, result.Schedule, &plan, &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	mapScheduleToModel(ctx, result.Schedule, data, diagnostics)
 }
 
 func (r *snapshotScheduleResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

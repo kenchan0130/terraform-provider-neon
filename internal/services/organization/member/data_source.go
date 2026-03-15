@@ -16,9 +16,9 @@ type organizationMembersDataSource struct {
 }
 
 type organizationMembersDataSourceModel struct {
-	OrgID   types.String   `tfsdk:"org_id"`
-	Query   *membersQuery  `tfsdk:"query"`
-	Members []memberModel  `tfsdk:"members"`
+	OrgID   types.String  `tfsdk:"org_id"`
+	Query   *membersQuery `tfsdk:"query"`
+	Members []memberModel `tfsdk:"members"`
 }
 
 type membersQuery struct {
@@ -63,7 +63,7 @@ func (d *organizationMembersDataSource) Schema(_ context.Context, _ datasource.S
 						Description: "Sort order. Possible values: `asc`, `desc`.",
 						Optional:    true,
 					},
-					},
+				},
 			},
 			"members": schema.ListNestedAttribute{
 				Description: "The list of organization members.",

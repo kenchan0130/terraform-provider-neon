@@ -167,7 +167,7 @@ func (d *projectsDataSource) Read(ctx context.Context, req datasource.ReadReques
 			ID:        types.StringValue(p.ID),
 			Name:      types.StringValue(p.Name),
 			RegionID:  types.StringValue(p.RegionID),
-			PgVersion: types.Int32Value(int32(p.PgVersion)),
+			PgVersion: types.Int32Value(int32(p.PgVersion)), //nolint:gosec // PgVersion is a small Postgres version number, no overflow risk
 			CreatedAt: types.StringValue(p.CreatedAt.Format(time.RFC3339)),
 			UpdatedAt: types.StringValue(p.UpdatedAt.Format(time.RFC3339)),
 		}

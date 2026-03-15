@@ -6,11 +6,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
-"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
@@ -66,141 +67,158 @@ func (r *branchResource) Metadata(_ context.Context, req resource.MetadataReques
 func (r *branchResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "Manages a Neon branch.",
-		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Description: "The branch ID.",
-				Computed:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"project_id": schema.StringAttribute{
-				Description: "The project ID.",
-				Required:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
-			"name": schema.StringAttribute{
-				Description: "The branch name.",
-				Optional:    true,
-				Computed:    true,
-			},
-			"parent_id": schema.StringAttribute{
-				Description: "The parent branch ID.",
-				Optional:    true,
-				Computed:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"parent_lsn": schema.StringAttribute{
-				Description: "A Log Sequence Number (LSN) on the parent branch.",
-				Optional:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
-			"parent_timestamp": schema.StringAttribute{
-				Description: "A timestamp identifying a point in time on the parent branch (ISO 8601 format).",
-				Optional:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
-			"protected": schema.BoolAttribute{
-				Description: "Whether the branch is protected.",
-				Optional:    true,
-				Computed:    true,
-			},
-			"archived": schema.BoolAttribute{
-				Description: "Whether to create the branch as archived.",
-				Optional:    true,
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.RequiresReplace(),
-				},
-			},
-			"init_source": schema.StringAttribute{
-				Description: "The source of initialization for the branch. Valid values are 'schema-only' and 'parent-data' (default).",
-				Optional:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
-			"expires_at": schema.StringAttribute{
-				Description: "The timestamp when the branch is scheduled to expire and be automatically deleted (ISO 8601 / RFC 3339 format).",
-				Optional:    true,
-				Computed:    true,
-			},
-			"current_state": schema.StringAttribute{
-				Description: "The current state of the branch.",
-				Computed:    true,
-			},
-			"logical_size": schema.Int64Attribute{
-				Description: "The logical size of the branch, in bytes.",
-				Computed:    true,
-			},
-			"creation_source": schema.StringAttribute{
-				Description: "The branch creation source.",
-				Computed:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"default": schema.BoolAttribute{
-				Description: "Whether the branch is the project's default branch.",
-				Computed:    true,
-			},
-			"compute_time_seconds": schema.Int64Attribute{
-				Description: "Compute time used by the branch, in seconds.",
-				Computed:    true,
-			},
-			"active_time_seconds": schema.Int64Attribute{
-				Description: "Active time for the branch, in seconds.",
-				Computed:    true,
-			},
-			"written_data_bytes": schema.Int64Attribute{
-				Description: "Written data for the branch, in bytes.",
-				Computed:    true,
-			},
-			"data_transfer_bytes": schema.Int64Attribute{
-				Description: "Data transfer for the branch, in bytes.",
-				Computed:    true,
-			},
-			"pending_state": schema.StringAttribute{
-				Description: "The pending state of the branch.",
-				Computed:    true,
-			},
-			"state_changed_at": schema.StringAttribute{
-				Description: "A timestamp indicating when the current state began.",
-				Computed:    true,
-			},
-			"last_reset_at": schema.StringAttribute{
-				Description: "A timestamp indicating when the branch was last reset.",
-				Computed:    true,
-			},
-			"restored_from": schema.StringAttribute{
-				Description: "The ID of the snapshot that was the restore source for this branch.",
-				Computed:    true,
-			},
-			"restored_as": schema.StringAttribute{
-				Description: "The ID of the target branch which was replaced when this branch was restored.",
-				Computed:    true,
-			},
-			"created_at": schema.StringAttribute{
-				Description: "The creation timestamp.",
-				Computed:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"updated_at": schema.StringAttribute{
-				Description: "The last update timestamp.",
-				Computed:    true,
+		Attributes:  branchSchemaAttributes(),
+	}
+}
+
+func branchSchemaConfigurableAttributes() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"id": schema.StringAttribute{
+			Description: "The branch ID.",
+			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
 			},
 		},
+		"project_id": schema.StringAttribute{
+			Description: "The project ID.",
+			Required:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
+			},
+		},
+		"name": schema.StringAttribute{
+			Description: "The branch name.",
+			Optional:    true,
+			Computed:    true,
+		},
+		"parent_id": schema.StringAttribute{
+			Description: "The parent branch ID.",
+			Optional:    true,
+			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+		"parent_lsn": schema.StringAttribute{
+			Description: "A Log Sequence Number (LSN) on the parent branch.",
+			Optional:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
+			},
+		},
+		"parent_timestamp": schema.StringAttribute{
+			Description: "A timestamp identifying a point in time on the parent branch (ISO 8601 format).",
+			Optional:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
+			},
+		},
+		"protected": schema.BoolAttribute{
+			Description: "Whether the branch is protected.",
+			Optional:    true,
+			Computed:    true,
+		},
+		"archived": schema.BoolAttribute{
+			Description: "Whether to create the branch as archived.",
+			Optional:    true,
+			PlanModifiers: []planmodifier.Bool{
+				boolplanmodifier.RequiresReplace(),
+			},
+		},
+		"init_source": schema.StringAttribute{
+			Description: "The source of initialization for the branch. Valid values are 'schema-only' and 'parent-data' (default).",
+			Optional:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
+			},
+		},
+		"expires_at": schema.StringAttribute{
+			Description: "The timestamp when the branch is scheduled to expire and be automatically deleted (ISO 8601 / RFC 3339 format).",
+			Optional:    true,
+			Computed:    true,
+		},
 	}
+}
+
+func branchSchemaComputedAttributes() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"current_state": schema.StringAttribute{
+			Description: "The current state of the branch.",
+			Computed:    true,
+		},
+		"logical_size": schema.Int64Attribute{
+			Description: "The logical size of the branch, in bytes.",
+			Computed:    true,
+		},
+		"creation_source": schema.StringAttribute{
+			Description: "The branch creation source.",
+			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+		"default": schema.BoolAttribute{
+			Description: "Whether the branch is the project's default branch.",
+			Computed:    true,
+		},
+		"compute_time_seconds": schema.Int64Attribute{
+			Description: "Compute time used by the branch, in seconds.",
+			Computed:    true,
+		},
+		"active_time_seconds": schema.Int64Attribute{
+			Description: "Active time for the branch, in seconds.",
+			Computed:    true,
+		},
+		"written_data_bytes": schema.Int64Attribute{
+			Description: "Written data for the branch, in bytes.",
+			Computed:    true,
+		},
+		"data_transfer_bytes": schema.Int64Attribute{
+			Description: "Data transfer for the branch, in bytes.",
+			Computed:    true,
+		},
+		"pending_state": schema.StringAttribute{
+			Description: "The pending state of the branch.",
+			Computed:    true,
+		},
+		"state_changed_at": schema.StringAttribute{
+			Description: "A timestamp indicating when the current state began.",
+			Computed:    true,
+		},
+		"last_reset_at": schema.StringAttribute{
+			Description: "A timestamp indicating when the branch was last reset.",
+			Computed:    true,
+		},
+		"restored_from": schema.StringAttribute{
+			Description: "The ID of the snapshot that was the restore source for this branch.",
+			Computed:    true,
+		},
+		"restored_as": schema.StringAttribute{
+			Description: "The ID of the target branch which was replaced when this branch was restored.",
+			Computed:    true,
+		},
+		"created_at": schema.StringAttribute{
+			Description: "The creation timestamp.",
+			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+		"updated_at": schema.StringAttribute{
+			Description: "The last update timestamp.",
+			Computed:    true,
+		},
+	}
+}
+
+func branchSchemaAttributes() map[string]schema.Attribute {
+	attrs := branchSchemaConfigurableAttributes()
+	for k, v := range branchSchemaComputedAttributes() {
+		attrs[k] = v
+	}
+	return attrs
 }
 
 func (r *branchResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -227,41 +245,10 @@ func (r *branchResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	branchReq := neon.CreateProjectBranchReqBranch{}
-
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		branchReq.Name = neon.NewOptString(data.Name.ValueString())
-	}
-	if !data.ParentID.IsNull() && !data.ParentID.IsUnknown() {
-		branchReq.ParentID = neon.NewOptString(data.ParentID.ValueString())
-	}
-	if !data.ParentLsn.IsNull() && !data.ParentLsn.IsUnknown() {
-		branchReq.ParentLsn = neon.NewOptString(data.ParentLsn.ValueString())
-	}
-	if !data.ParentTimestamp.IsNull() && !data.ParentTimestamp.IsUnknown() {
-		t, err := time.Parse(time.RFC3339, data.ParentTimestamp.ValueString())
-		if err != nil {
-			resp.Diagnostics.AddError("Invalid parent_timestamp format", fmt.Sprintf("Expected RFC 3339 format: %s", err.Error()))
-			return
-		}
-		branchReq.ParentTimestamp = neon.NewOptDateTime(t)
-	}
-	if !data.Protected.IsNull() && !data.Protected.IsUnknown() {
-		branchReq.Protected = neon.NewOptBool(data.Protected.ValueBool())
-	}
-	if !data.Archived.IsNull() && !data.Archived.IsUnknown() {
-		branchReq.Archived = neon.NewOptBool(data.Archived.ValueBool())
-	}
-	if !data.InitSource.IsNull() && !data.InitSource.IsUnknown() {
-		branchReq.InitSource = neon.NewOptString(data.InitSource.ValueString())
-	}
-	if !data.ExpiresAt.IsNull() && !data.ExpiresAt.IsUnknown() {
-		t, err := time.Parse(time.RFC3339, data.ExpiresAt.ValueString())
-		if err != nil {
-			resp.Diagnostics.AddError("Invalid expires_at format", fmt.Sprintf("Expected RFC 3339 format: %s", err.Error()))
-			return
-		}
-		branchReq.ExpiresAt = neon.NewOptDateTime(t)
+	branchReq, diags := buildBranchCreateRequest(&data)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
 
 	apiReq := neon.NewOptCreateProjectBranchReq(neon.CreateProjectBranchReq{
@@ -278,6 +265,48 @@ func (r *branchResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	r.mapBranchToModel(&result.Branch, &data)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func buildBranchCreateRequest(data *branchResourceModel) (neon.CreateProjectBranchReqBranch, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	branchReq := neon.CreateProjectBranchReqBranch{}
+
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		branchReq.Name = neon.NewOptString(data.Name.ValueString())
+	}
+	if !data.ParentID.IsNull() && !data.ParentID.IsUnknown() {
+		branchReq.ParentID = neon.NewOptString(data.ParentID.ValueString())
+	}
+	if !data.ParentLsn.IsNull() && !data.ParentLsn.IsUnknown() {
+		branchReq.ParentLsn = neon.NewOptString(data.ParentLsn.ValueString())
+	}
+	if !data.ParentTimestamp.IsNull() && !data.ParentTimestamp.IsUnknown() {
+		t, err := time.Parse(time.RFC3339, data.ParentTimestamp.ValueString())
+		if err != nil {
+			diags.AddError("Invalid parent_timestamp format", fmt.Sprintf("Expected RFC 3339 format: %s", err.Error()))
+			return branchReq, diags
+		}
+		branchReq.ParentTimestamp = neon.NewOptDateTime(t)
+	}
+	if !data.Protected.IsNull() && !data.Protected.IsUnknown() {
+		branchReq.Protected = neon.NewOptBool(data.Protected.ValueBool())
+	}
+	if !data.Archived.IsNull() && !data.Archived.IsUnknown() {
+		branchReq.Archived = neon.NewOptBool(data.Archived.ValueBool())
+	}
+	if !data.InitSource.IsNull() && !data.InitSource.IsUnknown() {
+		branchReq.InitSource = neon.NewOptString(data.InitSource.ValueString())
+	}
+	if !data.ExpiresAt.IsNull() && !data.ExpiresAt.IsUnknown() {
+		t, err := time.Parse(time.RFC3339, data.ExpiresAt.ValueString())
+		if err != nil {
+			diags.AddError("Invalid expires_at format", fmt.Sprintf("Expected RFC 3339 format: %s", err.Error()))
+			return branchReq, diags
+		}
+		branchReq.ExpiresAt = neon.NewOptDateTime(t)
+	}
+
+	return branchReq, diags
 }
 
 func (r *branchResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {

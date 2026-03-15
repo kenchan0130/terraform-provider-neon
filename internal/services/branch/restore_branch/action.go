@@ -21,11 +21,11 @@ type restoreBranchAction struct {
 }
 
 type restoreBranchActionModel struct {
-	ProjectID        string       `tfsdk:"project_id"`
-	BranchID         string       `tfsdk:"branch_id"`
-	SourceBranchID   string       `tfsdk:"source_branch_id"`
-	SourceLsn        types.String `tfsdk:"source_lsn"`
-	SourceTimestamp  types.String `tfsdk:"source_timestamp"`
+	ProjectID         string       `tfsdk:"project_id"`
+	BranchID          string       `tfsdk:"branch_id"`
+	SourceBranchID    string       `tfsdk:"source_branch_id"`
+	SourceLsn         types.String `tfsdk:"source_lsn"`
+	SourceTimestamp   types.String `tfsdk:"source_timestamp"`
 	PreserveUnderName types.String `tfsdk:"preserve_under_name"`
 }
 

@@ -126,19 +126,7 @@ func (r *vpcEndpointResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	err := r.client.AssignOrganizationVPCEndpoint(ctx, &neon.VPCEndpointAssignment{
-		Label: data.Label.ValueString(),
-	}, neon.AssignOrganizationVPCEndpointParams{
-		OrgID:         data.OrgID.ValueString(),
-		RegionID:      data.RegionID.ValueString(),
-		VpcEndpointID: data.VpcEndpointID.ValueString(),
-	})
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to assign VPC endpoint", err.Error())
-		return
-	}
-
-	r.readIntoModel(ctx, &data, &resp.Diagnostics)
+	r.createOrUpdate(ctx, &data, &resp.Diagnostics, "assign")
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -180,6 +168,14 @@ func (r *vpcEndpointResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
+	r.createOrUpdate(ctx, &data, &resp.Diagnostics, "update")
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func (r *vpcEndpointResource) createOrUpdate(ctx context.Context, data *vpcEndpointResourceModel, diagnostics *diag.Diagnostics, operation string) {
 	err := r.client.AssignOrganizationVPCEndpoint(ctx, &neon.VPCEndpointAssignment{
 		Label: data.Label.ValueString(),
 	}, neon.AssignOrganizationVPCEndpointParams{
@@ -188,15 +184,11 @@ func (r *vpcEndpointResource) Update(ctx context.Context, req resource.UpdateReq
 		VpcEndpointID: data.VpcEndpointID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to update VPC endpoint", err.Error())
+		diagnostics.AddError(fmt.Sprintf("Failed to %s VPC endpoint", operation), err.Error())
 		return
 	}
 
-	r.readIntoModel(ctx, &data, &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	r.readIntoModel(ctx, data, diagnostics)
 }
 
 func (r *vpcEndpointResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

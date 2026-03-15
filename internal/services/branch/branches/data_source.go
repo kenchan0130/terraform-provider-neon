@@ -16,8 +16,8 @@ type branchesDataSource struct {
 }
 
 type branchesDataSourceModel struct {
-	ProjectID types.String `tfsdk:"project_id"`
-	Query     *queryModel  `tfsdk:"query"`
+	ProjectID types.String  `tfsdk:"project_id"`
+	Query     *queryModel   `tfsdk:"query"`
 	Branches  []branchModel `tfsdk:"branches"`
 }
 
@@ -68,7 +68,7 @@ func (d *branchesDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 						Description: "Sort order. Possible values are `asc`, `desc`.",
 						Optional:    true,
 					},
-					},
+				},
 			},
 			"branches": schema.ListNestedAttribute{
 				Description: "The list of branches.",

@@ -93,7 +93,7 @@ func (r *jwksResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				},
 			},
 			"role_names": schema.ListAttribute{
-				Description:        "The roles the JWKS should be mapped to. By default, the JWKS is mapped to the authenticator, authenticated and anonymous roles.",
+				Description: "The roles the JWKS should be mapped to. By default, the JWKS is mapped to the authenticator, authenticated and anonymous roles.",
 				Optional:    true,
 				ElementType: types.StringType,
 				PlanModifiers: []planmodifier.List{
@@ -156,7 +156,7 @@ func (r *jwksResource) Create(ctx context.Context, req resource.CreateRequest, r
 		if resp.Diagnostics.HasError() {
 			return
 		}
-		apiReq.RoleNames = roleNames
+		apiReq.RoleNames = roleNames //nolint:staticcheck // intentionally using deprecated API field for backward compatibility
 	}
 
 	result, err := r.client.AddProjectJWKS(ctx, apiReq, neon.AddProjectJWKSParams{

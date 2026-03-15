@@ -25,133 +25,141 @@ func (d *endpointDataSource) Metadata(_ context.Context, req datasource.Metadata
 func (d *endpointDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "Retrieves information about a Neon endpoint.",
+		Attributes:  endpointDataSourceSchemaAttributes(),
+	}
+}
+
+func endpointDataSourceSchemaAttributes() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"id": schema.StringAttribute{
+			Description: "The endpoint ID.",
+			Required:    true,
+		},
+		"project_id": schema.StringAttribute{
+			Description: "The project ID.",
+			Required:    true,
+		},
+		"branch_id": schema.StringAttribute{
+			Description: "The branch ID.",
+			Computed:    true,
+		},
+		"type": schema.StringAttribute{
+			Description: "The endpoint type.",
+			Computed:    true,
+		},
+		"name": schema.StringAttribute{
+			Description: "Optional name of the compute endpoint.",
+			Computed:    true,
+		},
+		"autoscaling_limit_min_cu": schema.Float64Attribute{
+			Description: "The minimum number of Compute Units.",
+			Computed:    true,
+		},
+		"autoscaling_limit_max_cu": schema.Float64Attribute{
+			Description: "The maximum number of Compute Units.",
+			Computed:    true,
+		},
+		"suspend_timeout_seconds": schema.Int64Attribute{
+			Description: "The duration of inactivity in seconds after which the compute is suspended.",
+			Computed:    true,
+		},
+		"pooler_enabled": schema.BoolAttribute{
+			Description: "Whether connection pooling is enabled.",
+			Computed:    true,
+		},
+		"pooler_mode": schema.StringAttribute{
+			Description: "The connection pooler mode.",
+			Computed:    true,
+		},
+		"disabled": schema.BoolAttribute{
+			Description: "Whether the endpoint is disabled.",
+			Computed:    true,
+		},
+		"passwordless_access": schema.BoolAttribute{
+			Description: "Whether to permit passwordless access to the compute endpoint.",
+			Computed:    true,
+		},
+		"compute_provisioner": schema.StringAttribute{
+			Description: "The provisioner for the compute endpoint.",
+			Computed:    true,
+		},
+		"settings": endpointSettingsDataSourceSchema(),
+		"host": schema.StringAttribute{
+			Description: "The hostname for connecting to the endpoint.",
+			Computed:    true,
+		},
+		"region_id": schema.StringAttribute{
+			Description: "The region identifier.",
+			Computed:    true,
+		},
+		"current_state": schema.StringAttribute{
+			Description: "The current state of the compute endpoint.",
+			Computed:    true,
+		},
+		"last_active": schema.StringAttribute{
+			Description: "A timestamp indicating when the compute endpoint was last active.",
+			Computed:    true,
+		},
+		"creation_source": schema.StringAttribute{
+			Description: "The compute endpoint creation source.",
+			Computed:    true,
+		},
+		"compute_release_version": schema.StringAttribute{
+			Description: "Attached compute's release version number.",
+			Computed:    true,
+		},
+		"pending_state": schema.StringAttribute{
+			Description: "The pending state of the compute endpoint.",
+			Computed:    true,
+		},
+		"started_at": schema.StringAttribute{
+			Description: "A timestamp indicating when the compute endpoint was last started.",
+			Computed:    true,
+		},
+		"suspended_at": schema.StringAttribute{
+			Description: "A timestamp indicating when the compute endpoint was last suspended.",
+			Computed:    true,
+		},
+		"created_at": schema.StringAttribute{
+			Description: "The creation timestamp.",
+			Computed:    true,
+		},
+		"updated_at": schema.StringAttribute{
+			Description: "The last update timestamp.",
+			Computed:    true,
+		},
+	}
+}
+
+func endpointSettingsDataSourceSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: "Endpoint settings.",
+		Computed:    true,
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Description: "The endpoint ID.",
-				Required:    true,
-			},
-			"project_id": schema.StringAttribute{
-				Description: "The project ID.",
-				Required:    true,
-			},
-			"branch_id": schema.StringAttribute{
-				Description: "The branch ID.",
+			"pg_settings": schema.MapAttribute{
+				Description: "A raw representation of Postgres settings.",
+				ElementType: types.StringType,
 				Computed:    true,
 			},
-			"type": schema.StringAttribute{
-				Description: "The endpoint type.",
+			"pgbouncer_settings": schema.MapAttribute{
+				Description: "A raw representation of PgBouncer settings.",
+				ElementType: types.StringType,
 				Computed:    true,
 			},
-			"name": schema.StringAttribute{
-				Description: "Optional name of the compute endpoint.",
-				Computed:    true,
-			},
-			"autoscaling_limit_min_cu": schema.Float64Attribute{
-				Description: "The minimum number of Compute Units.",
-				Computed:    true,
-			},
-			"autoscaling_limit_max_cu": schema.Float64Attribute{
-				Description: "The maximum number of Compute Units.",
-				Computed:    true,
-			},
-			"suspend_timeout_seconds": schema.Int64Attribute{
-				Description: "The duration of inactivity in seconds after which the compute is suspended.",
-				Computed:    true,
-			},
-			"pooler_enabled": schema.BoolAttribute{
-				Description: "Whether connection pooling is enabled.",
-				Computed:    true,
-			},
-			"pooler_mode": schema.StringAttribute{
-				Description: "The connection pooler mode.",
-				Computed:    true,
-			},
-			"disabled": schema.BoolAttribute{
-				Description: "Whether the endpoint is disabled.",
-				Computed:    true,
-			},
-			"passwordless_access": schema.BoolAttribute{
-				Description: "Whether to permit passwordless access to the compute endpoint.",
-				Computed:    true,
-			},
-			"compute_provisioner": schema.StringAttribute{
-				Description: "The provisioner for the compute endpoint.",
-				Computed:    true,
-			},
-			"settings": schema.SingleNestedAttribute{
-				Description: "Endpoint settings.",
+			"preload_libraries": schema.SingleNestedAttribute{
+				Description: "Preload libraries configuration.",
 				Computed:    true,
 				Attributes: map[string]schema.Attribute{
-					"pg_settings": schema.MapAttribute{
-						Description: "A raw representation of Postgres settings.",
-						ElementType: types.StringType,
+					"use_defaults": schema.BoolAttribute{
+						Description: "Whether to use default preload libraries.",
 						Computed:    true,
 					},
-					"pgbouncer_settings": schema.MapAttribute{
-						Description: "A raw representation of PgBouncer settings.",
+					"enabled_libraries": schema.ListAttribute{
+						Description: "List of enabled preload libraries.",
 						ElementType: types.StringType,
 						Computed:    true,
-					},
-					"preload_libraries": schema.SingleNestedAttribute{
-						Description: "Preload libraries configuration.",
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"use_defaults": schema.BoolAttribute{
-								Description: "Whether to use default preload libraries.",
-								Computed:    true,
-							},
-							"enabled_libraries": schema.ListAttribute{
-								Description: "List of enabled preload libraries.",
-								ElementType: types.StringType,
-								Computed:    true,
-							},
-						},
 					},
 				},
-			},
-			"host": schema.StringAttribute{
-				Description: "The hostname for connecting to the endpoint.",
-				Computed:    true,
-			},
-			"region_id": schema.StringAttribute{
-				Description: "The region identifier.",
-				Computed:    true,
-			},
-			"current_state": schema.StringAttribute{
-				Description: "The current state of the compute endpoint.",
-				Computed:    true,
-			},
-			"last_active": schema.StringAttribute{
-				Description: "A timestamp indicating when the compute endpoint was last active.",
-				Computed:    true,
-			},
-			"creation_source": schema.StringAttribute{
-				Description: "The compute endpoint creation source.",
-				Computed:    true,
-			},
-			"compute_release_version": schema.StringAttribute{
-				Description: "Attached compute's release version number.",
-				Computed:    true,
-			},
-			"pending_state": schema.StringAttribute{
-				Description: "The pending state of the compute endpoint.",
-				Computed:    true,
-			},
-			"started_at": schema.StringAttribute{
-				Description: "A timestamp indicating when the compute endpoint was last started.",
-				Computed:    true,
-			},
-			"suspended_at": schema.StringAttribute{
-				Description: "A timestamp indicating when the compute endpoint was last suspended.",
-				Computed:    true,
-			},
-			"created_at": schema.StringAttribute{
-				Description: "The creation timestamp.",
-				Computed:    true,
-			},
-			"updated_at": schema.StringAttribute{
-				Description: "The last update timestamp.",
-				Computed:    true,
 			},
 		},
 	}

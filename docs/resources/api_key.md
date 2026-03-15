@@ -3,12 +3,12 @@
 page_title: "neon_api_key Resource - neon"
 subcategory: ""
 description: |-
-  Manages a Neon API key.
+  Manages a Neon API key. Import is not supported because the API key secret is only available at creation time.
 ---
 
 # neon_api_key (Resource)
 
-Manages a Neon API key.
+Manages a Neon API key. Import is not supported because the API key secret is only available at creation time.
 
 ## Example Usage
 

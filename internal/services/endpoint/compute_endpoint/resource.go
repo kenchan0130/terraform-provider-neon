@@ -78,184 +78,205 @@ func (r *endpointResource) Metadata(_ context.Context, req resource.MetadataRequ
 func (r *endpointResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "Manages a Neon endpoint (compute).",
-		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Description: "The endpoint ID.",
-				Computed:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
+		Attributes:  endpointResourceSchemaAttributes(),
+	}
+}
+
+func endpointResourceSchemaConfigurableAttributes() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"id": schema.StringAttribute{
+			Description: "The endpoint ID.",
+			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
 			},
-			"project_id": schema.StringAttribute{
-				Description: "The project ID.",
-				Required:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
+		},
+		"project_id": schema.StringAttribute{
+			Description: "The project ID.",
+			Required:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
 			},
-			"branch_id": schema.StringAttribute{
-				Description: "The branch ID.",
-				Required:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
+		},
+		"branch_id": schema.StringAttribute{
+			Description: "The branch ID.",
+			Required:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
 			},
-			"type": schema.StringAttribute{
-				Description: "The endpoint type. Must be `read_write` or `read_only`.",
-				Required:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
+		},
+		"type": schema.StringAttribute{
+			Description: "The endpoint type. Must be `read_write` or `read_only`.",
+			Required:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
 			},
-			"name": schema.StringAttribute{
-				Description: "Optional name of the compute endpoint.",
-				Optional:    true,
-				Computed:    true,
+		},
+		"name": schema.StringAttribute{
+			Description: "Optional name of the compute endpoint.",
+			Optional:    true,
+			Computed:    true,
+		},
+		"autoscaling_limit_min_cu": schema.Float64Attribute{
+			Description: "The minimum number of Compute Units.",
+			Optional:    true,
+			Computed:    true,
+			PlanModifiers: []planmodifier.Float64{
+				float64planmodifier.UseStateForUnknown(),
 			},
-			"autoscaling_limit_min_cu": schema.Float64Attribute{
-				Description: "The minimum number of Compute Units.",
-				Optional:    true,
-				Computed:    true,
-				PlanModifiers: []planmodifier.Float64{
-					float64planmodifier.UseStateForUnknown(),
-				},
+		},
+		"autoscaling_limit_max_cu": schema.Float64Attribute{
+			Description: "The maximum number of Compute Units.",
+			Optional:    true,
+			Computed:    true,
+			PlanModifiers: []planmodifier.Float64{
+				float64planmodifier.UseStateForUnknown(),
 			},
-			"autoscaling_limit_max_cu": schema.Float64Attribute{
-				Description: "The maximum number of Compute Units.",
-				Optional:    true,
-				Computed:    true,
-				PlanModifiers: []planmodifier.Float64{
-					float64planmodifier.UseStateForUnknown(),
-				},
+		},
+		"suspend_timeout_seconds": schema.Int64Attribute{
+			Description: "The duration of inactivity in seconds after which the compute is suspended.",
+			Optional:    true,
+			Computed:    true,
+		},
+		"pooler_enabled": schema.BoolAttribute{
+			Description: "Whether connection pooling is enabled.",
+			Optional:    true,
+			Computed:    true,
+		},
+		"pooler_mode": schema.StringAttribute{
+			Description: "The connection pooler mode. Must be `transaction`.",
+			Optional:    true,
+			Computed:    true,
+		},
+		"disabled": schema.BoolAttribute{
+			Description: "Whether the endpoint is disabled.",
+			Optional:    true,
+			Computed:    true,
+		},
+		"passwordless_access": schema.BoolAttribute{
+			Description: "Whether to permit passwordless access to the compute endpoint.",
+			Optional:    true,
+			Computed:    true,
+		},
+		"compute_provisioner": schema.StringAttribute{
+			Description: "The provisioner for the compute endpoint.",
+			Optional:    true,
+			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
+				stringplanmodifier.UseStateForUnknown(),
 			},
-			"suspend_timeout_seconds": schema.Int64Attribute{
-				Description: "The duration of inactivity in seconds after which the compute is suspended.",
-				Optional:    true,
-				Computed:    true,
-			},
-			"pooler_enabled": schema.BoolAttribute{
-				Description: "Whether connection pooling is enabled.",
-				Optional:    true,
-				Computed:    true,
-			},
-			"pooler_mode": schema.StringAttribute{
-				Description: "The connection pooler mode. Must be `transaction`.",
-				Optional:    true,
-				Computed:    true,
-			},
-			"disabled": schema.BoolAttribute{
-				Description: "Whether the endpoint is disabled.",
-				Optional:    true,
-				Computed:    true,
-			},
-			"passwordless_access": schema.BoolAttribute{
-				Description: "Whether to permit passwordless access to the compute endpoint.",
-				Optional:    true,
-				Computed:    true,
-			},
-			"compute_provisioner": schema.StringAttribute{
-				Description: "The provisioner for the compute endpoint.",
-				Optional:    true,
-				Computed:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"settings": schema.SingleNestedAttribute{
-				Description: "Endpoint settings.",
-				Optional:    true,
-				Computed:    true,
-				Attributes: map[string]schema.Attribute{
-					"pg_settings": schema.MapAttribute{
-						Description: "A raw representation of Postgres settings.",
-						ElementType: types.StringType,
-						Optional:    true,
-						Computed:    true,
-					},
-					"pgbouncer_settings": schema.MapAttribute{
-						Description: "A raw representation of PgBouncer settings.",
-						ElementType: types.StringType,
-						Optional:    true,
-						Computed:    true,
-					},
-					"preload_libraries": schema.SingleNestedAttribute{
-						Description: "Preload libraries configuration.",
-						Optional:    true,
-						Computed:    true,
-						Attributes: map[string]schema.Attribute{
-							"use_defaults": schema.BoolAttribute{
-								Description: "Whether to use default preload libraries.",
-								Optional:    true,
-								Computed:    true,
-							},
-							"enabled_libraries": schema.ListAttribute{
-								Description: "List of enabled preload libraries.",
-								ElementType: types.StringType,
-								Optional:    true,
-								Computed:    true,
-							},
-						},
-					},
-				},
-			},
-			"host": schema.StringAttribute{
-				Description: "The hostname for connecting to the endpoint.",
-				Computed:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"region_id": schema.StringAttribute{
-				Description: "The region identifier.",
-				Optional:    true,
-				Computed:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"current_state": schema.StringAttribute{
-				Description: "The current state of the compute endpoint.",
-				Computed:    true,
-			},
-			"last_active": schema.StringAttribute{
-				Description: "A timestamp indicating when the compute endpoint was last active.",
-				Computed:    true,
-			},
-			"creation_source": schema.StringAttribute{
-				Description: "The compute endpoint creation source.",
-				Computed:    true,
-			},
-			"compute_release_version": schema.StringAttribute{
-				Description: "Attached compute's release version number.",
-				Computed:    true,
-			},
-			"pending_state": schema.StringAttribute{
-				Description: "The pending state of the compute endpoint.",
-				Computed:    true,
-			},
-			"started_at": schema.StringAttribute{
-				Description: "A timestamp indicating when the compute endpoint was last started.",
-				Computed:    true,
-			},
-			"suspended_at": schema.StringAttribute{
-				Description: "A timestamp indicating when the compute endpoint was last suspended.",
-				Computed:    true,
-			},
-			"created_at": schema.StringAttribute{
-				Description: "The creation timestamp.",
-				Computed:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"updated_at": schema.StringAttribute{
-				Description: "The last update timestamp.",
-				Computed:    true,
+		},
+		"settings": endpointSettingsResourceSchema(),
+		"region_id": schema.StringAttribute{
+			Description: "The region identifier.",
+			Optional:    true,
+			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.RequiresReplace(),
+				stringplanmodifier.UseStateForUnknown(),
 			},
 		},
 	}
+}
+
+func endpointSettingsResourceSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: "Endpoint settings.",
+		Optional:    true,
+		Computed:    true,
+		Attributes: map[string]schema.Attribute{
+			"pg_settings": schema.MapAttribute{
+				Description: "A raw representation of Postgres settings.",
+				ElementType: types.StringType,
+				Optional:    true,
+				Computed:    true,
+			},
+			"pgbouncer_settings": schema.MapAttribute{
+				Description: "A raw representation of PgBouncer settings.",
+				ElementType: types.StringType,
+				Optional:    true,
+				Computed:    true,
+			},
+			"preload_libraries": schema.SingleNestedAttribute{
+				Description: "Preload libraries configuration.",
+				Optional:    true,
+				Computed:    true,
+				Attributes: map[string]schema.Attribute{
+					"use_defaults": schema.BoolAttribute{
+						Description: "Whether to use default preload libraries.",
+						Optional:    true,
+						Computed:    true,
+					},
+					"enabled_libraries": schema.ListAttribute{
+						Description: "List of enabled preload libraries.",
+						ElementType: types.StringType,
+						Optional:    true,
+						Computed:    true,
+					},
+				},
+			},
+		},
+	}
+}
+
+func endpointSchemaComputedAttributes() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"host": schema.StringAttribute{
+			Description: "The hostname for connecting to the endpoint.",
+			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+		"current_state": schema.StringAttribute{
+			Description: "The current state of the compute endpoint.",
+			Computed:    true,
+		},
+		"last_active": schema.StringAttribute{
+			Description: "A timestamp indicating when the compute endpoint was last active.",
+			Computed:    true,
+		},
+		"creation_source": schema.StringAttribute{
+			Description: "The compute endpoint creation source.",
+			Computed:    true,
+		},
+		"compute_release_version": schema.StringAttribute{
+			Description: "Attached compute's release version number.",
+			Computed:    true,
+		},
+		"pending_state": schema.StringAttribute{
+			Description: "The pending state of the compute endpoint.",
+			Computed:    true,
+		},
+		"started_at": schema.StringAttribute{
+			Description: "A timestamp indicating when the compute endpoint was last started.",
+			Computed:    true,
+		},
+		"suspended_at": schema.StringAttribute{
+			Description: "A timestamp indicating when the compute endpoint was last suspended.",
+			Computed:    true,
+		},
+		"created_at": schema.StringAttribute{
+			Description: "The creation timestamp.",
+			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+		"updated_at": schema.StringAttribute{
+			Description: "The last update timestamp.",
+			Computed:    true,
+		},
+	}
+}
+
+func endpointResourceSchemaAttributes() map[string]schema.Attribute {
+	attrs := endpointResourceSchemaConfigurableAttributes()
+	for k, v := range endpointSchemaComputedAttributes() {
+		attrs[k] = v
+	}
+	return attrs
 }
 
 func (r *endpointResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -290,33 +311,10 @@ func (r *endpointResource) Create(ctx context.Context, req resource.CreateReques
 	if !data.RegionID.IsNull() && !data.RegionID.IsUnknown() {
 		ep.RegionID = neon.NewOptString(data.RegionID.ValueString())
 	}
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		ep.Name = neon.NewOptString(data.Name.ValueString())
-	}
-	if !data.AutoscalingLimitMinCu.IsNull() && !data.AutoscalingLimitMinCu.IsUnknown() {
-		ep.AutoscalingLimitMinCu = neon.NewOptComputeUnit(neon.ComputeUnit(data.AutoscalingLimitMinCu.ValueFloat64()))
-	}
-	if !data.AutoscalingLimitMaxCu.IsNull() && !data.AutoscalingLimitMaxCu.IsUnknown() {
-		ep.AutoscalingLimitMaxCu = neon.NewOptComputeUnit(neon.ComputeUnit(data.AutoscalingLimitMaxCu.ValueFloat64()))
-	}
-	if !data.SuspendTimeoutSeconds.IsNull() && !data.SuspendTimeoutSeconds.IsUnknown() {
-		ep.SuspendTimeoutSeconds = neon.NewOptSuspendTimeoutSeconds(neon.SuspendTimeoutSeconds(data.SuspendTimeoutSeconds.ValueInt64()))
-	}
-	if !data.PoolerEnabled.IsNull() && !data.PoolerEnabled.IsUnknown() {
-		ep.PoolerEnabled = neon.NewOptBool(data.PoolerEnabled.ValueBool())
-	}
-	if !data.PoolerMode.IsNull() && !data.PoolerMode.IsUnknown() {
-		ep.PoolerMode = neon.NewOptEndpointPoolerMode(neon.EndpointPoolerMode(data.PoolerMode.ValueString()))
-	}
-	if !data.Disabled.IsNull() && !data.Disabled.IsUnknown() {
-		ep.Disabled = neon.NewOptBool(data.Disabled.ValueBool())
-	}
-	if !data.PasswordlessAccess.IsNull() && !data.PasswordlessAccess.IsUnknown() {
-		ep.PasswordlessAccess = neon.NewOptBool(data.PasswordlessAccess.ValueBool())
-	}
-	if !data.Provisioner.IsNull() && !data.Provisioner.IsUnknown() {
-		ep.Provisioner = neon.NewOptProvisioner(neon.Provisioner(data.Provisioner.ValueString()))
-	}
+
+	setEndpointCommonFields(&data, &ep.Name, &ep.AutoscalingLimitMinCu, &ep.AutoscalingLimitMaxCu,
+		&ep.SuspendTimeoutSeconds, &ep.PoolerEnabled, &ep.PoolerMode, &ep.Disabled, //nolint:staticcheck // intentionally using deprecated API field for backward compatibility
+		&ep.PasswordlessAccess, &ep.Provisioner)
 
 	buildSettingsRequest(ctx, data.Settings, &ep.Settings, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
@@ -382,33 +380,9 @@ func (r *endpointResource) Update(ctx context.Context, req resource.UpdateReques
 
 	ep := neon.EndpointUpdateRequestEndpoint{}
 
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		ep.Name = neon.NewOptString(data.Name.ValueString())
-	}
-	if !data.AutoscalingLimitMinCu.IsNull() && !data.AutoscalingLimitMinCu.IsUnknown() {
-		ep.AutoscalingLimitMinCu = neon.NewOptComputeUnit(neon.ComputeUnit(data.AutoscalingLimitMinCu.ValueFloat64()))
-	}
-	if !data.AutoscalingLimitMaxCu.IsNull() && !data.AutoscalingLimitMaxCu.IsUnknown() {
-		ep.AutoscalingLimitMaxCu = neon.NewOptComputeUnit(neon.ComputeUnit(data.AutoscalingLimitMaxCu.ValueFloat64()))
-	}
-	if !data.SuspendTimeoutSeconds.IsNull() && !data.SuspendTimeoutSeconds.IsUnknown() {
-		ep.SuspendTimeoutSeconds = neon.NewOptSuspendTimeoutSeconds(neon.SuspendTimeoutSeconds(data.SuspendTimeoutSeconds.ValueInt64()))
-	}
-	if !data.PoolerEnabled.IsNull() && !data.PoolerEnabled.IsUnknown() {
-		ep.PoolerEnabled = neon.NewOptBool(data.PoolerEnabled.ValueBool())
-	}
-	if !data.PoolerMode.IsNull() && !data.PoolerMode.IsUnknown() {
-		ep.PoolerMode = neon.NewOptEndpointPoolerMode(neon.EndpointPoolerMode(data.PoolerMode.ValueString()))
-	}
-	if !data.Disabled.IsNull() && !data.Disabled.IsUnknown() {
-		ep.Disabled = neon.NewOptBool(data.Disabled.ValueBool())
-	}
-	if !data.PasswordlessAccess.IsNull() && !data.PasswordlessAccess.IsUnknown() {
-		ep.PasswordlessAccess = neon.NewOptBool(data.PasswordlessAccess.ValueBool())
-	}
-	if !data.Provisioner.IsNull() && !data.Provisioner.IsUnknown() {
-		ep.Provisioner = neon.NewOptProvisioner(neon.Provisioner(data.Provisioner.ValueString()))
-	}
+	setEndpointCommonFields(&data, &ep.Name, &ep.AutoscalingLimitMinCu, &ep.AutoscalingLimitMaxCu,
+		&ep.SuspendTimeoutSeconds, &ep.PoolerEnabled, &ep.PoolerMode, &ep.Disabled, //nolint:staticcheck // intentionally using deprecated API field for backward compatibility
+		&ep.PasswordlessAccess, &ep.Provisioner)
 
 	buildSettingsRequest(ctx, data.Settings, &ep.Settings, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
@@ -464,6 +438,47 @@ func (r *endpointResource) ImportState(ctx context.Context, req resource.ImportS
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), parts[1])...)
 }
 
+func setEndpointCommonFields(
+	data *endpointResourceModel,
+	name *neon.OptString,
+	minCu *neon.OptComputeUnit,
+	maxCu *neon.OptComputeUnit,
+	suspendTimeout *neon.OptSuspendTimeoutSeconds,
+	poolerEnabled *neon.OptBool,
+	poolerMode *neon.OptEndpointPoolerMode,
+	disabled *neon.OptBool,
+	passwordlessAccess *neon.OptBool,
+	provisioner *neon.OptProvisioner,
+) {
+	if !data.Name.IsNull() && !data.Name.IsUnknown() {
+		*name = neon.NewOptString(data.Name.ValueString())
+	}
+	if !data.AutoscalingLimitMinCu.IsNull() && !data.AutoscalingLimitMinCu.IsUnknown() {
+		*minCu = neon.NewOptComputeUnit(neon.ComputeUnit(data.AutoscalingLimitMinCu.ValueFloat64()))
+	}
+	if !data.AutoscalingLimitMaxCu.IsNull() && !data.AutoscalingLimitMaxCu.IsUnknown() {
+		*maxCu = neon.NewOptComputeUnit(neon.ComputeUnit(data.AutoscalingLimitMaxCu.ValueFloat64()))
+	}
+	if !data.SuspendTimeoutSeconds.IsNull() && !data.SuspendTimeoutSeconds.IsUnknown() {
+		*suspendTimeout = neon.NewOptSuspendTimeoutSeconds(neon.SuspendTimeoutSeconds(data.SuspendTimeoutSeconds.ValueInt64()))
+	}
+	if !data.PoolerEnabled.IsNull() && !data.PoolerEnabled.IsUnknown() {
+		*poolerEnabled = neon.NewOptBool(data.PoolerEnabled.ValueBool())
+	}
+	if !data.PoolerMode.IsNull() && !data.PoolerMode.IsUnknown() {
+		*poolerMode = neon.NewOptEndpointPoolerMode(neon.EndpointPoolerMode(data.PoolerMode.ValueString()))
+	}
+	if !data.Disabled.IsNull() && !data.Disabled.IsUnknown() {
+		*disabled = neon.NewOptBool(data.Disabled.ValueBool())
+	}
+	if !data.PasswordlessAccess.IsNull() && !data.PasswordlessAccess.IsUnknown() {
+		*passwordlessAccess = neon.NewOptBool(data.PasswordlessAccess.ValueBool())
+	}
+	if !data.Provisioner.IsNull() && !data.Provisioner.IsUnknown() {
+		*provisioner = neon.NewOptProvisioner(neon.Provisioner(data.Provisioner.ValueString()))
+	}
+}
+
 func buildSettingsRequest(ctx context.Context, settings types.Object, target *neon.OptEndpointSettingsData, diags *diag.Diagnostics) {
 	if settings.IsNull() || settings.IsUnknown() {
 		return
@@ -472,66 +487,98 @@ func buildSettingsRequest(ctx context.Context, settings types.Object, target *ne
 	attrs := settings.Attributes()
 	s := neon.EndpointSettingsData{}
 
-	if pgSettings, ok := attrs["pg_settings"]; ok {
-		pgMap, ok := pgSettings.(types.Map)
-		if ok && !pgMap.IsNull() && !pgMap.IsUnknown() {
-			m := make(map[string]string)
-			d := pgMap.ElementsAs(ctx, &m, false)
-			diags.Append(d...)
-			if diags.HasError() {
-				return
-			}
-			s.PgSettings = neon.NewOptPgSettingsData(neon.PgSettingsData(m))
-		}
+	buildPgSettingsRequest(ctx, attrs, &s.PgSettings, diags)
+	if diags.HasError() {
+		return
 	}
 
-	if pgbSettings, ok := attrs["pgbouncer_settings"]; ok {
-		pgbMap, ok := pgbSettings.(types.Map)
-		if ok && !pgbMap.IsNull() && !pgbMap.IsUnknown() {
-			m := make(map[string]string)
-			d := pgbMap.ElementsAs(ctx, &m, false)
-			diags.Append(d...)
-			if diags.HasError() {
-				return
-			}
-			s.PgbouncerSettings = neon.NewOptPgbouncerSettingsData(neon.PgbouncerSettingsData(m))
-		}
+	buildPgbouncerSettingsRequest(ctx, attrs, &s.PgbouncerSettings, diags)
+	if diags.HasError() {
+		return
 	}
 
-	if plAttr, ok := attrs["preload_libraries"]; ok {
-		plObj, ok := plAttr.(types.Object)
-		if ok && !plObj.IsNull() && !plObj.IsUnknown() {
-			plAttrs := plObj.Attributes()
-			pl := neon.PreloadLibraries{}
-
-			if ud, ok := plAttrs["use_defaults"]; ok {
-				udBool, ok := ud.(types.Bool)
-				if ok && !udBool.IsNull() && !udBool.IsUnknown() {
-					pl.UseDefaults = neon.NewOptBool(udBool.ValueBool())
-				}
-			}
-
-			if el, ok := plAttrs["enabled_libraries"]; ok {
-				elList, ok := el.(types.List)
-				if ok && !elList.IsNull() && !elList.IsUnknown() {
-					var libs []string
-					d := elList.ElementsAs(ctx, &libs, false)
-					diags.Append(d...)
-					if diags.HasError() {
-						return
-					}
-					pl.EnabledLibraries = libs
-				}
-			}
-
-			s.PreloadLibraries = neon.NewOptPreloadLibraries(pl)
-		}
+	buildPreloadLibrariesRequest(ctx, attrs, &s.PreloadLibraries, diags)
+	if diags.HasError() {
+		return
 	}
 
 	*target = neon.NewOptEndpointSettingsData(s)
 }
 
-func mapEndpointToModel(ctx context.Context, ep *neon.Endpoint, data *endpointResourceModel, diags *diag.Diagnostics) {
+func buildPgSettingsRequest(ctx context.Context, attrs map[string]attr.Value, target *neon.OptPgSettingsData, diags *diag.Diagnostics) {
+	pgSettings, ok := attrs["pg_settings"]
+	if !ok {
+		return
+	}
+	pgMap, ok := pgSettings.(types.Map)
+	if !ok || pgMap.IsNull() || pgMap.IsUnknown() {
+		return
+	}
+	m := make(map[string]string)
+	diags.Append(pgMap.ElementsAs(ctx, &m, false)...)
+	if !diags.HasError() {
+		*target = neon.NewOptPgSettingsData(neon.PgSettingsData(m))
+	}
+}
+
+func buildPgbouncerSettingsRequest(ctx context.Context, attrs map[string]attr.Value, target *neon.OptPgbouncerSettingsData, diags *diag.Diagnostics) {
+	pgbSettings, ok := attrs["pgbouncer_settings"]
+	if !ok {
+		return
+	}
+	pgbMap, ok := pgbSettings.(types.Map)
+	if !ok || pgbMap.IsNull() || pgbMap.IsUnknown() {
+		return
+	}
+	m := make(map[string]string)
+	diags.Append(pgbMap.ElementsAs(ctx, &m, false)...)
+	if !diags.HasError() {
+		*target = neon.NewOptPgbouncerSettingsData(neon.PgbouncerSettingsData(m))
+	}
+}
+
+func buildPreloadLibrariesRequest(ctx context.Context, attrs map[string]attr.Value, target *neon.OptPreloadLibraries, diags *diag.Diagnostics) {
+	plAttr, ok := attrs["preload_libraries"]
+	if !ok {
+		return
+	}
+	plObj, ok := plAttr.(types.Object)
+	if !ok || plObj.IsNull() || plObj.IsUnknown() {
+		return
+	}
+
+	plAttrs := plObj.Attributes()
+	pl := neon.PreloadLibraries{}
+
+	if ud, ok := plAttrs["use_defaults"]; ok {
+		udBool, ok := ud.(types.Bool)
+		if ok && !udBool.IsNull() && !udBool.IsUnknown() {
+			pl.UseDefaults = neon.NewOptBool(udBool.ValueBool())
+		}
+	}
+
+	if el, ok := plAttrs["enabled_libraries"]; ok {
+		elList, ok := el.(types.List)
+		if ok && !elList.IsNull() && !elList.IsUnknown() {
+			var libs []string
+			diags.Append(elList.ElementsAs(ctx, &libs, false)...)
+			if diags.HasError() {
+				return
+			}
+			pl.EnabledLibraries = libs
+		}
+	}
+
+	*target = neon.NewOptPreloadLibraries(pl)
+}
+
+func mapEndpointToModel(_ context.Context, ep *neon.Endpoint, data *endpointResourceModel, diags *diag.Diagnostics) {
+	mapEndpointCoreFields(ep, data)
+	mapEndpointOptionalFields(ep, data)
+	mapEndpointSettingsToModel(ep, data, diags)
+}
+
+func mapEndpointCoreFields(ep *neon.Endpoint, data *endpointResourceModel) {
 	data.ID = types.StringValue(ep.ID)
 	data.ProjectID = types.StringValue(ep.ProjectID)
 	data.BranchID = types.StringValue(ep.BranchID)
@@ -550,7 +597,9 @@ func mapEndpointToModel(ctx context.Context, ep *neon.Endpoint, data *endpointRe
 	data.Provisioner = types.StringValue(string(ep.Provisioner))
 	data.CreatedAt = types.StringValue(ep.CreatedAt.String())
 	data.UpdatedAt = types.StringValue(ep.UpdatedAt.String())
+}
 
+func mapEndpointOptionalFields(ep *neon.Endpoint, data *endpointResourceModel) {
 	if v, ok := ep.Name.Get(); ok {
 		data.Name = types.StringValue(v)
 	} else {
@@ -586,8 +635,9 @@ func mapEndpointToModel(ctx context.Context, ep *neon.Endpoint, data *endpointRe
 	} else {
 		data.SuspendedAt = types.StringNull()
 	}
+}
 
-	// Settings
+func mapEndpointSettingsToModel(ep *neon.Endpoint, data *endpointResourceModel, diags *diag.Diagnostics) {
 	settingsAttrs := map[string]attr.Value{}
 
 	if ep.Settings.PgSettings.IsSet() {

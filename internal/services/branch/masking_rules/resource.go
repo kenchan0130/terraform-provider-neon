@@ -140,29 +140,7 @@ func (r *maskingRulesResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	var maskingRuleModels []maskingRuleModel
-	resp.Diagnostics.Append(data.MaskingRules.ElementsAs(ctx, &maskingRuleModels, false)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	apiMaskingRules := make([]neon.MaskingRule, len(maskingRuleModels))
-	for i, rule := range maskingRuleModels {
-		apiMaskingRules[i] = toAPIMaskingRule(rule)
-	}
-
-	result, err := r.client.UpdateMaskingRules(ctx, &neon.MaskingRulesUpdateRequest{
-		MaskingRules: apiMaskingRules,
-	}, neon.UpdateMaskingRulesParams{
-		ProjectID: data.ProjectID.ValueString(),
-		BranchID:  data.BranchID.ValueString(),
-	})
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to create masking rules", err.Error())
-		return
-	}
-
-	mapMaskingRulesToModel(ctx, result.MaskingRules, &data, &resp.Diagnostics)
+	r.createOrUpdate(ctx, &data, &resp.Diagnostics, "create")
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -205,9 +183,18 @@ func (r *maskingRulesResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	var maskingRuleModels []maskingRuleModel
-	resp.Diagnostics.Append(plan.MaskingRules.ElementsAs(ctx, &maskingRuleModels, false)...)
+	r.createOrUpdate(ctx, &plan, &resp.Diagnostics, "update")
 	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+}
+
+func (r *maskingRulesResource) createOrUpdate(ctx context.Context, data *maskingRulesResourceModel, diagnostics *diag.Diagnostics, operation string) {
+	var maskingRuleModels []maskingRuleModel
+	diagnostics.Append(data.MaskingRules.ElementsAs(ctx, &maskingRuleModels, false)...)
+	if diagnostics.HasError() {
 		return
 	}
 
@@ -219,20 +206,15 @@ func (r *maskingRulesResource) Update(ctx context.Context, req resource.UpdateRe
 	result, err := r.client.UpdateMaskingRules(ctx, &neon.MaskingRulesUpdateRequest{
 		MaskingRules: apiMaskingRules,
 	}, neon.UpdateMaskingRulesParams{
-		ProjectID: plan.ProjectID.ValueString(),
-		BranchID:  plan.BranchID.ValueString(),
+		ProjectID: data.ProjectID.ValueString(),
+		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to update masking rules", err.Error())
+		diagnostics.AddError(fmt.Sprintf("Failed to %s masking rules", operation), err.Error())
 		return
 	}
 
-	mapMaskingRulesToModel(ctx, result.MaskingRules, &plan, &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	mapMaskingRulesToModel(ctx, result.MaskingRules, data, diagnostics)
 }
 
 func (r *maskingRulesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

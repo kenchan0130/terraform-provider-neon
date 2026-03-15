@@ -80,11 +80,11 @@ func newInvokeConfig(projectID, branchID, sourceBranchID string, sourceLsn, sour
 	return tfsdk.Config{
 		Schema: s,
 		Raw: tftypes.NewValue(schemaType, map[string]tftypes.Value{
-			"project_id":         tftypes.NewValue(tftypes.String, projectID),
-			"branch_id":          tftypes.NewValue(tftypes.String, branchID),
-			"source_branch_id":   tftypes.NewValue(tftypes.String, sourceBranchID),
-			"source_lsn":         sourceLsnValue,
-			"source_timestamp":   sourceTimestampValue,
+			"project_id":          tftypes.NewValue(tftypes.String, projectID),
+			"branch_id":           tftypes.NewValue(tftypes.String, branchID),
+			"source_branch_id":    tftypes.NewValue(tftypes.String, sourceBranchID),
+			"source_lsn":          sourceLsnValue,
+			"source_timestamp":    sourceTimestampValue,
 			"preserve_under_name": preserveUnderNameValue,
 		}),
 	}
