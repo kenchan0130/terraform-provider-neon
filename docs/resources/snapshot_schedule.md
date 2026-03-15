@@ -50,3 +50,13 @@ Optional:
 - `hour` (Number) The hour of the day to take the snapshot (if applicable).
 - `month` (Number) The month of the year to take the snapshot (if applicable).
 - `retention_seconds` (Number) How long to keep a snapshot (in seconds) before it's automatically deleted.
+
+## Import
+
+Import is supported using the following syntax:
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
+```shell
+terraform import neon_snapshot_schedule.example <project_id>/<branch_id>
+```

@@ -61,3 +61,13 @@ Optional:
 
 - `masking_function` (String) The PostgreSQL Anonymizer masking function to apply (e.g., 'anon.random_string(10)', 'anon.fake_email()').
 - `masking_value` (String) A literal value to set on the column when masking.
+
+## Import
+
+Import is supported using the following syntax:
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
+```shell
+terraform import neon_branch_masking_rules.example <project_id>/<branch_id>
+```

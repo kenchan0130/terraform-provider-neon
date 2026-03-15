@@ -32,3 +32,13 @@ resource "neon_branch_neon_auth_trusted_domain" "example" {
 ### Read-Only
 
 - `auth_provider` (String) The authentication provider associated with this domain.
+
+## Import
+
+Import is supported using the following syntax:
+
+The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
+
+```shell
+terraform import neon_branch_neon_auth_trusted_domain.example <project_id>/<branch_id>/<domain>
+```
