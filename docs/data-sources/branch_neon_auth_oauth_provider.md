@@ -26,11 +26,11 @@ data "neon_branch_neon_auth_oauth_provider" "example" {
 ### Required
 
 - `branch_id` (String) The Neon branch ID.
-- `id` (String) The OAuth provider ID (e.g. google, github, microsoft, vercel).
+- `id` (String) The OAuth provider ID (e.g. `google`, `github`, `microsoft`, `vercel`).
 - `project_id` (String) The Neon project ID.
 
 ### Read-Only
 
-- `client_id` (String, Sensitive) The OAuth client ID.
+- `client_id` (String) The OAuth client ID.
 - `client_secret` (String, Sensitive) The OAuth client secret.
-- `type` (String) The OAuth provider type (e.g. standard, shared).
+- `type` (String) The OAuth provider type (e.g. `standard`, `shared`).

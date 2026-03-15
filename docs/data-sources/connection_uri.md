@@ -37,4 +37,4 @@ data "neon_connection_uri" "example" {
 
 ### Read-Only
 
-- `uri` (String, Sensitive) The connection URI.
+- `uri` (String) The connection URI.

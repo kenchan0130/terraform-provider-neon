@@ -33,6 +33,5 @@ data "neon_role" "example" {
 
 - `authentication_method` (String) The authentication method used for the role.
 - `created_at` (String) The creation timestamp.
-- `password` (String, Sensitive) The role password.
 - `protected` (Boolean) Whether the role is protected.
 - `updated_at` (String) The last update timestamp.
