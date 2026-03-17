@@ -10,7 +10,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -116,6 +121,9 @@ func endpointResourceSchemaConfigurableAttributes() map[string]schema.Attribute 
 			Description: "Optional name of the compute endpoint.",
 			Optional:    true,
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"autoscaling_limit_min_cu": schema.Float64Attribute{
 			Description: "The minimum number of Compute Units.",
@@ -137,26 +145,41 @@ func endpointResourceSchemaConfigurableAttributes() map[string]schema.Attribute 
 			Description: "The duration of inactivity in seconds after which the compute is suspended.",
 			Optional:    true,
 			Computed:    true,
+			PlanModifiers: []planmodifier.Int64{
+				int64planmodifier.UseStateForUnknown(),
+			},
 		},
 		"pooler_enabled": schema.BoolAttribute{
 			Description: "Whether connection pooling is enabled.",
 			Optional:    true,
 			Computed:    true,
+			PlanModifiers: []planmodifier.Bool{
+				boolplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"pooler_mode": schema.StringAttribute{
 			Description: "The connection pooler mode. Must be `transaction`.",
 			Optional:    true,
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"disabled": schema.BoolAttribute{
 			Description: "Whether the endpoint is disabled.",
 			Optional:    true,
 			Computed:    true,
+			PlanModifiers: []planmodifier.Bool{
+				boolplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"passwordless_access": schema.BoolAttribute{
 			Description: "Whether to permit passwordless access to the compute endpoint.",
 			Optional:    true,
 			Computed:    true,
+			PlanModifiers: []planmodifier.Bool{
+				boolplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"compute_provisioner": schema.StringAttribute{
 			Description: "The provisioner for the compute endpoint.",
@@ -185,34 +208,52 @@ func endpointSettingsResourceSchema() schema.SingleNestedAttribute {
 		Description: "Endpoint settings.",
 		Optional:    true,
 		Computed:    true,
+		PlanModifiers: []planmodifier.Object{
+			objectplanmodifier.UseStateForUnknown(),
+		},
 		Attributes: map[string]schema.Attribute{
 			"pg_settings": schema.MapAttribute{
 				Description: "A raw representation of Postgres settings.",
 				ElementType: types.StringType,
 				Optional:    true,
 				Computed:    true,
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"pgbouncer_settings": schema.MapAttribute{
 				Description: "A raw representation of PgBouncer settings.",
 				ElementType: types.StringType,
 				Optional:    true,
 				Computed:    true,
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"preload_libraries": schema.SingleNestedAttribute{
 				Description: "Preload libraries configuration.",
 				Optional:    true,
 				Computed:    true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 					"use_defaults": schema.BoolAttribute{
 						Description: "Whether to use default preload libraries.",
 						Optional:    true,
 						Computed:    true,
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"enabled_libraries": schema.ListAttribute{
 						Description: "List of enabled preload libraries.",
 						ElementType: types.StringType,
 						Optional:    true,
 						Computed:    true,
+						PlanModifiers: []planmodifier.List{
+							listplanmodifier.UseStateForUnknown(),
+						},
 					},
 				},
 			},
@@ -232,30 +273,51 @@ func endpointSchemaComputedAttributes() map[string]schema.Attribute {
 		"current_state": schema.StringAttribute{
 			Description: "The current state of the compute endpoint.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"last_active": schema.StringAttribute{
 			Description: "A timestamp indicating when the compute endpoint was last active.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"creation_source": schema.StringAttribute{
 			Description: "The compute endpoint creation source.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"compute_release_version": schema.StringAttribute{
 			Description: "Attached compute's release version number.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"pending_state": schema.StringAttribute{
 			Description: "The pending state of the compute endpoint.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"started_at": schema.StringAttribute{
 			Description: "A timestamp indicating when the compute endpoint was last started.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"suspended_at": schema.StringAttribute{
 			Description: "A timestamp indicating when the compute endpoint was last suspended.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"created_at": schema.StringAttribute{
 			Description: "The creation timestamp.",
@@ -267,6 +329,9 @@ func endpointSchemaComputedAttributes() map[string]schema.Attribute {
 		"updated_at": schema.StringAttribute{
 			Description: "The last update timestamp.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 	}
 }

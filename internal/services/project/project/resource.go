@@ -9,7 +9,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int32planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -161,6 +167,9 @@ func projectSchemaAttributes() map[string]schema.Attribute {
 			Description: "The project name.",
 			Optional:    true,
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"region_id": schema.StringAttribute{
 			Description: "The region identifier. Cannot be changed after creation.",
@@ -184,11 +193,17 @@ func projectSchemaAttributes() map[string]schema.Attribute {
 			Description: "The number of seconds to retain the shared history for all branches.",
 			Optional:    true,
 			Computed:    true,
+			PlanModifiers: []planmodifier.Int32{
+				int32planmodifier.UseStateForUnknown(),
+			},
 		},
 		"store_passwords": schema.BoolAttribute{
 			Description: "Whether passwords are stored for roles in the project.",
 			Optional:    true,
 			Computed:    true,
+			PlanModifiers: []planmodifier.Bool{
+				boolplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"org_id": schema.StringAttribute{
 			Description: "The organization ID. If set, the project belongs to the specified organization. Cannot be changed after creation.",
@@ -220,6 +235,9 @@ func projectSchemaAttributes() map[string]schema.Attribute {
 		"updated_at": schema.StringAttribute{
 			Description: "The last update timestamp.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 	}
 }
@@ -229,33 +247,51 @@ func defaultEndpointSettingsSchema() schema.SingleNestedAttribute {
 		Description: "Default endpoint settings for the project.",
 		Optional:    true,
 		Computed:    true,
+		PlanModifiers: []planmodifier.Object{
+			objectplanmodifier.UseStateForUnknown(),
+		},
 		Attributes: map[string]schema.Attribute{
 			"pg_settings": schema.MapAttribute{
 				Description: "A raw representation of Postgres settings.",
 				Optional:    true,
 				Computed:    true,
 				ElementType: types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"pgbouncer_settings": schema.MapAttribute{
 				Description: "A raw representation of PgBouncer settings.",
 				Optional:    true,
 				Computed:    true,
 				ElementType: types.StringType,
+				PlanModifiers: []planmodifier.Map{
+					mapplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"autoscaling_limit_min_cu": schema.Float64Attribute{
 				Description: "The minimum number of Compute Units.",
 				Optional:    true,
 				Computed:    true,
+				PlanModifiers: []planmodifier.Float64{
+					float64planmodifier.UseStateForUnknown(),
+				},
 			},
 			"autoscaling_limit_max_cu": schema.Float64Attribute{
 				Description: "The maximum number of Compute Units.",
 				Optional:    true,
 				Computed:    true,
+				PlanModifiers: []planmodifier.Float64{
+					float64planmodifier.UseStateForUnknown(),
+				},
 			},
 			"suspend_timeout_seconds": schema.Int64Attribute{
 				Description: "Duration of inactivity in seconds after which the compute endpoint is automatically suspended.",
 				Optional:    true,
 				Computed:    true,
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
 			},
 		},
 	}
@@ -266,122 +302,215 @@ func projectSettingsSchema() schema.SingleNestedAttribute {
 		Description: "Project settings.",
 		Optional:    true,
 		Computed:    true,
-		Attributes:  projectSettingsSchemaAttributes(),
+		PlanModifiers: []planmodifier.Object{
+			objectplanmodifier.UseStateForUnknown(),
+		},
+		Attributes: projectSettingsSchemaAttributes(),
 	}
 }
 
 func projectSettingsSchemaAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
-		"quota": schema.SingleNestedAttribute{
-			Description: "Per-project consumption quota.",
-			Optional:    true,
-			Computed:    true,
-			Attributes: map[string]schema.Attribute{
-				"active_time_seconds": schema.Int64Attribute{
-					Description: "The total amount of wall-clock time allowed to be spent by the project's compute endpoints.",
-					Optional:    true,
-					Computed:    true,
+		"quota":                      projectQuotaSchema(),
+		"allowed_ips":                projectAllowedIpsSchema(),
+		"enable_logical_replication": projectEnableLogicalReplicationSchema(),
+		"maintenance_window":         projectMaintenanceWindowSchema(),
+		"block_public_connections":   projectBlockPublicConnectionsSchema(),
+		"block_vpc_connections":      projectBlockVpcConnectionsSchema(),
+		"audit_log_level":            projectAuditLogLevelSchema(),
+		"hipaa":                      projectHipaaSchema(),
+		"preload_libraries":          projectPreloadLibrariesSchema(),
+	}
+}
+
+func projectQuotaSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: "Per-project consumption quota.",
+		Optional:    true,
+		Computed:    true,
+		PlanModifiers: []planmodifier.Object{
+			objectplanmodifier.UseStateForUnknown(),
+		},
+		Attributes: map[string]schema.Attribute{
+			"active_time_seconds": schema.Int64Attribute{
+				Description: "The total amount of wall-clock time allowed to be spent by the project's compute endpoints.",
+				Optional:    true,
+				Computed:    true,
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
 				},
-				"compute_time_seconds": schema.Int64Attribute{
-					Description: "The total amount of CPU seconds allowed to be spent by the project's compute endpoints.",
-					Optional:    true,
-					Computed:    true,
+			},
+			"compute_time_seconds": schema.Int64Attribute{
+				Description: "The total amount of CPU seconds allowed to be spent by the project's compute endpoints.",
+				Optional:    true,
+				Computed:    true,
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
 				},
-				"written_data_bytes": schema.Int64Attribute{
-					Description: "Total amount of data written to all of a project's branches.",
-					Optional:    true,
-					Computed:    true,
+			},
+			"written_data_bytes": schema.Int64Attribute{
+				Description: "Total amount of data written to all of a project's branches.",
+				Optional:    true,
+				Computed:    true,
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
 				},
-				"data_transfer_bytes": schema.Int64Attribute{
-					Description: "Total amount of data transferred from all of a project's branches using the proxy.",
-					Optional:    true,
-					Computed:    true,
+			},
+			"data_transfer_bytes": schema.Int64Attribute{
+				Description: "Total amount of data transferred from all of a project's branches using the proxy.",
+				Optional:    true,
+				Computed:    true,
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
 				},
-				"logical_size_bytes": schema.Int64Attribute{
-					Description: "Limit on the logical size of every project's branch.",
-					Optional:    true,
-					Computed:    true,
+			},
+			"logical_size_bytes": schema.Int64Attribute{
+				Description: "Limit on the logical size of every project's branch.",
+				Optional:    true,
+				Computed:    true,
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
 				},
 			},
 		},
-		"allowed_ips": schema.SingleNestedAttribute{
-			Description: "A list of IP addresses that are allowed to connect to the endpoint.",
-			Optional:    true,
-			Computed:    true,
-			Attributes: map[string]schema.Attribute{
-				"ips": schema.ListAttribute{
-					Description: "A list of allowed IP addresses.",
-					Optional:    true,
-					Computed:    true,
-					ElementType: types.StringType,
+	}
+}
+
+func projectAllowedIpsSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: "A list of IP addresses that are allowed to connect to the endpoint.",
+		Optional:    true,
+		Computed:    true,
+		PlanModifiers: []planmodifier.Object{
+			objectplanmodifier.UseStateForUnknown(),
+		},
+		Attributes: map[string]schema.Attribute{
+			"ips": schema.ListAttribute{
+				Description: "A list of allowed IP addresses.",
+				Optional:    true,
+				Computed:    true,
+				ElementType: types.StringType,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
-				"protected_branches_only": schema.BoolAttribute{
-					Description: "If true, the list will be applied only to protected branches.",
-					Optional:    true,
-					Computed:    true,
+			},
+			"protected_branches_only": schema.BoolAttribute{
+				Description: "If true, the list will be applied only to protected branches.",
+				Optional:    true,
+				Computed:    true,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
 		},
-		"enable_logical_replication": schema.BoolAttribute{
-			Description: "Sets wal_level=logical for all compute endpoints in this project.",
-			Optional:    true,
-			Computed:    true,
+	}
+}
+
+func projectEnableLogicalReplicationSchema() schema.BoolAttribute {
+	return schema.BoolAttribute{
+		Description: "Sets wal_level=logical for all compute endpoints in this project.",
+		Optional:    true,
+		Computed:    true,
+		PlanModifiers: []planmodifier.Bool{
+			boolplanmodifier.UseStateForUnknown(),
 		},
-		"maintenance_window": schema.SingleNestedAttribute{
-			Description: "The maintenance window configuration.",
-			Optional:    true,
-			Computed:    true,
-			Attributes: map[string]schema.Attribute{
-				"weekdays": schema.ListAttribute{
-					Description: "A list of weekdays when the maintenance window is active (1=Monday, 7=Sunday).",
-					Required:    true,
-					ElementType: types.Int64Type,
-				},
-				"start_time": schema.StringAttribute{
-					Description: "Start time of the maintenance window in HH:MM format (UTC).",
-					Required:    true,
-				},
-				"end_time": schema.StringAttribute{
-					Description: "End time of the maintenance window in HH:MM format (UTC).",
-					Required:    true,
-				},
+	}
+}
+
+func projectMaintenanceWindowSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: "The maintenance window configuration.",
+		Optional:    true,
+		Computed:    true,
+		PlanModifiers: []planmodifier.Object{
+			objectplanmodifier.UseStateForUnknown(),
+		},
+		Attributes: map[string]schema.Attribute{
+			"weekdays": schema.ListAttribute{
+				Description: "A list of weekdays when the maintenance window is active (1=Monday, 7=Sunday).",
+				Required:    true,
+				ElementType: types.Int64Type,
+			},
+			"start_time": schema.StringAttribute{
+				Description: "Start time of the maintenance window in HH:MM format (UTC).",
+				Required:    true,
+			},
+			"end_time": schema.StringAttribute{
+				Description: "End time of the maintenance window in HH:MM format (UTC).",
+				Required:    true,
 			},
 		},
-		"block_public_connections": schema.BoolAttribute{
-			Description: "When set, connections from the public internet are disallowed.",
-			Optional:    true,
-			Computed:    true,
+	}
+}
+
+func projectBlockPublicConnectionsSchema() schema.BoolAttribute {
+	return schema.BoolAttribute{
+		Description: "When set, connections from the public internet are disallowed.",
+		Optional:    true,
+		Computed:    true,
+		PlanModifiers: []planmodifier.Bool{
+			boolplanmodifier.UseStateForUnknown(),
 		},
-		"block_vpc_connections": schema.BoolAttribute{
-			Description: "When set, connections using VPC endpoints are disallowed.",
-			Optional:    true,
-			Computed:    true,
+	}
+}
+
+func projectBlockVpcConnectionsSchema() schema.BoolAttribute {
+	return schema.BoolAttribute{
+		Description: "When set, connections using VPC endpoints are disallowed.",
+		Optional:    true,
+		Computed:    true,
+		PlanModifiers: []planmodifier.Bool{
+			boolplanmodifier.UseStateForUnknown(),
 		},
-		"audit_log_level": schema.StringAttribute{
-			Description: "The audit log level. One of: base, extended, full.",
-			Optional:    true,
-			Computed:    true,
+	}
+}
+
+func projectAuditLogLevelSchema() schema.StringAttribute {
+	return schema.StringAttribute{
+		Description: "The audit log level. One of: base, extended, full.",
+		Optional:    true,
+		Computed:    true,
+		PlanModifiers: []planmodifier.String{
+			stringplanmodifier.UseStateForUnknown(),
 		},
-		"hipaa": schema.BoolAttribute{
-			Description: "Whether HIPAA compliance is enabled for the project.",
-			Optional:    true,
-			Computed:    true,
+	}
+}
+
+func projectHipaaSchema() schema.BoolAttribute {
+	return schema.BoolAttribute{
+		Description: "Whether HIPAA compliance is enabled for the project.",
+		Optional:    true,
+		Computed:    true,
+		PlanModifiers: []planmodifier.Bool{
+			boolplanmodifier.UseStateForUnknown(),
 		},
-		"preload_libraries": schema.SingleNestedAttribute{
-			Description: "Configuration for preloaded Postgres libraries.",
-			Optional:    true,
-			Computed:    true,
-			Attributes: map[string]schema.Attribute{
-				"use_defaults": schema.BoolAttribute{
-					Description: "Whether to use the default preloaded libraries.",
-					Optional:    true,
-					Computed:    true,
+	}
+}
+
+func projectPreloadLibrariesSchema() schema.SingleNestedAttribute {
+	return schema.SingleNestedAttribute{
+		Description: "Configuration for preloaded Postgres libraries.",
+		Optional:    true,
+		Computed:    true,
+		PlanModifiers: []planmodifier.Object{
+			objectplanmodifier.UseStateForUnknown(),
+		},
+		Attributes: map[string]schema.Attribute{
+			"use_defaults": schema.BoolAttribute{
+				Description: "Whether to use the default preloaded libraries.",
+				Optional:    true,
+				Computed:    true,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
 				},
-				"enabled_libraries": schema.ListAttribute{
-					Description: "A list of libraries to preload.",
-					Optional:    true,
-					Computed:    true,
-					ElementType: types.StringType,
+			},
+			"enabled_libraries": schema.ListAttribute{
+				Description: "A list of libraries to preload.",
+				Optional:    true,
+				Computed:    true,
+				ElementType: types.StringType,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 			},
 		},

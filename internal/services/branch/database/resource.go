@@ -90,6 +90,9 @@ func (r *databaseResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 			"updated_at": schema.StringAttribute{
 				Description: "The last update timestamp.",
 				Computed:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 		},
 	}

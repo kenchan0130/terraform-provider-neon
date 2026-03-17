@@ -80,10 +80,16 @@ func (r *roleResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			"protected": schema.BoolAttribute{
 				Description: "Whether the role is protected.",
 				Computed:    true,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"authentication_method": schema.StringAttribute{
 				Description: "The authentication method used for the role.",
 				Computed:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"created_at": schema.StringAttribute{
 				Description: "The creation timestamp.",
@@ -95,6 +101,9 @@ func (r *roleResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			"updated_at": schema.StringAttribute{
 				Description: "The last update timestamp.",
 				Computed:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 		},
 	}
