@@ -54,6 +54,9 @@ API client is auto-generated from OpenAPI spec using ogen (`internal/neon/` - DO
 - When introducing or updating any dependency (Go modules, GitHub Actions, tools, etc.), always look up the latest version using WebSearch/WebFetch before specifying it
 - GitHub Actions are pinned by full commit SHA with version comment (e.g., `uses: actions/checkout@<sha> # v6.0.2`)
 
+## Git Conventions
+- All commits MUST include a `Signed-off-by` line for DCO (Developer Certificate of Origin) compliance. Always use `--signoff` (or `-s`) flag when committing (e.g., `git commit -s -m "message"`)
+
 ## Common Gotchas
 - API response status codes vary: check `oas_response_decoders_gen.go` for each operation (e.g., Delete may expect 202, not 200)
 - `ApiKeysListResponseItem.CreatedBy` is `ApiKeyCreatorData` (has `id`, `name`, `image` fields), NOT a simple UUID
