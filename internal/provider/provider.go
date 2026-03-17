@@ -213,6 +213,7 @@ func (p *NeonProvider) EphemeralResources(_ context.Context) []func() ephemeral.
 	return []func() ephemeral.EphemeralResource{
 		role_password.NewEphemeralResource,
 		neon_auth_oauth_provider.NewEphemeralResource,
+		connection_uri.NewEphemeralResource,
 	}
 }
 

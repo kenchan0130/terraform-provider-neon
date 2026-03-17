@@ -4,31 +4,31 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
+	"github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
 )
 
 var (
-	_ datasource.DataSource              = &connectionURIDataSource{}
-	_ datasource.DataSourceWithConfigure = &connectionURIDataSource{}
+	_ ephemeral.EphemeralResource              = &connectionURIEphemeral{}
+	_ ephemeral.EphemeralResourceWithConfigure = &connectionURIEphemeral{}
 )
 
-type connectionURIDataSource struct {
+type connectionURIEphemeral struct {
 	client *neon.Client
 }
 
-func NewDataSource() datasource.DataSource {
-	return &connectionURIDataSource{}
+func NewEphemeralResource() ephemeral.EphemeralResource {
+	return &connectionURIEphemeral{}
 }
 
-func (d *connectionURIDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (e *connectionURIEphemeral) Metadata(_ context.Context, req ephemeral.MetadataRequest, resp *ephemeral.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_connection_uri"
 }
 
-func (d *connectionURIDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (e *connectionURIEphemeral) Schema(_ context.Context, _ ephemeral.SchemaRequest, resp *ephemeral.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Retrieves a connection URI for a Neon database.",
+		Description: "Retrieves a connection URI for a Neon database. The URI is ephemeral and will not be stored in Terraform state.",
 		Attributes: map[string]schema.Attribute{
 			"project_id": schema.StringAttribute{
 				Description: "The Neon project ID.",
@@ -56,14 +56,14 @@ func (d *connectionURIDataSource) Schema(_ context.Context, _ datasource.SchemaR
 			},
 			"uri": schema.StringAttribute{
 				Description: "The connection URI.",
-				Sensitive:   true,
 				Computed:    true,
+				Sensitive:   true,
 			},
 		},
 	}
 }
 
-func (d *connectionURIDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (e *connectionURIEphemeral) Configure(_ context.Context, req ephemeral.ConfigureRequest, resp *ephemeral.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -77,20 +77,20 @@ func (d *connectionURIDataSource) Configure(_ context.Context, req datasource.Co
 		return
 	}
 
-	d.client = client
+	e.client = client
 }
 
-func (d *connectionURIDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (e *connectionURIEphemeral) Open(ctx context.Context, req ephemeral.OpenRequest, resp *ephemeral.OpenResponse) {
 	var data connectionURIModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(fetchConnectionURI(ctx, d.client, &data)...)
+	resp.Diagnostics.Append(fetchConnectionURI(ctx, e.client, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.Result.Set(ctx, &data)...)
 }
