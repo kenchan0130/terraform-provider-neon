@@ -77,6 +77,9 @@ func (r *branchDataAPIResource) Schema(_ context.Context, _ resource.SchemaReque
 			"status": schema.StringAttribute{
 				Description: "The status of the Data API.",
 				Computed:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 		},
 	}

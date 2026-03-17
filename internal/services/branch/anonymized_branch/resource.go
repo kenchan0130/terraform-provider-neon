@@ -98,6 +98,9 @@ func (r *anonymizedBranchResource) Schema(_ context.Context, _ resource.SchemaRe
 				Description: "The branch name.",
 				Optional:    true,
 				Computed:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"start_anonymization": schema.BoolAttribute{
 				Description: "If true, automatically start anonymization. Changing from true to false requires resource replacement.",
@@ -109,6 +112,9 @@ func (r *anonymizedBranchResource) Schema(_ context.Context, _ resource.SchemaRe
 			"state": schema.StringAttribute{
 				Description: "The current state of the anonymized branch (e.g., created, initialized, anonymizing, anonymized, error).",
 				Computed:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"created_at": schema.StringAttribute{
 				Description: "The creation timestamp.",
@@ -120,6 +126,9 @@ func (r *anonymizedBranchResource) Schema(_ context.Context, _ resource.SchemaRe
 			"updated_at": schema.StringAttribute{
 				Description: "The last update timestamp.",
 				Computed:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 		},
 		Blocks: map[string]schema.Block{

@@ -78,6 +78,9 @@ func (r *neonAuthOauthProviderResource) Schema(_ context.Context, _ resource.Sch
 				Description: "The OAuth client ID.",
 				Optional:    true,
 				Computed:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"client_secret": schema.StringAttribute{
 				Description: "The OAuth client secret. Conflicts with `client_secret_wo`.",

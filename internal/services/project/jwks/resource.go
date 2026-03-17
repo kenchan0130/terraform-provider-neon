@@ -110,6 +110,9 @@ func (r *jwksResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			"updated_at": schema.StringAttribute{
 				Description: "The last update timestamp.",
 				Computed:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 		},
 	}

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -91,6 +92,9 @@ func branchSchemaConfigurableAttributes() map[string]schema.Attribute {
 			Description: "The branch name.",
 			Optional:    true,
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"parent_id": schema.StringAttribute{
 			Description: "The parent branch ID.",
@@ -119,6 +123,9 @@ func branchSchemaConfigurableAttributes() map[string]schema.Attribute {
 			Description: "Whether the branch is protected.",
 			Optional:    true,
 			Computed:    true,
+			PlanModifiers: []planmodifier.Bool{
+				boolplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"archived": schema.BoolAttribute{
 			Description: "Whether to create the branch as archived.",
@@ -138,6 +145,9 @@ func branchSchemaConfigurableAttributes() map[string]schema.Attribute {
 			Description: "The timestamp when the branch is scheduled to expire and be automatically deleted (ISO 8601 / RFC 3339 format).",
 			Optional:    true,
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 	}
 }
@@ -147,10 +157,16 @@ func branchSchemaComputedAttributes() map[string]schema.Attribute {
 		"current_state": schema.StringAttribute{
 			Description: "The current state of the branch.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"logical_size": schema.Int64Attribute{
 			Description: "The logical size of the branch, in bytes.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.Int64{
+				int64planmodifier.UseStateForUnknown(),
+			},
 		},
 		"creation_source": schema.StringAttribute{
 			Description: "The branch creation source.",
@@ -162,42 +178,72 @@ func branchSchemaComputedAttributes() map[string]schema.Attribute {
 		"default": schema.BoolAttribute{
 			Description: "Whether the branch is the project's default branch.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.Bool{
+				boolplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"compute_time_seconds": schema.Int64Attribute{
 			Description: "Compute time used by the branch, in seconds.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.Int64{
+				int64planmodifier.UseStateForUnknown(),
+			},
 		},
 		"active_time_seconds": schema.Int64Attribute{
 			Description: "Active time for the branch, in seconds.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.Int64{
+				int64planmodifier.UseStateForUnknown(),
+			},
 		},
 		"written_data_bytes": schema.Int64Attribute{
 			Description: "Written data for the branch, in bytes.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.Int64{
+				int64planmodifier.UseStateForUnknown(),
+			},
 		},
 		"data_transfer_bytes": schema.Int64Attribute{
 			Description: "Data transfer for the branch, in bytes.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.Int64{
+				int64planmodifier.UseStateForUnknown(),
+			},
 		},
 		"pending_state": schema.StringAttribute{
 			Description: "The pending state of the branch.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"state_changed_at": schema.StringAttribute{
 			Description: "A timestamp indicating when the current state began.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"last_reset_at": schema.StringAttribute{
 			Description: "A timestamp indicating when the branch was last reset.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"restored_from": schema.StringAttribute{
 			Description: "The ID of the snapshot that was the restore source for this branch.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"restored_as": schema.StringAttribute{
 			Description: "The ID of the target branch which was replaced when this branch was restored.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"created_at": schema.StringAttribute{
 			Description: "The creation timestamp.",
@@ -209,6 +255,9 @@ func branchSchemaComputedAttributes() map[string]schema.Attribute {
 		"updated_at": schema.StringAttribute{
 			Description: "The last update timestamp.",
 			Computed:    true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 	}
 }
