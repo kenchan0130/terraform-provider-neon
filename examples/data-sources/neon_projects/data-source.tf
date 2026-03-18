@@ -15,3 +15,17 @@ data "neon_projects" "recoverable" {
     recoverable = true
   }
 }
+
+data "neon_projects" "org_search" {
+  query = {
+    org_id = "org-example-001"
+    search = "production"
+  }
+}
+
+data "neon_projects" "org_recoverable" {
+  query = {
+    org_id      = "org-example-001"
+    recoverable = true
+  }
+}
