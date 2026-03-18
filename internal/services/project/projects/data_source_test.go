@@ -89,3 +89,63 @@ data "neon_projects" "test" {
 		},
 	})
 }
+
+func TestProjectsDataSource_ReadWithOrgID(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects",
+		testutil.JSONResponder(200, projectsJSON),
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+data "neon_projects" "test" {
+  query = {
+    org_id = "org-test-001"
+  }
+}
+`),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testutil.CheckResourceAttr("data.neon_projects.test", "projects.#", "2"),
+					testutil.CheckResourceAttr("data.neon_projects.test", "projects.0.id", "project-001"),
+					testutil.CheckResourceAttr("data.neon_projects.test", "projects.1.id", "project-002"),
+				),
+			},
+		},
+	})
+}
+
+func TestProjectsDataSource_ReadWithRecoverable(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects",
+		testutil.JSONResponder(200, projectsJSON),
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+data "neon_projects" "test" {
+  query = {
+    recoverable = true
+  }
+}
+`),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testutil.CheckResourceAttr("data.neon_projects.test", "projects.#", "2"),
+					testutil.CheckResourceAttr("data.neon_projects.test", "projects.0.id", "project-001"),
+					testutil.CheckResourceAttr("data.neon_projects.test", "projects.1.id", "project-002"),
+				),
+			},
+		},
+	})
+}
