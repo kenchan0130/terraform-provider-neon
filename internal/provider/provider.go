@@ -34,6 +34,7 @@ import (
 	"github.com/kenchan0130/terraform-provider-neon/internal/services/branch/set_default_branch"
 	"github.com/kenchan0130/terraform-provider-neon/internal/services/branch/snapshot_schedule"
 	"github.com/kenchan0130/terraform-provider-neon/internal/services/endpoint/compute_endpoint"
+	"github.com/kenchan0130/terraform-provider-neon/internal/services/endpoint/compute_endpoints"
 	"github.com/kenchan0130/terraform-provider-neon/internal/services/organization/invitations"
 	"github.com/kenchan0130/terraform-provider-neon/internal/services/organization/member"
 	"github.com/kenchan0130/terraform-provider-neon/internal/services/organization/org_api_key"
@@ -244,5 +245,6 @@ func (p *NeonProvider) DataSources(_ context.Context) []func() datasource.DataSo
 		role_password.NewDataSource,
 		projects.NewDataSource,
 		branches.NewDataSource,
+		compute_endpoints.NewDataSource,
 	}
 }
