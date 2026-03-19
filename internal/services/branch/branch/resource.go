@@ -108,15 +108,19 @@ func branchSchemaConfigurableAttributes() map[string]schema.Attribute {
 		"parent_lsn": schema.StringAttribute{
 			Description: "A Log Sequence Number (LSN) on the parent branch.",
 			Optional:    true,
+			Computed:    true,
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.RequiresReplace(),
+				stringplanmodifier.UseStateForUnknown(),
 			},
 		},
 		"parent_timestamp": schema.StringAttribute{
 			Description: "A timestamp identifying a point in time on the parent branch (ISO 8601 format).",
 			Optional:    true,
+			Computed:    true,
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.RequiresReplace(),
+				stringplanmodifier.UseStateForUnknown(),
 			},
 		},
 		"protected": schema.BoolAttribute{
@@ -137,8 +141,10 @@ func branchSchemaConfigurableAttributes() map[string]schema.Attribute {
 		"init_source": schema.StringAttribute{
 			Description: "The source of initialization for the branch. Valid values are 'schema-only' and 'parent-data' (default).",
 			Optional:    true,
+			Computed:    true,
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.RequiresReplace(),
+				stringplanmodifier.UseStateForUnknown(),
 			},
 		},
 		"expires_at": schema.StringAttribute{

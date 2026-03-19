@@ -13,8 +13,12 @@ import (
 const branchJSON = `{
 	"id": "br-test-001",
 	"project_id": "test-project-id",
-	"name": "dev-branch",
 	"parent_id": "br-parent-001",
+	"parent_lsn": "0/1B482A0",
+	"parent_timestamp": "2025-01-01T00:00:00Z",
+	"name": "dev-branch",
+	"slug": "br-test-001",
+	"project_slug": "test-project-id",
 	"current_state": "ready",
 	"state_changed_at": "2025-01-01T00:00:00Z",
 	"creation_source": "console",
@@ -27,7 +31,8 @@ const branchJSON = `{
 	"written_data_bytes": 0,
 	"data_transfer_bytes": 0,
 	"created_at": "2025-01-01T00:00:00Z",
-	"updated_at": "2025-01-01T00:00:00Z"
+	"updated_at": "2025-01-01T00:00:00Z",
+	"init_source": "parent-data"
 }`
 
 func setupBranchMocks(transport *httpmock.MockTransport) {
@@ -75,6 +80,9 @@ resource "neon_branch" "test" {
 					testutil.CheckResourceAttr("neon_branch.test", "project_id", "test-project-id"),
 					testutil.CheckResourceAttr("neon_branch.test", "name", "dev-branch"),
 					testutil.CheckResourceAttr("neon_branch.test", "parent_id", "br-parent-001"),
+					testutil.CheckResourceAttr("neon_branch.test", "parent_lsn", "0/1B482A0"),
+					testutil.CheckResourceAttr("neon_branch.test", "parent_timestamp", "2025-01-01T00:00:00Z"),
+					testutil.CheckResourceAttr("neon_branch.test", "init_source", "parent-data"),
 				),
 			},
 		},
@@ -99,11 +107,10 @@ resource "neon_branch" "test" {
 `),
 			},
 			{
-				ResourceName:            "neon_branch.test",
-				ImportState:             true,
-				ImportStateId:           "test-project-id/br-test-001",
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"parent_lsn", "parent_timestamp"},
+				ResourceName:      "neon_branch.test",
+				ImportState:       true,
+				ImportStateId:     "test-project-id/br-test-001",
+				ImportStateVerify: true,
 			},
 		},
 	})
