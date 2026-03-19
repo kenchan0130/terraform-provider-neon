@@ -1,6 +1,7 @@
 package neon_auth_oauth_provider_test
 
 import (
+	"encoding/json"
 	"net/http"
 	"regexp"
 	"testing"
@@ -20,7 +21,24 @@ const oauthProviderJSON = `{
 func setupOauthProviderMocks(transport *httpmock.MockTransport) {
 	transport.RegisterResponder(http.MethodPost,
 		"https://neon.example.com/api/v2/projects/test-project-id/branches/br-test-001/auth/oauth_providers",
-		testutil.JSONResponder(200, oauthProviderJSON),
+		func(req *http.Request) (*http.Response, error) {
+			var body struct {
+				ClientSecret string `json:"client_secret"`
+			}
+			if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
+				resp := httpmock.NewStringResponse(400, `{"message":"invalid request"}`)
+				resp.Header.Set("Content-Type", "application/json")
+				return resp, nil
+			}
+			if body.ClientSecret == "" {
+				resp := httpmock.NewStringResponse(400, `{"message":"client_secret: cannot be blank."}`)
+				resp.Header.Set("Content-Type", "application/json")
+				return resp, nil
+			}
+			resp := httpmock.NewStringResponse(200, oauthProviderJSON)
+			resp.Header.Set("Content-Type", "application/json")
+			return resp, nil
+		},
 	)
 
 	transport.RegisterResponder(http.MethodGet,
