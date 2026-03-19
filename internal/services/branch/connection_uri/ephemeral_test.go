@@ -97,6 +97,22 @@ func TestConnectionURIEphemeral_Open(t *testing.T) {
 	if resp.Diagnostics.HasError() {
 		t.Fatalf("unexpected error: %s", resp.Diagnostics.Errors())
 	}
+
+	var values map[string]tftypes.Value
+	if err := resp.Result.Raw.As(&values); err != nil {
+		t.Fatalf("failed to unmarshal result: %v", err)
+	}
+
+	var uri string
+	if err := values["uri"].As(&uri); err != nil {
+		t.Fatalf("failed to get uri value: %v", err)
+	}
+	if uri == "" {
+		t.Fatal("expected uri to be non-empty, but it was empty")
+	}
+	if uri != "postgres://user:pass@host/dbname" {
+		t.Fatalf("expected uri to be 'postgres://user:pass@host/dbname', got '%s'", uri)
+	}
 }
 
 func TestConnectionURIEphemeral_APIError(t *testing.T) {
