@@ -117,8 +117,10 @@ func branchSchemaConfigurableAttributes() map[string]schema.Attribute {
 		"parent_timestamp": schema.StringAttribute{
 			Description: "A timestamp identifying a point in time on the parent branch (ISO 8601 format).",
 			Optional:    true,
+			Computed:    true,
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.RequiresReplace(),
+				stringplanmodifier.UseStateForUnknown(),
 			},
 		},
 		"protected": schema.BoolAttribute{
