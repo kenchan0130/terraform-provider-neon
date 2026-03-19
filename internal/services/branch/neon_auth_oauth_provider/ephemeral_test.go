@@ -96,6 +96,35 @@ func TestNeonAuthOauthProviderEphemeral_Open(t *testing.T) {
 	if resp.Diagnostics.HasError() {
 		t.Fatalf("unexpected error: %s", resp.Diagnostics.Errors())
 	}
+
+	var values map[string]tftypes.Value
+	if err := resp.Result.Raw.As(&values); err != nil {
+		t.Fatalf("failed to unmarshal result: %v", err)
+	}
+
+	var providerType string
+	if err := values["type"].As(&providerType); err != nil {
+		t.Fatalf("failed to get type value: %v", err)
+	}
+	if providerType != "standard" {
+		t.Fatalf("expected type to be 'standard', got '%s'", providerType)
+	}
+
+	var clientID string
+	if err := values["client_id"].As(&clientID); err != nil {
+		t.Fatalf("failed to get client_id value: %v", err)
+	}
+	if clientID != "my-client-id" {
+		t.Fatalf("expected client_id to be 'my-client-id', got '%s'", clientID)
+	}
+
+	var clientSecret string
+	if err := values["client_secret"].As(&clientSecret); err != nil {
+		t.Fatalf("failed to get client_secret value: %v", err)
+	}
+	if clientSecret != "my-client-secret" {
+		t.Fatalf("expected client_secret to be 'my-client-secret', got '%s'", clientSecret)
+	}
 }
 
 func TestNeonAuthOauthProviderEphemeral_NotFound(t *testing.T) {
