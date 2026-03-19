@@ -107,10 +107,10 @@ resource "neon_branch" "test" {
 `),
 			},
 			{
-				ResourceName:            "neon_branch.test",
-				ImportState:             true,
-				ImportStateId:           "test-project-id/br-test-001",
-				ImportStateVerify:       true,
+				ResourceName:      "neon_branch.test",
+				ImportState:       true,
+				ImportStateId:     "test-project-id/br-test-001",
+				ImportStateVerify: true,
 			},
 		},
 	})
