@@ -131,6 +131,14 @@ func (r *neonAuthOauthProviderResource) Create(ctx context.Context, req resource
 		return
 	}
 
+	// Write-only attributes are not available in the plan; read them from the config.
+	var config neonAuthOauthProviderResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	applyWriteOnlyAttributes(&data, &config)
+
 	createReq := &neon.NeonAuthAddOAuthProviderRequest{
 		ID: neon.NeonAuthOauthProviderId(data.Type.ValueString()),
 	}
@@ -187,6 +195,14 @@ func (r *neonAuthOauthProviderResource) Update(ctx context.Context, req resource
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	// Write-only attributes are not available in the plan; read them from the config.
+	var config neonAuthOauthProviderResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	applyWriteOnlyAttributes(&plan, &config)
 
 	var state neonAuthOauthProviderResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
@@ -247,6 +263,12 @@ func (r *neonAuthOauthProviderResource) ImportState(ctx context.Context, req res
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("project_id"), parts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("branch_id"), parts[1])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), parts[2])...)
+}
+
+// applyWriteOnlyAttributes copies write-only attribute values from config to data.
+// Write-only attributes are not available in the plan; they must be read from the config.
+func applyWriteOnlyAttributes(data, config *neonAuthOauthProviderResourceModel) {
+	data.ClientSecretWo = config.ClientSecretWo
 }
 
 // resolveClientSecret returns the client secret value from either client_secret or client_secret_wo.
