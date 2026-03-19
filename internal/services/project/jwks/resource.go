@@ -95,9 +95,11 @@ func (r *jwksResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			"role_names": schema.ListAttribute{
 				Description: "The roles the JWKS should be mapped to. By default, the JWKS is mapped to the authenticator, authenticated and anonymous roles.",
 				Optional:    true,
+				Computed:    true,
 				ElementType: types.StringType,
 				PlanModifiers: []planmodifier.List{
 					listplanmodifier.RequiresReplace(),
+					listplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"created_at": schema.StringAttribute{

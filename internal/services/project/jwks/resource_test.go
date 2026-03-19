@@ -17,7 +17,7 @@ const jwksJSON = `{
 	"provider_name": "Clerk",
 	"branch_id": "br-test-001",
 	"jwt_audience": "neon",
-	"role_names": [],
+	"role_names": ["authenticator", "authenticated", "anonymous"],
 	"created_at": "2025-01-01T00:00:00Z",
 	"updated_at": "2025-01-01T00:00:00Z"
 }`
@@ -68,6 +68,10 @@ resource "neon_project_jwks" "test" {
 					testutil.CheckResourceAttr("neon_project_jwks.test", "provider_name", "Clerk"),
 					testutil.CheckResourceAttr("neon_project_jwks.test", "branch_id", "br-test-001"),
 					testutil.CheckResourceAttr("neon_project_jwks.test", "jwt_audience", "neon"),
+					testutil.CheckResourceAttr("neon_project_jwks.test", "role_names.#", "3"),
+					testutil.CheckResourceAttr("neon_project_jwks.test", "role_names.0", "authenticator"),
+					testutil.CheckResourceAttr("neon_project_jwks.test", "role_names.1", "authenticated"),
+					testutil.CheckResourceAttr("neon_project_jwks.test", "role_names.2", "anonymous"),
 				),
 			},
 		},

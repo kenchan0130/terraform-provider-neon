@@ -15,6 +15,7 @@ const roleJSON = `{
 	"name": "myrole",
 	"password": "generated-password-123",
 	"protected": false,
+	"authentication_method": "password",
 	"created_at": "2025-01-01T00:00:00Z",
 	"updated_at": "2025-01-01T00:00:00Z"
 }`
@@ -56,6 +57,8 @@ resource "neon_role" "test" {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testutil.CheckResourceAttr("neon_role.test", "name", "myrole"),
 					testutil.CheckResourceAttr("neon_role.test", "branch_id", "br-test-001"),
+					testutil.CheckResourceAttr("neon_role.test", "protected", "false"),
+					testutil.CheckResourceAttr("neon_role.test", "authentication_method", "password"),
 				),
 			},
 		},
