@@ -826,7 +826,7 @@ func (UnimplementedHandler) GetProject(ctx context.Context, params GetProjectPar
 //
 // Analyzes the database for security and performance issues.
 // Returns a list of issues categorized by severity (ERROR, WARN, INFO).
-// Requires read access to the project.
+// Requires read access to the project and Data API enabled.
 //
 // GET /projects/{project_id}/advisors
 func (UnimplementedHandler) GetProjectAdvisorSecurityIssues(ctx context.Context, params GetProjectAdvisorSecurityIssuesParams) (r *GetProjectAdvisorSecurityIssuesOK, _ error) {
