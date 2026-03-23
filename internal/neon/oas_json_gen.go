@@ -9506,7 +9506,7 @@ func (s *CurrentUserInfoResponse) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("max_autoscaling_limit")
-		s.MaxAutoscalingLimit.Encode(e)
+		e.Float64(s.MaxAutoscalingLimit)
 	}
 	{
 		if s.ComputeSecondsLimit.Set {
@@ -9685,7 +9685,9 @@ func (s *CurrentUserInfoResponse) Decode(d *jx.Decoder) error {
 		case "max_autoscaling_limit":
 			requiredBitSet[1] |= 1 << 3
 			if err := func() error {
-				if err := s.MaxAutoscalingLimit.Decode(d); err != nil {
+				v, err := d.Float64()
+				s.MaxAutoscalingLimit = float64(v)
+				if err != nil {
 					return err
 				}
 				return nil

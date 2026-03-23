@@ -7856,9 +7856,7 @@ func unpackGetConsumptionHistoryPerProjectV2Params(packed middleware.Parameters)
 			Name: "metrics",
 			In:   "query",
 		}
-		if v, ok := packed[key]; ok {
-			params.Metrics = v.(ConsumptionHistoryQueryMetrics)
-		}
+		params.Metrics = packed[key].(ConsumptionHistoryQueryMetrics)
 	}
 	return params
 }
@@ -8278,6 +8276,8 @@ func decodeGetConsumptionHistoryPerProjectV2Params(args [0]string, argsEscaped b
 			}); err != nil {
 				return err
 			}
+		} else {
+			return err
 		}
 		return nil
 	}(); err != nil {

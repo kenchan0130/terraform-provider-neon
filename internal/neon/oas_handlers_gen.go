@@ -17271,7 +17271,7 @@ func (s *Server) handleGetProjectRequest(args [1]string, argsEscaped bool, w htt
 //
 // Analyzes the database for security and performance issues.
 // Returns a list of issues categorized by severity (ERROR, WARN, INFO).
-// Requires read access to the project.
+// Requires read access to the project and Data API enabled.
 //
 // GET /projects/{project_id}/advisors
 func (s *Server) handleGetProjectAdvisorSecurityIssuesRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {

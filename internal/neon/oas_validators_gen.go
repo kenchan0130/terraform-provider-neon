@@ -2328,8 +2328,8 @@ func (s *CurrentUserInfoResponse) Validate() error {
 		})
 	}
 	if err := func() error {
-		if err := s.MaxAutoscalingLimit.Validate(); err != nil {
-			return err
+		if err := (validate.Float{}).Validate(float64(s.MaxAutoscalingLimit)); err != nil {
+			return errors.Wrap(err, "float")
 		}
 		return nil
 	}(); err != nil {
