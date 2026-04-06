@@ -2328,8 +2328,8 @@ func (s *CurrentUserInfoResponse) Validate() error {
 		})
 	}
 	if err := func() error {
-		if err := s.MaxAutoscalingLimit.Validate(); err != nil {
-			return err
+		if err := (validate.Float{}).Validate(float64(s.MaxAutoscalingLimit)); err != nil {
+			return errors.Wrap(err, "float")
 		}
 		return nil
 	}(); err != nil {
@@ -5554,6 +5554,10 @@ func (s NeonAuthWebhookConfigEnabledEventsItem) Validate() error {
 	case "send.otp":
 		return nil
 	case "send.magic_link":
+		return nil
+	case "organization.invitation.created":
+		return nil
+	case "organization.invitation.accepted":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)

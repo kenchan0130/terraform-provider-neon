@@ -580,9 +580,11 @@ func (UnimplementedHandler) FinalizeRestoreBranch(ctx context.Context, req OptFi
 // GetActiveRegions implements getActiveRegions operation.
 //
 // Lists supported Neon regions.
+// **Note:** Not all regions are available to all organizations. Pass the `org_id`
+// parameter to get an accurate list of regions available to your organization.
 //
 // GET /regions
-func (UnimplementedHandler) GetActiveRegions(ctx context.Context) (r *ActiveRegionsResponse, _ error) {
+func (UnimplementedHandler) GetActiveRegions(ctx context.Context, params GetActiveRegionsParams) (r *ActiveRegionsResponse, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -637,6 +639,9 @@ func (UnimplementedHandler) GetConnectionURI(ctx context.Context, params GetConn
 // Retrieves consumption metrics for Scale and Enterprise plan accounts, and for legacy Scale,
 // Business, and Enterprise plan accounts.
 // Consumption history begins at the time the account was upgraded to a supported plan.
+// **Deprecated**: This endpoint will be removed on June 1, 2026.
+//
+// Deprecated: schema marks this operation as deprecated.
 //
 // GET /consumption_history/account
 func (UnimplementedHandler) GetConsumptionHistoryPerAccount(ctx context.Context, params GetConsumptionHistoryPerAccountParams) (r GetConsumptionHistoryPerAccountRes, _ error) {
@@ -826,7 +831,7 @@ func (UnimplementedHandler) GetProject(ctx context.Context, params GetProjectPar
 //
 // Analyzes the database for security and performance issues.
 // Returns a list of issues categorized by severity (ERROR, WARN, INFO).
-// Requires read access to the project.
+// Requires read access to the project and Data API enabled.
 //
 // GET /projects/{project_id}/advisors
 func (UnimplementedHandler) GetProjectAdvisorSecurityIssues(ctx context.Context, params GetProjectAdvisorSecurityIssuesParams) (r *GetProjectAdvisorSecurityIssuesOK, _ error) {

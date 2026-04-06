@@ -460,9 +460,11 @@ type Invoker interface {
 	// GetActiveRegions invokes getActiveRegions operation.
 	//
 	// Lists supported Neon regions.
+	// **Note:** Not all regions are available to all organizations. Pass the `org_id`
+	// parameter to get an accurate list of regions available to your organization.
 	//
 	// GET /regions
-	GetActiveRegions(ctx context.Context) (*ActiveRegionsResponse, error)
+	GetActiveRegions(ctx context.Context, params GetActiveRegionsParams) (*ActiveRegionsResponse, error)
 	// GetAnonymizedBranchStatus invokes getAnonymizedBranchStatus operation.
 	//
 	// Retrieves the current status of an anonymized branch, including its state and progress information.
@@ -502,6 +504,9 @@ type Invoker interface {
 	// Retrieves consumption metrics for Scale and Enterprise plan accounts, and for legacy Scale,
 	// Business, and Enterprise plan accounts.
 	// Consumption history begins at the time the account was upgraded to a supported plan.
+	// **Deprecated**: This endpoint will be removed on June 1, 2026.
+	//
+	// Deprecated: schema marks this operation as deprecated.
 	//
 	// GET /consumption_history/account
 	GetConsumptionHistoryPerAccount(ctx context.Context, params GetConsumptionHistoryPerAccountParams) (GetConsumptionHistoryPerAccountRes, error)
@@ -634,7 +639,7 @@ type Invoker interface {
 	//
 	// Analyzes the database for security and performance issues.
 	// Returns a list of issues categorized by severity (ERROR, WARN, INFO).
-	// Requires read access to the project.
+	// Requires read access to the project and Data API enabled.
 	//
 	// GET /projects/{project_id}/advisors
 	GetProjectAdvisorSecurityIssues(ctx context.Context, params GetProjectAdvisorSecurityIssuesParams) (*GetProjectAdvisorSecurityIssuesOK, error)
@@ -8920,14 +8925,16 @@ func (c *Client) sendFinalizeRestoreBranch(ctx context.Context, request OptFinal
 // GetActiveRegions invokes getActiveRegions operation.
 //
 // Lists supported Neon regions.
+// **Note:** Not all regions are available to all organizations. Pass the `org_id`
+// parameter to get an accurate list of regions available to your organization.
 //
 // GET /regions
-func (c *Client) GetActiveRegions(ctx context.Context) (*ActiveRegionsResponse, error) {
-	res, err := c.sendGetActiveRegions(ctx)
+func (c *Client) GetActiveRegions(ctx context.Context, params GetActiveRegionsParams) (*ActiveRegionsResponse, error) {
+	res, err := c.sendGetActiveRegions(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendGetActiveRegions(ctx context.Context) (res *ActiveRegionsResponse, err error) {
+func (c *Client) sendGetActiveRegions(ctx context.Context, params GetActiveRegionsParams) (res *ActiveRegionsResponse, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getActiveRegions"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -8967,6 +8974,27 @@ func (c *Client) sendGetActiveRegions(ctx context.Context) (res *ActiveRegionsRe
 	var pathParts [1]string
 	pathParts[0] = "/regions"
 	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "org_id" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "org_id",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.OrgID.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
 
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "GET", u)
@@ -9746,6 +9774,9 @@ func (c *Client) sendGetConnectionURI(ctx context.Context, params GetConnectionU
 // Retrieves consumption metrics for Scale and Enterprise plan accounts, and for legacy Scale,
 // Business, and Enterprise plan accounts.
 // Consumption history begins at the time the account was upgraded to a supported plan.
+// **Deprecated**: This endpoint will be removed on June 1, 2026.
+//
+// Deprecated: schema marks this operation as deprecated.
 //
 // GET /consumption_history/account
 func (c *Client) GetConsumptionHistoryPerAccount(ctx context.Context, params GetConsumptionHistoryPerAccountParams) (GetConsumptionHistoryPerAccountRes, error) {
@@ -13204,7 +13235,7 @@ func (c *Client) sendGetProject(ctx context.Context, params GetProjectParams) (r
 //
 // Analyzes the database for security and performance issues.
 // Returns a list of issues categorized by severity (ERROR, WARN, INFO).
-// Requires read access to the project.
+// Requires read access to the project and Data API enabled.
 //
 // GET /projects/{project_id}/advisors
 func (c *Client) GetProjectAdvisorSecurityIssues(ctx context.Context, params GetProjectAdvisorSecurityIssuesParams) (*GetProjectAdvisorSecurityIssuesOK, error) {

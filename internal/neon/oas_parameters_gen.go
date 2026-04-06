@@ -6092,6 +6092,99 @@ func decodeFinalizeRestoreBranchParams(args [2]string, argsEscaped bool, r *http
 	return params, nil
 }
 
+// GetActiveRegionsParams is parameters of getActiveRegions operation.
+type GetActiveRegionsParams struct {
+	// Organization ID. When provided, returns only regions available to this organization.
+	// Recommended for accurate region availability.
+	OrgID OptString `json:",omitempty,omitzero"`
+}
+
+func unpackGetActiveRegionsParams(packed middleware.Parameters) (params GetActiveRegionsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "org_id",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.OrgID = v.(OptString)
+		}
+	}
+	return params
+}
+
+func decodeGetActiveRegionsParams(args [0]string, argsEscaped bool, r *http.Request) (params GetActiveRegionsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: org_id.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "org_id",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotOrgIDVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotOrgIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.OrgID.SetTo(paramsDotOrgIDVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.OrgID.Get(); ok {
+					if err := func() error {
+						if err := (validate.String{
+							MinLength:     0,
+							MinLengthSet:  false,
+							MaxLength:     0,
+							MaxLengthSet:  false,
+							Email:         false,
+							Hostname:      false,
+							Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+							MinNumeric:    0,
+							MinNumericSet: false,
+							MaxNumeric:    0,
+							MaxNumericSet: false,
+						}).Validate(string(value)); err != nil {
+							return errors.Wrap(err, "string")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "org_id",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetAnonymizedBranchStatusParams is parameters of getAnonymizedBranchStatus operation.
 type GetAnonymizedBranchStatusParams struct {
 	// The Neon project ID.
@@ -7856,9 +7949,7 @@ func unpackGetConsumptionHistoryPerProjectV2Params(packed middleware.Parameters)
 			Name: "metrics",
 			In:   "query",
 		}
-		if v, ok := packed[key]; ok {
-			params.Metrics = v.(ConsumptionHistoryQueryMetrics)
-		}
+		params.Metrics = packed[key].(ConsumptionHistoryQueryMetrics)
 	}
 	return params
 }
@@ -8278,6 +8369,8 @@ func decodeGetConsumptionHistoryPerProjectV2Params(args [0]string, argsEscaped b
 			}); err != nil {
 				return err
 			}
+		} else {
+			return err
 		}
 		return nil
 	}(); err != nil {

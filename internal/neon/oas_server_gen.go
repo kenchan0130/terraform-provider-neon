@@ -440,9 +440,11 @@ type Handler interface {
 	// GetActiveRegions implements getActiveRegions operation.
 	//
 	// Lists supported Neon regions.
+	// **Note:** Not all regions are available to all organizations. Pass the `org_id`
+	// parameter to get an accurate list of regions available to your organization.
 	//
 	// GET /regions
-	GetActiveRegions(ctx context.Context) (*ActiveRegionsResponse, error)
+	GetActiveRegions(ctx context.Context, params GetActiveRegionsParams) (*ActiveRegionsResponse, error)
 	// GetAnonymizedBranchStatus implements getAnonymizedBranchStatus operation.
 	//
 	// Retrieves the current status of an anonymized branch, including its state and progress information.
@@ -482,6 +484,9 @@ type Handler interface {
 	// Retrieves consumption metrics for Scale and Enterprise plan accounts, and for legacy Scale,
 	// Business, and Enterprise plan accounts.
 	// Consumption history begins at the time the account was upgraded to a supported plan.
+	// **Deprecated**: This endpoint will be removed on June 1, 2026.
+	//
+	// Deprecated: schema marks this operation as deprecated.
 	//
 	// GET /consumption_history/account
 	GetConsumptionHistoryPerAccount(ctx context.Context, params GetConsumptionHistoryPerAccountParams) (GetConsumptionHistoryPerAccountRes, error)
@@ -614,7 +619,7 @@ type Handler interface {
 	//
 	// Analyzes the database for security and performance issues.
 	// Returns a list of issues categorized by severity (ERROR, WARN, INFO).
-	// Requires read access to the project.
+	// Requires read access to the project and Data API enabled.
 	//
 	// GET /projects/{project_id}/advisors
 	GetProjectAdvisorSecurityIssues(ctx context.Context, params GetProjectAdvisorSecurityIssuesParams) (*GetProjectAdvisorSecurityIssuesOK, error)
