@@ -3952,14 +3952,16 @@ type CurrentUserInfoResponse struct {
 	// DEPRECATED. Use `email` field.
 	//
 	// Deprecated: schema marks this property as deprecated.
-	Login               string      `json:"login"`
-	Name                string      `json:"name"`
-	LastName            string      `json:"last_name"`
-	ProjectsLimit       int64       `json:"projects_limit"`
-	BranchesLimit       int64       `json:"branches_limit"`
-	MaxAutoscalingLimit ComputeUnit `json:"max_autoscaling_limit"`
-	ComputeSecondsLimit OptInt64    `json:"compute_seconds_limit"`
-	Plan                string      `json:"plan"`
+	Login         string `json:"login"`
+	Name          string `json:"name"`
+	LastName      string `json:"last_name"`
+	ProjectsLimit int64  `json:"projects_limit"`
+	BranchesLimit int64  `json:"branches_limit"`
+	// The maximum autoscaling limit in Compute Units.
+	// A value of 0 indicates no limit is configured.
+	MaxAutoscalingLimit float64  `json:"max_autoscaling_limit"`
+	ComputeSecondsLimit OptInt64 `json:"compute_seconds_limit"`
+	Plan                string   `json:"plan"`
 }
 
 // GetActiveSecondsLimit returns the value of ActiveSecondsLimit.
@@ -4018,7 +4020,7 @@ func (s *CurrentUserInfoResponse) GetBranchesLimit() int64 {
 }
 
 // GetMaxAutoscalingLimit returns the value of MaxAutoscalingLimit.
-func (s *CurrentUserInfoResponse) GetMaxAutoscalingLimit() ComputeUnit {
+func (s *CurrentUserInfoResponse) GetMaxAutoscalingLimit() float64 {
 	return s.MaxAutoscalingLimit
 }
 
@@ -4088,7 +4090,7 @@ func (s *CurrentUserInfoResponse) SetBranchesLimit(val int64) {
 }
 
 // SetMaxAutoscalingLimit sets the value of MaxAutoscalingLimit.
-func (s *CurrentUserInfoResponse) SetMaxAutoscalingLimit(val ComputeUnit) {
+func (s *CurrentUserInfoResponse) SetMaxAutoscalingLimit(val float64) {
 	s.MaxAutoscalingLimit = val
 }
 
@@ -8600,10 +8602,12 @@ func (s *NeonAuthWebhookConfig) SetTimeoutSeconds(val OptInt) {
 type NeonAuthWebhookConfigEnabledEventsItem string
 
 const (
-	NeonAuthWebhookConfigEnabledEventsItemUserBeforeCreate NeonAuthWebhookConfigEnabledEventsItem = "user.before_create"
-	NeonAuthWebhookConfigEnabledEventsItemUserCreated      NeonAuthWebhookConfigEnabledEventsItem = "user.created"
-	NeonAuthWebhookConfigEnabledEventsItemSendOtp          NeonAuthWebhookConfigEnabledEventsItem = "send.otp"
-	NeonAuthWebhookConfigEnabledEventsItemSendMagicLink    NeonAuthWebhookConfigEnabledEventsItem = "send.magic_link"
+	NeonAuthWebhookConfigEnabledEventsItemUserBeforeCreate               NeonAuthWebhookConfigEnabledEventsItem = "user.before_create"
+	NeonAuthWebhookConfigEnabledEventsItemUserCreated                    NeonAuthWebhookConfigEnabledEventsItem = "user.created"
+	NeonAuthWebhookConfigEnabledEventsItemSendOtp                        NeonAuthWebhookConfigEnabledEventsItem = "send.otp"
+	NeonAuthWebhookConfigEnabledEventsItemSendMagicLink                  NeonAuthWebhookConfigEnabledEventsItem = "send.magic_link"
+	NeonAuthWebhookConfigEnabledEventsItemOrganizationInvitationCreated  NeonAuthWebhookConfigEnabledEventsItem = "organization.invitation.created"
+	NeonAuthWebhookConfigEnabledEventsItemOrganizationInvitationAccepted NeonAuthWebhookConfigEnabledEventsItem = "organization.invitation.accepted"
 )
 
 // AllValues returns all NeonAuthWebhookConfigEnabledEventsItem values.
@@ -8613,6 +8617,8 @@ func (NeonAuthWebhookConfigEnabledEventsItem) AllValues() []NeonAuthWebhookConfi
 		NeonAuthWebhookConfigEnabledEventsItemUserCreated,
 		NeonAuthWebhookConfigEnabledEventsItemSendOtp,
 		NeonAuthWebhookConfigEnabledEventsItemSendMagicLink,
+		NeonAuthWebhookConfigEnabledEventsItemOrganizationInvitationCreated,
+		NeonAuthWebhookConfigEnabledEventsItemOrganizationInvitationAccepted,
 	}
 }
 
@@ -8626,6 +8632,10 @@ func (s NeonAuthWebhookConfigEnabledEventsItem) MarshalText() ([]byte, error) {
 	case NeonAuthWebhookConfigEnabledEventsItemSendOtp:
 		return []byte(s), nil
 	case NeonAuthWebhookConfigEnabledEventsItemSendMagicLink:
+		return []byte(s), nil
+	case NeonAuthWebhookConfigEnabledEventsItemOrganizationInvitationCreated:
+		return []byte(s), nil
+	case NeonAuthWebhookConfigEnabledEventsItemOrganizationInvitationAccepted:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -8646,6 +8656,12 @@ func (s *NeonAuthWebhookConfigEnabledEventsItem) UnmarshalText(data []byte) erro
 		return nil
 	case NeonAuthWebhookConfigEnabledEventsItemSendMagicLink:
 		*s = NeonAuthWebhookConfigEnabledEventsItemSendMagicLink
+		return nil
+	case NeonAuthWebhookConfigEnabledEventsItemOrganizationInvitationCreated:
+		*s = NeonAuthWebhookConfigEnabledEventsItemOrganizationInvitationCreated
+		return nil
+	case NeonAuthWebhookConfigEnabledEventsItemOrganizationInvitationAccepted:
+		*s = NeonAuthWebhookConfigEnabledEventsItemOrganizationInvitationAccepted
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)

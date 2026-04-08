@@ -11429,6 +11429,8 @@ func (s *Server) handleFinalizeRestoreBranchRequest(args [2]string, argsEscaped 
 // handleGetActiveRegionsRequest handles getActiveRegions operation.
 //
 // Lists supported Neon regions.
+// **Note:** Not all regions are available to all organizations. Pass the `org_id`
+// parameter to get an accurate list of regions available to your organization.
 //
 // GET /regions
 func (s *Server) handleGetActiveRegionsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -11586,6 +11588,16 @@ func (s *Server) handleGetActiveRegionsRequest(args [0]string, argsEscaped bool,
 			return
 		}
 	}
+	params, err := decodeGetActiveRegionsParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
 
 	var rawBody []byte
 
@@ -11598,13 +11610,18 @@ func (s *Server) handleGetActiveRegionsRequest(args [0]string, argsEscaped bool,
 			OperationID:      "getActiveRegions",
 			Body:             nil,
 			RawBody:          rawBody,
-			Params:           middleware.Parameters{},
-			Raw:              r,
+			Params: middleware.Parameters{
+				{
+					Name: "org_id",
+					In:   "query",
+				}: params.OrgID,
+			},
+			Raw: r,
 		}
 
 		type (
 			Request  = struct{}
-			Params   = struct{}
+			Params   = GetActiveRegionsParams
 			Response = *ActiveRegionsResponse
 		)
 		response, err = middleware.HookMiddleware[
@@ -11614,14 +11631,14 @@ func (s *Server) handleGetActiveRegionsRequest(args [0]string, argsEscaped bool,
 		](
 			m,
 			mreq,
-			nil,
+			unpackGetActiveRegionsParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.GetActiveRegions(ctx)
+				response, err = s.h.GetActiveRegions(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.GetActiveRegions(ctx)
+		response, err = s.h.GetActiveRegions(ctx, params)
 	}
 	if err != nil {
 		if errRes, ok := errors.Into[*GeneralErrorStatusCode](err); ok {
@@ -12625,6 +12642,9 @@ func (s *Server) handleGetConnectionURIRequest(args [1]string, argsEscaped bool,
 // Retrieves consumption metrics for Scale and Enterprise plan accounts, and for legacy Scale,
 // Business, and Enterprise plan accounts.
 // Consumption history begins at the time the account was upgraded to a supported plan.
+// **Deprecated**: This endpoint will be removed on June 1, 2026.
+//
+// Deprecated: schema marks this operation as deprecated.
 //
 // GET /consumption_history/account
 func (s *Server) handleGetConsumptionHistoryPerAccountRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -17271,7 +17291,7 @@ func (s *Server) handleGetProjectRequest(args [1]string, argsEscaped bool, w htt
 //
 // Analyzes the database for security and performance issues.
 // Returns a list of issues categorized by severity (ERROR, WARN, INFO).
-// Requires read access to the project.
+// Requires read access to the project and Data API enabled.
 //
 // GET /projects/{project_id}/advisors
 func (s *Server) handleGetProjectAdvisorSecurityIssuesRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {

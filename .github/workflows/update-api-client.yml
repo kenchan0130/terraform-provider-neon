@@ -38,6 +38,7 @@ jobs:
         if: steps.changes.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         with:
+          signoff: true
           commit-message: "Update auto-generated API client from OpenAPI spec"
           branch: automated/update-api-client
           title: "Update auto-generated API client from OpenAPI spec"
