@@ -94,7 +94,7 @@ func (d *activeRegionsDataSource) Read(ctx context.Context, req datasource.ReadR
 		return
 	}
 
-	result, err := d.client.GetActiveRegions(ctx)
+	result, err := d.client.GetActiveRegions(ctx, neon.GetActiveRegionsParams{})
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to read active regions", err.Error())
 		return
