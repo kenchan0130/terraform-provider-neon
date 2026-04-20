@@ -752,6 +752,16 @@ func (UnimplementedHandler) GetNeonAuthEmailServer(ctx context.Context, params G
 	return r, ht.ErrNotImplemented
 }
 
+// GetNeonAuthPhoneNumberPlugin implements getNeonAuthPhoneNumberPlugin operation.
+//
+// Returns the phone number plugin configuration for Neon Auth.
+// The phone number plugin enables phone-based OTP authentication.
+//
+// GET /projects/{project_id}/branches/{branch_id}/auth/plugins/phone_number
+func (UnimplementedHandler) GetNeonAuthPhoneNumberPlugin(ctx context.Context, params GetNeonAuthPhoneNumberPluginParams) (r *NeonAuthPhoneNumberConfig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetNeonAuthPluginConfigs implements getNeonAuthPluginConfigs operation.
 //
 // Returns all plugin configurations for Neon Auth in a single response.
@@ -1428,6 +1438,8 @@ func (UnimplementedHandler) TransferProjectsFromOrgToOrg(ctx context.Context, re
 // Transfers selected projects, identified by their IDs, from your personal account to a specified
 // organization.
 //
+// Deprecated: schema marks this operation as deprecated.
+//
 // POST /users/me/projects/transfer
 func (UnimplementedHandler) TransferProjectsFromUserToOrg(ctx context.Context, req *TransferProjectsToOrganizationRequest) (r TransferProjectsFromUserToOrgRes, _ error) {
 	return r, ht.ErrNotImplemented
@@ -1464,6 +1476,16 @@ func (UnimplementedHandler) UpdateNeonAuthAllowLocalhost(ctx context.Context, re
 	return r, ht.ErrNotImplemented
 }
 
+// UpdateNeonAuthConfig implements updateNeonAuthConfig operation.
+//
+// Updates the auth configuration for the branch.
+// Currently supports updating the application name used in auth emails.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/auth/config
+func (UnimplementedHandler) UpdateNeonAuthConfig(ctx context.Context, req *NeonAuthConfigUpdate, params UpdateNeonAuthConfigParams) (r *NeonAuthConfigResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // UpdateNeonAuthEmailAndPasswordConfig implements updateNeonAuthEmailAndPasswordConfig operation.
 //
 // Updates the email and password authentication configuration for Neon Auth.
@@ -1494,6 +1516,16 @@ func (UnimplementedHandler) UpdateNeonAuthEmailServer(ctx context.Context, req *
 	return r, ht.ErrNotImplemented
 }
 
+// UpdateNeonAuthMagicLinkPlugin implements updateNeonAuthMagicLinkPlugin operation.
+//
+// Updates the magic link plugin configuration for Neon Auth.
+// The magic link plugin enables passwordless authentication via email magic links.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/magic-link
+func (UnimplementedHandler) UpdateNeonAuthMagicLinkPlugin(ctx context.Context, req *NeonAuthMagicLinkConfigUpdate, params UpdateNeonAuthMagicLinkPluginParams) (r *NeonAuthMagicLinkConfig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // UpdateNeonAuthOauthProvider implements updateNeonAuthOauthProvider operation.
 //
 // DEPRECATED, use
@@ -1514,6 +1546,18 @@ func (UnimplementedHandler) UpdateNeonAuthOauthProvider(ctx context.Context, req
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/organization
 func (UnimplementedHandler) UpdateNeonAuthOrganizationPlugin(ctx context.Context, req *NeonAuthOrganizationConfigUpdate, params UpdateNeonAuthOrganizationPluginParams) (r *NeonAuthOrganizationConfig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateNeonAuthPhoneNumberPlugin implements updateNeonAuthPhoneNumberPlugin operation.
+//
+// Updates the phone number plugin configuration for Neon Auth.
+// The phone number plugin enables phone-based OTP authentication.
+// OTP codes are delivered via the `send.otp` webhook event with `delivery_preference: "sms"`.
+// A webhook must be configured with the `send.otp` event enabled for SMS delivery to work.
+//
+// PUT /projects/{project_id}/branches/{branch_id}/auth/plugins/phone_number
+func (UnimplementedHandler) UpdateNeonAuthPhoneNumberPlugin(ctx context.Context, req *NeonAuthPhoneNumberConfig, params UpdateNeonAuthPhoneNumberPluginParams) (r *NeonAuthPhoneNumberConfig, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

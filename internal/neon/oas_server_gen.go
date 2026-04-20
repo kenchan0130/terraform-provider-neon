@@ -564,6 +564,13 @@ type Handler interface {
 	//
 	// GET /projects/{project_id}/auth/email_server
 	GetNeonAuthEmailServer(ctx context.Context, params GetNeonAuthEmailServerParams) (*NeonAuthEmailServerConfig, error)
+	// GetNeonAuthPhoneNumberPlugin implements getNeonAuthPhoneNumberPlugin operation.
+	//
+	// Returns the phone number plugin configuration for Neon Auth.
+	// The phone number plugin enables phone-based OTP authentication.
+	//
+	// GET /projects/{project_id}/branches/{branch_id}/auth/plugins/phone_number
+	GetNeonAuthPhoneNumberPlugin(ctx context.Context, params GetNeonAuthPhoneNumberPluginParams) (*NeonAuthPhoneNumberConfig, error)
 	// GetNeonAuthPluginConfigs implements getNeonAuthPluginConfigs operation.
 	//
 	// Returns all plugin configurations for Neon Auth in a single response.
@@ -1063,6 +1070,8 @@ type Handler interface {
 	// Transfers selected projects, identified by their IDs, from your personal account to a specified
 	// organization.
 	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
 	// POST /users/me/projects/transfer
 	TransferProjectsFromUserToOrg(ctx context.Context, req *TransferProjectsToOrganizationRequest) (TransferProjectsFromUserToOrgRes, error)
 	// UpdateBranchNeonAuthOauthProvider implements updateBranchNeonAuthOauthProvider operation.
@@ -1087,6 +1096,13 @@ type Handler interface {
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/auth/allow_localhost
 	UpdateNeonAuthAllowLocalhost(ctx context.Context, req *UpdateNeonAuthAllowLocalhostRequest, params UpdateNeonAuthAllowLocalhostParams) (*NeonAuthAllowLocalhostResponse, error)
+	// UpdateNeonAuthConfig implements updateNeonAuthConfig operation.
+	//
+	// Updates the auth configuration for the branch.
+	// Currently supports updating the application name used in auth emails.
+	//
+	// PATCH /projects/{project_id}/branches/{branch_id}/auth/config
+	UpdateNeonAuthConfig(ctx context.Context, req *NeonAuthConfigUpdate, params UpdateNeonAuthConfigParams) (*NeonAuthConfigResponse, error)
 	// UpdateNeonAuthEmailAndPasswordConfig implements updateNeonAuthEmailAndPasswordConfig operation.
 	//
 	// Updates the email and password authentication configuration for Neon Auth.
@@ -1108,6 +1124,13 @@ type Handler interface {
 	//
 	// PATCH /projects/{project_id}/auth/email_server
 	UpdateNeonAuthEmailServer(ctx context.Context, req *NeonAuthEmailServerConfig, params UpdateNeonAuthEmailServerParams) (*NeonAuthEmailServerConfig, error)
+	// UpdateNeonAuthMagicLinkPlugin implements updateNeonAuthMagicLinkPlugin operation.
+	//
+	// Updates the magic link plugin configuration for Neon Auth.
+	// The magic link plugin enables passwordless authentication via email magic links.
+	//
+	// PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/magic-link
+	UpdateNeonAuthMagicLinkPlugin(ctx context.Context, req *NeonAuthMagicLinkConfigUpdate, params UpdateNeonAuthMagicLinkPluginParams) (*NeonAuthMagicLinkConfig, error)
 	// UpdateNeonAuthOauthProvider implements updateNeonAuthOauthProvider operation.
 	//
 	// DEPRECATED, use
@@ -1125,6 +1148,15 @@ type Handler interface {
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/organization
 	UpdateNeonAuthOrganizationPlugin(ctx context.Context, req *NeonAuthOrganizationConfigUpdate, params UpdateNeonAuthOrganizationPluginParams) (*NeonAuthOrganizationConfig, error)
+	// UpdateNeonAuthPhoneNumberPlugin implements updateNeonAuthPhoneNumberPlugin operation.
+	//
+	// Updates the phone number plugin configuration for Neon Auth.
+	// The phone number plugin enables phone-based OTP authentication.
+	// OTP codes are delivered via the `send.otp` webhook event with `delivery_preference: "sms"`.
+	// A webhook must be configured with the `send.otp` event enabled for SMS delivery to work.
+	//
+	// PUT /projects/{project_id}/branches/{branch_id}/auth/plugins/phone_number
+	UpdateNeonAuthPhoneNumberPlugin(ctx context.Context, req *NeonAuthPhoneNumberConfig, params UpdateNeonAuthPhoneNumberPluginParams) (*NeonAuthPhoneNumberConfig, error)
 	// UpdateNeonAuthUserRole implements updateNeonAuthUserRole operation.
 	//
 	// Updates the role of an auth user for the specified project.
