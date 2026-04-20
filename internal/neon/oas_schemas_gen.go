@@ -1605,16 +1605,17 @@ func (s *BillingAccountState) UnmarshalText(data []byte) error {
 type BillingPaymentMethod string
 
 const (
-	BillingPaymentMethodUNKNOWN       BillingPaymentMethod = "UNKNOWN"
-	BillingPaymentMethodNone          BillingPaymentMethod = "none"
-	BillingPaymentMethodStripe        BillingPaymentMethod = "stripe"
-	BillingPaymentMethodDirectPayment BillingPaymentMethod = "direct_payment"
-	BillingPaymentMethodAWSMp         BillingPaymentMethod = "aws_mp"
-	BillingPaymentMethodAzureMp       BillingPaymentMethod = "azure_mp"
-	BillingPaymentMethodVercelMp      BillingPaymentMethod = "vercel_mp"
-	BillingPaymentMethodStaff         BillingPaymentMethod = "staff"
-	BillingPaymentMethodTrial         BillingPaymentMethod = "trial"
-	BillingPaymentMethodSponsorship   BillingPaymentMethod = "sponsorship"
+	BillingPaymentMethodUNKNOWN            BillingPaymentMethod = "UNKNOWN"
+	BillingPaymentMethodNone               BillingPaymentMethod = "none"
+	BillingPaymentMethodStripe             BillingPaymentMethod = "stripe"
+	BillingPaymentMethodDirectPayment      BillingPaymentMethod = "direct_payment"
+	BillingPaymentMethodAWSMp              BillingPaymentMethod = "aws_mp"
+	BillingPaymentMethodAzureMp            BillingPaymentMethod = "azure_mp"
+	BillingPaymentMethodVercelMp           BillingPaymentMethod = "vercel_mp"
+	BillingPaymentMethodStaff              BillingPaymentMethod = "staff"
+	BillingPaymentMethodTrial              BillingPaymentMethod = "trial"
+	BillingPaymentMethodSponsorship        BillingPaymentMethod = "sponsorship"
+	BillingPaymentMethodSharedPaymentToken BillingPaymentMethod = "shared_payment_token"
 )
 
 // AllValues returns all BillingPaymentMethod values.
@@ -1630,6 +1631,7 @@ func (BillingPaymentMethod) AllValues() []BillingPaymentMethod {
 		BillingPaymentMethodStaff,
 		BillingPaymentMethodTrial,
 		BillingPaymentMethodSponsorship,
+		BillingPaymentMethodSharedPaymentToken,
 	}
 }
 
@@ -1655,6 +1657,8 @@ func (s BillingPaymentMethod) MarshalText() ([]byte, error) {
 	case BillingPaymentMethodTrial:
 		return []byte(s), nil
 	case BillingPaymentMethodSponsorship:
+		return []byte(s), nil
+	case BillingPaymentMethodSharedPaymentToken:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -1693,6 +1697,9 @@ func (s *BillingPaymentMethod) UnmarshalText(data []byte) error {
 		return nil
 	case BillingPaymentMethodSponsorship:
 		*s = BillingPaymentMethodSponsorship
+		return nil
+	case BillingPaymentMethodSharedPaymentToken:
+		*s = BillingPaymentMethodSharedPaymentToken
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -7183,6 +7190,38 @@ func (s *NeonAuthAllowLocalhostResponse) SetAllowLocalhost(val bool) {
 	s.AllowLocalhost = val
 }
 
+// Ref: #/components/schemas/NeonAuthConfigResponse
+type NeonAuthConfigResponse struct {
+	// The application name used in auth emails and communications.
+	Name string `json:"name"`
+}
+
+// GetName returns the value of Name.
+func (s *NeonAuthConfigResponse) GetName() string {
+	return s.Name
+}
+
+// SetName sets the value of Name.
+func (s *NeonAuthConfigResponse) SetName(val string) {
+	s.Name = val
+}
+
+// Ref: #/components/schemas/NeonAuthConfigUpdate
+type NeonAuthConfigUpdate struct {
+	// The application name used in auth emails and communications.
+	Name string `json:"name"`
+}
+
+// GetName returns the value of Name.
+func (s *NeonAuthConfigUpdate) GetName() string {
+	return s.Name
+}
+
+// SetName sets the value of Name.
+func (s *NeonAuthConfigUpdate) SetName(val string) {
+	s.Name = val
+}
+
 // Ref: #/components/schemas/NeonAuthCreateAuthProviderSDKKeysRequest
 type NeonAuthCreateAuthProviderSDKKeysRequest struct {
 	ProjectID    string                        `json:"project_id"`
@@ -7781,6 +7820,8 @@ type NeonAuthIntegration struct {
 	TransferStatus        OptNeonAuthProviderProjectTransferStatus `json:"transfer_status"`
 	JwksURL               string                                   `json:"jwks_url"`
 	BaseURL               OptString                                `json:"base_url"`
+	// The application name used in auth emails and communications. Defaults to the Neon project name.
+	Name OptString `json:"name"`
 }
 
 // GetAuthProvider returns the value of AuthProvider.
@@ -7828,6 +7869,11 @@ func (s *NeonAuthIntegration) GetBaseURL() OptString {
 	return s.BaseURL
 }
 
+// GetName returns the value of Name.
+func (s *NeonAuthIntegration) GetName() OptString {
+	return s.Name
+}
+
 // SetAuthProvider sets the value of AuthProvider.
 func (s *NeonAuthIntegration) SetAuthProvider(val NeonAuthSupportedAuthProvider) {
 	s.AuthProvider = val
@@ -7871,6 +7917,91 @@ func (s *NeonAuthIntegration) SetJwksURL(val string) {
 // SetBaseURL sets the value of BaseURL.
 func (s *NeonAuthIntegration) SetBaseURL(val OptString) {
 	s.BaseURL = val
+}
+
+// SetName sets the value of Name.
+func (s *NeonAuthIntegration) SetName(val OptString) {
+	s.Name = val
+}
+
+// Ref: #/components/schemas/NeonAuthMagicLinkConfig
+type NeonAuthMagicLinkConfig struct {
+	// Whether the magic link plugin is enabled.
+	Enabled bool `json:"enabled"`
+	// Time in minutes before the magic link expires.
+	ExpiresIn int32 `json:"expires_in"`
+	// Whether to disable sign-up via magic link.
+	DisableSignUp bool `json:"disable_sign_up"`
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *NeonAuthMagicLinkConfig) GetEnabled() bool {
+	return s.Enabled
+}
+
+// GetExpiresIn returns the value of ExpiresIn.
+func (s *NeonAuthMagicLinkConfig) GetExpiresIn() int32 {
+	return s.ExpiresIn
+}
+
+// GetDisableSignUp returns the value of DisableSignUp.
+func (s *NeonAuthMagicLinkConfig) GetDisableSignUp() bool {
+	return s.DisableSignUp
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *NeonAuthMagicLinkConfig) SetEnabled(val bool) {
+	s.Enabled = val
+}
+
+// SetExpiresIn sets the value of ExpiresIn.
+func (s *NeonAuthMagicLinkConfig) SetExpiresIn(val int32) {
+	s.ExpiresIn = val
+}
+
+// SetDisableSignUp sets the value of DisableSignUp.
+func (s *NeonAuthMagicLinkConfig) SetDisableSignUp(val bool) {
+	s.DisableSignUp = val
+}
+
+// Ref: #/components/schemas/NeonAuthMagicLinkConfigUpdate
+type NeonAuthMagicLinkConfigUpdate struct {
+	// Whether the magic link plugin is enabled.
+	Enabled OptBool `json:"enabled"`
+	// Time in minutes before the magic link expires.
+	ExpiresIn OptInt32 `json:"expires_in"`
+	// Whether to disable sign-up via magic link.
+	DisableSignUp OptBool `json:"disable_sign_up"`
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *NeonAuthMagicLinkConfigUpdate) GetEnabled() OptBool {
+	return s.Enabled
+}
+
+// GetExpiresIn returns the value of ExpiresIn.
+func (s *NeonAuthMagicLinkConfigUpdate) GetExpiresIn() OptInt32 {
+	return s.ExpiresIn
+}
+
+// GetDisableSignUp returns the value of DisableSignUp.
+func (s *NeonAuthMagicLinkConfigUpdate) GetDisableSignUp() OptBool {
+	return s.DisableSignUp
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *NeonAuthMagicLinkConfigUpdate) SetEnabled(val OptBool) {
+	s.Enabled = val
+}
+
+// SetExpiresIn sets the value of ExpiresIn.
+func (s *NeonAuthMagicLinkConfigUpdate) SetExpiresIn(val OptInt32) {
+	s.ExpiresIn = val
+}
+
+// SetDisableSignUp sets the value of DisableSignUp.
+func (s *NeonAuthMagicLinkConfigUpdate) SetDisableSignUp(val OptBool) {
+	s.DisableSignUp = val
 }
 
 // Ref: #/components/schemas/NeonAuthOauthProvider
@@ -8231,10 +8362,52 @@ func (s *NeonAuthOrganizationConfigUpdateCreatorRole) UnmarshalText(data []byte)
 	}
 }
 
+// Ref: #/components/schemas/NeonAuthPhoneNumberConfig
+type NeonAuthPhoneNumberConfig struct {
+	// Whether the phone number plugin is enabled.
+	Enabled bool `json:"enabled"`
+	// Time in seconds before the OTP expires.
+	OtpExpiresIn OptInt `json:"otp_expires_in"`
+	// Maximum number of OTP verification attempts before lockout.
+	AllowedAttempts OptInt `json:"allowed_attempts"`
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *NeonAuthPhoneNumberConfig) GetEnabled() bool {
+	return s.Enabled
+}
+
+// GetOtpExpiresIn returns the value of OtpExpiresIn.
+func (s *NeonAuthPhoneNumberConfig) GetOtpExpiresIn() OptInt {
+	return s.OtpExpiresIn
+}
+
+// GetAllowedAttempts returns the value of AllowedAttempts.
+func (s *NeonAuthPhoneNumberConfig) GetAllowedAttempts() OptInt {
+	return s.AllowedAttempts
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *NeonAuthPhoneNumberConfig) SetEnabled(val bool) {
+	s.Enabled = val
+}
+
+// SetOtpExpiresIn sets the value of OtpExpiresIn.
+func (s *NeonAuthPhoneNumberConfig) SetOtpExpiresIn(val OptInt) {
+	s.OtpExpiresIn = val
+}
+
+// SetAllowedAttempts sets the value of AllowedAttempts.
+func (s *NeonAuthPhoneNumberConfig) SetAllowedAttempts(val OptInt) {
+	s.AllowedAttempts = val
+}
+
 // Aggregated plugin configurations for Neon Auth.
 // Ref: #/components/schemas/NeonAuthPluginConfigs
 type NeonAuthPluginConfigs struct {
 	Organization     OptNeonAuthOrganizationConfig     `json:"organization"`
+	MagicLink        OptNeonAuthMagicLinkConfig        `json:"magic_link"`
+	PhoneNumber      OptNeonAuthPhoneNumberConfig      `json:"phone_number"`
 	EmailProvider    OptNeonAuthEmailServerConfig      `json:"email_provider"`
 	EmailAndPassword OptNeonAuthEmailAndPasswordConfig `json:"email_and_password"`
 	OAuthProviders   []NeonAuthOauthProvider           `json:"oauth_providers"`
@@ -8244,6 +8417,16 @@ type NeonAuthPluginConfigs struct {
 // GetOrganization returns the value of Organization.
 func (s *NeonAuthPluginConfigs) GetOrganization() OptNeonAuthOrganizationConfig {
 	return s.Organization
+}
+
+// GetMagicLink returns the value of MagicLink.
+func (s *NeonAuthPluginConfigs) GetMagicLink() OptNeonAuthMagicLinkConfig {
+	return s.MagicLink
+}
+
+// GetPhoneNumber returns the value of PhoneNumber.
+func (s *NeonAuthPluginConfigs) GetPhoneNumber() OptNeonAuthPhoneNumberConfig {
+	return s.PhoneNumber
 }
 
 // GetEmailProvider returns the value of EmailProvider.
@@ -8269,6 +8452,16 @@ func (s *NeonAuthPluginConfigs) GetAllowLocalhost() OptBool {
 // SetOrganization sets the value of Organization.
 func (s *NeonAuthPluginConfigs) SetOrganization(val OptNeonAuthOrganizationConfig) {
 	s.Organization = val
+}
+
+// SetMagicLink sets the value of MagicLink.
+func (s *NeonAuthPluginConfigs) SetMagicLink(val OptNeonAuthMagicLinkConfig) {
+	s.MagicLink = val
+}
+
+// SetPhoneNumber sets the value of PhoneNumber.
+func (s *NeonAuthPluginConfigs) SetPhoneNumber(val OptNeonAuthPhoneNumberConfig) {
+	s.PhoneNumber = val
 }
 
 // SetEmailProvider sets the value of EmailProvider.
@@ -8608,6 +8801,7 @@ const (
 	NeonAuthWebhookConfigEnabledEventsItemSendMagicLink                  NeonAuthWebhookConfigEnabledEventsItem = "send.magic_link"
 	NeonAuthWebhookConfigEnabledEventsItemOrganizationInvitationCreated  NeonAuthWebhookConfigEnabledEventsItem = "organization.invitation.created"
 	NeonAuthWebhookConfigEnabledEventsItemOrganizationInvitationAccepted NeonAuthWebhookConfigEnabledEventsItem = "organization.invitation.accepted"
+	NeonAuthWebhookConfigEnabledEventsItemPhoneNumberVerified            NeonAuthWebhookConfigEnabledEventsItem = "phone_number.verified"
 )
 
 // AllValues returns all NeonAuthWebhookConfigEnabledEventsItem values.
@@ -8619,6 +8813,7 @@ func (NeonAuthWebhookConfigEnabledEventsItem) AllValues() []NeonAuthWebhookConfi
 		NeonAuthWebhookConfigEnabledEventsItemSendMagicLink,
 		NeonAuthWebhookConfigEnabledEventsItemOrganizationInvitationCreated,
 		NeonAuthWebhookConfigEnabledEventsItemOrganizationInvitationAccepted,
+		NeonAuthWebhookConfigEnabledEventsItemPhoneNumberVerified,
 	}
 }
 
@@ -8636,6 +8831,8 @@ func (s NeonAuthWebhookConfigEnabledEventsItem) MarshalText() ([]byte, error) {
 	case NeonAuthWebhookConfigEnabledEventsItemOrganizationInvitationCreated:
 		return []byte(s), nil
 	case NeonAuthWebhookConfigEnabledEventsItemOrganizationInvitationAccepted:
+		return []byte(s), nil
+	case NeonAuthWebhookConfigEnabledEventsItemPhoneNumberVerified:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -8662,6 +8859,9 @@ func (s *NeonAuthWebhookConfigEnabledEventsItem) UnmarshalText(data []byte) erro
 		return nil
 	case NeonAuthWebhookConfigEnabledEventsItemOrganizationInvitationAccepted:
 		*s = NeonAuthWebhookConfigEnabledEventsItemOrganizationInvitationAccepted
+		return nil
+	case NeonAuthWebhookConfigEnabledEventsItemPhoneNumberVerified:
+		*s = NeonAuthWebhookConfigEnabledEventsItemPhoneNumberVerified
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -8819,35 +9019,36 @@ func (s *Operation) SetTotalDurationMs(val int32) {
 type OperationAction string
 
 const (
-	OperationActionCreateCompute              OperationAction = "create_compute"
-	OperationActionCreateTimeline             OperationAction = "create_timeline"
-	OperationActionStartCompute               OperationAction = "start_compute"
-	OperationActionSuspendCompute             OperationAction = "suspend_compute"
-	OperationActionApplyConfig                OperationAction = "apply_config"
-	OperationActionCheckAvailability          OperationAction = "check_availability"
-	OperationActionDeleteTimeline             OperationAction = "delete_timeline"
-	OperationActionCreateBranch               OperationAction = "create_branch"
-	OperationActionImportData                 OperationAction = "import_data"
-	OperationActionTenantIgnore               OperationAction = "tenant_ignore"
-	OperationActionTenantAttach               OperationAction = "tenant_attach"
-	OperationActionTenantDetach               OperationAction = "tenant_detach"
-	OperationActionTenantReattach             OperationAction = "tenant_reattach"
-	OperationActionReplaceSafekeeper          OperationAction = "replace_safekeeper"
-	OperationActionDisableMaintenance         OperationAction = "disable_maintenance"
-	OperationActionApplyStorageConfig         OperationAction = "apply_storage_config"
-	OperationActionPrepareSecondaryPageserver OperationAction = "prepare_secondary_pageserver"
-	OperationActionSwitchPageserver           OperationAction = "switch_pageserver"
-	OperationActionDetachParentBranch         OperationAction = "detach_parent_branch"
-	OperationActionTimelineArchive            OperationAction = "timeline_archive"
-	OperationActionTimelineUnarchive          OperationAction = "timeline_unarchive"
-	OperationActionStartReservedCompute       OperationAction = "start_reserved_compute"
-	OperationActionSyncDbsAndRolesFromCompute OperationAction = "sync_dbs_and_roles_from_compute"
-	OperationActionApplySchemaFromBranch      OperationAction = "apply_schema_from_branch"
-	OperationActionTimelineMarkInvisible      OperationAction = "timeline_mark_invisible"
-	OperationActionPrewarmReplica             OperationAction = "prewarm_replica"
-	OperationActionPromoteReplica             OperationAction = "promote_replica"
-	OperationActionSetStorageNonDirty         OperationAction = "set_storage_non_dirty"
-	OperationActionSwapBindingID              OperationAction = "swap_binding_id"
+	OperationActionCreateCompute                 OperationAction = "create_compute"
+	OperationActionCreateTimeline                OperationAction = "create_timeline"
+	OperationActionStartCompute                  OperationAction = "start_compute"
+	OperationActionSuspendCompute                OperationAction = "suspend_compute"
+	OperationActionApplyConfig                   OperationAction = "apply_config"
+	OperationActionCheckAvailability             OperationAction = "check_availability"
+	OperationActionDeleteTimeline                OperationAction = "delete_timeline"
+	OperationActionCreateBranch                  OperationAction = "create_branch"
+	OperationActionImportData                    OperationAction = "import_data"
+	OperationActionTenantIgnore                  OperationAction = "tenant_ignore"
+	OperationActionTenantAttach                  OperationAction = "tenant_attach"
+	OperationActionTenantDetach                  OperationAction = "tenant_detach"
+	OperationActionTenantReattach                OperationAction = "tenant_reattach"
+	OperationActionReplaceSafekeeper             OperationAction = "replace_safekeeper"
+	OperationActionDisableMaintenance            OperationAction = "disable_maintenance"
+	OperationActionApplyStorageConfig            OperationAction = "apply_storage_config"
+	OperationActionPrepareSecondaryPageserver    OperationAction = "prepare_secondary_pageserver"
+	OperationActionSwitchPageserver              OperationAction = "switch_pageserver"
+	OperationActionDetachParentBranch            OperationAction = "detach_parent_branch"
+	OperationActionTimelineArchive               OperationAction = "timeline_archive"
+	OperationActionTimelineUnarchive             OperationAction = "timeline_unarchive"
+	OperationActionStartReservedCompute          OperationAction = "start_reserved_compute"
+	OperationActionSyncDbsAndRolesFromCompute    OperationAction = "sync_dbs_and_roles_from_compute"
+	OperationActionApplySchemaFromBranch         OperationAction = "apply_schema_from_branch"
+	OperationActionTimelineMarkInvisible         OperationAction = "timeline_mark_invisible"
+	OperationActionTimelineUpdateProtectedConfig OperationAction = "timeline_update_protected_config"
+	OperationActionPrewarmReplica                OperationAction = "prewarm_replica"
+	OperationActionPromoteReplica                OperationAction = "promote_replica"
+	OperationActionSetStorageNonDirty            OperationAction = "set_storage_non_dirty"
+	OperationActionSwapBindingID                 OperationAction = "swap_binding_id"
 )
 
 // AllValues returns all OperationAction values.
@@ -8878,6 +9079,7 @@ func (OperationAction) AllValues() []OperationAction {
 		OperationActionSyncDbsAndRolesFromCompute,
 		OperationActionApplySchemaFromBranch,
 		OperationActionTimelineMarkInvisible,
+		OperationActionTimelineUpdateProtectedConfig,
 		OperationActionPrewarmReplica,
 		OperationActionPromoteReplica,
 		OperationActionSetStorageNonDirty,
@@ -8937,6 +9139,8 @@ func (s OperationAction) MarshalText() ([]byte, error) {
 	case OperationActionApplySchemaFromBranch:
 		return []byte(s), nil
 	case OperationActionTimelineMarkInvisible:
+		return []byte(s), nil
+	case OperationActionTimelineUpdateProtectedConfig:
 		return []byte(s), nil
 	case OperationActionPrewarmReplica:
 		return []byte(s), nil
@@ -9028,6 +9232,9 @@ func (s *OperationAction) UnmarshalText(data []byte) error {
 		return nil
 	case OperationActionTimelineMarkInvisible:
 		*s = OperationActionTimelineMarkInvisible
+		return nil
+	case OperationActionTimelineUpdateProtectedConfig:
+		*s = OperationActionTimelineUpdateProtectedConfig
 		return nil
 	case OperationActionPrewarmReplica:
 		*s = OperationActionPrewarmReplica
@@ -11047,6 +11254,52 @@ func (o OptNeonAuthEmailVerificationMethod) Or(d NeonAuthEmailVerificationMethod
 	return d
 }
 
+// NewOptNeonAuthMagicLinkConfig returns new OptNeonAuthMagicLinkConfig with value set to v.
+func NewOptNeonAuthMagicLinkConfig(v NeonAuthMagicLinkConfig) OptNeonAuthMagicLinkConfig {
+	return OptNeonAuthMagicLinkConfig{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNeonAuthMagicLinkConfig is optional NeonAuthMagicLinkConfig.
+type OptNeonAuthMagicLinkConfig struct {
+	Value NeonAuthMagicLinkConfig
+	Set   bool
+}
+
+// IsSet returns true if OptNeonAuthMagicLinkConfig was set.
+func (o OptNeonAuthMagicLinkConfig) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNeonAuthMagicLinkConfig) Reset() {
+	var v NeonAuthMagicLinkConfig
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptNeonAuthMagicLinkConfig) SetTo(v NeonAuthMagicLinkConfig) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNeonAuthMagicLinkConfig) Get() (v NeonAuthMagicLinkConfig, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNeonAuthMagicLinkConfig) Or(d NeonAuthMagicLinkConfig) NeonAuthMagicLinkConfig {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptNeonAuthOrganizationConfig returns new OptNeonAuthOrganizationConfig with value set to v.
 func NewOptNeonAuthOrganizationConfig(v NeonAuthOrganizationConfig) OptNeonAuthOrganizationConfig {
 	return OptNeonAuthOrganizationConfig{
@@ -11133,6 +11386,52 @@ func (o OptNeonAuthOrganizationConfigUpdateCreatorRole) Get() (v NeonAuthOrganiz
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNeonAuthOrganizationConfigUpdateCreatorRole) Or(d NeonAuthOrganizationConfigUpdateCreatorRole) NeonAuthOrganizationConfigUpdateCreatorRole {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNeonAuthPhoneNumberConfig returns new OptNeonAuthPhoneNumberConfig with value set to v.
+func NewOptNeonAuthPhoneNumberConfig(v NeonAuthPhoneNumberConfig) OptNeonAuthPhoneNumberConfig {
+	return OptNeonAuthPhoneNumberConfig{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNeonAuthPhoneNumberConfig is optional NeonAuthPhoneNumberConfig.
+type OptNeonAuthPhoneNumberConfig struct {
+	Value NeonAuthPhoneNumberConfig
+	Set   bool
+}
+
+// IsSet returns true if OptNeonAuthPhoneNumberConfig was set.
+func (o OptNeonAuthPhoneNumberConfig) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNeonAuthPhoneNumberConfig) Reset() {
+	var v NeonAuthPhoneNumberConfig
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptNeonAuthPhoneNumberConfig) SetTo(v NeonAuthPhoneNumberConfig) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNeonAuthPhoneNumberConfig) Get() (v NeonAuthPhoneNumberConfig, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNeonAuthPhoneNumberConfig) Or(d NeonAuthPhoneNumberConfig) NeonAuthPhoneNumberConfig {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -15212,6 +15511,15 @@ type Snapshot struct {
 	CreatedAt      string    `json:"created_at"`
 	ExpiresAt      OptString `json:"expires_at"`
 	Manual         OptBool   `json:"manual"`
+	// Full logical size of the snapshot in bytes at the time it was taken.
+	// When absent, the logical size has not been calculated yet and the snapshot is not being charged.
+	// When present, a value of 0 means the snapshot is not being charged.
+	FullSize OptInt64 `json:"full_size"`
+	// Incremental storage size in bytes since the previous scheduled snapshot, when the snapshot is
+	// billed on incremental (diff) usage.
+	// When absent, either the incremental size has not been calculated yet and the snapshot is not being
+	// charged, or the snapshot is charged at full logical size (in that case `full_size` is set).
+	DiffSize OptInt64 `json:"diff_size"`
 }
 
 // GetID returns the value of ID.
@@ -15254,6 +15562,16 @@ func (s *Snapshot) GetManual() OptBool {
 	return s.Manual
 }
 
+// GetFullSize returns the value of FullSize.
+func (s *Snapshot) GetFullSize() OptInt64 {
+	return s.FullSize
+}
+
+// GetDiffSize returns the value of DiffSize.
+func (s *Snapshot) GetDiffSize() OptInt64 {
+	return s.DiffSize
+}
+
 // SetID sets the value of ID.
 func (s *Snapshot) SetID(val string) {
 	s.ID = val
@@ -15292,6 +15610,16 @@ func (s *Snapshot) SetExpiresAt(val OptString) {
 // SetManual sets the value of Manual.
 func (s *Snapshot) SetManual(val OptBool) {
 	s.Manual = val
+}
+
+// SetFullSize sets the value of FullSize.
+func (s *Snapshot) SetFullSize(val OptInt64) {
+	s.FullSize = val
+}
+
+// SetDiffSize sets the value of DiffSize.
+func (s *Snapshot) SetDiffSize(val OptInt64) {
+	s.DiffSize = val
 }
 
 // Ref: #/components/schemas/SnapshotUpdateRequest

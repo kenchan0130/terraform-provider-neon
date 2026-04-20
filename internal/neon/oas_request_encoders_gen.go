@@ -618,6 +618,20 @@ func encodeUpdateNeonAuthAllowLocalhostRequest(
 	return nil
 }
 
+func encodeUpdateNeonAuthConfigRequest(
+	req *NeonAuthConfigUpdate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeUpdateNeonAuthEmailAndPasswordConfigRequest(
 	req *NeonAuthEmailAndPasswordConfigUpdate,
 	r *http.Request,
@@ -660,6 +674,20 @@ func encodeUpdateNeonAuthEmailServerRequest(
 	return nil
 }
 
+func encodeUpdateNeonAuthMagicLinkPluginRequest(
+	req *NeonAuthMagicLinkConfigUpdate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeUpdateNeonAuthOauthProviderRequest(
 	req *NeonAuthUpdateOAuthProviderRequest,
 	r *http.Request,
@@ -676,6 +704,20 @@ func encodeUpdateNeonAuthOauthProviderRequest(
 
 func encodeUpdateNeonAuthOrganizationPluginRequest(
 	req *NeonAuthOrganizationConfigUpdate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateNeonAuthPhoneNumberPluginRequest(
+	req *NeonAuthPhoneNumberConfig,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

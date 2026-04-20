@@ -9269,6 +9269,166 @@ func decodeGetNeonAuthEmailServerParams(args [1]string, argsEscaped bool, r *htt
 	return params, nil
 }
 
+// GetNeonAuthPhoneNumberPluginParams is parameters of getNeonAuthPhoneNumberPlugin operation.
+type GetNeonAuthPhoneNumberPluginParams struct {
+	// The Neon project ID.
+	ProjectID string
+	// The Neon branch ID.
+	BranchID string
+}
+
+func unpackGetNeonAuthPhoneNumberPluginParams(packed middleware.Parameters) (params GetNeonAuthPhoneNumberPluginParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "project_id",
+			In:   "path",
+		}
+		params.ProjectID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "branch_id",
+			In:   "path",
+		}
+		params.BranchID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetNeonAuthPhoneNumberPluginParams(args [2]string, argsEscaped bool, r *http.Request) (params GetNeonAuthPhoneNumberPluginParams, _ error) {
+	// Decode path: project_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "project_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProjectID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.ProjectID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "project_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: branch_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "branch_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BranchID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.BranchID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "branch_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetNeonAuthPluginConfigsParams is parameters of getNeonAuthPluginConfigs operation.
 type GetNeonAuthPluginConfigsParams struct {
 	// The Neon project ID.
@@ -19434,6 +19594,166 @@ func decodeUpdateNeonAuthAllowLocalhostParams(args [2]string, argsEscaped bool, 
 	return params, nil
 }
 
+// UpdateNeonAuthConfigParams is parameters of updateNeonAuthConfig operation.
+type UpdateNeonAuthConfigParams struct {
+	// The Neon project ID.
+	ProjectID string
+	// The Neon branch ID.
+	BranchID string
+}
+
+func unpackUpdateNeonAuthConfigParams(packed middleware.Parameters) (params UpdateNeonAuthConfigParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "project_id",
+			In:   "path",
+		}
+		params.ProjectID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "branch_id",
+			In:   "path",
+		}
+		params.BranchID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeUpdateNeonAuthConfigParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateNeonAuthConfigParams, _ error) {
+	// Decode path: project_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "project_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProjectID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.ProjectID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "project_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: branch_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "branch_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BranchID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.BranchID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "branch_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // UpdateNeonAuthEmailAndPasswordConfigParams is parameters of updateNeonAuthEmailAndPasswordConfig operation.
 type UpdateNeonAuthEmailAndPasswordConfigParams struct {
 	// The Neon project ID.
@@ -19840,6 +20160,166 @@ func decodeUpdateNeonAuthEmailServerParams(args [1]string, argsEscaped bool, r *
 	return params, nil
 }
 
+// UpdateNeonAuthMagicLinkPluginParams is parameters of updateNeonAuthMagicLinkPlugin operation.
+type UpdateNeonAuthMagicLinkPluginParams struct {
+	// The Neon project ID.
+	ProjectID string
+	// The Neon branch ID.
+	BranchID string
+}
+
+func unpackUpdateNeonAuthMagicLinkPluginParams(packed middleware.Parameters) (params UpdateNeonAuthMagicLinkPluginParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "project_id",
+			In:   "path",
+		}
+		params.ProjectID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "branch_id",
+			In:   "path",
+		}
+		params.BranchID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeUpdateNeonAuthMagicLinkPluginParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateNeonAuthMagicLinkPluginParams, _ error) {
+	// Decode path: project_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "project_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProjectID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.ProjectID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "project_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: branch_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "branch_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BranchID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.BranchID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "branch_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // UpdateNeonAuthOauthProviderParams is parameters of updateNeonAuthOauthProvider operation.
 type UpdateNeonAuthOauthProviderParams struct {
 	// The Neon project ID.
@@ -20015,6 +20495,166 @@ func unpackUpdateNeonAuthOrganizationPluginParams(packed middleware.Parameters) 
 }
 
 func decodeUpdateNeonAuthOrganizationPluginParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateNeonAuthOrganizationPluginParams, _ error) {
+	// Decode path: project_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "project_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProjectID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.ProjectID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "project_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: branch_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "branch_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BranchID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.BranchID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "branch_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UpdateNeonAuthPhoneNumberPluginParams is parameters of updateNeonAuthPhoneNumberPlugin operation.
+type UpdateNeonAuthPhoneNumberPluginParams struct {
+	// The Neon project ID.
+	ProjectID string
+	// The Neon branch ID.
+	BranchID string
+}
+
+func unpackUpdateNeonAuthPhoneNumberPluginParams(packed middleware.Parameters) (params UpdateNeonAuthPhoneNumberPluginParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "project_id",
+			In:   "path",
+		}
+		params.ProjectID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "branch_id",
+			In:   "path",
+		}
+		params.BranchID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeUpdateNeonAuthPhoneNumberPluginParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateNeonAuthPhoneNumberPluginParams, _ error) {
 	// Decode path: project_id.
 	if err := func() error {
 		param := args[0]

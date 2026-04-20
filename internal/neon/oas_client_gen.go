@@ -584,6 +584,13 @@ type Invoker interface {
 	//
 	// GET /projects/{project_id}/auth/email_server
 	GetNeonAuthEmailServer(ctx context.Context, params GetNeonAuthEmailServerParams) (*NeonAuthEmailServerConfig, error)
+	// GetNeonAuthPhoneNumberPlugin invokes getNeonAuthPhoneNumberPlugin operation.
+	//
+	// Returns the phone number plugin configuration for Neon Auth.
+	// The phone number plugin enables phone-based OTP authentication.
+	//
+	// GET /projects/{project_id}/branches/{branch_id}/auth/plugins/phone_number
+	GetNeonAuthPhoneNumberPlugin(ctx context.Context, params GetNeonAuthPhoneNumberPluginParams) (*NeonAuthPhoneNumberConfig, error)
 	// GetNeonAuthPluginConfigs invokes getNeonAuthPluginConfigs operation.
 	//
 	// Returns all plugin configurations for Neon Auth in a single response.
@@ -1083,6 +1090,8 @@ type Invoker interface {
 	// Transfers selected projects, identified by their IDs, from your personal account to a specified
 	// organization.
 	//
+	// Deprecated: schema marks this operation as deprecated.
+	//
 	// POST /users/me/projects/transfer
 	TransferProjectsFromUserToOrg(ctx context.Context, request *TransferProjectsToOrganizationRequest) (TransferProjectsFromUserToOrgRes, error)
 	// UpdateBranchNeonAuthOauthProvider invokes updateBranchNeonAuthOauthProvider operation.
@@ -1107,6 +1116,13 @@ type Invoker interface {
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/auth/allow_localhost
 	UpdateNeonAuthAllowLocalhost(ctx context.Context, request *UpdateNeonAuthAllowLocalhostRequest, params UpdateNeonAuthAllowLocalhostParams) (*NeonAuthAllowLocalhostResponse, error)
+	// UpdateNeonAuthConfig invokes updateNeonAuthConfig operation.
+	//
+	// Updates the auth configuration for the branch.
+	// Currently supports updating the application name used in auth emails.
+	//
+	// PATCH /projects/{project_id}/branches/{branch_id}/auth/config
+	UpdateNeonAuthConfig(ctx context.Context, request *NeonAuthConfigUpdate, params UpdateNeonAuthConfigParams) (*NeonAuthConfigResponse, error)
 	// UpdateNeonAuthEmailAndPasswordConfig invokes updateNeonAuthEmailAndPasswordConfig operation.
 	//
 	// Updates the email and password authentication configuration for Neon Auth.
@@ -1128,6 +1144,13 @@ type Invoker interface {
 	//
 	// PATCH /projects/{project_id}/auth/email_server
 	UpdateNeonAuthEmailServer(ctx context.Context, request *NeonAuthEmailServerConfig, params UpdateNeonAuthEmailServerParams) (*NeonAuthEmailServerConfig, error)
+	// UpdateNeonAuthMagicLinkPlugin invokes updateNeonAuthMagicLinkPlugin operation.
+	//
+	// Updates the magic link plugin configuration for Neon Auth.
+	// The magic link plugin enables passwordless authentication via email magic links.
+	//
+	// PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/magic-link
+	UpdateNeonAuthMagicLinkPlugin(ctx context.Context, request *NeonAuthMagicLinkConfigUpdate, params UpdateNeonAuthMagicLinkPluginParams) (*NeonAuthMagicLinkConfig, error)
 	// UpdateNeonAuthOauthProvider invokes updateNeonAuthOauthProvider operation.
 	//
 	// DEPRECATED, use
@@ -1145,6 +1168,15 @@ type Invoker interface {
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/organization
 	UpdateNeonAuthOrganizationPlugin(ctx context.Context, request *NeonAuthOrganizationConfigUpdate, params UpdateNeonAuthOrganizationPluginParams) (*NeonAuthOrganizationConfig, error)
+	// UpdateNeonAuthPhoneNumberPlugin invokes updateNeonAuthPhoneNumberPlugin operation.
+	//
+	// Updates the phone number plugin configuration for Neon Auth.
+	// The phone number plugin enables phone-based OTP authentication.
+	// OTP codes are delivered via the `send.otp` webhook event with `delivery_preference: "sms"`.
+	// A webhook must be configured with the `send.otp` event enabled for SMS delivery to work.
+	//
+	// PUT /projects/{project_id}/branches/{branch_id}/auth/plugins/phone_number
+	UpdateNeonAuthPhoneNumberPlugin(ctx context.Context, request *NeonAuthPhoneNumberConfig, params UpdateNeonAuthPhoneNumberPluginParams) (*NeonAuthPhoneNumberConfig, error)
 	// UpdateNeonAuthUserRole invokes updateNeonAuthUserRole operation.
 	//
 	// Updates the role of an auth user for the specified project.
@@ -11865,6 +11897,176 @@ func (c *Client) sendGetNeonAuthEmailServer(ctx context.Context, params GetNeonA
 	return result, nil
 }
 
+// GetNeonAuthPhoneNumberPlugin invokes getNeonAuthPhoneNumberPlugin operation.
+//
+// Returns the phone number plugin configuration for Neon Auth.
+// The phone number plugin enables phone-based OTP authentication.
+//
+// GET /projects/{project_id}/branches/{branch_id}/auth/plugins/phone_number
+func (c *Client) GetNeonAuthPhoneNumberPlugin(ctx context.Context, params GetNeonAuthPhoneNumberPluginParams) (*NeonAuthPhoneNumberConfig, error) {
+	res, err := c.sendGetNeonAuthPhoneNumberPlugin(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetNeonAuthPhoneNumberPlugin(ctx context.Context, params GetNeonAuthPhoneNumberPluginParams) (res *NeonAuthPhoneNumberConfig, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getNeonAuthPhoneNumberPlugin"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/auth/plugins/phone_number"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetNeonAuthPhoneNumberPluginOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/auth/plugins/phone_number"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, GetNeonAuthPhoneNumberPluginOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, GetNeonAuthPhoneNumberPluginOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, GetNeonAuthPhoneNumberPluginOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetNeonAuthPhoneNumberPluginResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetNeonAuthPluginConfigs invokes getNeonAuthPluginConfigs operation.
 //
 // Returns all plugin configurations for Neon Auth in a single response.
@@ -22174,6 +22376,8 @@ func (c *Client) sendTransferProjectsFromOrgToOrg(ctx context.Context, request *
 // Transfers selected projects, identified by their IDs, from your personal account to a specified
 // organization.
 //
+// Deprecated: schema marks this operation as deprecated.
+//
 // POST /users/me/projects/transfer
 func (c *Client) TransferProjectsFromUserToOrg(ctx context.Context, request *TransferProjectsToOrganizationRequest) (TransferProjectsFromUserToOrgRes, error) {
 	res, err := c.sendTransferProjectsFromUserToOrg(ctx, request)
@@ -22842,6 +23046,179 @@ func (c *Client) sendUpdateNeonAuthAllowLocalhost(ctx context.Context, request *
 	return result, nil
 }
 
+// UpdateNeonAuthConfig invokes updateNeonAuthConfig operation.
+//
+// Updates the auth configuration for the branch.
+// Currently supports updating the application name used in auth emails.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/auth/config
+func (c *Client) UpdateNeonAuthConfig(ctx context.Context, request *NeonAuthConfigUpdate, params UpdateNeonAuthConfigParams) (*NeonAuthConfigResponse, error) {
+	res, err := c.sendUpdateNeonAuthConfig(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateNeonAuthConfig(ctx context.Context, request *NeonAuthConfigUpdate, params UpdateNeonAuthConfigParams) (res *NeonAuthConfigResponse, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateNeonAuthConfig"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/auth/config"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateNeonAuthConfigOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/auth/config"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateNeonAuthConfigRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, UpdateNeonAuthConfigOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, UpdateNeonAuthConfigOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, UpdateNeonAuthConfigOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateNeonAuthConfigResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // UpdateNeonAuthEmailAndPasswordConfig invokes updateNeonAuthEmailAndPasswordConfig operation.
 //
 // Updates the email and password authentication configuration for Neon Auth.
@@ -23342,6 +23719,179 @@ func (c *Client) sendUpdateNeonAuthEmailServer(ctx context.Context, request *Neo
 	return result, nil
 }
 
+// UpdateNeonAuthMagicLinkPlugin invokes updateNeonAuthMagicLinkPlugin operation.
+//
+// Updates the magic link plugin configuration for Neon Auth.
+// The magic link plugin enables passwordless authentication via email magic links.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/magic-link
+func (c *Client) UpdateNeonAuthMagicLinkPlugin(ctx context.Context, request *NeonAuthMagicLinkConfigUpdate, params UpdateNeonAuthMagicLinkPluginParams) (*NeonAuthMagicLinkConfig, error) {
+	res, err := c.sendUpdateNeonAuthMagicLinkPlugin(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateNeonAuthMagicLinkPlugin(ctx context.Context, request *NeonAuthMagicLinkConfigUpdate, params UpdateNeonAuthMagicLinkPluginParams) (res *NeonAuthMagicLinkConfig, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateNeonAuthMagicLinkPlugin"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/auth/plugins/magic-link"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateNeonAuthMagicLinkPluginOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/auth/plugins/magic-link"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateNeonAuthMagicLinkPluginRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, UpdateNeonAuthMagicLinkPluginOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, UpdateNeonAuthMagicLinkPluginOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, UpdateNeonAuthMagicLinkPluginOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateNeonAuthMagicLinkPluginResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // UpdateNeonAuthOauthProvider invokes updateNeonAuthOauthProvider operation.
 //
 // DEPRECATED, use
@@ -23683,6 +24233,181 @@ func (c *Client) sendUpdateNeonAuthOrganizationPlugin(ctx context.Context, reque
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateNeonAuthOrganizationPluginResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateNeonAuthPhoneNumberPlugin invokes updateNeonAuthPhoneNumberPlugin operation.
+//
+// Updates the phone number plugin configuration for Neon Auth.
+// The phone number plugin enables phone-based OTP authentication.
+// OTP codes are delivered via the `send.otp` webhook event with `delivery_preference: "sms"`.
+// A webhook must be configured with the `send.otp` event enabled for SMS delivery to work.
+//
+// PUT /projects/{project_id}/branches/{branch_id}/auth/plugins/phone_number
+func (c *Client) UpdateNeonAuthPhoneNumberPlugin(ctx context.Context, request *NeonAuthPhoneNumberConfig, params UpdateNeonAuthPhoneNumberPluginParams) (*NeonAuthPhoneNumberConfig, error) {
+	res, err := c.sendUpdateNeonAuthPhoneNumberPlugin(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateNeonAuthPhoneNumberPlugin(ctx context.Context, request *NeonAuthPhoneNumberConfig, params UpdateNeonAuthPhoneNumberPluginParams) (res *NeonAuthPhoneNumberConfig, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateNeonAuthPhoneNumberPlugin"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/auth/plugins/phone_number"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateNeonAuthPhoneNumberPluginOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/auth/plugins/phone_number"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateNeonAuthPhoneNumberPluginRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, UpdateNeonAuthPhoneNumberPluginOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, UpdateNeonAuthPhoneNumberPluginOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, UpdateNeonAuthPhoneNumberPluginOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateNeonAuthPhoneNumberPluginResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
