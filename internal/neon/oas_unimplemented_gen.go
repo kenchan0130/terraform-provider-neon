@@ -426,6 +426,18 @@ func (UnimplementedHandler) DeleteNeonAuthUser(ctx context.Context, params Delet
 	return ht.ErrNotImplemented
 }
 
+// DeleteOrganizationSpendingLimit implements deleteOrganizationSpendingLimit operation.
+//
+// Removes a previously configured spending limit for a V3 paid
+// organization. Idempotent — deleting an already-unset limit still
+// succeeds. Available to organization admins on Launch and Scale plans
+// only.
+//
+// DELETE /organizations/{org_id}/billing/spending_limit
+func (UnimplementedHandler) DeleteOrganizationSpendingLimit(ctx context.Context, params DeleteOrganizationSpendingLimitParams) error {
+	return ht.ErrNotImplemented
+}
+
 // DeleteOrganizationVPCEndpoint implements deleteOrganizationVPCEndpoint operation.
 //
 // Deletes the VPC endpoint from the specified Neon organization.
@@ -463,6 +475,10 @@ func (UnimplementedHandler) DeleteProject(ctx context.Context, params DeleteProj
 // You cannot delete a project's root or default branch, and you cannot delete a branch that has a
 // child branch.
 // A project must have at least one branch.
+// By default, deleted branches can be recovered within a 7-day grace period.
+// Use the `hard_delete` parameter to permanently delete the branch immediately without a recovery
+// window.
+// Soft delete and branch recovery are in preview and not available to all users.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}
 func (UnimplementedHandler) DeleteProjectBranch(ctx context.Context, params DeleteProjectBranchParams) (r DeleteProjectBranchRes, _ error) {
@@ -752,6 +768,16 @@ func (UnimplementedHandler) GetNeonAuthEmailServer(ctx context.Context, params G
 	return r, ht.ErrNotImplemented
 }
 
+// GetNeonAuthPhoneNumberPlugin implements getNeonAuthPhoneNumberPlugin operation.
+//
+// Returns the phone number plugin configuration for Neon Auth.
+// The phone number plugin enables phone-based OTP authentication.
+//
+// GET /projects/{project_id}/branches/{branch_id}/auth/plugins/phone_number
+func (UnimplementedHandler) GetNeonAuthPhoneNumberPlugin(ctx context.Context, params GetNeonAuthPhoneNumberPluginParams) (r *NeonAuthPhoneNumberConfig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetNeonAuthPluginConfigs implements getNeonAuthPluginConfigs operation.
 //
 // Returns all plugin configurations for Neon Auth in a single response.
@@ -805,6 +831,18 @@ func (UnimplementedHandler) GetOrganizationMember(ctx context.Context, params Ge
 //
 // GET /organizations/{org_id}/members
 func (UnimplementedHandler) GetOrganizationMembers(ctx context.Context, params GetOrganizationMembersParams) (r *GetOrganizationMembersOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetOrganizationSpendingLimit implements getOrganizationSpendingLimit operation.
+//
+// Returns the configured spending limit for a V3 paid organization.
+// `spending_limit_cents: null` indicates that no limit is currently
+// set. Available to organization members with read access on Launch
+// and Scale plans only.
+//
+// GET /organizations/{org_id}/billing/spending_limit
+func (UnimplementedHandler) GetOrganizationSpendingLimit(ctx context.Context, params GetOrganizationSpendingLimitParams) (r *SpendingLimitResponse, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1214,6 +1252,20 @@ func (UnimplementedHandler) RecoverProject(ctx context.Context, params RecoverPr
 	return r, ht.ErrNotImplemented
 }
 
+// RecoverProjectBranch implements recoverProjectBranch operation.
+//
+// Recovers a deleted branch during the deletion grace period (7 days).
+// The branch must have been soft deleted and not yet permanently deleted.
+// Recovery restores the branch and its endpoints to an idle state.
+// Connection strings remain valid after recovery.
+// TTL branches become non-TTL branches after recovery.
+// This endpoint is in preview and not available to all users.
+//
+// POST /projects/{project_id}/branches/{branch_id}/recover
+func (UnimplementedHandler) RecoverProjectBranch(ctx context.Context, params RecoverProjectBranchParams) (r *BranchRecoverResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // RemoveOrganizationMember implements removeOrganizationMember operation.
 //
 // Remove member from the organization.
@@ -1255,19 +1307,6 @@ func (UnimplementedHandler) ResetProjectBranchRolePassword(ctx context.Context, 
 //
 // POST /projects/{project_id}/endpoints/{endpoint_id}/restart
 func (UnimplementedHandler) RestartProjectEndpoint(ctx context.Context, params RestartProjectEndpointParams) (r *EndpointOperations, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// RestoreProject implements restoreProject operation.
-//
-// DEPRECATED, use `/projects/{project_id}/recover` instead. Restores a deleted project during the
-// deletion grace period.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-//
-// Deprecated: schema marks this operation as deprecated.
-//
-// POST /projects/{project_id}/restore
-func (UnimplementedHandler) RestoreProject(ctx context.Context, params RestoreProjectParams) (r *ProjectRecoverResponse, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1350,6 +1389,19 @@ func (UnimplementedHandler) SetDefaultProjectBranch(ctx context.Context, params 
 	return r, ht.ErrNotImplemented
 }
 
+// SetOrganizationSpendingLimit implements setOrganizationSpendingLimit operation.
+//
+// Sets the spending limit for a V3 paid organization. To remove a
+// previously configured limit, send a DELETE request to this endpoint.
+// When a limit is configured, email notifications are sent at 80% and
+// 100% of the limit. Computes are not suspended by this feature.
+// Available to organization admins on Launch and Scale plans only.
+//
+// PUT /organizations/{org_id}/billing/spending_limit
+func (UnimplementedHandler) SetOrganizationSpendingLimit(ctx context.Context, req *SpendingLimitUpdateRequest, params SetOrganizationSpendingLimitParams) (r *SpendingLimitResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // SetSnapshotSchedule implements setSnapshotSchedule operation.
 //
 // Update the backup schedule for the specified branch.
@@ -1428,6 +1480,8 @@ func (UnimplementedHandler) TransferProjectsFromOrgToOrg(ctx context.Context, re
 // Transfers selected projects, identified by their IDs, from your personal account to a specified
 // organization.
 //
+// Deprecated: schema marks this operation as deprecated.
+//
 // POST /users/me/projects/transfer
 func (UnimplementedHandler) TransferProjectsFromUserToOrg(ctx context.Context, req *TransferProjectsToOrganizationRequest) (r TransferProjectsFromUserToOrgRes, _ error) {
 	return r, ht.ErrNotImplemented
@@ -1464,6 +1518,16 @@ func (UnimplementedHandler) UpdateNeonAuthAllowLocalhost(ctx context.Context, re
 	return r, ht.ErrNotImplemented
 }
 
+// UpdateNeonAuthConfig implements updateNeonAuthConfig operation.
+//
+// Updates the auth configuration for the branch.
+// Currently supports updating the application name used in auth emails.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/auth/config
+func (UnimplementedHandler) UpdateNeonAuthConfig(ctx context.Context, req *NeonAuthConfigUpdate, params UpdateNeonAuthConfigParams) (r *NeonAuthConfigResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // UpdateNeonAuthEmailAndPasswordConfig implements updateNeonAuthEmailAndPasswordConfig operation.
 //
 // Updates the email and password authentication configuration for Neon Auth.
@@ -1494,6 +1558,16 @@ func (UnimplementedHandler) UpdateNeonAuthEmailServer(ctx context.Context, req *
 	return r, ht.ErrNotImplemented
 }
 
+// UpdateNeonAuthMagicLinkPlugin implements updateNeonAuthMagicLinkPlugin operation.
+//
+// Updates the magic link plugin configuration for Neon Auth.
+// The magic link plugin enables passwordless authentication via email magic links.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/magic-link
+func (UnimplementedHandler) UpdateNeonAuthMagicLinkPlugin(ctx context.Context, req *NeonAuthMagicLinkConfigUpdate, params UpdateNeonAuthMagicLinkPluginParams) (r *NeonAuthMagicLinkConfig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // UpdateNeonAuthOauthProvider implements updateNeonAuthOauthProvider operation.
 //
 // DEPRECATED, use
@@ -1514,6 +1588,18 @@ func (UnimplementedHandler) UpdateNeonAuthOauthProvider(ctx context.Context, req
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/organization
 func (UnimplementedHandler) UpdateNeonAuthOrganizationPlugin(ctx context.Context, req *NeonAuthOrganizationConfigUpdate, params UpdateNeonAuthOrganizationPluginParams) (r *NeonAuthOrganizationConfig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateNeonAuthPhoneNumberPlugin implements updateNeonAuthPhoneNumberPlugin operation.
+//
+// Updates the phone number plugin configuration for Neon Auth.
+// The phone number plugin enables phone-based OTP authentication.
+// OTP codes are delivered via the `send.otp` webhook event with `delivery_preference: "sms"`.
+// A webhook must be configured with the `send.otp` event enabled for SMS delivery to work.
+//
+// PUT /projects/{project_id}/branches/{branch_id}/auth/plugins/phone_number
+func (UnimplementedHandler) UpdateNeonAuthPhoneNumberPlugin(ctx context.Context, req *NeonAuthPhoneNumberConfig, params UpdateNeonAuthPhoneNumberPluginParams) (r *NeonAuthPhoneNumberConfig, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
