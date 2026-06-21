@@ -4089,6 +4089,92 @@ func decodeDeleteNeonAuthUserParams(args [2]string, argsEscaped bool, r *http.Re
 	return params, nil
 }
 
+// DeleteOrganizationSpendingLimitParams is parameters of deleteOrganizationSpendingLimit operation.
+type DeleteOrganizationSpendingLimitParams struct {
+	// The Neon organization ID.
+	OrgID string
+}
+
+func unpackDeleteOrganizationSpendingLimitParams(packed middleware.Parameters) (params DeleteOrganizationSpendingLimitParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "org_id",
+			In:   "path",
+		}
+		params.OrgID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeDeleteOrganizationSpendingLimitParams(args [1]string, argsEscaped bool, r *http.Request) (params DeleteOrganizationSpendingLimitParams, _ error) {
+	// Decode path: org_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "org_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.OrgID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.OrgID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "org_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // DeleteOrganizationVPCEndpointParams is parameters of deleteOrganizationVPCEndpoint operation.
 type DeleteOrganizationVPCEndpointParams struct {
 	// The Neon organization ID.
@@ -4372,6 +4458,11 @@ func decodeDeleteProjectParams(args [1]string, argsEscaped bool, r *http.Request
 
 // DeleteProjectBranchParams is parameters of deleteProjectBranch operation.
 type DeleteProjectBranchParams struct {
+	// If true, the branch is permanently deleted immediately without a recovery window.
+	// If false (default), the branch can be recovered within 7 days via the recover endpoint.
+	// This parameter is part of the Branch Recovery feature, which is in preview and not available to
+	// all users.
+	HardDelete OptBool `json:",omitempty,omitzero"`
 	// The Neon project ID.
 	ProjectID string
 	// The branch ID.
@@ -4379,6 +4470,15 @@ type DeleteProjectBranchParams struct {
 }
 
 func unpackDeleteProjectBranchParams(packed middleware.Parameters) (params DeleteProjectBranchParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "hard_delete",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.HardDelete = v.(OptBool)
+		}
+	}
 	{
 		key := middleware.ParameterKey{
 			Name: "project_id",
@@ -4397,6 +4497,53 @@ func unpackDeleteProjectBranchParams(packed middleware.Parameters) (params Delet
 }
 
 func decodeDeleteProjectBranchParams(args [2]string, argsEscaped bool, r *http.Request) (params DeleteProjectBranchParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Set default value for query: hard_delete.
+	{
+		val := bool(false)
+		params.HardDelete.SetTo(val)
+	}
+	// Decode query: hard_delete.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "hard_delete",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotHardDeleteVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotHardDeleteVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.HardDelete.SetTo(paramsDotHardDeleteVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "hard_delete",
+			In:   "query",
+			Err:  err,
+		}
+	}
 	// Decode path: project_id.
 	if err := func() error {
 		param := args[0]
@@ -6819,59 +6966,100 @@ func decodeGetConnectionURIParams(args [1]string, argsEscaped bool, r *http.Requ
 	return params, nil
 }
 
-// GetConsumptionHistoryPerAccountParams is parameters of getConsumptionHistoryPerAccount operation.
-type GetConsumptionHistoryPerAccountParams struct {
+// GetConsumptionHistoryPerBranchV2Params is parameters of getConsumptionHistoryPerBranchV2 operation.
+type GetConsumptionHistoryPerBranchV2Params struct {
+	// Cursor from the previous response (`pagination.cursor`). Pass it to fetch the next page
+	// of branches. Pages are ordered by project ID, then branch ID.
+	Cursor OptString `json:",omitempty,omitzero"`
+	// Maximum number of branches per page. Allowed range: 1 to 1000. Default: 100.
+	Limit OptInt `json:",omitempty,omitzero"`
+	// Project IDs to include (required, 1 to 100). Returns metrics for branches in these projects.
+	// Pass multiple IDs as repeated query parameters or a comma-separated list:
+	// - `project_ids=cold-poetry-09157238&project_ids=quiet-snow-71788278`
+	// - `project_ids=cold-poetry-09157238,quiet-snow-71788278`.
+	ProjectIds []string `json:",omitempty"`
+	// Optional branch IDs to filter the response (up to 100). If omitted, all branches in the
+	// listed projects are included.
+	// Pass multiple IDs as repeated query parameters or a comma-separated list:
+	// - `branch_ids=br-aged-salad-637688&branch_ids=br-sweet-breeze-497520`
+	// - `branch_ids=br-aged-salad-637688,br-sweet-breeze-497520`.
+	BranchIds []string `json:",omitempty"`
 	// Specify the start `date-time` for the consumption period.
 	// The `date-time` value is rounded according to the specified `granularity`.
 	// For example, `2024-03-15T15:30:00Z` for `daily` granularity will be rounded to
 	// `2024-03-15T00:00:00Z`.
-	// The specified `date-time` value must respect the specified granularity:
+	// The specified `date-time` value must respect the specified `granularity`:
 	// - For `hourly`, consumption metrics are limited to the last 168 hours.
 	// - For `daily`, consumption metrics are limited to the last 60 days.
-	// - For `monthly`, consumption metrics are limited to the past year.
-	// The consumption history is available starting from `March 1, 2024, at 00:00:00 UTC`.
+	// - For `monthly`, consumption metrics are limited to the last year.
+	// Branch-level metrics are returned from when the account first ingests branch-level
+	// consumption data. Periods before that time contain no branch metrics.
 	From time.Time
 	// Specify the end `date-time` for the consumption period.
-	// The `date-time` value is rounded according to the specified granularity.
+	// The `date-time` value is rounded according to the specified `granularity`.
 	// For example, `2024-03-15T15:30:00Z` for `daily` granularity will be rounded to
 	// `2024-03-15T00:00:00Z`.
-	// The specified `date-time` value must respect the specified granularity:
+	// The specified `date-time` value must respect the specified `granularity`:
 	// - For `hourly`, consumption metrics are limited to the last 168 hours.
 	// - For `daily`, consumption metrics are limited to the last 60 days.
-	// - For `monthly`, consumption metrics are limited to the past year.
+	// - For `monthly`, consumption metrics are limited to the last year.
 	To time.Time
 	// Specify the granularity of consumption metrics.
 	// Hourly, daily, and monthly metrics are available for the last 168 hours, 60 days,
 	// and 1 year, respectively.
 	Granularity ConsumptionHistoryGranularity
-	// Specify the organization for which the consumption metrics should be returned.
-	// If this parameter is not provided, the endpoint will return the metrics for the
-	// authenticated user's account.
-	OrgID OptString `json:",omitempty,omitzero"`
-	// The field is deprecated. Please use `metrics` instead.
-	// If `metrics` is specified, this field is ignored.
-	// Include metrics utilized in previous pricing models.
-	// - **data_storage_bytes_hour**: The sum of the maximum observed storage values for each hour
-	// for each project, which never decreases.
-	//
-	// Deprecated: schema marks this parameter as deprecated.
-	IncludeV1Metrics OptBool `json:",omitempty,omitzero"`
-	// Specify a list of metrics to include in the response.
-	// If omitted, active_time, compute_time, written_data, synthetic_storage_size are returned.
-	// Possible values:
-	// - `active_time_seconds`
-	// - `compute_time_seconds`
-	// - `written_data_bytes`
-	// - `synthetic_storage_size_bytes`
-	// - `data_storage_bytes_hour`
-	// A list of metrics can be specified as an array of parameter values or as a comma-separated list in
-	// a single parameter value.
-	// - As an array of parameter values: `metrics=cpu_seconds&metrics=ram_bytes`
-	// - As a comma-separated list in a single parameter value: `metrics=cpu_seconds,ram_bytes`.
+	// Organization ID. Metrics are returned for projects in this organization.
+	OrgID string
+	// Required. List the metrics to return. Only these values are supported:
+	// - `compute_unit_seconds`
+	// - `root_branch_bytes_month`
+	// - `child_branch_bytes_month`
+	// - `instant_restore_bytes_month`
+	// - `public_network_transfer_bytes`
+	// - `private_network_transfer_bytes`
+	// Not supported on this endpoint: `extra_branches_month`, `snapshot_storage_bytes_month`.
+	// Use `GET /consumption_history/v2/projects` for those.
+	// Pass multiple values as repeated query parameters or a comma-separated list:
+	// - `metrics=compute_unit_seconds&metrics=public_network_transfer_bytes`
+	// - `metrics=compute_unit_seconds,public_network_transfer_bytes`.
 	Metrics ConsumptionHistoryQueryMetrics
 }
 
-func unpackGetConsumptionHistoryPerAccountParams(packed middleware.Parameters) (params GetConsumptionHistoryPerAccountParams) {
+func unpackGetConsumptionHistoryPerBranchV2Params(packed middleware.Parameters) (params GetConsumptionHistoryPerBranchV2Params) {
+	{
+		key := middleware.ParameterKey{
+			Name: "cursor",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Cursor = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "limit",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Limit = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "project_ids",
+			In:   "query",
+		}
+		params.ProjectIds = packed[key].([]string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "branch_ids",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.BranchIds = v.([]string)
+		}
+	}
 	{
 		key := middleware.ParameterKey{
 			Name: "from",
@@ -6898,33 +7086,310 @@ func unpackGetConsumptionHistoryPerAccountParams(packed middleware.Parameters) (
 			Name: "org_id",
 			In:   "query",
 		}
-		if v, ok := packed[key]; ok {
-			params.OrgID = v.(OptString)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "include_v1_metrics",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.IncludeV1Metrics = v.(OptBool)
-		}
+		params.OrgID = packed[key].(string)
 	}
 	{
 		key := middleware.ParameterKey{
 			Name: "metrics",
 			In:   "query",
 		}
-		if v, ok := packed[key]; ok {
-			params.Metrics = v.(ConsumptionHistoryQueryMetrics)
-		}
+		params.Metrics = packed[key].(ConsumptionHistoryQueryMetrics)
 	}
 	return params
 }
 
-func decodeGetConsumptionHistoryPerAccountParams(args [0]string, argsEscaped bool, r *http.Request) (params GetConsumptionHistoryPerAccountParams, _ error) {
+func decodeGetConsumptionHistoryPerBranchV2Params(args [0]string, argsEscaped bool, r *http.Request) (params GetConsumptionHistoryPerBranchV2Params, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: cursor.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "cursor",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotCursorVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotCursorVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Cursor.SetTo(paramsDotCursorVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "cursor",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: limit.
+	{
+		val := int(100)
+		params.Limit.SetTo(val)
+	}
+	// Decode query: limit.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLimitVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLimitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Limit.SetTo(paramsDotLimitVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Limit.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           1,
+							MaxSet:        true,
+							Max:           1000,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+							Pattern:       nil,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: project_ids.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "project_ids",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotProjectIdsVal string
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToString(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotProjectIdsVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.ProjectIds = append(params.ProjectIds, paramsDotProjectIdsVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if params.ProjectIds == nil {
+					return errors.New("nil is invalid value")
+				}
+				if err := (validate.Array{
+					MinLength:    1,
+					MinLengthSet: true,
+					MaxLength:    100,
+					MaxLengthSet: true,
+				}).ValidateLength(len(params.ProjectIds)); err != nil {
+					return errors.Wrap(err, "array")
+				}
+				var failures []validate.FieldError
+				for i, elem := range params.ProjectIds {
+					if err := func() error {
+						if err := (validate.String{
+							MinLength:     0,
+							MinLengthSet:  false,
+							MaxLength:     0,
+							MaxLengthSet:  false,
+							Email:         false,
+							Hostname:      false,
+							Regex:         regexMap["^([a-z0-9-]{1,60}(,[a-z0-9-]{1,60}){0,99})?$"],
+							MinNumeric:    0,
+							MinNumericSet: false,
+							MaxNumeric:    0,
+							MaxNumericSet: false,
+						}).Validate(string(elem)); err != nil {
+							return errors.Wrap(err, "string")
+						}
+						return nil
+					}(); err != nil {
+						failures = append(failures, validate.FieldError{
+							Name:  fmt.Sprintf("[%d]", i),
+							Error: err,
+						})
+					}
+				}
+				if len(failures) > 0 {
+					return &validate.Error{Fields: failures}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "project_ids",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: branch_ids.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "branch_ids",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotBranchIdsVal string
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToString(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotBranchIdsVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.BranchIds = append(params.BranchIds, paramsDotBranchIdsVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if params.BranchIds == nil {
+					return nil // optional
+				}
+				if err := (validate.Array{
+					MinLength:    0,
+					MinLengthSet: true,
+					MaxLength:    100,
+					MaxLengthSet: true,
+				}).ValidateLength(len(params.BranchIds)); err != nil {
+					return errors.Wrap(err, "array")
+				}
+				var failures []validate.FieldError
+				for i, elem := range params.BranchIds {
+					if err := func() error {
+						if err := (validate.String{
+							MinLength:     0,
+							MinLengthSet:  false,
+							MaxLength:     0,
+							MaxLengthSet:  false,
+							Email:         false,
+							Hostname:      false,
+							Regex:         regexMap["^([a-z0-9-]{1,60}(,[a-z0-9-]{1,60}){0,99})?$"],
+							MinNumeric:    0,
+							MinNumericSet: false,
+							MaxNumeric:    0,
+							MaxNumericSet: false,
+						}).Validate(string(elem)); err != nil {
+							return errors.Wrap(err, "string")
+						}
+						return nil
+					}(); err != nil {
+						failures = append(failures, validate.FieldError{
+							Name:  fmt.Sprintf("[%d]", i),
+							Error: err,
+						})
+					}
+				}
+				if len(failures) > 0 {
+					return &validate.Error{Fields: failures}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "branch_ids",
+			In:   "query",
+			Err:  err,
+		}
+	}
 	// Decode query: from.
 	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
@@ -7051,101 +7516,48 @@ func decodeGetConsumptionHistoryPerAccountParams(args [0]string, argsEscaped boo
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotOrgIDVal string
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToString(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotOrgIDVal = c
-					return nil
-				}(); err != nil {
+				val, err := d.DecodeValue()
+				if err != nil {
 					return err
 				}
-				params.OrgID.SetTo(paramsDotOrgIDVal)
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.OrgID = c
 				return nil
 			}); err != nil {
 				return err
 			}
 			if err := func() error {
-				if value, ok := params.OrgID.Get(); ok {
-					if err := func() error {
-						if err := (validate.String{
-							MinLength:     0,
-							MinLengthSet:  false,
-							MaxLength:     0,
-							MaxLengthSet:  false,
-							Email:         false,
-							Hostname:      false,
-							Regex:         regexMap["^[a-z0-9-]{1,60}$"],
-							MinNumeric:    0,
-							MinNumericSet: false,
-							MaxNumeric:    0,
-							MaxNumericSet: false,
-						}).Validate(string(value)); err != nil {
-							return errors.Wrap(err, "string")
-						}
-						return nil
-					}(); err != nil {
-						return err
-					}
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.OrgID)); err != nil {
+					return errors.Wrap(err, "string")
 				}
 				return nil
 			}(); err != nil {
 				return err
 			}
+		} else {
+			return err
 		}
 		return nil
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "org_id",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: include_v1_metrics.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "include_v1_metrics",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotIncludeV1MetricsVal bool
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToBool(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotIncludeV1MetricsVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.IncludeV1Metrics.SetTo(paramsDotIncludeV1MetricsVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "include_v1_metrics",
 			In:   "query",
 			Err:  err,
 		}
@@ -7191,6 +7603,8 @@ func decodeGetConsumptionHistoryPerAccountParams(args [0]string, argsEscaped boo
 			}); err != nil {
 				return err
 			}
+		} else {
+			return err
 		}
 		return nil
 	}(); err != nil {
@@ -7831,18 +8245,16 @@ func decodeGetConsumptionHistoryPerProjectParams(args [0]string, argsEscaped boo
 
 // GetConsumptionHistoryPerProjectV2Params is parameters of getConsumptionHistoryPerProjectV2 operation.
 type GetConsumptionHistoryPerProjectV2Params struct {
-	// Specify the cursor value from the previous response to get the next batch of projects.
+	// Cursor from the previous response (`pagination.cursor`). Pass it to fetch the next page
+	// of projects. Pages are ordered by project creation order (newest first).
 	Cursor OptString `json:",omitempty,omitzero"`
-	// Specify a value from 1 to 100 to limit number of projects in the response.
+	// Maximum number of projects per page. Allowed range: 1 to 100. Default: 10.
 	Limit OptInt `json:",omitempty,omitzero"`
-	// Specify a list of project IDs to filter the response.
-	// If omitted, the response will contain all projects.
-	// A list of project IDs can be specified as an array of parameter values or as a comma-separated
-	// list in a single parameter value.
-	// - As an array of parameter values:
-	// `project_ids=cold-poetry-09157238%20&project_ids=quiet-snow-71788278`
-	// - As a comma-separated list in a single parameter value: `project_ids=cold-poetry-09157238,
-	// quiet-snow-71788278`.
+	// Optional project IDs to filter the response (up to 100). If omitted, projects in the
+	// organization are included across pages (use `cursor` and `limit`).
+	// Pass multiple IDs as repeated query parameters or a comma-separated list:
+	// - `project_ids=cold-poetry-09157238&project_ids=quiet-snow-71788278`
+	// - `project_ids=cold-poetry-09157238,quiet-snow-71788278`.
 	ProjectIds []string `json:",omitempty"`
 	// Specify the start `date-time` for the consumption period.
 	// The `date-time` value is rounded according to the specified `granularity`.
@@ -7852,10 +8264,12 @@ type GetConsumptionHistoryPerProjectV2Params struct {
 	// - For `hourly`, consumption metrics are limited to the last 168 hours.
 	// - For `daily`, consumption metrics are limited to the last 60 days.
 	// - For `monthly`, consumption metrics are limited to the last year.
-	// The consumption history is available starting from `March 1, 2024, at 00:00:00 UTC`.
+	// The earliest allowed `from` value is `March 1, 2024, at 00:00:00 UTC`.
+	// Metrics are returned from when the account upgraded to an eligible plan, which may be
+	// later than that date.
 	From time.Time
 	// Specify the end `date-time` for the consumption period.
-	// The `date-time` value is rounded according to the specified granularity.
+	// The `date-time` value is rounded according to the specified `granularity`.
 	// For example, `2024-03-15T15:30:00Z` for `daily` granularity will be rounded to
 	// `2024-03-15T00:00:00Z`.
 	// The specified `date-time` value must respect the specified `granularity`:
@@ -7867,12 +8281,9 @@ type GetConsumptionHistoryPerProjectV2Params struct {
 	// Hourly, daily, and monthly metrics are available for the last 168 hours, 60 days,
 	// and 1 year, respectively.
 	Granularity ConsumptionHistoryGranularity
-	// Specify the organization for which the project consumption metrics should be returned.
-	// If this parameter is not provided, the endpoint will return the metrics for the
-	// authenticated user's projects.
+	// Organization ID. Metrics are returned for projects in this organization.
 	OrgID string
-	// Specify a list of metrics to include in the response.
-	// Possible values:
+	// Required. List the metrics to return. Supported values:
 	// - `compute_unit_seconds`
 	// - `root_branch_bytes_month`
 	// - `child_branch_bytes_month`
@@ -7880,11 +8291,10 @@ type GetConsumptionHistoryPerProjectV2Params struct {
 	// - `public_network_transfer_bytes`
 	// - `private_network_transfer_bytes`
 	// - `extra_branches_month`
-	// A list of metrics can be specified as an array of parameter values or as a comma-separated list in
-	// a single parameter value.
-	// - As an array of parameter values: `metrics=compute_unit_seconds&metrics=extra_branches_month`
-	// - As a comma-separated list in a single parameter value: `metrics=compute_unit_seconds,
-	// extra_branches_month`.
+	// - `snapshot_storage_bytes_month`
+	// Pass multiple values as repeated query parameters or a comma-separated list:
+	// - `metrics=compute_unit_seconds&metrics=extra_branches_month`
+	// - `metrics=compute_unit_seconds,extra_branches_month`.
 	Metrics ConsumptionHistoryQueryMetrics
 }
 
@@ -9269,6 +9679,166 @@ func decodeGetNeonAuthEmailServerParams(args [1]string, argsEscaped bool, r *htt
 	return params, nil
 }
 
+// GetNeonAuthPhoneNumberPluginParams is parameters of getNeonAuthPhoneNumberPlugin operation.
+type GetNeonAuthPhoneNumberPluginParams struct {
+	// The Neon project ID.
+	ProjectID string
+	// The Neon branch ID.
+	BranchID string
+}
+
+func unpackGetNeonAuthPhoneNumberPluginParams(packed middleware.Parameters) (params GetNeonAuthPhoneNumberPluginParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "project_id",
+			In:   "path",
+		}
+		params.ProjectID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "branch_id",
+			In:   "path",
+		}
+		params.BranchID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetNeonAuthPhoneNumberPluginParams(args [2]string, argsEscaped bool, r *http.Request) (params GetNeonAuthPhoneNumberPluginParams, _ error) {
+	// Decode path: project_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "project_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProjectID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.ProjectID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "project_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: branch_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "branch_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BranchID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.BranchID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "branch_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // GetNeonAuthPluginConfigsParams is parameters of getNeonAuthPluginConfigs operation.
 type GetNeonAuthPluginConfigsParams struct {
 	// The Neon project ID.
@@ -10194,6 +10764,92 @@ func decodeGetOrganizationMembersParams(args [1]string, argsEscaped bool, r *htt
 			Err:  err,
 		}
 	}
+	// Decode path: org_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "org_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.OrgID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.OrgID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "org_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetOrganizationSpendingLimitParams is parameters of getOrganizationSpendingLimit operation.
+type GetOrganizationSpendingLimitParams struct {
+	// The Neon organization ID.
+	OrgID string
+}
+
+func unpackGetOrganizationSpendingLimitParams(packed middleware.Parameters) (params GetOrganizationSpendingLimitParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "org_id",
+			In:   "path",
+		}
+		params.OrgID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetOrganizationSpendingLimitParams(args [1]string, argsEscaped bool, r *http.Request) (params GetOrganizationSpendingLimitParams, _ error) {
 	// Decode path: org_id.
 	if err := func() error {
 		param := args[0]
@@ -14783,6 +15439,11 @@ type ListProjectBranchesParams struct {
 	SortOrder OptSortOrderParam `json:",omitempty,omitzero"`
 	// The maximum number of records to be returned in the response.
 	Limit OptInt `json:",omitempty,omitzero"`
+	// If true, return recoverable deleted branches too (soft-deleted within the recovery window).
+	// If false or not provided, return only active (non-deleted) branches.
+	// This parameter is part of the Branch Recovery feature, which is in preview and not available to
+	// all users.
+	IncludeDeleted OptBool `json:",omitempty,omitzero"`
 	// The Neon project ID.
 	ProjectID string
 }
@@ -14831,6 +15492,15 @@ func unpackListProjectBranchesParams(packed middleware.Parameters) (params ListP
 		}
 		if v, ok := packed[key]; ok {
 			params.Limit = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "include_deleted",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.IncludeDeleted = v.(OptBool)
 		}
 	}
 	{
@@ -15111,6 +15781,52 @@ func decodeListProjectBranchesParams(args [1]string, argsEscaped bool, r *http.R
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "limit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: include_deleted.
+	{
+		val := bool(false)
+		params.IncludeDeleted.SetTo(val)
+	}
+	// Decode query: include_deleted.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "include_deleted",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotIncludeDeletedVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotIncludeDeletedVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.IncludeDeleted.SetTo(paramsDotIncludeDeletedVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "include_deleted",
 			In:   "query",
 			Err:  err,
 		}
@@ -17040,92 +17756,6 @@ func decodeRestartProjectEndpointParams(args [2]string, argsEscaped bool, r *htt
 	return params, nil
 }
 
-// RestoreProjectParams is parameters of restoreProject operation.
-type RestoreProjectParams struct {
-	// The Neon project ID.
-	ProjectID string
-}
-
-func unpackRestoreProjectParams(packed middleware.Parameters) (params RestoreProjectParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "project_id",
-			In:   "path",
-		}
-		params.ProjectID = packed[key].(string)
-	}
-	return params
-}
-
-func decodeRestoreProjectParams(args [1]string, argsEscaped bool, r *http.Request) (params RestoreProjectParams, _ error) {
-	// Decode path: project_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "project_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.ProjectID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-			if err := func() error {
-				if err := (validate.String{
-					MinLength:     0,
-					MinLengthSet:  false,
-					MaxLength:     0,
-					MaxLengthSet:  false,
-					Email:         false,
-					Hostname:      false,
-					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
-					MinNumeric:    0,
-					MinNumericSet: false,
-					MaxNumeric:    0,
-					MaxNumericSet: false,
-				}).Validate(string(params.ProjectID)); err != nil {
-					return errors.Wrap(err, "string")
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "project_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
 // RestoreProjectBranchParams is parameters of restoreProjectBranch operation.
 type RestoreProjectBranchParams struct {
 	// The Neon project ID.
@@ -18159,6 +18789,92 @@ func decodeSetDefaultProjectBranchParams(args [2]string, argsEscaped bool, r *ht
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "branch_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// SetOrganizationSpendingLimitParams is parameters of setOrganizationSpendingLimit operation.
+type SetOrganizationSpendingLimitParams struct {
+	// The Neon organization ID.
+	OrgID string
+}
+
+func unpackSetOrganizationSpendingLimitParams(packed middleware.Parameters) (params SetOrganizationSpendingLimitParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "org_id",
+			In:   "path",
+		}
+		params.OrgID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeSetOrganizationSpendingLimitParams(args [1]string, argsEscaped bool, r *http.Request) (params SetOrganizationSpendingLimitParams, _ error) {
+	// Decode path: org_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "org_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.OrgID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.OrgID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "org_id",
 			In:   "path",
 			Err:  err,
 		}
@@ -19434,6 +20150,166 @@ func decodeUpdateNeonAuthAllowLocalhostParams(args [2]string, argsEscaped bool, 
 	return params, nil
 }
 
+// UpdateNeonAuthConfigParams is parameters of updateNeonAuthConfig operation.
+type UpdateNeonAuthConfigParams struct {
+	// The Neon project ID.
+	ProjectID string
+	// The Neon branch ID.
+	BranchID string
+}
+
+func unpackUpdateNeonAuthConfigParams(packed middleware.Parameters) (params UpdateNeonAuthConfigParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "project_id",
+			In:   "path",
+		}
+		params.ProjectID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "branch_id",
+			In:   "path",
+		}
+		params.BranchID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeUpdateNeonAuthConfigParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateNeonAuthConfigParams, _ error) {
+	// Decode path: project_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "project_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProjectID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.ProjectID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "project_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: branch_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "branch_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BranchID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.BranchID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "branch_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // UpdateNeonAuthEmailAndPasswordConfigParams is parameters of updateNeonAuthEmailAndPasswordConfig operation.
 type UpdateNeonAuthEmailAndPasswordConfigParams struct {
 	// The Neon project ID.
@@ -19840,6 +20716,166 @@ func decodeUpdateNeonAuthEmailServerParams(args [1]string, argsEscaped bool, r *
 	return params, nil
 }
 
+// UpdateNeonAuthMagicLinkPluginParams is parameters of updateNeonAuthMagicLinkPlugin operation.
+type UpdateNeonAuthMagicLinkPluginParams struct {
+	// The Neon project ID.
+	ProjectID string
+	// The Neon branch ID.
+	BranchID string
+}
+
+func unpackUpdateNeonAuthMagicLinkPluginParams(packed middleware.Parameters) (params UpdateNeonAuthMagicLinkPluginParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "project_id",
+			In:   "path",
+		}
+		params.ProjectID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "branch_id",
+			In:   "path",
+		}
+		params.BranchID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeUpdateNeonAuthMagicLinkPluginParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateNeonAuthMagicLinkPluginParams, _ error) {
+	// Decode path: project_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "project_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProjectID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.ProjectID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "project_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: branch_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "branch_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BranchID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.BranchID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "branch_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // UpdateNeonAuthOauthProviderParams is parameters of updateNeonAuthOauthProvider operation.
 type UpdateNeonAuthOauthProviderParams struct {
 	// The Neon project ID.
@@ -20015,6 +21051,166 @@ func unpackUpdateNeonAuthOrganizationPluginParams(packed middleware.Parameters) 
 }
 
 func decodeUpdateNeonAuthOrganizationPluginParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateNeonAuthOrganizationPluginParams, _ error) {
+	// Decode path: project_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "project_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProjectID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.ProjectID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "project_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: branch_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "branch_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BranchID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.BranchID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "branch_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UpdateNeonAuthPhoneNumberPluginParams is parameters of updateNeonAuthPhoneNumberPlugin operation.
+type UpdateNeonAuthPhoneNumberPluginParams struct {
+	// The Neon project ID.
+	ProjectID string
+	// The Neon branch ID.
+	BranchID string
+}
+
+func unpackUpdateNeonAuthPhoneNumberPluginParams(packed middleware.Parameters) (params UpdateNeonAuthPhoneNumberPluginParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "project_id",
+			In:   "path",
+		}
+		params.ProjectID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "branch_id",
+			In:   "path",
+		}
+		params.BranchID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeUpdateNeonAuthPhoneNumberPluginParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateNeonAuthPhoneNumberPluginParams, _ error) {
 	// Decode path: project_id.
 	if err := func() error {
 		param := args[0]

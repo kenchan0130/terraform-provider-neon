@@ -294,7 +294,8 @@ func (s *Server) handleAcceptProjectTransferRequestRequest(args [2]string, argsE
 
 // handleAddBranchNeonAuthOauthProviderRequest handles addBranchNeonAuthOauthProvider operation.
 //
-// Adds a OAuth provider to the specified project.
+// Adds an OAuth provider configuration to the specified branch's Neon Auth integration.
+// After adding, users can authenticate using the configured provider.
 //
 // POST /projects/{project_id}/branches/{branch_id}/auth/oauth_providers
 func (s *Server) handleAddBranchNeonAuthOauthProviderRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -485,7 +486,7 @@ func (s *Server) handleAddBranchNeonAuthOauthProviderRequest(args [2]string, arg
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    AddBranchNeonAuthOauthProviderOperation,
-			OperationSummary: "Add a OAuth provider",
+			OperationSummary: "Add an OAuth provider",
 			OperationID:      "addBranchNeonAuthOauthProvider",
 			Body:             request,
 			RawBody:          rawBody,
@@ -551,7 +552,8 @@ func (s *Server) handleAddBranchNeonAuthOauthProviderRequest(args [2]string, arg
 
 // handleAddBranchNeonAuthTrustedDomainRequest handles addBranchNeonAuthTrustedDomain operation.
 //
-// Adds a domain to the redirect_uri whitelist for the specified project.
+// Adds a domain to the redirect URI whitelist for the specified branch.
+// Only domains in this list are permitted as redirect targets after authentication.
 //
 // POST /projects/{project_id}/branches/{branch_id}/auth/domains
 func (s *Server) handleAddBranchNeonAuthTrustedDomainRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -1002,7 +1004,7 @@ func (s *Server) handleAddNeonAuthDomainToRedirectURIWhitelistRequest(args [1]st
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    AddNeonAuthDomainToRedirectURIWhitelistOperation,
-			OperationSummary: "Add domain to redirect_uri whitelist",
+			OperationSummary: "Add trusted redirect URI domain",
 			OperationID:      "addNeonAuthDomainToRedirectURIWhitelist",
 			Body:             request,
 			RawBody:          rawBody,
@@ -1064,8 +1066,8 @@ func (s *Server) handleAddNeonAuthDomainToRedirectURIWhitelistRequest(args [1]st
 
 // handleAddNeonAuthOauthProviderRequest handles addNeonAuthOauthProvider operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead. Adds a
-// OAuth provider to the specified project.
+// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead.
+// Adds an OAuth provider to the specified project.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -1258,7 +1260,7 @@ func (s *Server) handleAddNeonAuthOauthProviderRequest(args [1]string, argsEscap
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    AddNeonAuthOauthProviderOperation,
-			OperationSummary: "Add a OAuth provider",
+			OperationSummary: "Add an OAuth provider",
 			OperationID:      "addNeonAuthOauthProvider",
 			Body:             request,
 			RawBody:          rawBody,
@@ -1320,17 +1322,15 @@ func (s *Server) handleAddNeonAuthOauthProviderRequest(args [1]string, argsEscap
 
 // handleAddProjectJWKSRequest handles addProjectJWKS operation.
 //
-// Add a new JWKS URL to a project, such that it can be used for verifying JWTs used as the
-// authentication mechanism for the specified project.
+// Adds a JWKS URL to the specified project for verifying JWTs used as the authentication mechanism.
 // The URL must be a valid HTTPS URL that returns a JSON Web Key Set.
 // The `provider_name` field allows you to specify which authentication provider you're using (e.g.,
-// Clerk, Auth0, AWS Cognito, etc.).
-// The `branch_id` can be used to specify on which branches the JWKS URL will be accepted. If not
-// specified, then it will work on any branch.
-// The `role_names` can be used to specify for which roles the JWKS URL will be accepted. If not
-// specified, then default roles will be used (authenticator, authenticated and anonymous).
-// The `jwt_audience` can be used to specify which "aud" values should be accepted by Neon in the
-// JWTs that are used for authentication.
+// Clerk, Auth0, AWS Cognito).
+// The `branch_id` scopes the JWKS URL to specific branches; if not specified, it applies to all
+// branches.
+// The `role_names` scopes the URL to specific roles; if not specified, default roles are used
+// (`authenticator`, `authenticated`, `anonymous`).
+// The `jwt_audience` specifies which `aud` values are accepted in JWTs.
 //
 // POST /projects/{project_id}/jwks
 func (s *Server) handleAddProjectJWKSRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -2106,7 +2106,7 @@ func (s *Server) handleAssignProjectVPCEndpointRequest(args [2]string, argsEscap
 // handleCountProjectBranchesRequest handles countProjectBranches operation.
 //
 // Retrieves the total number of branches in the specified project.
-// You can obtain a `project_id` by listing the projects for your Neon account.
+// Supports an optional `search` parameter to count branches matching a name filter.
 //
 // GET /projects/{project_id}/branches/count
 func (s *Server) handleCountProjectBranchesRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -2350,10 +2350,11 @@ func (s *Server) handleCountProjectBranchesRequest(args [1]string, argsEscaped b
 //
 // Creates an API key.
 // The `key_name` is a user-specified name for the key.
-// This method returns an `id` and `key`. The `key` is a randomly generated, 64-bit token required to
-// access the Neon API.
+// Returns an `id` and `key`; the `key` is a randomly generated, 64-bit token required to access the
+// Neon API.
+// Store the key securely — it is only returned once.
 // API keys can also be managed in the Neon Console.
-// See [Manage API keys](https://neon.tech/docs/manage/api-keys/).
+// See [Manage API keys](https://neon.com/docs/manage/api-keys/).
 //
 // POST /api_keys
 func (s *Server) handleCreateApiKeyRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -2591,7 +2592,9 @@ func (s *Server) handleCreateApiKeyRequest(args [0]string, argsEscaped bool, w h
 
 // handleCreateBranchNeonAuthNewUserRequest handles createBranchNeonAuthNewUser operation.
 //
-// Creates a new user in Neon Auth.
+// Creates a new user in the Neon Auth user directory for the specified branch.
+// The user is created in the `neon_auth.users_sync` table and can immediately authenticate
+// using the branch's configured auth providers.
 //
 // POST /projects/{project_id}/branches/{branch_id}/auth/users
 func (s *Server) handleCreateBranchNeonAuthNewUserRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -2848,9 +2851,9 @@ func (s *Server) handleCreateBranchNeonAuthNewUserRequest(args [2]string, argsEs
 
 // handleCreateNeonAuthRequest handles createNeonAuth operation.
 //
-// Enables Neon Auth integrationfor the branch.
-// You can obtain the `project_id` and `branch_id` by listing the projects and branches for your Neon
-// account.
+// Enables Neon Auth for the specified branch by connecting it to an authentication provider.
+// Creating the integration provisions the `neon_auth` schema in the branch database, which stores
+// user identity data synchronized from the provider.
 //
 // POST /projects/{project_id}/branches/{branch_id}/auth
 func (s *Server) handleCreateNeonAuthRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -3834,10 +3837,11 @@ func (s *Server) handleCreateNeonAuthProviderSDKKeysRequest(args [0]string, args
 //
 // Creates an API key for the specified organization.
 // The `key_name` is a user-specified name for the key.
-// This method returns an `id` and `key`. The `key` is a randomly generated, 64-bit token required to
-// access the Neon API.
+// Returns an `id` and `key`; the `key` is a randomly generated, 64-bit token required to access the
+// Neon API.
+// Store the key securely — it is only returned once.
 // API keys can also be managed in the Neon Console.
-// See [Manage API keys](https://neon.tech/docs/manage/api-keys/).
+// See [Manage API keys](https://neon.com/docs/manage/api-keys/).
 //
 // POST /organizations/{org_id}/api_keys
 func (s *Server) handleCreateOrgApiKeyRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -4348,13 +4352,15 @@ func (s *Server) handleCreateOrganizationInvitationsRequest(args [1]string, args
 // handleCreateProjectRequest handles createProject operation.
 //
 // Creates a Neon project within an organization.
-// You may need to specify an org_id parameter depending on your API key type.
+// If using a personal API key, include the `org_id` parameter to specify which organization to
+// create the project in.
+// If using an org API key, `org_id` is automatically inferred from the key.
 // Plan limits define how many projects you can create.
-// For more information, see [Manage projects](https://neon.tech/docs/manage/projects/).
+// For more information, see [Manage projects](https://neon.com/docs/manage/projects/).
 // You can specify a region and Postgres version in the request body.
-// Neon currently supports PostgreSQL 14, 15, 16, and 17.
+// Neon currently supports PostgreSQL 14, 15, 16, 17, and 18.
 // For supported regions and `region_id` values, see [Regions](https://neon.
-// tech/docs/introduction/regions/).
+// com/docs/introduction/regions/).
 //
 // POST /projects
 func (s *Server) handleCreateProjectRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -4593,15 +4599,13 @@ func (s *Server) handleCreateProjectRequest(args [0]string, argsEscaped bool, w 
 // handleCreateProjectBranchRequest handles createProjectBranch operation.
 //
 // Creates a branch in the specified project.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// This method does not require a request body, but you can specify one to create a compute endpoint
-// for the branch or to select a non-default parent branch.
+// No request body is required, but you can specify one to create a compute endpoint or select a
+// non-default parent branch.
 // By default, the branch is created from the project's default branch with no compute endpoint, and
 // the branch name is auto-generated.
-// To access the branch, you must add an endpoint object. A `read_write` endpoint allows you to
-// perform read and write operations on the branch.
+// To access the branch, add a `read_write` endpoint.
 // Each branch supports one read-write endpoint and multiple read-only endpoints.
-// For related information, see [Manage branches](https://neon.tech/docs/manage/branches/).
+// For related information, see [Manage branches](https://neon.com/docs/manage/branches/).
 //
 // POST /projects/{project_id}/branches
 func (s *Server) handleCreateProjectBranchRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -5114,8 +5118,8 @@ func (s *Server) handleCreateProjectBranchAnonymizedRequest(args [1]string, args
 // handleCreateProjectBranchDataAPIRequest handles createProjectBranchDataAPI operation.
 //
 // Creates a new instance of Neon Data API in the specified branch.
-// You can obtain the `project_id` and `branch_id` by listing the projects and branches for your Neon
-// account.
+// The Data API exposes a REST interface over the branch database. The `database_name` path parameter
+// determines which database the API serves.
 //
 // POST /projects/{project_id}/branches/{branch_id}/data-api/{database_name}
 func (s *Server) handleCreateProjectBranchDataAPIRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -5378,9 +5382,7 @@ func (s *Server) handleCreateProjectBranchDataAPIRequest(args [3]string, argsEsc
 //
 // Creates a database in the specified branch.
 // A branch can have multiple databases.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
-// For related information, see [Manage databases](https://neon.tech/docs/manage/databases/).
+// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
 //
 // POST /projects/{project_id}/branches/{branch_id}/databases
 func (s *Server) handleCreateProjectBranchDatabaseRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -5638,9 +5640,7 @@ func (s *Server) handleCreateProjectBranchDatabaseRequest(args [2]string, argsEs
 // handleCreateProjectBranchRoleRequest handles createProjectBranchRole operation.
 //
 // Creates a Postgres role in the specified branch.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
-// For related information, see [Manage roles](https://neon.tech/docs/manage/roles/).
+// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
 // Connections established to the active compute endpoint will be dropped.
 // If the compute endpoint is idle, the endpoint becomes active for a short period of time and is
 // suspended afterward.
@@ -5901,17 +5901,12 @@ func (s *Server) handleCreateProjectBranchRoleRequest(args [2]string, argsEscape
 // handleCreateProjectEndpointRequest handles createProjectEndpoint operation.
 //
 // Creates a compute endpoint for the specified branch.
-// An endpoint is a Neon compute instance.
+// A compute endpoint is a Neon compute instance.
 // There is a maximum of one read-write compute endpoint per branch.
 // If the specified branch already has a read-write compute endpoint, the operation fails.
 // A branch can have multiple read-only compute endpoints.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain `branch_id` by listing the project's branches.
-// A `branch_id` has a `br-` prefix.
-// For supported regions and `region_id` values, see [Regions](https://neon.
-// tech/docs/introduction/regions/).
 // For more information about compute endpoints, see [Manage computes](https://neon.
-// tech/docs/manage/endpoints/).
+// com/docs/manage/endpoints/).
 //
 // POST /projects/{project_id}/endpoints
 func (s *Server) handleCreateProjectEndpointRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -6164,14 +6159,11 @@ func (s *Server) handleCreateProjectEndpointRequest(args [1]string, argsEscaped 
 
 // handleCreateProjectTransferRequestRequest handles createProjectTransferRequest operation.
 //
-// Creates a transfer request for the specified project. A transfer request allows
-// the project to be transferred to another account or organization. The request
-// has an expiration time after which it can no longer be used. To accept/claim
-// the transfer request, the recipient user/organization must call the
-// `/projects/{project_id}/transfer_requests/{request_id}` API endpoint, or visit
-// `https://console.neon.tech/app/claim?p={project_id}&tr={request_id}&ru={redirect_url}`
-// in the Neon Console. The `ru` parameter is optional and can be used to redirect
-// the user after accepting the transfer request.
+// Creates a transfer request for the specified project. The request expires after a set period.
+// To accept the request, the recipient calls `PUT
+// /projects/{project_id}/transfer_requests/{request_id}`
+// or uses the Neon Console claim link.
+// The optional `ru` parameter redirects the recipient after acceptance.
 //
 // POST /projects/{project_id}/transfer_requests
 func (s *Server) handleCreateProjectTransferRequestRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -6424,8 +6416,8 @@ func (s *Server) handleCreateProjectTransferRequestRequest(args [1]string, argsE
 
 // handleCreateSnapshotRequest handles createSnapshot operation.
 //
-// Create a snapshot from the specified branch using the provided parameters.
-// This endpoint may initiate an asynchronous operation.
+// Creates a snapshot from the specified branch.
+// This operation may initiate an asynchronous process.
 // **Note**: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/snapshot
@@ -6930,7 +6922,8 @@ func (s *Server) handleDeleteBranchNeonAuthOauthProviderRequest(args [3]string, 
 
 // handleDeleteBranchNeonAuthTrustedDomainRequest handles deleteBranchNeonAuthTrustedDomain operation.
 //
-// Deletes a domain from the redirect_uri whitelist for the specified project.
+// Removes a domain from the redirect URI whitelist for the specified branch.
+// After removal, the domain can no longer be used as a redirect target after authentication.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/auth/domains
 func (s *Server) handleDeleteBranchNeonAuthTrustedDomainRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -7187,7 +7180,8 @@ func (s *Server) handleDeleteBranchNeonAuthTrustedDomainRequest(args [2]string, 
 
 // handleDeleteBranchNeonAuthUserRequest handles deleteBranchNeonAuthUser operation.
 //
-// Deletes the auth user for the specified project.
+// Deletes the specified user from the Neon Auth user directory for the specified branch.
+// Removes the user record from `neon_auth.users_sync`. This action cannot be undone.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/auth/users/{auth_user_id}
 func (s *Server) handleDeleteBranchNeonAuthUserRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -7627,7 +7621,7 @@ func (s *Server) handleDeleteNeonAuthDomainFromRedirectURIWhitelistRequest(args 
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    DeleteNeonAuthDomainFromRedirectURIWhitelistOperation,
-			OperationSummary: "Delete domain from redirect_uri whitelist",
+			OperationSummary: "Delete trusted redirect URI domain",
 			OperationID:      "deleteNeonAuthDomainFromRedirectURIWhitelist",
 			Body:             request,
 			RawBody:          rawBody,
@@ -8437,6 +8431,246 @@ func (s *Server) handleDeleteNeonAuthUserRequest(args [2]string, argsEscaped boo
 	}
 }
 
+// handleDeleteOrganizationSpendingLimitRequest handles deleteOrganizationSpendingLimit operation.
+//
+// Removes the configured monthly spending limit for the specified organization.
+// Idempotent — removing an already-unset limit still succeeds.
+// Available to organization admins on Launch and Scale plans only.
+//
+// DELETE /organizations/{org_id}/billing/spending_limit
+func (s *Server) handleDeleteOrganizationSpendingLimitRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	statusWriter := &codeRecorder{ResponseWriter: w}
+	w = statusWriter
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("deleteOrganizationSpendingLimit"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.HTTPRouteKey.String("/organizations/{org_id}/billing/spending_limit"),
+	}
+	// Add attributes from config.
+	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), DeleteOrganizationSpendingLimitOperation,
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+
+		attrSet := labeler.AttributeSet()
+		attrs := attrSet.ToSlice()
+		code := statusWriter.status
+		if code != 0 {
+			codeAttr := semconv.HTTPResponseStatusCode(code)
+			attrs = append(attrs, codeAttr)
+			span.SetAttributes(codeAttr)
+		}
+		attrOpt := metric.WithAttributes(attrs...)
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+
+			// https://opentelemetry.io/docs/specs/semconv/http/http-spans/#status
+			// Span Status MUST be left unset if HTTP status code was in the 1xx, 2xx or 3xx ranges,
+			// unless there was another error (e.g., network error receiving the response body; or 3xx codes with
+			// max redirects exceeded), in which case status MUST be set to Error.
+			code := statusWriter.status
+			if code < 100 || code >= 500 {
+				span.SetStatus(codes.Error, stage)
+			}
+
+			attrSet := labeler.AttributeSet()
+			attrs := attrSet.ToSlice()
+			if code != 0 {
+				attrs = append(attrs, semconv.HTTPResponseStatusCode(code))
+			}
+
+			s.errors.Add(ctx, 1, metric.WithAttributes(attrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: DeleteOrganizationSpendingLimitOperation,
+			ID:   "deleteOrganizationSpendingLimit",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityBearerAuth(ctx, DeleteOrganizationSpendingLimitOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "BearerAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:BearerAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+		{
+			sctx, ok, err := s.securityCookieAuth(ctx, DeleteOrganizationSpendingLimitOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "CookieAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:CookieAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 1
+				ctx = sctx
+			}
+		}
+		{
+			sctx, ok, err := s.securityTokenCookieAuth(ctx, DeleteOrganizationSpendingLimitOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "TokenCookieAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:TokenCookieAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 2
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeDeleteOrganizationSpendingLimitParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var rawBody []byte
+
+	var response *EmptyResponse
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    DeleteOrganizationSpendingLimitOperation,
+			OperationSummary: "Remove organization spending limit",
+			OperationID:      "deleteOrganizationSpendingLimit",
+			Body:             nil,
+			RawBody:          rawBody,
+			Params: middleware.Parameters{
+				{
+					Name: "org_id",
+					In:   "path",
+				}: params.OrgID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = DeleteOrganizationSpendingLimitParams
+			Response = *EmptyResponse
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackDeleteOrganizationSpendingLimitParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				err = s.h.DeleteOrganizationSpendingLimit(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		err = s.h.DeleteOrganizationSpendingLimit(ctx, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*GeneralErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeDeleteOrganizationSpendingLimitResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleDeleteOrganizationVPCEndpointRequest handles deleteOrganizationVPCEndpoint operation.
 //
 // Deletes the VPC endpoint from the specified Neon organization.
@@ -8687,11 +8921,9 @@ func (s *Server) handleDeleteOrganizationVPCEndpointRequest(args [3]string, args
 
 // handleDeleteProjectRequest handles deleteProject operation.
 //
-// Deletes the specified project.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// Deleting a project is a permanent action.
-// Deleting a project also deletes endpoints, branches, databases, and users that belong to the
-// project.
+// Deletes the specified project and all its endpoints, branches, databases, and users.
+// Deleted projects can be recovered within 7 days using `POST /projects/{project_id}/recover`.
+// To list recoverable projects, use `GET /projects?recoverable=true`.
 //
 // DELETE /projects/{project_id}
 func (s *Server) handleDeleteProjectRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -8929,17 +9161,14 @@ func (s *Server) handleDeleteProjectRequest(args [1]string, argsEscaped bool, w 
 
 // handleDeleteProjectBranchRequest handles deleteProjectBranch operation.
 //
-// Deletes the specified branch from a project, and places
-// all compute endpoints into an idle state, breaking existing client connections.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain a `branch_id` by listing the project's branches.
-// For related information, see [Manage branches](https://neon.tech/docs/manage/branches/).
-// When a successful response status is received, the compute endpoints are still active,
-// and the branch is not yet deleted from storage.
-// The deletion occurs after all operations finish.
-// You cannot delete a project's root or default branch, and you cannot delete a branch that has a
-// child branch.
+// Deletes the specified branch from a project and places all compute endpoints into an idle state,
+// breaking existing client connections.
+// The deletion completes after all operations finish.
+// You cannot delete a project's root or default branch, or a branch that has a child branch.
 // A project must have at least one branch.
+// By default, deleted branches can be recovered within a 7-day grace period.
+// Use the `hard_delete` parameter to permanently delete the branch immediately.
+// For related information, see [Manage branches](https://neon.com/docs/manage/branches/).
 //
 // DELETE /projects/{project_id}/branches/{branch_id}
 func (s *Server) handleDeleteProjectBranchRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -9121,6 +9350,10 @@ func (s *Server) handleDeleteProjectBranchRequest(args [2]string, argsEscaped bo
 			RawBody:          rawBody,
 			Params: middleware.Parameters{
 				{
+					Name: "hard_delete",
+					In:   "query",
+				}: params.HardDelete,
+				{
 					Name: "project_id",
 					In:   "path",
 				}: params.ProjectID,
@@ -9182,8 +9415,7 @@ func (s *Server) handleDeleteProjectBranchRequest(args [2]string, argsEscaped bo
 // handleDeleteProjectBranchDataAPIRequest handles deleteProjectBranchDataAPI operation.
 //
 // Deletes the Neon Data API for the specified branch.
-// You can obtain the `project_id` and `branch_id` by listing the projects and branches for your Neon
-// account.
+// Existing connections using the Data API endpoint will fail after deletion.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/data-api/{database_name}
 func (s *Server) handleDeleteProjectBranchDataAPIRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -9430,9 +9662,7 @@ func (s *Server) handleDeleteProjectBranchDataAPIRequest(args [3]string, argsEsc
 // handleDeleteProjectBranchDatabaseRequest handles deleteProjectBranchDatabase operation.
 //
 // Deletes the specified database from the branch.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` and `database_name` by listing the branch's databases.
-// For related information, see [Manage databases](https://neon.tech/docs/manage/databases/).
+// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/databases/{database_name}
 func (s *Server) handleDeleteProjectBranchDatabaseRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -9679,10 +9909,7 @@ func (s *Server) handleDeleteProjectBranchDatabaseRequest(args [3]string, argsEs
 // handleDeleteProjectBranchRoleRequest handles deleteProjectBranchRole operation.
 //
 // Deletes the specified Postgres role from the branch.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
-// You can obtain the `role_name` by listing the roles for a branch.
-// For related information, see [Manage roles](https://neon.tech/docs/manage/roles/).
+// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/roles/{role_name}
 func (s *Server) handleDeleteProjectBranchRoleRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -9928,15 +10155,13 @@ func (s *Server) handleDeleteProjectBranchRoleRequest(args [3]string, argsEscape
 
 // handleDeleteProjectEndpointRequest handles deleteProjectEndpoint operation.
 //
-// Delete the specified compute endpoint.
+// Deletes the specified compute endpoint.
 // A compute endpoint is a Neon compute instance.
 // Deleting a compute endpoint drops existing network connections to the compute endpoint.
-// The deletion is completed when last operation in the chain finishes successfully.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain an `endpoint_id` by listing your project's compute endpoints.
+// The deletion is completed when the last operation in the chain finishes successfully.
 // An `endpoint_id` has an `ep-` prefix.
 // For information about compute endpoints, see [Manage computes](https://neon.
-// tech/docs/manage/endpoints/).
+// com/docs/manage/endpoints/).
 //
 // DELETE /projects/{project_id}/endpoints/{endpoint_id}
 func (s *Server) handleDeleteProjectEndpointRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -10178,7 +10403,8 @@ func (s *Server) handleDeleteProjectEndpointRequest(args [2]string, argsEscaped 
 
 // handleDeleteProjectJWKSRequest handles deleteProjectJWKS operation.
 //
-// Deletes a JWKS URL from the specified project.
+// Removes the specified JWKS URL from the project.
+// JWTs signed by keys from the removed URL can no longer authenticate to the project's endpoints.
 //
 // DELETE /projects/{project_id}/jwks/{jwks_id}
 func (s *Server) handleDeleteProjectJWKSRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -10662,7 +10888,7 @@ func (s *Server) handleDeleteProjectVPCEndpointRequest(args [2]string, argsEscap
 
 // handleDeleteSnapshotRequest handles deleteSnapshot operation.
 //
-// Delete the specified snapshot.
+// Deletes the specified snapshot.
 // **Note**: This endpoint is currently in Beta.
 //
 // DELETE /projects/{project_id}/snapshots/{snapshot_id}
@@ -10905,7 +11131,12 @@ func (s *Server) handleDeleteSnapshotRequest(args [2]string, argsEscaped bool, w
 
 // handleDisableNeonAuthRequest handles disableNeonAuth operation.
 //
-// Disables Neon Auth for the branch.
+// Disables the Neon Auth integration for the specified branch, removing the connection
+// to the authentication provider.
+// If `delete_data` is `true`, also deletes the `neon_auth` schema and all associated tables
+// from the branch database.
+// The integration can be re-enabled by calling `POST
+// /projects/{project_id}/branches/{branch_id}/auth`.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/auth
 func (s *Server) handleDisableNeonAuthRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -11096,7 +11327,7 @@ func (s *Server) handleDisableNeonAuthRequest(args [2]string, argsEscaped bool, 
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    DisableNeonAuthOperation,
-			OperationSummary: "Disables Neon Auth for the branch",
+			OperationSummary: "Disable Neon Auth for the branch",
 			OperationID:      "disableNeonAuth",
 			Body:             request,
 			RawBody:          rawBody,
@@ -11362,7 +11593,7 @@ func (s *Server) handleFinalizeRestoreBranchRequest(args [2]string, argsEscaped 
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    FinalizeRestoreBranchOperation,
-			OperationSummary: "Finalize restore",
+			OperationSummary: "Finalize branch restore from snapshot",
 			OperationID:      "finalizeRestoreBranch",
 			Body:             request,
 			RawBody:          rawBody,
@@ -11671,8 +11902,6 @@ func (s *Server) handleGetActiveRegionsRequest(args [0]string, argsEscaped bool,
 // Retrieves the current status of an anonymized branch, including its state and progress information.
 // This endpoint allows you to monitor the anonymization process from initialization through
 // completion.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
 // Only anonymized branches will have status information available.
 // **Note**: This endpoint is currently in Beta.
 //
@@ -11850,7 +12079,7 @@ func (s *Server) handleGetAnonymizedBranchStatusRequest(args [2]string, argsEsca
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    GetAnonymizedBranchStatusOperation,
-			OperationSummary: "Get anonymized branch status",
+			OperationSummary: "Retrieve anonymized branch status",
 			OperationID:      "getAnonymizedBranchStatus",
 			Body:             nil,
 			RawBody:          rawBody,
@@ -11916,8 +12145,9 @@ func (s *Server) handleGetAnonymizedBranchStatusRequest(args [2]string, argsEsca
 
 // handleGetAuthDetailsRequest handles getAuthDetails operation.
 //
-// Returns auth information about the passed credentials. It can refer to an API key, Bearer token or
-// OAuth session.
+// Returns authentication details for the credentials used in the request,
+// including the credential type (API key, Bearer token, or OAuth session)
+// and the associated identity.
 //
 // GET /auth
 func (s *Server) handleGetAuthDetailsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -12083,7 +12313,7 @@ func (s *Server) handleGetAuthDetailsRequest(args [0]string, argsEscaped bool, w
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    GetAuthDetailsOperation,
-			OperationSummary: "Get request authentication details",
+			OperationSummary: "Retrieve request authentication details",
 			OperationID:      "getAuthDetails",
 			Body:             nil,
 			RawBody:          rawBody,
@@ -12140,7 +12370,11 @@ func (s *Server) handleGetAuthDetailsRequest(args [0]string, argsEscaped bool, w
 
 // handleGetAvailablePreloadLibrariesRequest handles getAvailablePreloadLibraries operation.
 //
-// Return available shared preload libraries.
+// Returns the shared preload libraries available for the specified project's Postgres version.
+// Shared preload libraries are Postgres extensions that require the `shared_preload_libraries`
+// setting and a compute restart to activate.
+// Use this list to determine which libraries can be enabled in the project's
+// `settings.preload_libraries` configuration.
 //
 // GET /projects/{project_id}/available_preload_libraries
 func (s *Server) handleGetAvailablePreloadLibrariesRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -12316,7 +12550,7 @@ func (s *Server) handleGetAvailablePreloadLibrariesRequest(args [1]string, argsE
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    GetAvailablePreloadLibrariesOperation,
-			OperationSummary: "Return available shared preload libraries",
+			OperationSummary: "List available shared preload libraries",
 			OperationID:      "getAvailablePreloadLibraries",
 			Body:             nil,
 			RawBody:          rawBody,
@@ -12379,9 +12613,8 @@ func (s *Server) handleGetAvailablePreloadLibrariesRequest(args [1]string, argsE
 // handleGetConnectionURIRequest handles getConnectionURI operation.
 //
 // Retrieves a connection URI for the specified database.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `database_name` by listing the databases for a branch.
-// You can obtain a `role_name` by listing the roles for a branch.
+// The URI uses the standard PostgreSQL connection string format. Set `pooled=true` to include the
+// `-pooler` suffix for a connection pooler URI.
 //
 // GET /projects/{project_id}/connection_uri
 func (s *Server) handleGetConnectionURIRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -12637,29 +12870,35 @@ func (s *Server) handleGetConnectionURIRequest(args [1]string, argsEscaped bool,
 	}
 }
 
-// handleGetConsumptionHistoryPerAccountRequest handles getConsumptionHistoryPerAccount operation.
+// handleGetConsumptionHistoryPerBranchV2Request handles getConsumptionHistoryPerBranchV2 operation.
 //
-// Retrieves consumption metrics for Scale and Enterprise plan accounts, and for legacy Scale,
-// Business, and Enterprise plan accounts.
-// Consumption history begins at the time the account was upgraded to a supported plan.
-// **Deprecated**: This endpoint will be removed on June 1, 2026.
+// Returns consumption metrics for each branch across one or more projects listed in
+// `project_ids` (1 to 100 projects). Available for accounts on paid usage-based Launch, Scale,
+// Agent, and Enterprise plans.
+// History starts when the account first ingests branch-level consumption data.
+// The `metrics` query parameter is required. Only these six values are supported on this
+// endpoint:
+// `compute_unit_seconds`, `root_branch_bytes_month`, `child_branch_bytes_month`,
+// `instant_restore_bytes_month`, `public_network_transfer_bytes`, `private_network_transfer_bytes`.
+// This endpoint does not support `extra_branches_month` or `snapshot_storage_bytes_month`.
+// Use `GET /consumption_history/v2/projects` for those.
+// Consumption metrics within each branch are returned in ascending time order (oldest first).
+// This request does not wake project computes.
 //
-// Deprecated: schema marks this operation as deprecated.
-//
-// GET /consumption_history/account
-func (s *Server) handleGetConsumptionHistoryPerAccountRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// GET /consumption_history/v2/branches
+func (s *Server) handleGetConsumptionHistoryPerBranchV2Request(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getConsumptionHistoryPerAccount"),
+		otelogen.OperationID("getConsumptionHistoryPerBranchV2"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/consumption_history/account"),
+		semconv.HTTPRouteKey.String("/consumption_history/v2/branches"),
 	}
 	// Add attributes from config.
 	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), GetConsumptionHistoryPerAccountOperation,
+	ctx, span := s.cfg.Tracer.Start(r.Context(), GetConsumptionHistoryPerBranchV2Operation,
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -12714,15 +12953,15 @@ func (s *Server) handleGetConsumptionHistoryPerAccountRequest(args [0]string, ar
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: GetConsumptionHistoryPerAccountOperation,
-			ID:   "getConsumptionHistoryPerAccount",
+			Name: GetConsumptionHistoryPerBranchV2Operation,
+			ID:   "getConsumptionHistoryPerBranchV2",
 		}
 	)
 	{
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, GetConsumptionHistoryPerAccountOperation, r)
+			sctx, ok, err := s.securityBearerAuth(ctx, GetConsumptionHistoryPerBranchV2Operation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
@@ -12740,7 +12979,7 @@ func (s *Server) handleGetConsumptionHistoryPerAccountRequest(args [0]string, ar
 			}
 		}
 		{
-			sctx, ok, err := s.securityCookieAuth(ctx, GetConsumptionHistoryPerAccountOperation, r)
+			sctx, ok, err := s.securityCookieAuth(ctx, GetConsumptionHistoryPerBranchV2Operation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
@@ -12758,7 +12997,7 @@ func (s *Server) handleGetConsumptionHistoryPerAccountRequest(args [0]string, ar
 			}
 		}
 		{
-			sctx, ok, err := s.securityTokenCookieAuth(ctx, GetConsumptionHistoryPerAccountOperation, r)
+			sctx, ok, err := s.securityTokenCookieAuth(ctx, GetConsumptionHistoryPerBranchV2Operation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
@@ -12802,7 +13041,7 @@ func (s *Server) handleGetConsumptionHistoryPerAccountRequest(args [0]string, ar
 			return
 		}
 	}
-	params, err := decodeGetConsumptionHistoryPerAccountParams(args, argsEscaped, r)
+	params, err := decodeGetConsumptionHistoryPerBranchV2Params(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -12815,16 +13054,32 @@ func (s *Server) handleGetConsumptionHistoryPerAccountRequest(args [0]string, ar
 
 	var rawBody []byte
 
-	var response GetConsumptionHistoryPerAccountRes
+	var response GetConsumptionHistoryPerBranchV2Res
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    GetConsumptionHistoryPerAccountOperation,
-			OperationSummary: "Retrieve account consumption metrics (legacy plans)",
-			OperationID:      "getConsumptionHistoryPerAccount",
+			OperationName:    GetConsumptionHistoryPerBranchV2Operation,
+			OperationSummary: "Retrieve branch consumption metrics",
+			OperationID:      "getConsumptionHistoryPerBranchV2",
 			Body:             nil,
 			RawBody:          rawBody,
 			Params: middleware.Parameters{
+				{
+					Name: "cursor",
+					In:   "query",
+				}: params.Cursor,
+				{
+					Name: "limit",
+					In:   "query",
+				}: params.Limit,
+				{
+					Name: "project_ids",
+					In:   "query",
+				}: params.ProjectIds,
+				{
+					Name: "branch_ids",
+					In:   "query",
+				}: params.BranchIds,
 				{
 					Name: "from",
 					In:   "query",
@@ -12842,10 +13097,6 @@ func (s *Server) handleGetConsumptionHistoryPerAccountRequest(args [0]string, ar
 					In:   "query",
 				}: params.OrgID,
 				{
-					Name: "include_v1_metrics",
-					In:   "query",
-				}: params.IncludeV1Metrics,
-				{
 					Name: "metrics",
 					In:   "query",
 				}: params.Metrics,
@@ -12855,8 +13106,8 @@ func (s *Server) handleGetConsumptionHistoryPerAccountRequest(args [0]string, ar
 
 		type (
 			Request  = struct{}
-			Params   = GetConsumptionHistoryPerAccountParams
-			Response = GetConsumptionHistoryPerAccountRes
+			Params   = GetConsumptionHistoryPerBranchV2Params
+			Response = GetConsumptionHistoryPerBranchV2Res
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -12865,14 +13116,14 @@ func (s *Server) handleGetConsumptionHistoryPerAccountRequest(args [0]string, ar
 		](
 			m,
 			mreq,
-			unpackGetConsumptionHistoryPerAccountParams,
+			unpackGetConsumptionHistoryPerBranchV2Params,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.GetConsumptionHistoryPerAccount(ctx, params)
+				response, err = s.h.GetConsumptionHistoryPerBranchV2(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.GetConsumptionHistoryPerAccount(ctx, params)
+		response, err = s.h.GetConsumptionHistoryPerBranchV2(ctx, params)
 	}
 	if err != nil {
 		if errRes, ok := errors.Into[*GeneralErrorStatusCode](err); ok {
@@ -12891,7 +13142,7 @@ func (s *Server) handleGetConsumptionHistoryPerAccountRequest(args [0]string, ar
 		return
 	}
 
-	if err := encodeGetConsumptionHistoryPerAccountResponse(response, w, span); err != nil {
+	if err := encodeGetConsumptionHistoryPerBranchV2Response(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -13175,10 +13426,17 @@ func (s *Server) handleGetConsumptionHistoryPerProjectRequest(args [0]string, ar
 
 // handleGetConsumptionHistoryPerProjectV2Request handles getConsumptionHistoryPerProjectV2 operation.
 //
-// Retrieves consumption metrics for Launch, Scale, Agent, and Enterprise plan projects. History
-// begins at the time of upgrade.
-// Results are ordered by time in ascending order (oldest to newest).
-// Issuing a call to this API does not wake a project's compute endpoint.
+// Returns consumption metrics for up to `limit` projects per page. If `project_ids` is omitted,
+// projects in the organization are included across pages (use `cursor`). If `project_ids` is
+// provided, the response is limited to those projects (up to 100). Available for accounts on
+// Launch, Scale, Agent, Business, and Enterprise plans.
+// History starts when the account upgrades to an eligible plan.
+// The `metrics` query parameter is required. Supported values:
+// `compute_unit_seconds`, `root_branch_bytes_month`, `child_branch_bytes_month`,
+// `instant_restore_bytes_month`, `public_network_transfer_bytes`, `private_network_transfer_bytes`,
+// `extra_branches_month`, `snapshot_storage_bytes_month`.
+// Consumption metrics within each project are returned in ascending time order (oldest first).
+// This request does not wake project computes.
 //
 // GET /consumption_history/v2/projects
 func (s *Server) handleGetConsumptionHistoryPerProjectV2Request(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -13444,7 +13702,8 @@ func (s *Server) handleGetConsumptionHistoryPerProjectV2Request(args [0]string, 
 
 // handleGetCurrentUserInfoRequest handles getCurrentUserInfo operation.
 //
-// Retrieves information about the current Neon user account.
+// Retrieves information about the currently authenticated Neon user,
+// including account identifiers, plan details, and linked auth accounts.
 //
 // GET /users/me
 func (s *Server) handleGetCurrentUserInfoRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -13667,7 +13926,7 @@ func (s *Server) handleGetCurrentUserInfoRequest(args [0]string, argsEscaped boo
 
 // handleGetCurrentUserOrganizationsRequest handles getCurrentUserOrganizations operation.
 //
-// Retrieves information about the current Neon user's organizations.
+// Retrieves the organizations that the currently authenticated user belongs to.
 //
 // GET /users/me/organizations
 func (s *Server) handleGetCurrentUserOrganizationsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -13833,7 +14092,7 @@ func (s *Server) handleGetCurrentUserOrganizationsRequest(args [0]string, argsEs
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    GetCurrentUserOrganizationsOperation,
-			OperationSummary: "Retrieve current user organizations list",
+			OperationSummary: "List organizations for the current user",
 			OperationID:      "getCurrentUserOrganizations",
 			Body:             nil,
 			RawBody:          rawBody,
@@ -13892,8 +14151,6 @@ func (s *Server) handleGetCurrentUserOrganizationsRequest(args [0]string, argsEs
 //
 // Retrieves the masking rules for the specified anonymized branch.
 // Masking rules define how sensitive data should be anonymized using PostgreSQL Anonymizer.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
 // **Note**: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/masking_rules
@@ -14070,7 +14327,7 @@ func (s *Server) handleGetMaskingRulesRequest(args [2]string, argsEscaped bool, 
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    GetMaskingRulesOperation,
-			OperationSummary: "Get masking rules",
+			OperationSummary: "Retrieve masking rules",
 			OperationID:      "getMaskingRules",
 			Body:             nil,
 			RawBody:          rawBody,
@@ -14136,8 +14393,8 @@ func (s *Server) handleGetMaskingRulesRequest(args [2]string, argsEscaped bool, 
 
 // handleGetNeonAuthRequest handles getNeonAuth operation.
 //
-// / Fetches the details of the Neon Auth for the specified branch. You can obtain the `project_id`
-// and `branch_id` by listing the projects and branches for your Neon account.
+// Retrieves the Neon Auth integration details for the specified branch,
+// including the auth provider type and integration status.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth
 func (s *Server) handleGetNeonAuthRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -14313,7 +14570,7 @@ func (s *Server) handleGetNeonAuthRequest(args [2]string, argsEscaped bool, w ht
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    GetNeonAuthOperation,
-			OperationSummary: "Get details of Neon Auth for the branch",
+			OperationSummary: "Retrieve Neon Auth details for the branch",
 			OperationID:      "getNeonAuth",
 			Body:             nil,
 			RawBody:          rawBody,
@@ -14379,7 +14636,9 @@ func (s *Server) handleGetNeonAuthRequest(args [2]string, argsEscaped bool, w ht
 
 // handleGetNeonAuthAllowLocalhostRequest handles getNeonAuthAllowLocalhost operation.
 //
-// Get the allow localhost configuration for the specified branch.
+// Retrieves the localhost allow setting for the specified branch's Neon Auth integration.
+// When enabled, authentication flows work from `localhost` without adding it to the redirect URI
+// whitelist.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/allow_localhost
 func (s *Server) handleGetNeonAuthAllowLocalhostRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -14555,7 +14814,7 @@ func (s *Server) handleGetNeonAuthAllowLocalhostRequest(args [2]string, argsEsca
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    GetNeonAuthAllowLocalhostOperation,
-			OperationSummary: "Get allow localhost",
+			OperationSummary: "Retrieve localhost allow setting",
 			OperationID:      "getNeonAuthAllowLocalhost",
 			Body:             nil,
 			RawBody:          rawBody,
@@ -14621,7 +14880,9 @@ func (s *Server) handleGetNeonAuthAllowLocalhostRequest(args [2]string, argsEsca
 
 // handleGetNeonAuthEmailAndPasswordConfigRequest handles getNeonAuthEmailAndPasswordConfig operation.
 //
-// Gets the email and password authentication configuration for Neon Auth.
+// Retrieves the email and password authentication configuration for the specified branch's Neon Auth
+// integration,
+// including whether it is enabled and the email verification method.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/email_and_password
 func (s *Server) handleGetNeonAuthEmailAndPasswordConfigRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -14797,7 +15058,7 @@ func (s *Server) handleGetNeonAuthEmailAndPasswordConfigRequest(args [2]string, 
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    GetNeonAuthEmailAndPasswordConfigOperation,
-			OperationSummary: "Get email and password configuration",
+			OperationSummary: "Retrieve email and password configuration",
 			OperationID:      "getNeonAuthEmailAndPasswordConfig",
 			Body:             nil,
 			RawBody:          rawBody,
@@ -14863,7 +15124,8 @@ func (s *Server) handleGetNeonAuthEmailAndPasswordConfigRequest(args [2]string, 
 
 // handleGetNeonAuthEmailProviderRequest handles getNeonAuthEmailProvider operation.
 //
-// Gets the email provider configuration for the specified branch.
+// Retrieves the email provider configuration for the specified branch's Neon Auth integration,
+// including the provider type and server settings.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/email_provider
 func (s *Server) handleGetNeonAuthEmailProviderRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -15039,7 +15301,7 @@ func (s *Server) handleGetNeonAuthEmailProviderRequest(args [2]string, argsEscap
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    GetNeonAuthEmailProviderOperation,
-			OperationSummary: "Get email provider configuration",
+			OperationSummary: "Retrieve email provider configuration",
 			OperationID:      "getNeonAuthEmailProvider",
 			Body:             nil,
 			RawBody:          rawBody,
@@ -15284,7 +15546,7 @@ func (s *Server) handleGetNeonAuthEmailServerRequest(args [1]string, argsEscaped
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    GetNeonAuthEmailServerOperation,
-			OperationSummary: "Get email server configuration",
+			OperationSummary: "Retrieve email server configuration",
 			OperationID:      "getNeonAuthEmailServer",
 			Body:             nil,
 			RawBody:          rawBody,
@@ -15336,6 +15598,249 @@ func (s *Server) handleGetNeonAuthEmailServerRequest(args [1]string, argsEscaped
 	}
 
 	if err := encodeGetNeonAuthEmailServerResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
+// handleGetNeonAuthPhoneNumberPluginRequest handles getNeonAuthPhoneNumberPlugin operation.
+//
+// Returns the phone number plugin configuration for Neon Auth.
+// The phone number plugin enables phone-based OTP authentication.
+//
+// GET /projects/{project_id}/branches/{branch_id}/auth/plugins/phone-number
+func (s *Server) handleGetNeonAuthPhoneNumberPluginRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	statusWriter := &codeRecorder{ResponseWriter: w}
+	w = statusWriter
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getNeonAuthPhoneNumberPlugin"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/projects/{project_id}/branches/{branch_id}/auth/plugins/phone-number"),
+	}
+	// Add attributes from config.
+	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), GetNeonAuthPhoneNumberPluginOperation,
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+
+		attrSet := labeler.AttributeSet()
+		attrs := attrSet.ToSlice()
+		code := statusWriter.status
+		if code != 0 {
+			codeAttr := semconv.HTTPResponseStatusCode(code)
+			attrs = append(attrs, codeAttr)
+			span.SetAttributes(codeAttr)
+		}
+		attrOpt := metric.WithAttributes(attrs...)
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+
+			// https://opentelemetry.io/docs/specs/semconv/http/http-spans/#status
+			// Span Status MUST be left unset if HTTP status code was in the 1xx, 2xx or 3xx ranges,
+			// unless there was another error (e.g., network error receiving the response body; or 3xx codes with
+			// max redirects exceeded), in which case status MUST be set to Error.
+			code := statusWriter.status
+			if code < 100 || code >= 500 {
+				span.SetStatus(codes.Error, stage)
+			}
+
+			attrSet := labeler.AttributeSet()
+			attrs := attrSet.ToSlice()
+			if code != 0 {
+				attrs = append(attrs, semconv.HTTPResponseStatusCode(code))
+			}
+
+			s.errors.Add(ctx, 1, metric.WithAttributes(attrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: GetNeonAuthPhoneNumberPluginOperation,
+			ID:   "getNeonAuthPhoneNumberPlugin",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityBearerAuth(ctx, GetNeonAuthPhoneNumberPluginOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "BearerAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:BearerAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+		{
+			sctx, ok, err := s.securityCookieAuth(ctx, GetNeonAuthPhoneNumberPluginOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "CookieAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:CookieAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 1
+				ctx = sctx
+			}
+		}
+		{
+			sctx, ok, err := s.securityTokenCookieAuth(ctx, GetNeonAuthPhoneNumberPluginOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "TokenCookieAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:TokenCookieAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 2
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeGetNeonAuthPhoneNumberPluginParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var rawBody []byte
+
+	var response *NeonAuthPhoneNumberConfig
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    GetNeonAuthPhoneNumberPluginOperation,
+			OperationSummary: "Retrieve phone number plugin configuration",
+			OperationID:      "getNeonAuthPhoneNumberPlugin",
+			Body:             nil,
+			RawBody:          rawBody,
+			Params: middleware.Parameters{
+				{
+					Name: "project_id",
+					In:   "path",
+				}: params.ProjectID,
+				{
+					Name: "branch_id",
+					In:   "path",
+				}: params.BranchID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetNeonAuthPhoneNumberPluginParams
+			Response = *NeonAuthPhoneNumberConfig
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetNeonAuthPhoneNumberPluginParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetNeonAuthPhoneNumberPlugin(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.GetNeonAuthPhoneNumberPlugin(ctx, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*GeneralErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeGetNeonAuthPhoneNumberPluginResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -15524,7 +16029,7 @@ func (s *Server) handleGetNeonAuthPluginConfigsRequest(args [2]string, argsEscap
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    GetNeonAuthPluginConfigsOperation,
-			OperationSummary: "Get all plugin configurations",
+			OperationSummary: "Retrieve Neon Auth plugin configurations",
 			OperationID:      "getNeonAuthPluginConfigs",
 			Body:             nil,
 			RawBody:          rawBody,
@@ -15590,7 +16095,8 @@ func (s *Server) handleGetNeonAuthPluginConfigsRequest(args [2]string, argsEscap
 
 // handleGetNeonAuthWebhookConfigRequest handles getNeonAuthWebhookConfig operation.
 //
-// Returns the webhook configuration for Neon Auth.
+// Returns the webhook configuration for the specified branch's Neon Auth integration,
+// including the endpoint URL and the events that trigger it.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/webhooks
 func (s *Server) handleGetNeonAuthWebhookConfigRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -15766,7 +16272,7 @@ func (s *Server) handleGetNeonAuthWebhookConfigRequest(args [2]string, argsEscap
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    GetNeonAuthWebhookConfigOperation,
-			OperationSummary: "Get webhook configuration for Neon Auth",
+			OperationSummary: "Retrieve Neon Auth webhook configuration",
 			OperationID:      "getNeonAuthWebhookConfig",
 			Body:             nil,
 			RawBody:          rawBody,
@@ -15832,7 +16338,7 @@ func (s *Server) handleGetNeonAuthWebhookConfigRequest(args [2]string, argsEscap
 
 // handleGetOrganizationRequest handles getOrganization operation.
 //
-// Retrieves information about the specified organization.
+// Retrieves details for the specified organization, including its name, plan, and configuration.
 //
 // GET /organizations/{org_id}
 func (s *Server) handleGetOrganizationRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -16070,7 +16576,7 @@ func (s *Server) handleGetOrganizationRequest(args [1]string, argsEscaped bool, 
 
 // handleGetOrganizationInvitationsRequest handles getOrganizationInvitations operation.
 //
-// Retrieves information about extended invitations for the specified organization.
+// Retrieves pending and accepted invitations for the specified organization.
 //
 // GET /organizations/{org_id}/invitations
 func (s *Server) handleGetOrganizationInvitationsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -16246,7 +16752,7 @@ func (s *Server) handleGetOrganizationInvitationsRequest(args [1]string, argsEsc
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    GetOrganizationInvitationsOperation,
-			OperationSummary: "Retrieve organization invitation details",
+			OperationSummary: "List organization invitations",
 			OperationID:      "getOrganizationInvitations",
 			Body:             nil,
 			RawBody:          rawBody,
@@ -16726,7 +17232,7 @@ func (s *Server) handleGetOrganizationMembersRequest(args [1]string, argsEscaped
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    GetOrganizationMembersOperation,
-			OperationSummary: "Retrieve organization members details",
+			OperationSummary: "List organization members",
 			OperationID:      "getOrganizationMembers",
 			Body:             nil,
 			RawBody:          rawBody,
@@ -16794,6 +17300,246 @@ func (s *Server) handleGetOrganizationMembersRequest(args [1]string, argsEscaped
 	}
 
 	if err := encodeGetOrganizationMembersResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
+// handleGetOrganizationSpendingLimitRequest handles getOrganizationSpendingLimit operation.
+//
+// Returns the configured monthly spending limit for the specified organization.
+// `spending_limit_cents: null` indicates that no limit is currently set.
+// Available to organization members with read access on Launch and Scale plans only.
+//
+// GET /organizations/{org_id}/billing/spending_limit
+func (s *Server) handleGetOrganizationSpendingLimitRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	statusWriter := &codeRecorder{ResponseWriter: w}
+	w = statusWriter
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getOrganizationSpendingLimit"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/organizations/{org_id}/billing/spending_limit"),
+	}
+	// Add attributes from config.
+	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), GetOrganizationSpendingLimitOperation,
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+
+		attrSet := labeler.AttributeSet()
+		attrs := attrSet.ToSlice()
+		code := statusWriter.status
+		if code != 0 {
+			codeAttr := semconv.HTTPResponseStatusCode(code)
+			attrs = append(attrs, codeAttr)
+			span.SetAttributes(codeAttr)
+		}
+		attrOpt := metric.WithAttributes(attrs...)
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+
+			// https://opentelemetry.io/docs/specs/semconv/http/http-spans/#status
+			// Span Status MUST be left unset if HTTP status code was in the 1xx, 2xx or 3xx ranges,
+			// unless there was another error (e.g., network error receiving the response body; or 3xx codes with
+			// max redirects exceeded), in which case status MUST be set to Error.
+			code := statusWriter.status
+			if code < 100 || code >= 500 {
+				span.SetStatus(codes.Error, stage)
+			}
+
+			attrSet := labeler.AttributeSet()
+			attrs := attrSet.ToSlice()
+			if code != 0 {
+				attrs = append(attrs, semconv.HTTPResponseStatusCode(code))
+			}
+
+			s.errors.Add(ctx, 1, metric.WithAttributes(attrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: GetOrganizationSpendingLimitOperation,
+			ID:   "getOrganizationSpendingLimit",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityBearerAuth(ctx, GetOrganizationSpendingLimitOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "BearerAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:BearerAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+		{
+			sctx, ok, err := s.securityCookieAuth(ctx, GetOrganizationSpendingLimitOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "CookieAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:CookieAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 1
+				ctx = sctx
+			}
+		}
+		{
+			sctx, ok, err := s.securityTokenCookieAuth(ctx, GetOrganizationSpendingLimitOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "TokenCookieAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:TokenCookieAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 2
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeGetOrganizationSpendingLimitParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var rawBody []byte
+
+	var response *SpendingLimitResponse
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    GetOrganizationSpendingLimitOperation,
+			OperationSummary: "Retrieve organization spending limit",
+			OperationID:      "getOrganizationSpendingLimit",
+			Body:             nil,
+			RawBody:          rawBody,
+			Params: middleware.Parameters{
+				{
+					Name: "org_id",
+					In:   "path",
+				}: params.OrgID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = GetOrganizationSpendingLimitParams
+			Response = *SpendingLimitResponse
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackGetOrganizationSpendingLimitParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.GetOrganizationSpendingLimit(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.GetOrganizationSpendingLimit(ctx, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*GeneralErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeGetOrganizationSpendingLimitResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -17051,7 +17797,8 @@ func (s *Server) handleGetOrganizationVPCEndpointDetailsRequest(args [3]string, 
 // handleGetProjectRequest handles getProject operation.
 //
 // Retrieves information about the specified project.
-// You can obtain a `project_id` by listing the projects for an organization.
+// Returned details include the project settings, compute configuration, history retention, owner
+// information, and current usage metrics.
 //
 // GET /projects/{project_id}
 func (s *Server) handleGetProjectRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -17546,13 +18293,11 @@ func (s *Server) handleGetProjectAdvisorSecurityIssuesRequest(args [1]string, ar
 // handleGetProjectBranchRequest handles getProjectBranch operation.
 //
 // Retrieves information about the specified branch.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain a `branch_id` by listing the project's branches.
 // A `branch_id` value has a `br-` prefix.
 // Each Neon project is initially created with a root and default branch named `main`.
 // A project can contain one or more branches.
 // A parent branch is identified by a `parent_id` value, which is the `id` of the parent branch.
-// For related information, see [Manage branches](https://neon.tech/docs/manage/branches/).
+// For related information, see [Manage branches](https://neon.com/docs/manage/branches/).
 //
 // GET /projects/{project_id}/branches/{branch_id}
 func (s *Server) handleGetProjectBranchRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -17794,7 +18539,8 @@ func (s *Server) handleGetProjectBranchRequest(args [2]string, argsEscaped bool,
 
 // handleGetProjectBranchDataAPIRequest handles getProjectBranchDataAPI operation.
 //
-// Retrieves the Neon Data API for the specified branch.
+// Retrieves the Neon Data API configuration for the specified branch,
+// including endpoint URL, enabled state, and database settings.
 //
 // GET /projects/{project_id}/branches/{branch_id}/data-api/{database_name}
 func (s *Server) handleGetProjectBranchDataAPIRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -17970,7 +18716,7 @@ func (s *Server) handleGetProjectBranchDataAPIRequest(args [3]string, argsEscape
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    GetProjectBranchDataAPIOperation,
-			OperationSummary: "Get Neon Data API",
+			OperationSummary: "Retrieve Neon Data API configuration",
 			OperationID:      "getProjectBranchDataAPI",
 			Body:             nil,
 			RawBody:          rawBody,
@@ -18041,9 +18787,7 @@ func (s *Server) handleGetProjectBranchDataAPIRequest(args [3]string, argsEscape
 // handleGetProjectBranchDatabaseRequest handles getProjectBranchDatabase operation.
 //
 // Retrieves information about the specified database.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` and `database_name` by listing the branch's databases.
-// For related information, see [Manage databases](https://neon.tech/docs/manage/databases/).
+// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
 //
 // GET /projects/{project_id}/branches/{branch_id}/databases/{database_name}
 func (s *Server) handleGetProjectBranchDatabaseRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -18290,11 +19034,8 @@ func (s *Server) handleGetProjectBranchDatabaseRequest(args [3]string, argsEscap
 // handleGetProjectBranchRoleRequest handles getProjectBranchRole operation.
 //
 // Retrieves details about the specified role.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
-// You can obtain the `role_name` by listing the roles for a branch.
 // In Neon, the terms "role" and "user" are synonymous.
-// For related information, see [Manage roles](https://neon.tech/docs/manage/roles/).
+// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
 //
 // GET /projects/{project_id}/branches/{branch_id}/roles/{role_name}
 func (s *Server) handleGetProjectBranchRoleRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -18541,10 +19282,7 @@ func (s *Server) handleGetProjectBranchRoleRequest(args [3]string, argsEscaped b
 // handleGetProjectBranchRolePasswordRequest handles getProjectBranchRolePassword operation.
 //
 // Retrieves the password for the specified Postgres role, if possible.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
-// You can obtain the `role_name` by listing the roles for a branch.
-// For related information, see [Manage roles](https://neon.tech/docs/manage/roles/).
+// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
 //
 // GET /projects/{project_id}/branches/{branch_id}/roles/{role_name}/reveal_password
 func (s *Server) handleGetProjectBranchRolePasswordRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -19318,11 +20056,9 @@ func (s *Server) handleGetProjectBranchSchemaComparisonRequest(args [2]string, a
 //
 // Retrieves information about the specified compute endpoint.
 // A compute endpoint is a Neon compute instance.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain an `endpoint_id` by listing your project's compute endpoints.
 // An `endpoint_id` has an `ep-` prefix.
 // For information about compute endpoints, see [Manage computes](https://neon.
-// tech/docs/manage/endpoints/).
+// com/docs/manage/endpoints/).
 //
 // GET /projects/{project_id}/endpoints/{endpoint_id}
 func (s *Server) handleGetProjectEndpointRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -19805,8 +20541,6 @@ func (s *Server) handleGetProjectJWKSRequest(args [1]string, argsEscaped bool, w
 //
 // Retrieves details for the specified operation.
 // An operation is an action performed on a Neon project resource.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain a `operation_id` by listing operations for the project.
 //
 // GET /projects/{project_id}/operations/{operation_id}
 func (s *Server) handleGetProjectOperationRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -20048,7 +20782,8 @@ func (s *Server) handleGetProjectOperationRequest(args [2]string, argsEscaped bo
 
 // handleGetSnapshotScheduleRequest handles getSnapshotSchedule operation.
 //
-// View the backup schedule for the specified branch.
+// Returns the backup schedule for the specified branch, including the configured snapshot
+// frequencies.
 // **Note**: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/backup_schedule
@@ -20225,7 +20960,7 @@ func (s *Server) handleGetSnapshotScheduleRequest(args [2]string, argsEscaped bo
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    GetSnapshotScheduleOperation,
-			OperationSummary: "View backup schedule",
+			OperationSummary: "Retrieve backup schedule",
 			OperationID:      "getSnapshotSchedule",
 			Body:             nil,
 			RawBody:          rawBody,
@@ -20547,7 +21282,7 @@ func (s *Server) handleGrantPermissionToProjectRequest(args [1]string, argsEscap
 // Retrieves the API keys for your Neon account.
 // The response does not include API key tokens. A token is only provided when creating an API key.
 // API keys can also be managed in the Neon Console.
-// For more information, see [Manage API keys](https://neon.tech/docs/manage/api-keys/).
+// For more information, see [Manage API keys](https://neon.com/docs/manage/api-keys/).
 //
 // GET /api_keys
 func (s *Server) handleListApiKeysRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -20770,7 +21505,7 @@ func (s *Server) handleListApiKeysRequest(args [0]string, argsEscaped bool, w ht
 
 // handleListBranchNeonAuthOauthProvidersRequest handles listBranchNeonAuthOauthProviders operation.
 //
-// Lists the OAuth providers for the specified project and branch.
+// Lists the OAuth providers configured for the specified branch's Neon Auth integration.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/oauth_providers
 func (s *Server) handleListBranchNeonAuthOauthProvidersRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -20946,7 +21681,7 @@ func (s *Server) handleListBranchNeonAuthOauthProvidersRequest(args [2]string, a
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    ListBranchNeonAuthOauthProvidersOperation,
-			OperationSummary: "List OAuth providers for neon auth for a branch",
+			OperationSummary: "List OAuth providers for the branch",
 			OperationID:      "listBranchNeonAuthOauthProviders",
 			Body:             nil,
 			RawBody:          rawBody,
@@ -21012,7 +21747,8 @@ func (s *Server) handleListBranchNeonAuthOauthProvidersRequest(args [2]string, a
 
 // handleListBranchNeonAuthTrustedDomainsRequest handles listBranchNeonAuthTrustedDomains operation.
 //
-// Lists the domains in the redirect_uri whitelist for the specified project.
+// Lists the trusted domains in the redirect URI whitelist for the specified branch.
+// Only domains in this list are permitted as redirect targets after authentication.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/domains
 func (s *Server) handleListBranchNeonAuthTrustedDomainsRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -21432,7 +22168,7 @@ func (s *Server) handleListNeonAuthIntegrationsRequest(args [1]string, argsEscap
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    ListNeonAuthIntegrationsOperation,
-			OperationSummary: "Lists active integrations with auth providers",
+			OperationSummary: "List active integrations with auth providers",
 			OperationID:      "listNeonAuthIntegrations",
 			Body:             nil,
 			RawBody:          rawBody,
@@ -21914,7 +22650,7 @@ func (s *Server) handleListNeonAuthRedirectURIWhitelistDomainsRequest(args [1]st
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    ListNeonAuthRedirectURIWhitelistDomainsOperation,
-			OperationSummary: "List domains in redirect_uri whitelist",
+			OperationSummary: "List trusted redirect URI domains",
 			OperationID:      "listNeonAuthRedirectURIWhitelistDomains",
 			Body:             nil,
 			RawBody:          rawBody,
@@ -21979,7 +22715,7 @@ func (s *Server) handleListNeonAuthRedirectURIWhitelistDomainsRequest(args [1]st
 // Retrieves the API keys for the specified organization.
 // The response does not include API key tokens. A token is only provided when creating an API key.
 // API keys can also be managed in the Neon Console.
-// For more information, see [Manage API keys](https://neon.tech/docs/manage/api-keys/).
+// For more information, see [Manage API keys](https://neon.com/docs/manage/api-keys/).
 //
 // GET /organizations/{org_id}/api_keys
 func (s *Server) handleListOrgApiKeysRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -22699,9 +23435,7 @@ func (s *Server) handleListOrganizationVPCEndpointsAllRegionsRequest(args [1]str
 //
 // Retrieves a list of databases for the specified branch.
 // A branch can have multiple databases.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
-// For related information, see [Manage databases](https://neon.tech/docs/manage/databases/).
+// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
 //
 // GET /projects/{project_id}/branches/{branch_id}/databases
 func (s *Server) handleListProjectBranchDatabasesRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -22946,8 +23680,6 @@ func (s *Server) handleListProjectBranchDatabasesRequest(args [2]string, argsEsc
 // Retrieves a list of compute endpoints for the specified branch.
 // Neon permits only one read-write compute endpoint per branch.
 // A branch can have multiple read-only compute endpoints.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
 //
 // GET /projects/{project_id}/branches/{branch_id}/endpoints
 func (s *Server) handleListProjectBranchEndpointsRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -23190,9 +23922,7 @@ func (s *Server) handleListProjectBranchEndpointsRequest(args [2]string, argsEsc
 // handleListProjectBranchRolesRequest handles listProjectBranchRoles operation.
 //
 // Retrieves a list of Postgres roles from the specified branch.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
-// For related information, see [Manage roles](https://neon.tech/docs/manage/roles/).
+// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
 //
 // GET /projects/{project_id}/branches/{branch_id}/roles
 func (s *Server) handleListProjectBranchRolesRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -23435,12 +24165,11 @@ func (s *Server) handleListProjectBranchRolesRequest(args [2]string, argsEscaped
 // handleListProjectBranchesRequest handles listProjectBranches operation.
 //
 // Retrieves a list of branches for the specified project.
-// You can obtain a `project_id` by listing the projects for your Neon account.
 // Each Neon project has a root branch named `main`.
 // A `branch_id` value has a `br-` prefix.
 // A project may contain child branches that were branched from `main` or from another branch.
 // A parent branch is identified by the `parent_id` value, which is the `id` of the parent branch.
-// For related information, see [Manage branches](https://neon.tech/docs/manage/branches/).
+// For related information, see [Manage branches](https://neon.com/docs/manage/branches/).
 //
 // GET /projects/{project_id}/branches
 func (s *Server) handleListProjectBranchesRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -23642,6 +24371,10 @@ func (s *Server) handleListProjectBranchesRequest(args [1]string, argsEscaped bo
 					In:   "query",
 				}: params.Limit,
 				{
+					Name: "include_deleted",
+					In:   "query",
+				}: params.IncludeDeleted,
+				{
 					Name: "project_id",
 					In:   "path",
 				}: params.ProjectID,
@@ -23700,9 +24433,8 @@ func (s *Server) handleListProjectBranchesRequest(args [1]string, argsEscaped bo
 //
 // Retrieves a list of compute endpoints for the specified project.
 // A compute endpoint is a Neon compute instance.
-// You can obtain a `project_id` by listing the projects for your Neon account.
 // For information about compute endpoints, see [Manage computes](https://neon.
-// tech/docs/manage/endpoints/).
+// com/docs/manage/endpoints/).
 //
 // GET /projects/{project_id}/endpoints
 func (s *Server) handleListProjectEndpointsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -23941,7 +24673,6 @@ func (s *Server) handleListProjectEndpointsRequest(args [1]string, argsEscaped b
 // handleListProjectOperationsRequest handles listProjectOperations operation.
 //
 // Retrieves a list of operations for the specified Neon project.
-// You can obtain a `project_id` by listing the projects for your Neon account.
 // The number of operations returned can be large.
 // To paginate the response, issue an initial request with a `limit` value.
 // Then, add the `cursor` value that was returned in the response to the next request.
@@ -24669,9 +25400,13 @@ func (s *Server) handleListProjectVPCEndpointsRequest(args [1]string, argsEscape
 
 // handleListProjectsRequest handles listProjects operation.
 //
-// Retrieves a list of projects for an organization.
-// You may need to specify an org_id parameter depending on your API key type.
-// For more information, see [Manage projects](https://neon.tech/docs/manage/projects/).
+// Retrieves a list of projects for the specified organization.
+// If using a personal API key, include the `org_id` parameter to specify which organization to work
+// with.
+// If using an org API key, `org_id` is automatically inferred from the key.
+// For more information, see [Manage organizations using the Neon API](https://neon.
+// com/docs/manage/orgs-api)
+// and [Manage projects](https://neon.com/docs/manage/projects/).
 //
 // GET /projects
 func (s *Server) handleListProjectsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -24930,7 +25665,7 @@ func (s *Server) handleListProjectsRequest(args [0]string, argsEscaped bool, w h
 // handleListSharedProjectsRequest handles listSharedProjects operation.
 //
 // Retrieves a list of projects shared with your Neon account.
-// For more information, see [Manage projects](https://neon.tech/docs/manage/projects/).
+// For more information, see [Manage projects](https://neon.com/docs/manage/projects/).
 //
 // GET /projects/shared
 func (s *Server) handleListSharedProjectsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -25180,7 +25915,8 @@ func (s *Server) handleListSharedProjectsRequest(args [0]string, argsEscaped boo
 
 // handleListSnapshotsRequest handles listSnapshots operation.
 //
-// List the snapshots for the specified project.
+// Lists the snapshots for the specified project.
+// Each snapshot represents a point-in-time backup of the project data.
 // **Note**: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/snapshots
@@ -25419,8 +26155,10 @@ func (s *Server) handleListSnapshotsRequest(args [1]string, argsEscaped bool, w 
 
 // handleRecoverProjectRequest handles recoverProject operation.
 //
-// Recovers a deleted project during the deletion grace period.
-// You can obtain a `project_id` by listing the projects for your Neon account.
+// Recovers a deleted project within the 7-day deletion recovery period.
+// Restores branches, endpoints, settings, and connection strings.
+// Some integrations require manual reconfiguration after recovery.
+// To list recoverable projects, use `GET /projects?recoverable=true`.
 //
 // POST /projects/{project_id}/recover
 func (s *Server) handleRecoverProjectRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -25658,10 +26396,9 @@ func (s *Server) handleRecoverProjectRequest(args [1]string, argsEscaped bool, w
 
 // handleRemoveOrganizationMemberRequest handles removeOrganizationMember operation.
 //
-// Remove member from the organization.
-// Only an admin of the organization can perform this action.
-// If another admin is being removed, it will not be allows in case it is the only admin left in the
-// organization.
+// Removes the specified member from the organization.
+// Only organization admins can perform this action.
+// The last admin in an organization cannot be removed.
 //
 // DELETE /organizations/{org_id}/members/{member_id}
 func (s *Server) handleRemoveOrganizationMemberRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -25837,7 +26574,7 @@ func (s *Server) handleRemoveOrganizationMemberRequest(args [2]string, argsEscap
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    RemoveOrganizationMemberOperation,
-			OperationSummary: "Remove member from the organization",
+			OperationSummary: "Remove organization member",
 			OperationID:      "removeOrganizationMember",
 			Body:             nil,
 			RawBody:          rawBody,
@@ -25909,10 +26646,7 @@ func (s *Server) handleRemoveOrganizationMemberRequest(args [2]string, argsEscap
 // The old password remains valid until last operation finishes.
 // Connections to the compute endpoint are dropped. If idle,
 // the compute endpoint becomes active for a short period of time.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
-// You can obtain the `role_name` by listing the roles for a branch.
-// For related information, see [Manage roles](https://neon.tech/docs/manage/roles/).
+// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
 //
 // POST /projects/{project_id}/branches/{branch_id}/roles/{role_name}/reset_password
 func (s *Server) handleResetProjectBranchRolePasswordRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -26158,12 +26892,10 @@ func (s *Server) handleResetProjectBranchRolePasswordRequest(args [3]string, arg
 
 // handleRestartProjectEndpointRequest handles restartProjectEndpoint operation.
 //
-// Restart the specified compute endpoint: suspend immediately followed by start operations.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain an `endpoint_id` by listing your project's compute endpoints.
+// Restarts the specified compute endpoint by immediately suspending it and then starting it again.
 // An `endpoint_id` has an `ep-` prefix.
 // For information about compute endpoints, see [Manage computes](https://neon.
-// tech/docs/manage/endpoints/).
+// com/docs/manage/endpoints/).
 //
 // POST /projects/{project_id}/endpoints/{endpoint_id}/restart
 func (s *Server) handleRestartProjectEndpointRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -26403,251 +27135,11 @@ func (s *Server) handleRestartProjectEndpointRequest(args [2]string, argsEscaped
 	}
 }
 
-// handleRestoreProjectRequest handles restoreProject operation.
-//
-// DEPRECATED, use `/projects/{project_id}/recover` instead. Restores a deleted project during the
-// deletion grace period.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-//
-// Deprecated: schema marks this operation as deprecated.
-//
-// POST /projects/{project_id}/restore
-func (s *Server) handleRestoreProjectRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
-	statusWriter := &codeRecorder{ResponseWriter: w}
-	w = statusWriter
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("restoreProject"),
-		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/projects/{project_id}/restore"),
-	}
-	// Add attributes from config.
-	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
-
-	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), RestoreProjectOperation,
-		trace.WithAttributes(otelAttrs...),
-		serverSpanKind,
-	)
-	defer span.End()
-
-	// Add Labeler to context.
-	labeler := &Labeler{attrs: otelAttrs}
-	ctx = contextWithLabeler(ctx, labeler)
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		elapsedDuration := time.Since(startTime)
-
-		attrSet := labeler.AttributeSet()
-		attrs := attrSet.ToSlice()
-		code := statusWriter.status
-		if code != 0 {
-			codeAttr := semconv.HTTPResponseStatusCode(code)
-			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
-		}
-		attrOpt := metric.WithAttributes(attrs...)
-
-		// Increment request counter.
-		s.requests.Add(ctx, 1, attrOpt)
-
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		s.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), attrOpt)
-	}()
-
-	var (
-		recordError = func(stage string, err error) {
-			span.RecordError(err)
-
-			// https://opentelemetry.io/docs/specs/semconv/http/http-spans/#status
-			// Span Status MUST be left unset if HTTP status code was in the 1xx, 2xx or 3xx ranges,
-			// unless there was another error (e.g., network error receiving the response body; or 3xx codes with
-			// max redirects exceeded), in which case status MUST be set to Error.
-			code := statusWriter.status
-			if code < 100 || code >= 500 {
-				span.SetStatus(codes.Error, stage)
-			}
-
-			attrSet := labeler.AttributeSet()
-			attrs := attrSet.ToSlice()
-			if code != 0 {
-				attrs = append(attrs, semconv.HTTPResponseStatusCode(code))
-			}
-
-			s.errors.Add(ctx, 1, metric.WithAttributes(attrs...))
-		}
-		err          error
-		opErrContext = ogenerrors.OperationContext{
-			Name: RestoreProjectOperation,
-			ID:   "restoreProject",
-		}
-	)
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			sctx, ok, err := s.securityBearerAuth(ctx, RestoreProjectOperation, r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "BearerAuth",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 0
-				ctx = sctx
-			}
-		}
-		{
-			sctx, ok, err := s.securityCookieAuth(ctx, RestoreProjectOperation, r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "CookieAuth",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:CookieAuth", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 1
-				ctx = sctx
-			}
-		}
-		{
-			sctx, ok, err := s.securityTokenCookieAuth(ctx, RestoreProjectOperation, r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "TokenCookieAuth",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:TokenCookieAuth", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 2
-				ctx = sctx
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-				{0b00000100},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			err = &ogenerrors.SecurityError{
-				OperationContext: opErrContext,
-				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
-			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
-			return
-		}
-	}
-	params, err := decodeRestoreProjectParams(args, argsEscaped, r)
-	if err != nil {
-		err = &ogenerrors.DecodeParamsError{
-			OperationContext: opErrContext,
-			Err:              err,
-		}
-		defer recordError("DecodeParams", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
-		return
-	}
-
-	var rawBody []byte
-
-	var response *ProjectRecoverResponse
-	if m := s.cfg.Middleware; m != nil {
-		mreq := middleware.Request{
-			Context:          ctx,
-			OperationName:    RestoreProjectOperation,
-			OperationSummary: "Restore a deleted project",
-			OperationID:      "restoreProject",
-			Body:             nil,
-			RawBody:          rawBody,
-			Params: middleware.Parameters{
-				{
-					Name: "project_id",
-					In:   "path",
-				}: params.ProjectID,
-			},
-			Raw: r,
-		}
-
-		type (
-			Request  = struct{}
-			Params   = RestoreProjectParams
-			Response = *ProjectRecoverResponse
-		)
-		response, err = middleware.HookMiddleware[
-			Request,
-			Params,
-			Response,
-		](
-			m,
-			mreq,
-			unpackRestoreProjectParams,
-			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.RestoreProject(ctx, params)
-				return response, err
-			},
-		)
-	} else {
-		response, err = s.h.RestoreProject(ctx, params)
-	}
-	if err != nil {
-		if errRes, ok := errors.Into[*GeneralErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
-		return
-	}
-
-	if err := encodeRestoreProjectResponse(response, w, span); err != nil {
-		defer recordError("EncodeResponse", err)
-		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-		}
-		return
-	}
-}
-
 // handleRestoreProjectBranchRequest handles restoreProjectBranch operation.
 //
-// Restores a branch to an earlier state in its own or another branch's history.
+// Restores a branch to an earlier state in its own or another branch's history
+// by specifying an LSN or timestamp.
+// Creates a new branch from the historical state.
 //
 // POST /projects/{project_id}/branches/{branch_id}/restore
 func (s *Server) handleRestoreProjectBranchRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -26838,7 +27330,7 @@ func (s *Server) handleRestoreProjectBranchRequest(args [2]string, argsEscaped b
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    RestoreProjectBranchOperation,
-			OperationSummary: "Restore branch",
+			OperationSummary: "Restore branch to a historical state",
 			OperationID:      "restoreProjectBranch",
 			Body:             request,
 			RawBody:          rawBody,
@@ -26904,7 +27396,8 @@ func (s *Server) handleRestoreProjectBranchRequest(args [2]string, argsEscaped b
 
 // handleRestoreSnapshotRequest handles restoreSnapshot operation.
 //
-// Restore the specified snapshot to a new branch and optionally finalize the restore operation.
+// Restores the specified snapshot to a new branch,
+// and optionally finalizes the restore operation to replace the original branch.
 // **Note**: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/snapshots/{snapshot_id}/restore
@@ -27169,9 +27662,8 @@ func (s *Server) handleRestoreSnapshotRequest(args [2]string, argsEscaped bool, 
 // Revokes the specified API key.
 // An API key that is no longer needed can be revoked.
 // This action cannot be reversed.
-// You can obtain `key_id` values by listing the API keys for your Neon account.
 // API keys can also be managed in the Neon Console.
-// See [Manage API keys](https://neon.tech/docs/manage/api-keys/).
+// See [Manage API keys](https://neon.com/docs/manage/api-keys/).
 //
 // DELETE /api_keys/{key_id}
 func (s *Server) handleRevokeApiKeyRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -27412,9 +27904,8 @@ func (s *Server) handleRevokeApiKeyRequest(args [1]string, argsEscaped bool, w h
 // Revokes the specified organization API key.
 // An API key that is no longer needed can be revoked.
 // This action cannot be reversed.
-// You can obtain `key_id` values by listing the API keys for an organization.
 // API keys can also be managed in the Neon Console.
-// See [Manage API keys](https://neon.tech/docs/manage/api-keys/).
+// See [Manage API keys](https://neon.com/docs/manage/api-keys/).
 //
 // DELETE /organizations/{org_id}/api_keys/{key_id}
 func (s *Server) handleRevokeOrgApiKeyRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -27899,7 +28390,11 @@ func (s *Server) handleRevokePermissionFromProjectRequest(args [2]string, argsEs
 
 // handleSendNeonAuthTestEmailRequest handles sendNeonAuthTestEmail operation.
 //
-// Sends a test email to the specified email address.
+// Sends a test email using the configured email server settings to verify SMTP connectivity and
+// credentials.
+// The request body must include the SMTP server settings
+// (`host`, `port`, `username`, `password`, `sender_email`, `sender_name`) and the `recipient_email`
+// address.
 //
 // POST /projects/{project_id}/branches/{branch_id}/auth/send_test_email
 func (s *Server) handleSendNeonAuthTestEmailRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -28158,9 +28653,7 @@ func (s *Server) handleSendNeonAuthTestEmailRequest(args [2]string, argsEscaped 
 //
 // Sets the specified branch as the project's default branch.
 // The default designation is automatically removed from the previous default branch.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
-// For more information, see [Manage branches](https://neon.tech/docs/manage/branches/).
+// For more information, see [Manage branches](https://neon.com/docs/manage/branches/).
 //
 // POST /projects/{project_id}/branches/{branch_id}/set_as_default
 func (s *Server) handleSetDefaultProjectBranchRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -28400,10 +28893,268 @@ func (s *Server) handleSetDefaultProjectBranchRequest(args [2]string, argsEscape
 	}
 }
 
+// handleSetOrganizationSpendingLimitRequest handles setOrganizationSpendingLimit operation.
+//
+// Sets the monthly spending limit for the specified organization.
+// To remove a previously configured limit, send a DELETE request to this endpoint.
+// When a limit is configured, email notifications are sent at 80% and 100% of the limit.
+// Computes are not suspended when the limit is reached.
+// Available to organization admins on Launch and Scale plans only.
+//
+// PUT /organizations/{org_id}/billing/spending_limit
+func (s *Server) handleSetOrganizationSpendingLimitRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	statusWriter := &codeRecorder{ResponseWriter: w}
+	w = statusWriter
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("setOrganizationSpendingLimit"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
+		semconv.HTTPRouteKey.String("/organizations/{org_id}/billing/spending_limit"),
+	}
+	// Add attributes from config.
+	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), SetOrganizationSpendingLimitOperation,
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+
+		attrSet := labeler.AttributeSet()
+		attrs := attrSet.ToSlice()
+		code := statusWriter.status
+		if code != 0 {
+			codeAttr := semconv.HTTPResponseStatusCode(code)
+			attrs = append(attrs, codeAttr)
+			span.SetAttributes(codeAttr)
+		}
+		attrOpt := metric.WithAttributes(attrs...)
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+
+			// https://opentelemetry.io/docs/specs/semconv/http/http-spans/#status
+			// Span Status MUST be left unset if HTTP status code was in the 1xx, 2xx or 3xx ranges,
+			// unless there was another error (e.g., network error receiving the response body; or 3xx codes with
+			// max redirects exceeded), in which case status MUST be set to Error.
+			code := statusWriter.status
+			if code < 100 || code >= 500 {
+				span.SetStatus(codes.Error, stage)
+			}
+
+			attrSet := labeler.AttributeSet()
+			attrs := attrSet.ToSlice()
+			if code != 0 {
+				attrs = append(attrs, semconv.HTTPResponseStatusCode(code))
+			}
+
+			s.errors.Add(ctx, 1, metric.WithAttributes(attrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: SetOrganizationSpendingLimitOperation,
+			ID:   "setOrganizationSpendingLimit",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityBearerAuth(ctx, SetOrganizationSpendingLimitOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "BearerAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:BearerAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+		{
+			sctx, ok, err := s.securityCookieAuth(ctx, SetOrganizationSpendingLimitOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "CookieAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:CookieAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 1
+				ctx = sctx
+			}
+		}
+		{
+			sctx, ok, err := s.securityTokenCookieAuth(ctx, SetOrganizationSpendingLimitOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "TokenCookieAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:TokenCookieAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 2
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeSetOrganizationSpendingLimitParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var rawBody []byte
+	request, rawBody, close, err := s.decodeSetOrganizationSpendingLimitRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response *SpendingLimitResponse
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    SetOrganizationSpendingLimitOperation,
+			OperationSummary: "Set organization spending limit",
+			OperationID:      "setOrganizationSpendingLimit",
+			Body:             request,
+			RawBody:          rawBody,
+			Params: middleware.Parameters{
+				{
+					Name: "org_id",
+					In:   "path",
+				}: params.OrgID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = *SpendingLimitUpdateRequest
+			Params   = SetOrganizationSpendingLimitParams
+			Response = *SpendingLimitResponse
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackSetOrganizationSpendingLimitParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.SetOrganizationSpendingLimit(ctx, request, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.SetOrganizationSpendingLimit(ctx, request, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*GeneralErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeSetOrganizationSpendingLimitResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleSetSnapshotScheduleRequest handles setSnapshotSchedule operation.
 //
-// Update the backup schedule for the specified branch.
-// **Note** : This endpoint is currently in Beta.
+// Updates the backup schedule for the specified branch.
+// The schedule defines how often automatic snapshots are created (e.g., `hourly`, `daily`).
+// **Note**: This endpoint is currently in Beta.
 //
 // PUT /projects/{project_id}/branches/{branch_id}/backup_schedule
 func (s *Server) handleSetSnapshotScheduleRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -28663,8 +29414,6 @@ func (s *Server) handleSetSnapshotScheduleRequest(args [2]string, argsEscaped bo
 // Starts the anonymization process for an anonymized branch that is in the initialized, error, or
 // anonymized state.
 // This will apply all defined masking rules to anonymize sensitive data in the branch databases.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
 // The branch must be an anonymized branch to start anonymization.
 // **Note**: This endpoint is currently in Beta.
 //
@@ -28908,13 +29657,11 @@ func (s *Server) handleStartAnonymizationRequest(args [2]string, argsEscaped boo
 
 // handleStartProjectEndpointRequest handles startProjectEndpoint operation.
 //
-// Starts a compute endpoint. The compute endpoint is ready to use
-// after the last operation in chain finishes successfully.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain an `endpoint_id` by listing your project's compute endpoints.
+// Starts a compute endpoint.
+// The compute endpoint is ready to use after the last operation in the chain finishes successfully.
 // An `endpoint_id` has an `ep-` prefix.
 // For information about compute endpoints, see [Manage computes](https://neon.
-// tech/docs/manage/endpoints/).
+// com/docs/manage/endpoints/).
 //
 // POST /projects/{project_id}/endpoints/{endpoint_id}/start
 func (s *Server) handleStartProjectEndpointRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -29156,12 +29903,10 @@ func (s *Server) handleStartProjectEndpointRequest(args [2]string, argsEscaped b
 
 // handleSuspendProjectEndpointRequest handles suspendProjectEndpoint operation.
 //
-// Suspend the specified compute endpoint
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain an `endpoint_id` by listing your project's compute endpoints.
+// Suspends the specified compute endpoint.
 // An `endpoint_id` has an `ep-` prefix.
 // For information about compute endpoints, see [Manage computes](https://neon.
-// tech/docs/manage/endpoints/).
+// com/docs/manage/endpoints/).
 //
 // POST /projects/{project_id}/endpoints/{endpoint_id}/suspend
 func (s *Server) handleSuspendProjectEndpointRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -29403,7 +30148,7 @@ func (s *Server) handleSuspendProjectEndpointRequest(args [2]string, argsEscaped
 
 // handleTransferNeonAuthProviderProjectRequest handles transferNeonAuthProviderProject operation.
 //
-// Transfer ownership of your Neon-managed auth project to your own auth provider account.
+// Transfers ownership of your Neon-managed auth project to your own auth provider account.
 //
 // POST /projects/auth/transfer_ownership
 func (s *Server) handleTransferNeonAuthProviderProjectRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -29895,8 +30640,10 @@ func (s *Server) handleTransferProjectsFromOrgToOrgRequest(args [1]string, argsE
 
 // handleTransferProjectsFromUserToOrgRequest handles transferProjectsFromUserToOrg operation.
 //
-// Transfers selected projects, identified by their IDs, from your personal account to a specified
-// organization.
+// DEPRECATED. Personal accounts have been migrated to organizations, making this operation no longer
+// applicable.
+//
+// Deprecated: schema marks this operation as deprecated.
 //
 // POST /users/me/projects/transfer
 func (s *Server) handleTransferProjectsFromUserToOrgRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -30397,8 +31144,6 @@ func (s *Server) handleUpdateBranchNeonAuthOauthProviderRequest(args [3]string, 
 //
 // Updates the masking rules for the specified anonymized branch.
 // Masking rules define how sensitive data should be anonymized using PostgreSQL Anonymizer.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
 // **Note**: This endpoint is currently in Beta.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/masking_rules
@@ -30656,7 +31401,9 @@ func (s *Server) handleUpdateMaskingRulesRequest(args [2]string, argsEscaped boo
 
 // handleUpdateNeonAuthAllowLocalhostRequest handles updateNeonAuthAllowLocalhost operation.
 //
-// Updates the allow localhost configuration for the specified branch.
+// Updates the localhost allow setting for the specified branch's Neon Auth integration.
+// When enabled, authentication flows work from `localhost` without adding it to the redirect URI
+// whitelist.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/allow_localhost
 func (s *Server) handleUpdateNeonAuthAllowLocalhostRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -30847,7 +31594,7 @@ func (s *Server) handleUpdateNeonAuthAllowLocalhostRequest(args [2]string, argsE
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    UpdateNeonAuthAllowLocalhostOperation,
-			OperationSummary: "Update allow localhost",
+			OperationSummary: "Update localhost allow setting",
 			OperationID:      "updateNeonAuthAllowLocalhost",
 			Body:             request,
 			RawBody:          rawBody,
@@ -30911,9 +31658,269 @@ func (s *Server) handleUpdateNeonAuthAllowLocalhostRequest(args [2]string, argsE
 	}
 }
 
+// handleUpdateNeonAuthConfigRequest handles updateNeonAuthConfig operation.
+//
+// Updates the auth configuration for the branch.
+// Currently supports updating the application name used in auth emails.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/auth/config
+func (s *Server) handleUpdateNeonAuthConfigRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	statusWriter := &codeRecorder{ResponseWriter: w}
+	w = statusWriter
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateNeonAuthConfig"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.HTTPRouteKey.String("/projects/{project_id}/branches/{branch_id}/auth/config"),
+	}
+	// Add attributes from config.
+	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), UpdateNeonAuthConfigOperation,
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+
+		attrSet := labeler.AttributeSet()
+		attrs := attrSet.ToSlice()
+		code := statusWriter.status
+		if code != 0 {
+			codeAttr := semconv.HTTPResponseStatusCode(code)
+			attrs = append(attrs, codeAttr)
+			span.SetAttributes(codeAttr)
+		}
+		attrOpt := metric.WithAttributes(attrs...)
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+
+			// https://opentelemetry.io/docs/specs/semconv/http/http-spans/#status
+			// Span Status MUST be left unset if HTTP status code was in the 1xx, 2xx or 3xx ranges,
+			// unless there was another error (e.g., network error receiving the response body; or 3xx codes with
+			// max redirects exceeded), in which case status MUST be set to Error.
+			code := statusWriter.status
+			if code < 100 || code >= 500 {
+				span.SetStatus(codes.Error, stage)
+			}
+
+			attrSet := labeler.AttributeSet()
+			attrs := attrSet.ToSlice()
+			if code != 0 {
+				attrs = append(attrs, semconv.HTTPResponseStatusCode(code))
+			}
+
+			s.errors.Add(ctx, 1, metric.WithAttributes(attrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: UpdateNeonAuthConfigOperation,
+			ID:   "updateNeonAuthConfig",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityBearerAuth(ctx, UpdateNeonAuthConfigOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "BearerAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:BearerAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+		{
+			sctx, ok, err := s.securityCookieAuth(ctx, UpdateNeonAuthConfigOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "CookieAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:CookieAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 1
+				ctx = sctx
+			}
+		}
+		{
+			sctx, ok, err := s.securityTokenCookieAuth(ctx, UpdateNeonAuthConfigOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "TokenCookieAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:TokenCookieAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 2
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeUpdateNeonAuthConfigParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var rawBody []byte
+	request, rawBody, close, err := s.decodeUpdateNeonAuthConfigRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response *NeonAuthConfigResponse
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    UpdateNeonAuthConfigOperation,
+			OperationSummary: "Update auth configuration",
+			OperationID:      "updateNeonAuthConfig",
+			Body:             request,
+			RawBody:          rawBody,
+			Params: middleware.Parameters{
+				{
+					Name: "project_id",
+					In:   "path",
+				}: params.ProjectID,
+				{
+					Name: "branch_id",
+					In:   "path",
+				}: params.BranchID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = *NeonAuthConfigUpdate
+			Params   = UpdateNeonAuthConfigParams
+			Response = *NeonAuthConfigResponse
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackUpdateNeonAuthConfigParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.UpdateNeonAuthConfig(ctx, request, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.UpdateNeonAuthConfig(ctx, request, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*GeneralErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeUpdateNeonAuthConfigResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleUpdateNeonAuthEmailAndPasswordConfigRequest handles updateNeonAuthEmailAndPasswordConfig operation.
 //
-// Updates the email and password authentication configuration for Neon Auth.
+// Updates the email and password authentication configuration for the specified branch's Neon Auth
+// integration.
+// Only the fields provided in the request body are updated.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/email_and_password
 func (s *Server) handleUpdateNeonAuthEmailAndPasswordConfigRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -31170,7 +32177,9 @@ func (s *Server) handleUpdateNeonAuthEmailAndPasswordConfigRequest(args [2]strin
 
 // handleUpdateNeonAuthEmailProviderRequest handles updateNeonAuthEmailProvider operation.
 //
-// Updates the email provider configuration for the specified branch.
+// Updates the email provider configuration for the specified branch's Neon Auth integration.
+// The email provider handles transactional messages such as verification emails and password reset
+// links.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/email_provider
 func (s *Server) handleUpdateNeonAuthEmailProviderRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -31673,6 +32682,264 @@ func (s *Server) handleUpdateNeonAuthEmailServerRequest(args [1]string, argsEsca
 	}
 
 	if err := encodeUpdateNeonAuthEmailServerResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
+// handleUpdateNeonAuthMagicLinkPluginRequest handles updateNeonAuthMagicLinkPlugin operation.
+//
+// Updates the magic link plugin configuration for Neon Auth.
+// The magic link plugin enables passwordless authentication via email magic links.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/magic-link
+func (s *Server) handleUpdateNeonAuthMagicLinkPluginRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	statusWriter := &codeRecorder{ResponseWriter: w}
+	w = statusWriter
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateNeonAuthMagicLinkPlugin"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.HTTPRouteKey.String("/projects/{project_id}/branches/{branch_id}/auth/plugins/magic-link"),
+	}
+	// Add attributes from config.
+	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), UpdateNeonAuthMagicLinkPluginOperation,
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+
+		attrSet := labeler.AttributeSet()
+		attrs := attrSet.ToSlice()
+		code := statusWriter.status
+		if code != 0 {
+			codeAttr := semconv.HTTPResponseStatusCode(code)
+			attrs = append(attrs, codeAttr)
+			span.SetAttributes(codeAttr)
+		}
+		attrOpt := metric.WithAttributes(attrs...)
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+
+			// https://opentelemetry.io/docs/specs/semconv/http/http-spans/#status
+			// Span Status MUST be left unset if HTTP status code was in the 1xx, 2xx or 3xx ranges,
+			// unless there was another error (e.g., network error receiving the response body; or 3xx codes with
+			// max redirects exceeded), in which case status MUST be set to Error.
+			code := statusWriter.status
+			if code < 100 || code >= 500 {
+				span.SetStatus(codes.Error, stage)
+			}
+
+			attrSet := labeler.AttributeSet()
+			attrs := attrSet.ToSlice()
+			if code != 0 {
+				attrs = append(attrs, semconv.HTTPResponseStatusCode(code))
+			}
+
+			s.errors.Add(ctx, 1, metric.WithAttributes(attrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: UpdateNeonAuthMagicLinkPluginOperation,
+			ID:   "updateNeonAuthMagicLinkPlugin",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityBearerAuth(ctx, UpdateNeonAuthMagicLinkPluginOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "BearerAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:BearerAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+		{
+			sctx, ok, err := s.securityCookieAuth(ctx, UpdateNeonAuthMagicLinkPluginOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "CookieAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:CookieAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 1
+				ctx = sctx
+			}
+		}
+		{
+			sctx, ok, err := s.securityTokenCookieAuth(ctx, UpdateNeonAuthMagicLinkPluginOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "TokenCookieAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:TokenCookieAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 2
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeUpdateNeonAuthMagicLinkPluginParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var rawBody []byte
+	request, rawBody, close, err := s.decodeUpdateNeonAuthMagicLinkPluginRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response *NeonAuthMagicLinkConfig
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    UpdateNeonAuthMagicLinkPluginOperation,
+			OperationSummary: "Update magic link plugin configuration",
+			OperationID:      "updateNeonAuthMagicLinkPlugin",
+			Body:             request,
+			RawBody:          rawBody,
+			Params: middleware.Parameters{
+				{
+					Name: "project_id",
+					In:   "path",
+				}: params.ProjectID,
+				{
+					Name: "branch_id",
+					In:   "path",
+				}: params.BranchID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = *NeonAuthMagicLinkConfigUpdate
+			Params   = UpdateNeonAuthMagicLinkPluginParams
+			Response = *NeonAuthMagicLinkConfig
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackUpdateNeonAuthMagicLinkPluginParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.UpdateNeonAuthMagicLinkPlugin(ctx, request, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.UpdateNeonAuthMagicLinkPlugin(ctx, request, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*GeneralErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeUpdateNeonAuthMagicLinkPluginResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -32200,9 +33467,272 @@ func (s *Server) handleUpdateNeonAuthOrganizationPluginRequest(args [2]string, a
 	}
 }
 
+// handleUpdateNeonAuthPhoneNumberPluginRequest handles updateNeonAuthPhoneNumberPlugin operation.
+//
+// Updates the phone number plugin configuration for Neon Auth.
+// Only the fields provided in the request body are updated; omitted fields retain their current
+// values.
+// The phone number plugin enables phone-based OTP authentication.
+// OTP codes are delivered via the `send.otp` webhook event with `delivery_preference: "sms"`.
+// A webhook must be configured with the `send.otp` event enabled for SMS delivery to work.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/phone-number
+func (s *Server) handleUpdateNeonAuthPhoneNumberPluginRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	statusWriter := &codeRecorder{ResponseWriter: w}
+	w = statusWriter
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateNeonAuthPhoneNumberPlugin"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.HTTPRouteKey.String("/projects/{project_id}/branches/{branch_id}/auth/plugins/phone-number"),
+	}
+	// Add attributes from config.
+	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), UpdateNeonAuthPhoneNumberPluginOperation,
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+
+		attrSet := labeler.AttributeSet()
+		attrs := attrSet.ToSlice()
+		code := statusWriter.status
+		if code != 0 {
+			codeAttr := semconv.HTTPResponseStatusCode(code)
+			attrs = append(attrs, codeAttr)
+			span.SetAttributes(codeAttr)
+		}
+		attrOpt := metric.WithAttributes(attrs...)
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+
+			// https://opentelemetry.io/docs/specs/semconv/http/http-spans/#status
+			// Span Status MUST be left unset if HTTP status code was in the 1xx, 2xx or 3xx ranges,
+			// unless there was another error (e.g., network error receiving the response body; or 3xx codes with
+			// max redirects exceeded), in which case status MUST be set to Error.
+			code := statusWriter.status
+			if code < 100 || code >= 500 {
+				span.SetStatus(codes.Error, stage)
+			}
+
+			attrSet := labeler.AttributeSet()
+			attrs := attrSet.ToSlice()
+			if code != 0 {
+				attrs = append(attrs, semconv.HTTPResponseStatusCode(code))
+			}
+
+			s.errors.Add(ctx, 1, metric.WithAttributes(attrs...))
+		}
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: UpdateNeonAuthPhoneNumberPluginOperation,
+			ID:   "updateNeonAuthPhoneNumberPlugin",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityBearerAuth(ctx, UpdateNeonAuthPhoneNumberPluginOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "BearerAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:BearerAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+		{
+			sctx, ok, err := s.securityCookieAuth(ctx, UpdateNeonAuthPhoneNumberPluginOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "CookieAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:CookieAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 1
+				ctx = sctx
+			}
+		}
+		{
+			sctx, ok, err := s.securityTokenCookieAuth(ctx, UpdateNeonAuthPhoneNumberPluginOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "TokenCookieAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+					defer recordError("Security:TokenCookieAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 2
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeUpdateNeonAuthPhoneNumberPluginParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var rawBody []byte
+	request, rawBody, close, err := s.decodeUpdateNeonAuthPhoneNumberPluginRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response *NeonAuthPhoneNumberConfig
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    UpdateNeonAuthPhoneNumberPluginOperation,
+			OperationSummary: "Update phone number plugin configuration",
+			OperationID:      "updateNeonAuthPhoneNumberPlugin",
+			Body:             request,
+			RawBody:          rawBody,
+			Params: middleware.Parameters{
+				{
+					Name: "project_id",
+					In:   "path",
+				}: params.ProjectID,
+				{
+					Name: "branch_id",
+					In:   "path",
+				}: params.BranchID,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = *NeonAuthPhoneNumberConfigUpdate
+			Params   = UpdateNeonAuthPhoneNumberPluginParams
+			Response = *NeonAuthPhoneNumberConfig
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackUpdateNeonAuthPhoneNumberPluginParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.UpdateNeonAuthPhoneNumberPlugin(ctx, request, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.UpdateNeonAuthPhoneNumberPlugin(ctx, request, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*GeneralErrorStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w, span); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeUpdateNeonAuthPhoneNumberPluginResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleUpdateNeonAuthUserRoleRequest handles updateNeonAuthUserRole operation.
 //
-// Updates the role of an auth user for the specified project.
+// Updates the role of a user in the Neon Auth user directory for the specified branch.
+// The role controls the user's level of access within the Neon Auth integration.
 //
 // PUT /projects/{project_id}/branches/{branch_id}/auth/users/{auth_user_id}/role
 func (s *Server) handleUpdateNeonAuthUserRoleRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -32463,7 +33993,8 @@ func (s *Server) handleUpdateNeonAuthUserRoleRequest(args [3]string, argsEscaped
 
 // handleUpdateNeonAuthWebhookConfigRequest handles updateNeonAuthWebhookConfig operation.
 //
-// Updates the webhook configuration for Neon Auth on a specific branch.
+// Updates the webhook configuration for the specified branch's Neon Auth integration.
+// Webhooks notify an external endpoint when auth events occur, such as user creation or sign-in.
 //
 // PUT /projects/{project_id}/branches/{branch_id}/auth/webhooks
 func (s *Server) handleUpdateNeonAuthWebhookConfigRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -32654,7 +34185,7 @@ func (s *Server) handleUpdateNeonAuthWebhookConfigRequest(args [2]string, argsEs
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    UpdateNeonAuthWebhookConfigOperation,
-			OperationSummary: "Update webhook configuration for Neon Auth",
+			OperationSummary: "Update Neon Auth webhook configuration",
 			OperationID:      "updateNeonAuthWebhookConfig",
 			Body:             request,
 			RawBody:          rawBody,
@@ -32720,7 +34251,9 @@ func (s *Server) handleUpdateNeonAuthWebhookConfigRequest(args [2]string, argsEs
 
 // handleUpdateOrganizationMemberRequest handles updateOrganizationMember operation.
 //
-// Only an admin can perform this action.
+// Updates the role of an existing member in the specified organization.
+// The requested role must be valid for the organization.
+// Only organization admins can call this endpoint.
 //
 // PATCH /organizations/{org_id}/members/{member_id}
 func (s *Server) handleUpdateOrganizationMemberRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -32978,7 +34511,8 @@ func (s *Server) handleUpdateOrganizationMemberRequest(args [2]string, argsEscap
 // handleUpdateProjectRequest handles updateProject operation.
 //
 // Updates the specified project.
-// You can obtain a `project_id` by listing the projects for your Neon account.
+// Configurable properties include the project name, default compute settings, history retention
+// period, and IP allowlist.
 //
 // PATCH /projects/{project_id}
 func (s *Server) handleUpdateProjectRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -33232,9 +34766,7 @@ func (s *Server) handleUpdateProjectRequest(args [1]string, argsEscaped bool, w 
 // handleUpdateProjectBranchRequest handles updateProjectBranch operation.
 //
 // Updates the specified branch.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
-// For more information, see [Manage branches](https://neon.tech/docs/manage/branches/).
+// For more information, see [Manage branches](https://neon.com/docs/manage/branches/).
 //
 // PATCH /projects/{project_id}/branches/{branch_id}
 func (s *Server) handleUpdateProjectBranchRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -33494,8 +35026,6 @@ func (s *Server) handleUpdateProjectBranchRequest(args [2]string, argsEscaped bo
 // Updates the Neon Data API configuration for the specified branch.
 // You can optionally provide settings to update the Data API configuration.
 // The schema cache is always refreshed as part of this operation.
-// You can obtain the `project_id` and `branch_id` by listing the projects and branches for your Neon
-// account.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/data-api/{database_name}
 func (s *Server) handleUpdateProjectBranchDataAPIRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -33757,9 +35287,7 @@ func (s *Server) handleUpdateProjectBranchDataAPIRequest(args [3]string, argsEsc
 // handleUpdateProjectBranchDatabaseRequest handles updateProjectBranchDatabase operation.
 //
 // Updates the specified database in the branch.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` and `database_name` by listing the branch's databases.
-// For related information, see [Manage databases](https://neon.tech/docs/manage/databases/).
+// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/databases/{database_name}
 func (s *Server) handleUpdateProjectBranchDatabaseRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -34021,11 +35549,9 @@ func (s *Server) handleUpdateProjectBranchDatabaseRequest(args [3]string, argsEs
 // handleUpdateProjectEndpointRequest handles updateProjectEndpoint operation.
 //
 // Updates the specified compute endpoint.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain an `endpoint_id` and `branch_id` by listing your project's compute endpoints.
 // An `endpoint_id` has an `ep-` prefix. A `branch_id` has a `br-` prefix.
 // For more information about compute endpoints, see [Manage computes](https://neon.
-// tech/docs/manage/endpoints/).
+// com/docs/manage/endpoints/).
 // If the returned list of operations is not empty, the compute endpoint is not ready to use.
 // The client must wait for the last operation to finish before using the compute endpoint.
 // If the compute endpoint was idle before the update, it becomes active for a short period of time,
@@ -34286,7 +35812,7 @@ func (s *Server) handleUpdateProjectEndpointRequest(args [2]string, argsEscaped 
 
 // handleUpdateSnapshotRequest handles updateSnapshot operation.
 //
-// Update the specified snapshot.
+// Updates the specified snapshot.
 // **Note**: This endpoint is currently in Beta.
 //
 // PATCH /projects/{project_id}/snapshots/{snapshot_id}
