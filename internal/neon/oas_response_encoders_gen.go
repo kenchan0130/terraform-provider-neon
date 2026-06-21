@@ -409,6 +409,20 @@ func encodeDeleteNeonAuthUserResponse(response *DeleteNeonAuthUserNoContent, w h
 	return nil
 }
 
+func encodeDeleteOrganizationSpendingLimitResponse(response *EmptyResponse, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeDeleteOrganizationVPCEndpointResponse(response *DeleteOrganizationVPCEndpointOK, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -674,9 +688,9 @@ func encodeGetConnectionURIResponse(response *ConnectionURIResponse, w http.Resp
 	return nil
 }
 
-func encodeGetConsumptionHistoryPerAccountResponse(response GetConsumptionHistoryPerAccountRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetConsumptionHistoryPerBranchV2Response(response GetConsumptionHistoryPerBranchV2Res, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
-	case *ConsumptionHistoryPerAccountResponse:
+	case *GetConsumptionHistoryPerBranchV2OK:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
 		span.SetStatus(codes.Ok, http.StatusText(200))
@@ -689,7 +703,7 @@ func encodeGetConsumptionHistoryPerAccountResponse(response GetConsumptionHistor
 
 		return nil
 
-	case *GetConsumptionHistoryPerAccountForbidden:
+	case *GetConsumptionHistoryPerBranchV2Forbidden:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(403)
 		span.SetStatus(codes.Error, http.StatusText(403))
@@ -702,7 +716,7 @@ func encodeGetConsumptionHistoryPerAccountResponse(response GetConsumptionHistor
 
 		return nil
 
-	case *GetConsumptionHistoryPerAccountNotFound:
+	case *GetConsumptionHistoryPerBranchV2NotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -715,7 +729,7 @@ func encodeGetConsumptionHistoryPerAccountResponse(response GetConsumptionHistor
 
 		return nil
 
-	case *GetConsumptionHistoryPerAccountNotAcceptable:
+	case *GetConsumptionHistoryPerBranchV2NotAcceptable:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(406)
 		span.SetStatus(codes.Error, http.StatusText(406))
@@ -728,7 +742,7 @@ func encodeGetConsumptionHistoryPerAccountResponse(response GetConsumptionHistor
 
 		return nil
 
-	case *GetConsumptionHistoryPerAccountTooManyRequests:
+	case *GetConsumptionHistoryPerBranchV2TooManyRequests:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
 		span.SetStatus(codes.Error, http.StatusText(429))
@@ -1002,6 +1016,20 @@ func encodeGetNeonAuthEmailServerResponse(response *NeonAuthEmailServerConfig, w
 	return nil
 }
 
+func encodeGetNeonAuthPhoneNumberPluginResponse(response *NeonAuthPhoneNumberConfig, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeGetNeonAuthPluginConfigsResponse(response *NeonAuthPluginConfigs, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
@@ -1073,6 +1101,20 @@ func encodeGetOrganizationMemberResponse(response *Member, w http.ResponseWriter
 }
 
 func encodeGetOrganizationMembersResponse(response *GetOrganizationMembersOK, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeGetOrganizationSpendingLimitResponse(response *SpendingLimitResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -1672,20 +1714,6 @@ func encodeRestartProjectEndpointResponse(response *EndpointOperations, w http.R
 	return nil
 }
 
-func encodeRestoreProjectResponse(response *ProjectRecoverResponse, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
-
-	e := new(jx.Encoder)
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-
-	return nil
-}
-
 func encodeRestoreProjectBranchResponse(response *BranchOperations, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
@@ -1771,6 +1799,20 @@ func encodeSendNeonAuthTestEmailResponse(response *SendNeonAuthTestEmailResponse
 }
 
 func encodeSetDefaultProjectBranchResponse(response *BranchOperations, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeSetOrganizationSpendingLimitResponse(response *SpendingLimitResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))
@@ -1988,6 +2030,20 @@ func encodeUpdateNeonAuthAllowLocalhostResponse(response *NeonAuthAllowLocalhost
 	return nil
 }
 
+func encodeUpdateNeonAuthConfigResponse(response *NeonAuthConfigResponse, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeUpdateNeonAuthEmailAndPasswordConfigResponse(response *NeonAuthEmailAndPasswordConfig, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
@@ -2030,6 +2086,20 @@ func encodeUpdateNeonAuthEmailServerResponse(response *NeonAuthEmailServerConfig
 	return nil
 }
 
+func encodeUpdateNeonAuthMagicLinkPluginResponse(response *NeonAuthMagicLinkConfig, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeUpdateNeonAuthOauthProviderResponse(response *NeonAuthOauthProvider, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
@@ -2045,6 +2115,20 @@ func encodeUpdateNeonAuthOauthProviderResponse(response *NeonAuthOauthProvider, 
 }
 
 func encodeUpdateNeonAuthOrganizationPluginResponse(response *NeonAuthOrganizationConfig, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeUpdateNeonAuthPhoneNumberPluginResponse(response *NeonAuthPhoneNumberConfig, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))

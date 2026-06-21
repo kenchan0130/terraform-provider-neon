@@ -40,8 +40,6 @@ resource "neon_endpoint" "example" {
 - `disabled` (Boolean) Whether the endpoint is disabled.
 - `name` (String) Optional name of the compute endpoint.
 - `passwordless_access` (Boolean) Whether to permit passwordless access to the compute endpoint.
-- `pooler_enabled` (Boolean) Whether connection pooling is enabled.
-- `pooler_mode` (String) The connection pooler mode. Must be `transaction`.
 - `region_id` (String) The region identifier.
 - `settings` (Attributes) Endpoint settings. (see [below for nested schema](#nestedatt--settings))
 - `suspend_timeout_seconds` (Number) The duration of inactivity in seconds after which the compute is suspended.
@@ -66,7 +64,6 @@ resource "neon_endpoint" "example" {
 Optional:
 
 - `pg_settings` (Map of String) A raw representation of Postgres settings.
-- `pgbouncer_settings` (Map of String) A raw representation of PgBouncer settings.
 - `preload_libraries` (Attributes) Preload libraries configuration. (see [below for nested schema](#nestedatt--settings--preload_libraries))
 
 <a id="nestedatt--settings--preload_libraries"></a>

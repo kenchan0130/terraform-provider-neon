@@ -65,7 +65,7 @@ func (r *neonAuthResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 				},
 			},
 			"auth_provider": schema.StringAttribute{
-				Description: "The authentication provider (e.g. stack, stack_v2, better_auth).",
+				Description: "The authentication provider (e.g. stack, better_auth).",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),

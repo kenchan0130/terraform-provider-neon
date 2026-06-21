@@ -11,7 +11,7 @@ import (
 )
 
 const neonAuthIntegrationJSON = `{
-	"auth_provider": "stack_v2",
+	"auth_provider": "stack",
 	"auth_provider_project_id": "auth-proj-001",
 	"branch_id": "br-test-001",
 	"db_name": "neondb",
@@ -22,7 +22,7 @@ const neonAuthIntegrationJSON = `{
 }`
 
 const neonAuthCreateResponseJSON = `{
-	"auth_provider": "stack_v2",
+	"auth_provider": "stack",
 	"auth_provider_project_id": "auth-proj-001",
 	"pub_client_key": "pub-key",
 	"secret_server_key": "secret-key",
@@ -63,13 +63,13 @@ func TestNeonAuthResource_Create(t *testing.T) {
 resource "neon_branch_neon_auth" "test" {
   project_id    = "test-project-id"
   branch_id     = "br-test-001"
-  auth_provider = "stack_v2"
+  auth_provider = "stack"
 }
 `),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testutil.CheckResourceAttr("neon_branch_neon_auth.test", "project_id", "test-project-id"),
 					testutil.CheckResourceAttr("neon_branch_neon_auth.test", "branch_id", "br-test-001"),
-					testutil.CheckResourceAttr("neon_branch_neon_auth.test", "auth_provider", "stack_v2"),
+					testutil.CheckResourceAttr("neon_branch_neon_auth.test", "auth_provider", "stack"),
 					testutil.CheckResourceAttr("neon_branch_neon_auth.test", "auth_provider_project_id", "auth-proj-001"),
 					testutil.CheckResourceAttr("neon_branch_neon_auth.test", "db_name", "neondb"),
 					testutil.CheckResourceAttr("neon_branch_neon_auth.test", "jwks_url", "https://example.com/.well-known/jwks.json"),
@@ -94,7 +94,7 @@ func TestNeonAuthResource_Import(t *testing.T) {
 resource "neon_branch_neon_auth" "test" {
   project_id    = "test-project-id"
   branch_id     = "br-test-001"
-  auth_provider = "stack_v2"
+  auth_provider = "stack"
 }
 `),
 			},
@@ -127,7 +127,7 @@ func TestNeonAuthResource_APIError(t *testing.T) {
 resource "neon_branch_neon_auth" "test" {
   project_id    = "test-project-id"
   branch_id     = "br-test-001"
-  auth_provider = "stack_v2"
+  auth_provider = "stack"
 }
 `),
 				ExpectError: regexp.MustCompile(`Failed to create NeonAuth integration`),

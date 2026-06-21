@@ -26,7 +26,8 @@ func (UnimplementedHandler) AcceptProjectTransferRequest(ctx context.Context, re
 
 // AddBranchNeonAuthOauthProvider implements addBranchNeonAuthOauthProvider operation.
 //
-// Adds a OAuth provider to the specified project.
+// Adds an OAuth provider configuration to the specified branch's Neon Auth integration.
+// After adding, users can authenticate using the configured provider.
 //
 // POST /projects/{project_id}/branches/{branch_id}/auth/oauth_providers
 func (UnimplementedHandler) AddBranchNeonAuthOauthProvider(ctx context.Context, req *NeonAuthAddOAuthProviderRequest, params AddBranchNeonAuthOauthProviderParams) (r *NeonAuthOauthProvider, _ error) {
@@ -35,7 +36,8 @@ func (UnimplementedHandler) AddBranchNeonAuthOauthProvider(ctx context.Context, 
 
 // AddBranchNeonAuthTrustedDomain implements addBranchNeonAuthTrustedDomain operation.
 //
-// Adds a domain to the redirect_uri whitelist for the specified project.
+// Adds a domain to the redirect URI whitelist for the specified branch.
+// Only domains in this list are permitted as redirect targets after authentication.
 //
 // POST /projects/{project_id}/branches/{branch_id}/auth/domains
 func (UnimplementedHandler) AddBranchNeonAuthTrustedDomain(ctx context.Context, req *NeonAuthAddDomainToRedirectURIWhitelistRequest, params AddBranchNeonAuthTrustedDomainParams) error {
@@ -56,8 +58,8 @@ func (UnimplementedHandler) AddNeonAuthDomainToRedirectURIWhitelist(ctx context.
 
 // AddNeonAuthOauthProvider implements addNeonAuthOauthProvider operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead. Adds a
-// OAuth provider to the specified project.
+// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead.
+// Adds an OAuth provider to the specified project.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -68,17 +70,15 @@ func (UnimplementedHandler) AddNeonAuthOauthProvider(ctx context.Context, req *N
 
 // AddProjectJWKS implements addProjectJWKS operation.
 //
-// Add a new JWKS URL to a project, such that it can be used for verifying JWTs used as the
-// authentication mechanism for the specified project.
+// Adds a JWKS URL to the specified project for verifying JWTs used as the authentication mechanism.
 // The URL must be a valid HTTPS URL that returns a JSON Web Key Set.
 // The `provider_name` field allows you to specify which authentication provider you're using (e.g.,
-// Clerk, Auth0, AWS Cognito, etc.).
-// The `branch_id` can be used to specify on which branches the JWKS URL will be accepted. If not
-// specified, then it will work on any branch.
-// The `role_names` can be used to specify for which roles the JWKS URL will be accepted. If not
-// specified, then default roles will be used (authenticator, authenticated and anonymous).
-// The `jwt_audience` can be used to specify which "aud" values should be accepted by Neon in the
-// JWTs that are used for authentication.
+// Clerk, Auth0, AWS Cognito).
+// The `branch_id` scopes the JWKS URL to specific branches; if not specified, it applies to all
+// branches.
+// The `role_names` scopes the URL to specific roles; if not specified, default roles are used
+// (`authenticator`, `authenticated`, `anonymous`).
+// The `jwt_audience` specifies which `aud` values are accepted in JWTs.
 //
 // POST /projects/{project_id}/jwks
 func (UnimplementedHandler) AddProjectJWKS(ctx context.Context, req *AddProjectJWKSRequest, params AddProjectJWKSParams) (r *JWKSCreationOperation, _ error) {
@@ -110,7 +110,7 @@ func (UnimplementedHandler) AssignProjectVPCEndpoint(ctx context.Context, req *V
 // CountProjectBranches implements countProjectBranches operation.
 //
 // Retrieves the total number of branches in the specified project.
-// You can obtain a `project_id` by listing the projects for your Neon account.
+// Supports an optional `search` parameter to count branches matching a name filter.
 //
 // GET /projects/{project_id}/branches/count
 func (UnimplementedHandler) CountProjectBranches(ctx context.Context, params CountProjectBranchesParams) (r *BranchesCountResponse, _ error) {
@@ -121,10 +121,11 @@ func (UnimplementedHandler) CountProjectBranches(ctx context.Context, params Cou
 //
 // Creates an API key.
 // The `key_name` is a user-specified name for the key.
-// This method returns an `id` and `key`. The `key` is a randomly generated, 64-bit token required to
-// access the Neon API.
+// Returns an `id` and `key`; the `key` is a randomly generated, 64-bit token required to access the
+// Neon API.
+// Store the key securely — it is only returned once.
 // API keys can also be managed in the Neon Console.
-// See [Manage API keys](https://neon.tech/docs/manage/api-keys/).
+// See [Manage API keys](https://neon.com/docs/manage/api-keys/).
 //
 // POST /api_keys
 func (UnimplementedHandler) CreateApiKey(ctx context.Context, req *ApiKeyCreateRequest) (r *ApiKeyCreateResponse, _ error) {
@@ -133,7 +134,9 @@ func (UnimplementedHandler) CreateApiKey(ctx context.Context, req *ApiKeyCreateR
 
 // CreateBranchNeonAuthNewUser implements createBranchNeonAuthNewUser operation.
 //
-// Creates a new user in Neon Auth.
+// Creates a new user in the Neon Auth user directory for the specified branch.
+// The user is created in the `neon_auth.users_sync` table and can immediately authenticate
+// using the branch's configured auth providers.
 //
 // POST /projects/{project_id}/branches/{branch_id}/auth/users
 func (UnimplementedHandler) CreateBranchNeonAuthNewUser(ctx context.Context, req *CreateBranchNeonAuthNewUserRequest, params CreateBranchNeonAuthNewUserParams) (r *NeonAuthCreateNewUserResponse, _ error) {
@@ -142,9 +145,9 @@ func (UnimplementedHandler) CreateBranchNeonAuthNewUser(ctx context.Context, req
 
 // CreateNeonAuth implements createNeonAuth operation.
 //
-// Enables Neon Auth integrationfor the branch.
-// You can obtain the `project_id` and `branch_id` by listing the projects and branches for your Neon
-// account.
+// Enables Neon Auth for the specified branch by connecting it to an authentication provider.
+// Creating the integration provisions the `neon_auth` schema in the branch database, which stores
+// user identity data synchronized from the provider.
 //
 // POST /projects/{project_id}/branches/{branch_id}/auth
 func (UnimplementedHandler) CreateNeonAuth(ctx context.Context, req *EnableNeonAuthIntegrationRequest, params CreateNeonAuthParams) (r *NeonAuthCreateIntegrationResponse, _ error) {
@@ -193,10 +196,11 @@ func (UnimplementedHandler) CreateNeonAuthProviderSDKKeys(ctx context.Context, r
 //
 // Creates an API key for the specified organization.
 // The `key_name` is a user-specified name for the key.
-// This method returns an `id` and `key`. The `key` is a randomly generated, 64-bit token required to
-// access the Neon API.
+// Returns an `id` and `key`; the `key` is a randomly generated, 64-bit token required to access the
+// Neon API.
+// Store the key securely — it is only returned once.
 // API keys can also be managed in the Neon Console.
-// See [Manage API keys](https://neon.tech/docs/manage/api-keys/).
+// See [Manage API keys](https://neon.com/docs/manage/api-keys/).
 //
 // POST /organizations/{org_id}/api_keys
 func (UnimplementedHandler) CreateOrgApiKey(ctx context.Context, req *OrgApiKeyCreateRequest, params CreateOrgApiKeyParams) (r *OrgApiKeyCreateResponse, _ error) {
@@ -219,13 +223,15 @@ func (UnimplementedHandler) CreateOrganizationInvitations(ctx context.Context, r
 // CreateProject implements createProject operation.
 //
 // Creates a Neon project within an organization.
-// You may need to specify an org_id parameter depending on your API key type.
+// If using a personal API key, include the `org_id` parameter to specify which organization to
+// create the project in.
+// If using an org API key, `org_id` is automatically inferred from the key.
 // Plan limits define how many projects you can create.
-// For more information, see [Manage projects](https://neon.tech/docs/manage/projects/).
+// For more information, see [Manage projects](https://neon.com/docs/manage/projects/).
 // You can specify a region and Postgres version in the request body.
-// Neon currently supports PostgreSQL 14, 15, 16, and 17.
+// Neon currently supports PostgreSQL 14, 15, 16, 17, and 18.
 // For supported regions and `region_id` values, see [Regions](https://neon.
-// tech/docs/introduction/regions/).
+// com/docs/introduction/regions/).
 //
 // POST /projects
 func (UnimplementedHandler) CreateProject(ctx context.Context, req *ProjectCreateRequest) (r *CreatedProject, _ error) {
@@ -235,15 +241,13 @@ func (UnimplementedHandler) CreateProject(ctx context.Context, req *ProjectCreat
 // CreateProjectBranch implements createProjectBranch operation.
 //
 // Creates a branch in the specified project.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// This method does not require a request body, but you can specify one to create a compute endpoint
-// for the branch or to select a non-default parent branch.
+// No request body is required, but you can specify one to create a compute endpoint or select a
+// non-default parent branch.
 // By default, the branch is created from the project's default branch with no compute endpoint, and
 // the branch name is auto-generated.
-// To access the branch, you must add an endpoint object. A `read_write` endpoint allows you to
-// perform read and write operations on the branch.
+// To access the branch, add a `read_write` endpoint.
 // Each branch supports one read-write endpoint and multiple read-only endpoints.
-// For related information, see [Manage branches](https://neon.tech/docs/manage/branches/).
+// For related information, see [Manage branches](https://neon.com/docs/manage/branches/).
 //
 // POST /projects/{project_id}/branches
 func (UnimplementedHandler) CreateProjectBranch(ctx context.Context, req OptCreateProjectBranchReq, params CreateProjectBranchParams) (r *CreatedBranch, _ error) {
@@ -268,8 +272,8 @@ func (UnimplementedHandler) CreateProjectBranchAnonymized(ctx context.Context, r
 // CreateProjectBranchDataAPI implements createProjectBranchDataAPI operation.
 //
 // Creates a new instance of Neon Data API in the specified branch.
-// You can obtain the `project_id` and `branch_id` by listing the projects and branches for your Neon
-// account.
+// The Data API exposes a REST interface over the branch database. The `database_name` path parameter
+// determines which database the API serves.
 //
 // POST /projects/{project_id}/branches/{branch_id}/data-api/{database_name}
 func (UnimplementedHandler) CreateProjectBranchDataAPI(ctx context.Context, req OptDataAPICreateRequest, params CreateProjectBranchDataAPIParams) (r *DataAPICreateResponse, _ error) {
@@ -280,9 +284,7 @@ func (UnimplementedHandler) CreateProjectBranchDataAPI(ctx context.Context, req 
 //
 // Creates a database in the specified branch.
 // A branch can have multiple databases.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
-// For related information, see [Manage databases](https://neon.tech/docs/manage/databases/).
+// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
 //
 // POST /projects/{project_id}/branches/{branch_id}/databases
 func (UnimplementedHandler) CreateProjectBranchDatabase(ctx context.Context, req *DatabaseCreateRequest, params CreateProjectBranchDatabaseParams) (r *DatabaseOperations, _ error) {
@@ -292,9 +294,7 @@ func (UnimplementedHandler) CreateProjectBranchDatabase(ctx context.Context, req
 // CreateProjectBranchRole implements createProjectBranchRole operation.
 //
 // Creates a Postgres role in the specified branch.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
-// For related information, see [Manage roles](https://neon.tech/docs/manage/roles/).
+// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
 // Connections established to the active compute endpoint will be dropped.
 // If the compute endpoint is idle, the endpoint becomes active for a short period of time and is
 // suspended afterward.
@@ -307,17 +307,12 @@ func (UnimplementedHandler) CreateProjectBranchRole(ctx context.Context, req *Ro
 // CreateProjectEndpoint implements createProjectEndpoint operation.
 //
 // Creates a compute endpoint for the specified branch.
-// An endpoint is a Neon compute instance.
+// A compute endpoint is a Neon compute instance.
 // There is a maximum of one read-write compute endpoint per branch.
 // If the specified branch already has a read-write compute endpoint, the operation fails.
 // A branch can have multiple read-only compute endpoints.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain `branch_id` by listing the project's branches.
-// A `branch_id` has a `br-` prefix.
-// For supported regions and `region_id` values, see [Regions](https://neon.
-// tech/docs/introduction/regions/).
 // For more information about compute endpoints, see [Manage computes](https://neon.
-// tech/docs/manage/endpoints/).
+// com/docs/manage/endpoints/).
 //
 // POST /projects/{project_id}/endpoints
 func (UnimplementedHandler) CreateProjectEndpoint(ctx context.Context, req *EndpointCreateRequest, params CreateProjectEndpointParams) (r *EndpointOperations, _ error) {
@@ -326,14 +321,11 @@ func (UnimplementedHandler) CreateProjectEndpoint(ctx context.Context, req *Endp
 
 // CreateProjectTransferRequest implements createProjectTransferRequest operation.
 //
-// Creates a transfer request for the specified project. A transfer request allows
-// the project to be transferred to another account or organization. The request
-// has an expiration time after which it can no longer be used. To accept/claim
-// the transfer request, the recipient user/organization must call the
-// `/projects/{project_id}/transfer_requests/{request_id}` API endpoint, or visit
-// `https://console.neon.tech/app/claim?p={project_id}&tr={request_id}&ru={redirect_url}`
-// in the Neon Console. The `ru` parameter is optional and can be used to redirect
-// the user after accepting the transfer request.
+// Creates a transfer request for the specified project. The request expires after a set period.
+// To accept the request, the recipient calls `PUT
+// /projects/{project_id}/transfer_requests/{request_id}`
+// or uses the Neon Console claim link.
+// The optional `ru` parameter redirects the recipient after acceptance.
 //
 // POST /projects/{project_id}/transfer_requests
 func (UnimplementedHandler) CreateProjectTransferRequest(ctx context.Context, req OptCreateProjectTransferRequestReq, params CreateProjectTransferRequestParams) (r *ProjectTransferRequestResponse, _ error) {
@@ -342,8 +334,8 @@ func (UnimplementedHandler) CreateProjectTransferRequest(ctx context.Context, re
 
 // CreateSnapshot implements createSnapshot operation.
 //
-// Create a snapshot from the specified branch using the provided parameters.
-// This endpoint may initiate an asynchronous operation.
+// Creates a snapshot from the specified branch.
+// This operation may initiate an asynchronous process.
 // **Note**: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/snapshot
@@ -362,7 +354,8 @@ func (UnimplementedHandler) DeleteBranchNeonAuthOauthProvider(ctx context.Contex
 
 // DeleteBranchNeonAuthTrustedDomain implements deleteBranchNeonAuthTrustedDomain operation.
 //
-// Deletes a domain from the redirect_uri whitelist for the specified project.
+// Removes a domain from the redirect URI whitelist for the specified branch.
+// After removal, the domain can no longer be used as a redirect target after authentication.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/auth/domains
 func (UnimplementedHandler) DeleteBranchNeonAuthTrustedDomain(ctx context.Context, req *NeonAuthDeleteDomainFromRedirectURIWhitelistRequest, params DeleteBranchNeonAuthTrustedDomainParams) error {
@@ -371,7 +364,8 @@ func (UnimplementedHandler) DeleteBranchNeonAuthTrustedDomain(ctx context.Contex
 
 // DeleteBranchNeonAuthUser implements deleteBranchNeonAuthUser operation.
 //
-// Deletes the auth user for the specified project.
+// Deletes the specified user from the Neon Auth user directory for the specified branch.
+// Removes the user record from `neon_auth.users_sync`. This action cannot be undone.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/auth/users/{auth_user_id}
 func (UnimplementedHandler) DeleteBranchNeonAuthUser(ctx context.Context, params DeleteBranchNeonAuthUserParams) error {
@@ -426,6 +420,17 @@ func (UnimplementedHandler) DeleteNeonAuthUser(ctx context.Context, params Delet
 	return ht.ErrNotImplemented
 }
 
+// DeleteOrganizationSpendingLimit implements deleteOrganizationSpendingLimit operation.
+//
+// Removes the configured monthly spending limit for the specified organization.
+// Idempotent — removing an already-unset limit still succeeds.
+// Available to organization admins on Launch and Scale plans only.
+//
+// DELETE /organizations/{org_id}/billing/spending_limit
+func (UnimplementedHandler) DeleteOrganizationSpendingLimit(ctx context.Context, params DeleteOrganizationSpendingLimitParams) error {
+	return ht.ErrNotImplemented
+}
+
 // DeleteOrganizationVPCEndpoint implements deleteOrganizationVPCEndpoint operation.
 //
 // Deletes the VPC endpoint from the specified Neon organization.
@@ -439,11 +444,9 @@ func (UnimplementedHandler) DeleteOrganizationVPCEndpoint(ctx context.Context, p
 
 // DeleteProject implements deleteProject operation.
 //
-// Deletes the specified project.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// Deleting a project is a permanent action.
-// Deleting a project also deletes endpoints, branches, databases, and users that belong to the
-// project.
+// Deletes the specified project and all its endpoints, branches, databases, and users.
+// Deleted projects can be recovered within 7 days using `POST /projects/{project_id}/recover`.
+// To list recoverable projects, use `GET /projects?recoverable=true`.
 //
 // DELETE /projects/{project_id}
 func (UnimplementedHandler) DeleteProject(ctx context.Context, params DeleteProjectParams) (r *ProjectResponse, _ error) {
@@ -452,17 +455,14 @@ func (UnimplementedHandler) DeleteProject(ctx context.Context, params DeleteProj
 
 // DeleteProjectBranch implements deleteProjectBranch operation.
 //
-// Deletes the specified branch from a project, and places
-// all compute endpoints into an idle state, breaking existing client connections.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain a `branch_id` by listing the project's branches.
-// For related information, see [Manage branches](https://neon.tech/docs/manage/branches/).
-// When a successful response status is received, the compute endpoints are still active,
-// and the branch is not yet deleted from storage.
-// The deletion occurs after all operations finish.
-// You cannot delete a project's root or default branch, and you cannot delete a branch that has a
-// child branch.
+// Deletes the specified branch from a project and places all compute endpoints into an idle state,
+// breaking existing client connections.
+// The deletion completes after all operations finish.
+// You cannot delete a project's root or default branch, or a branch that has a child branch.
 // A project must have at least one branch.
+// By default, deleted branches can be recovered within a 7-day grace period.
+// Use the `hard_delete` parameter to permanently delete the branch immediately.
+// For related information, see [Manage branches](https://neon.com/docs/manage/branches/).
 //
 // DELETE /projects/{project_id}/branches/{branch_id}
 func (UnimplementedHandler) DeleteProjectBranch(ctx context.Context, params DeleteProjectBranchParams) (r DeleteProjectBranchRes, _ error) {
@@ -472,8 +472,7 @@ func (UnimplementedHandler) DeleteProjectBranch(ctx context.Context, params Dele
 // DeleteProjectBranchDataAPI implements deleteProjectBranchDataAPI operation.
 //
 // Deletes the Neon Data API for the specified branch.
-// You can obtain the `project_id` and `branch_id` by listing the projects and branches for your Neon
-// account.
+// Existing connections using the Data API endpoint will fail after deletion.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/data-api/{database_name}
 func (UnimplementedHandler) DeleteProjectBranchDataAPI(ctx context.Context, params DeleteProjectBranchDataAPIParams) error {
@@ -483,9 +482,7 @@ func (UnimplementedHandler) DeleteProjectBranchDataAPI(ctx context.Context, para
 // DeleteProjectBranchDatabase implements deleteProjectBranchDatabase operation.
 //
 // Deletes the specified database from the branch.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` and `database_name` by listing the branch's databases.
-// For related information, see [Manage databases](https://neon.tech/docs/manage/databases/).
+// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/databases/{database_name}
 func (UnimplementedHandler) DeleteProjectBranchDatabase(ctx context.Context, params DeleteProjectBranchDatabaseParams) (r DeleteProjectBranchDatabaseRes, _ error) {
@@ -495,10 +492,7 @@ func (UnimplementedHandler) DeleteProjectBranchDatabase(ctx context.Context, par
 // DeleteProjectBranchRole implements deleteProjectBranchRole operation.
 //
 // Deletes the specified Postgres role from the branch.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
-// You can obtain the `role_name` by listing the roles for a branch.
-// For related information, see [Manage roles](https://neon.tech/docs/manage/roles/).
+// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/roles/{role_name}
 func (UnimplementedHandler) DeleteProjectBranchRole(ctx context.Context, params DeleteProjectBranchRoleParams) (r DeleteProjectBranchRoleRes, _ error) {
@@ -507,15 +501,13 @@ func (UnimplementedHandler) DeleteProjectBranchRole(ctx context.Context, params 
 
 // DeleteProjectEndpoint implements deleteProjectEndpoint operation.
 //
-// Delete the specified compute endpoint.
+// Deletes the specified compute endpoint.
 // A compute endpoint is a Neon compute instance.
 // Deleting a compute endpoint drops existing network connections to the compute endpoint.
-// The deletion is completed when last operation in the chain finishes successfully.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain an `endpoint_id` by listing your project's compute endpoints.
+// The deletion is completed when the last operation in the chain finishes successfully.
 // An `endpoint_id` has an `ep-` prefix.
 // For information about compute endpoints, see [Manage computes](https://neon.
-// tech/docs/manage/endpoints/).
+// com/docs/manage/endpoints/).
 //
 // DELETE /projects/{project_id}/endpoints/{endpoint_id}
 func (UnimplementedHandler) DeleteProjectEndpoint(ctx context.Context, params DeleteProjectEndpointParams) (r DeleteProjectEndpointRes, _ error) {
@@ -524,7 +516,8 @@ func (UnimplementedHandler) DeleteProjectEndpoint(ctx context.Context, params De
 
 // DeleteProjectJWKS implements deleteProjectJWKS operation.
 //
-// Deletes a JWKS URL from the specified project.
+// Removes the specified JWKS URL from the project.
+// JWTs signed by keys from the removed URL can no longer authenticate to the project's endpoints.
 //
 // DELETE /projects/{project_id}/jwks/{jwks_id}
 func (UnimplementedHandler) DeleteProjectJWKS(ctx context.Context, params DeleteProjectJWKSParams) (r *JWKS, _ error) {
@@ -542,7 +535,7 @@ func (UnimplementedHandler) DeleteProjectVPCEndpoint(ctx context.Context, params
 
 // DeleteSnapshot implements deleteSnapshot operation.
 //
-// Delete the specified snapshot.
+// Deletes the specified snapshot.
 // **Note**: This endpoint is currently in Beta.
 //
 // DELETE /projects/{project_id}/snapshots/{snapshot_id}
@@ -552,7 +545,12 @@ func (UnimplementedHandler) DeleteSnapshot(ctx context.Context, params DeleteSna
 
 // DisableNeonAuth implements disableNeonAuth operation.
 //
-// Disables Neon Auth for the branch.
+// Disables the Neon Auth integration for the specified branch, removing the connection
+// to the authentication provider.
+// If `delete_data` is `true`, also deletes the `neon_auth` schema and all associated tables
+// from the branch database.
+// The integration can be re-enabled by calling `POST
+// /projects/{project_id}/branches/{branch_id}/auth`.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/auth
 func (UnimplementedHandler) DisableNeonAuth(ctx context.Context, req OptDisableNeonAuthReq, params DisableNeonAuthParams) error {
@@ -593,8 +591,6 @@ func (UnimplementedHandler) GetActiveRegions(ctx context.Context, params GetActi
 // Retrieves the current status of an anonymized branch, including its state and progress information.
 // This endpoint allows you to monitor the anonymization process from initialization through
 // completion.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
 // Only anonymized branches will have status information available.
 // **Note**: This endpoint is currently in Beta.
 //
@@ -605,8 +601,9 @@ func (UnimplementedHandler) GetAnonymizedBranchStatus(ctx context.Context, param
 
 // GetAuthDetails implements getAuthDetails operation.
 //
-// Returns auth information about the passed credentials. It can refer to an API key, Bearer token or
-// OAuth session.
+// Returns authentication details for the credentials used in the request,
+// including the credential type (API key, Bearer token, or OAuth session)
+// and the associated identity.
 //
 // GET /auth
 func (UnimplementedHandler) GetAuthDetails(ctx context.Context) (r *AuthDetailsResponse, _ error) {
@@ -615,7 +612,11 @@ func (UnimplementedHandler) GetAuthDetails(ctx context.Context) (r *AuthDetailsR
 
 // GetAvailablePreloadLibraries implements getAvailablePreloadLibraries operation.
 //
-// Return available shared preload libraries.
+// Returns the shared preload libraries available for the specified project's Postgres version.
+// Shared preload libraries are Postgres extensions that require the `shared_preload_libraries`
+// setting and a compute restart to activate.
+// Use this list to determine which libraries can be enabled in the project's
+// `settings.preload_libraries` configuration.
 //
 // GET /projects/{project_id}/available_preload_libraries
 func (UnimplementedHandler) GetAvailablePreloadLibraries(ctx context.Context, params GetAvailablePreloadLibrariesParams) (r *AvailablePreloadLibraries, _ error) {
@@ -625,26 +626,31 @@ func (UnimplementedHandler) GetAvailablePreloadLibraries(ctx context.Context, pa
 // GetConnectionURI implements getConnectionURI operation.
 //
 // Retrieves a connection URI for the specified database.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `database_name` by listing the databases for a branch.
-// You can obtain a `role_name` by listing the roles for a branch.
+// The URI uses the standard PostgreSQL connection string format. Set `pooled=true` to include the
+// `-pooler` suffix for a connection pooler URI.
 //
 // GET /projects/{project_id}/connection_uri
 func (UnimplementedHandler) GetConnectionURI(ctx context.Context, params GetConnectionURIParams) (r *ConnectionURIResponse, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// GetConsumptionHistoryPerAccount implements getConsumptionHistoryPerAccount operation.
+// GetConsumptionHistoryPerBranchV2 implements getConsumptionHistoryPerBranchV2 operation.
 //
-// Retrieves consumption metrics for Scale and Enterprise plan accounts, and for legacy Scale,
-// Business, and Enterprise plan accounts.
-// Consumption history begins at the time the account was upgraded to a supported plan.
-// **Deprecated**: This endpoint will be removed on June 1, 2026.
+// Returns consumption metrics for each branch across one or more projects listed in
+// `project_ids` (1 to 100 projects). Available for accounts on paid usage-based Launch, Scale,
+// Agent, and Enterprise plans.
+// History starts when the account first ingests branch-level consumption data.
+// The `metrics` query parameter is required. Only these six values are supported on this
+// endpoint:
+// `compute_unit_seconds`, `root_branch_bytes_month`, `child_branch_bytes_month`,
+// `instant_restore_bytes_month`, `public_network_transfer_bytes`, `private_network_transfer_bytes`.
+// This endpoint does not support `extra_branches_month` or `snapshot_storage_bytes_month`.
+// Use `GET /consumption_history/v2/projects` for those.
+// Consumption metrics within each branch are returned in ascending time order (oldest first).
+// This request does not wake project computes.
 //
-// Deprecated: schema marks this operation as deprecated.
-//
-// GET /consumption_history/account
-func (UnimplementedHandler) GetConsumptionHistoryPerAccount(ctx context.Context, params GetConsumptionHistoryPerAccountParams) (r GetConsumptionHistoryPerAccountRes, _ error) {
+// GET /consumption_history/v2/branches
+func (UnimplementedHandler) GetConsumptionHistoryPerBranchV2(ctx context.Context, params GetConsumptionHistoryPerBranchV2Params) (r GetConsumptionHistoryPerBranchV2Res, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -662,10 +668,17 @@ func (UnimplementedHandler) GetConsumptionHistoryPerProject(ctx context.Context,
 
 // GetConsumptionHistoryPerProjectV2 implements getConsumptionHistoryPerProjectV2 operation.
 //
-// Retrieves consumption metrics for Launch, Scale, Agent, and Enterprise plan projects. History
-// begins at the time of upgrade.
-// Results are ordered by time in ascending order (oldest to newest).
-// Issuing a call to this API does not wake a project's compute endpoint.
+// Returns consumption metrics for up to `limit` projects per page. If `project_ids` is omitted,
+// projects in the organization are included across pages (use `cursor`). If `project_ids` is
+// provided, the response is limited to those projects (up to 100). Available for accounts on
+// Launch, Scale, Agent, Business, and Enterprise plans.
+// History starts when the account upgrades to an eligible plan.
+// The `metrics` query parameter is required. Supported values:
+// `compute_unit_seconds`, `root_branch_bytes_month`, `child_branch_bytes_month`,
+// `instant_restore_bytes_month`, `public_network_transfer_bytes`, `private_network_transfer_bytes`,
+// `extra_branches_month`, `snapshot_storage_bytes_month`.
+// Consumption metrics within each project are returned in ascending time order (oldest first).
+// This request does not wake project computes.
 //
 // GET /consumption_history/v2/projects
 func (UnimplementedHandler) GetConsumptionHistoryPerProjectV2(ctx context.Context, params GetConsumptionHistoryPerProjectV2Params) (r GetConsumptionHistoryPerProjectV2Res, _ error) {
@@ -674,7 +687,8 @@ func (UnimplementedHandler) GetConsumptionHistoryPerProjectV2(ctx context.Contex
 
 // GetCurrentUserInfo implements getCurrentUserInfo operation.
 //
-// Retrieves information about the current Neon user account.
+// Retrieves information about the currently authenticated Neon user,
+// including account identifiers, plan details, and linked auth accounts.
 //
 // GET /users/me
 func (UnimplementedHandler) GetCurrentUserInfo(ctx context.Context) (r *CurrentUserInfoResponse, _ error) {
@@ -683,7 +697,7 @@ func (UnimplementedHandler) GetCurrentUserInfo(ctx context.Context) (r *CurrentU
 
 // GetCurrentUserOrganizations implements getCurrentUserOrganizations operation.
 //
-// Retrieves information about the current Neon user's organizations.
+// Retrieves the organizations that the currently authenticated user belongs to.
 //
 // GET /users/me/organizations
 func (UnimplementedHandler) GetCurrentUserOrganizations(ctx context.Context) (r *OrganizationsResponse, _ error) {
@@ -694,8 +708,6 @@ func (UnimplementedHandler) GetCurrentUserOrganizations(ctx context.Context) (r 
 //
 // Retrieves the masking rules for the specified anonymized branch.
 // Masking rules define how sensitive data should be anonymized using PostgreSQL Anonymizer.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
 // **Note**: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/masking_rules
@@ -705,8 +717,8 @@ func (UnimplementedHandler) GetMaskingRules(ctx context.Context, params GetMaski
 
 // GetNeonAuth implements getNeonAuth operation.
 //
-// / Fetches the details of the Neon Auth for the specified branch. You can obtain the `project_id`
-// and `branch_id` by listing the projects and branches for your Neon account.
+// Retrieves the Neon Auth integration details for the specified branch,
+// including the auth provider type and integration status.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth
 func (UnimplementedHandler) GetNeonAuth(ctx context.Context, params GetNeonAuthParams) (r *NeonAuthIntegration, _ error) {
@@ -715,7 +727,9 @@ func (UnimplementedHandler) GetNeonAuth(ctx context.Context, params GetNeonAuthP
 
 // GetNeonAuthAllowLocalhost implements getNeonAuthAllowLocalhost operation.
 //
-// Get the allow localhost configuration for the specified branch.
+// Retrieves the localhost allow setting for the specified branch's Neon Auth integration.
+// When enabled, authentication flows work from `localhost` without adding it to the redirect URI
+// whitelist.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/allow_localhost
 func (UnimplementedHandler) GetNeonAuthAllowLocalhost(ctx context.Context, params GetNeonAuthAllowLocalhostParams) (r *NeonAuthAllowLocalhostResponse, _ error) {
@@ -724,7 +738,9 @@ func (UnimplementedHandler) GetNeonAuthAllowLocalhost(ctx context.Context, param
 
 // GetNeonAuthEmailAndPasswordConfig implements getNeonAuthEmailAndPasswordConfig operation.
 //
-// Gets the email and password authentication configuration for Neon Auth.
+// Retrieves the email and password authentication configuration for the specified branch's Neon Auth
+// integration,
+// including whether it is enabled and the email verification method.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/email_and_password
 func (UnimplementedHandler) GetNeonAuthEmailAndPasswordConfig(ctx context.Context, params GetNeonAuthEmailAndPasswordConfigParams) (r *NeonAuthEmailAndPasswordConfig, _ error) {
@@ -733,7 +749,8 @@ func (UnimplementedHandler) GetNeonAuthEmailAndPasswordConfig(ctx context.Contex
 
 // GetNeonAuthEmailProvider implements getNeonAuthEmailProvider operation.
 //
-// Gets the email provider configuration for the specified branch.
+// Retrieves the email provider configuration for the specified branch's Neon Auth integration,
+// including the provider type and server settings.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/email_provider
 func (UnimplementedHandler) GetNeonAuthEmailProvider(ctx context.Context, params GetNeonAuthEmailProviderParams) (r *NeonAuthEmailServerConfig, _ error) {
@@ -752,6 +769,16 @@ func (UnimplementedHandler) GetNeonAuthEmailServer(ctx context.Context, params G
 	return r, ht.ErrNotImplemented
 }
 
+// GetNeonAuthPhoneNumberPlugin implements getNeonAuthPhoneNumberPlugin operation.
+//
+// Returns the phone number plugin configuration for Neon Auth.
+// The phone number plugin enables phone-based OTP authentication.
+//
+// GET /projects/{project_id}/branches/{branch_id}/auth/plugins/phone-number
+func (UnimplementedHandler) GetNeonAuthPhoneNumberPlugin(ctx context.Context, params GetNeonAuthPhoneNumberPluginParams) (r *NeonAuthPhoneNumberConfig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetNeonAuthPluginConfigs implements getNeonAuthPluginConfigs operation.
 //
 // Returns all plugin configurations for Neon Auth in a single response.
@@ -765,7 +792,8 @@ func (UnimplementedHandler) GetNeonAuthPluginConfigs(ctx context.Context, params
 
 // GetNeonAuthWebhookConfig implements getNeonAuthWebhookConfig operation.
 //
-// Returns the webhook configuration for Neon Auth.
+// Returns the webhook configuration for the specified branch's Neon Auth integration,
+// including the endpoint URL and the events that trigger it.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/webhooks
 func (UnimplementedHandler) GetNeonAuthWebhookConfig(ctx context.Context, params GetNeonAuthWebhookConfigParams) (r *NeonAuthWebhookConfig, _ error) {
@@ -774,7 +802,7 @@ func (UnimplementedHandler) GetNeonAuthWebhookConfig(ctx context.Context, params
 
 // GetOrganization implements getOrganization operation.
 //
-// Retrieves information about the specified organization.
+// Retrieves details for the specified organization, including its name, plan, and configuration.
 //
 // GET /organizations/{org_id}
 func (UnimplementedHandler) GetOrganization(ctx context.Context, params GetOrganizationParams) (r *Organization, _ error) {
@@ -783,7 +811,7 @@ func (UnimplementedHandler) GetOrganization(ctx context.Context, params GetOrgan
 
 // GetOrganizationInvitations implements getOrganizationInvitations operation.
 //
-// Retrieves information about extended invitations for the specified organization.
+// Retrieves pending and accepted invitations for the specified organization.
 //
 // GET /organizations/{org_id}/invitations
 func (UnimplementedHandler) GetOrganizationInvitations(ctx context.Context, params GetOrganizationInvitationsParams) (r *OrganizationInvitationsResponse, _ error) {
@@ -808,6 +836,17 @@ func (UnimplementedHandler) GetOrganizationMembers(ctx context.Context, params G
 	return r, ht.ErrNotImplemented
 }
 
+// GetOrganizationSpendingLimit implements getOrganizationSpendingLimit operation.
+//
+// Returns the configured monthly spending limit for the specified organization.
+// `spending_limit_cents: null` indicates that no limit is currently set.
+// Available to organization members with read access on Launch and Scale plans only.
+//
+// GET /organizations/{org_id}/billing/spending_limit
+func (UnimplementedHandler) GetOrganizationSpendingLimit(ctx context.Context, params GetOrganizationSpendingLimitParams) (r *SpendingLimitResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetOrganizationVPCEndpointDetails implements getOrganizationVPCEndpointDetails operation.
 //
 // Retrieves the current state and configuration details of a specified VPC endpoint.
@@ -820,7 +859,8 @@ func (UnimplementedHandler) GetOrganizationVPCEndpointDetails(ctx context.Contex
 // GetProject implements getProject operation.
 //
 // Retrieves information about the specified project.
-// You can obtain a `project_id` by listing the projects for an organization.
+// Returned details include the project settings, compute configuration, history retention, owner
+// information, and current usage metrics.
 //
 // GET /projects/{project_id}
 func (UnimplementedHandler) GetProject(ctx context.Context, params GetProjectParams) (r *ProjectResponse, _ error) {
@@ -841,13 +881,11 @@ func (UnimplementedHandler) GetProjectAdvisorSecurityIssues(ctx context.Context,
 // GetProjectBranch implements getProjectBranch operation.
 //
 // Retrieves information about the specified branch.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain a `branch_id` by listing the project's branches.
 // A `branch_id` value has a `br-` prefix.
 // Each Neon project is initially created with a root and default branch named `main`.
 // A project can contain one or more branches.
 // A parent branch is identified by a `parent_id` value, which is the `id` of the parent branch.
-// For related information, see [Manage branches](https://neon.tech/docs/manage/branches/).
+// For related information, see [Manage branches](https://neon.com/docs/manage/branches/).
 //
 // GET /projects/{project_id}/branches/{branch_id}
 func (UnimplementedHandler) GetProjectBranch(ctx context.Context, params GetProjectBranchParams) (r *GetProjectBranchOK, _ error) {
@@ -856,7 +894,8 @@ func (UnimplementedHandler) GetProjectBranch(ctx context.Context, params GetProj
 
 // GetProjectBranchDataAPI implements getProjectBranchDataAPI operation.
 //
-// Retrieves the Neon Data API for the specified branch.
+// Retrieves the Neon Data API configuration for the specified branch,
+// including endpoint URL, enabled state, and database settings.
 //
 // GET /projects/{project_id}/branches/{branch_id}/data-api/{database_name}
 func (UnimplementedHandler) GetProjectBranchDataAPI(ctx context.Context, params GetProjectBranchDataAPIParams) (r *DataAPIReponse, _ error) {
@@ -866,9 +905,7 @@ func (UnimplementedHandler) GetProjectBranchDataAPI(ctx context.Context, params 
 // GetProjectBranchDatabase implements getProjectBranchDatabase operation.
 //
 // Retrieves information about the specified database.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` and `database_name` by listing the branch's databases.
-// For related information, see [Manage databases](https://neon.tech/docs/manage/databases/).
+// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
 //
 // GET /projects/{project_id}/branches/{branch_id}/databases/{database_name}
 func (UnimplementedHandler) GetProjectBranchDatabase(ctx context.Context, params GetProjectBranchDatabaseParams) (r *DatabaseResponse, _ error) {
@@ -878,11 +915,8 @@ func (UnimplementedHandler) GetProjectBranchDatabase(ctx context.Context, params
 // GetProjectBranchRole implements getProjectBranchRole operation.
 //
 // Retrieves details about the specified role.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
-// You can obtain the `role_name` by listing the roles for a branch.
 // In Neon, the terms "role" and "user" are synonymous.
-// For related information, see [Manage roles](https://neon.tech/docs/manage/roles/).
+// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
 //
 // GET /projects/{project_id}/branches/{branch_id}/roles/{role_name}
 func (UnimplementedHandler) GetProjectBranchRole(ctx context.Context, params GetProjectBranchRoleParams) (r *RoleResponse, _ error) {
@@ -892,10 +926,7 @@ func (UnimplementedHandler) GetProjectBranchRole(ctx context.Context, params Get
 // GetProjectBranchRolePassword implements getProjectBranchRolePassword operation.
 //
 // Retrieves the password for the specified Postgres role, if possible.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
-// You can obtain the `role_name` by listing the roles for a branch.
-// For related information, see [Manage roles](https://neon.tech/docs/manage/roles/).
+// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
 //
 // GET /projects/{project_id}/branches/{branch_id}/roles/{role_name}/reveal_password
 func (UnimplementedHandler) GetProjectBranchRolePassword(ctx context.Context, params GetProjectBranchRolePasswordParams) (r GetProjectBranchRolePasswordRes, _ error) {
@@ -926,11 +957,9 @@ func (UnimplementedHandler) GetProjectBranchSchemaComparison(ctx context.Context
 //
 // Retrieves information about the specified compute endpoint.
 // A compute endpoint is a Neon compute instance.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain an `endpoint_id` by listing your project's compute endpoints.
 // An `endpoint_id` has an `ep-` prefix.
 // For information about compute endpoints, see [Manage computes](https://neon.
-// tech/docs/manage/endpoints/).
+// com/docs/manage/endpoints/).
 //
 // GET /projects/{project_id}/endpoints/{endpoint_id}
 func (UnimplementedHandler) GetProjectEndpoint(ctx context.Context, params GetProjectEndpointParams) (r *EndpointResponse, _ error) {
@@ -951,8 +980,6 @@ func (UnimplementedHandler) GetProjectJWKS(ctx context.Context, params GetProjec
 //
 // Retrieves details for the specified operation.
 // An operation is an action performed on a Neon project resource.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain a `operation_id` by listing operations for the project.
 //
 // GET /projects/{project_id}/operations/{operation_id}
 func (UnimplementedHandler) GetProjectOperation(ctx context.Context, params GetProjectOperationParams) (r *OperationResponse, _ error) {
@@ -961,7 +988,8 @@ func (UnimplementedHandler) GetProjectOperation(ctx context.Context, params GetP
 
 // GetSnapshotSchedule implements getSnapshotSchedule operation.
 //
-// View the backup schedule for the specified branch.
+// Returns the backup schedule for the specified branch, including the configured snapshot
+// frequencies.
 // **Note**: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/backup_schedule
@@ -983,7 +1011,7 @@ func (UnimplementedHandler) GrantPermissionToProject(ctx context.Context, req *G
 // Retrieves the API keys for your Neon account.
 // The response does not include API key tokens. A token is only provided when creating an API key.
 // API keys can also be managed in the Neon Console.
-// For more information, see [Manage API keys](https://neon.tech/docs/manage/api-keys/).
+// For more information, see [Manage API keys](https://neon.com/docs/manage/api-keys/).
 //
 // GET /api_keys
 func (UnimplementedHandler) ListApiKeys(ctx context.Context) (r []ApiKeysListResponseItem, _ error) {
@@ -992,7 +1020,7 @@ func (UnimplementedHandler) ListApiKeys(ctx context.Context) (r []ApiKeysListRes
 
 // ListBranchNeonAuthOauthProviders implements listBranchNeonAuthOauthProviders operation.
 //
-// Lists the OAuth providers for the specified project and branch.
+// Lists the OAuth providers configured for the specified branch's Neon Auth integration.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/oauth_providers
 func (UnimplementedHandler) ListBranchNeonAuthOauthProviders(ctx context.Context, params ListBranchNeonAuthOauthProvidersParams) (r *ListNeonAuthOauthProvidersResponse, _ error) {
@@ -1001,7 +1029,8 @@ func (UnimplementedHandler) ListBranchNeonAuthOauthProviders(ctx context.Context
 
 // ListBranchNeonAuthTrustedDomains implements listBranchNeonAuthTrustedDomains operation.
 //
-// Lists the domains in the redirect_uri whitelist for the specified project.
+// Lists the trusted domains in the redirect URI whitelist for the specified branch.
+// Only domains in this list are permitted as redirect targets after authentication.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/domains
 func (UnimplementedHandler) ListBranchNeonAuthTrustedDomains(ctx context.Context, params ListBranchNeonAuthTrustedDomainsParams) (r *NeonAuthRedirectURIWhitelistResponse, _ error) {
@@ -1048,7 +1077,7 @@ func (UnimplementedHandler) ListNeonAuthRedirectURIWhitelistDomains(ctx context.
 // Retrieves the API keys for the specified organization.
 // The response does not include API key tokens. A token is only provided when creating an API key.
 // API keys can also be managed in the Neon Console.
-// For more information, see [Manage API keys](https://neon.tech/docs/manage/api-keys/).
+// For more information, see [Manage API keys](https://neon.com/docs/manage/api-keys/).
 //
 // GET /organizations/{org_id}/api_keys
 func (UnimplementedHandler) ListOrgApiKeys(ctx context.Context, params ListOrgApiKeysParams) (r []OrgApiKeysListResponseItem, _ error) {
@@ -1077,9 +1106,7 @@ func (UnimplementedHandler) ListOrganizationVPCEndpointsAllRegions(ctx context.C
 //
 // Retrieves a list of databases for the specified branch.
 // A branch can have multiple databases.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
-// For related information, see [Manage databases](https://neon.tech/docs/manage/databases/).
+// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
 //
 // GET /projects/{project_id}/branches/{branch_id}/databases
 func (UnimplementedHandler) ListProjectBranchDatabases(ctx context.Context, params ListProjectBranchDatabasesParams) (r *DatabasesResponse, _ error) {
@@ -1091,8 +1118,6 @@ func (UnimplementedHandler) ListProjectBranchDatabases(ctx context.Context, para
 // Retrieves a list of compute endpoints for the specified branch.
 // Neon permits only one read-write compute endpoint per branch.
 // A branch can have multiple read-only compute endpoints.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
 //
 // GET /projects/{project_id}/branches/{branch_id}/endpoints
 func (UnimplementedHandler) ListProjectBranchEndpoints(ctx context.Context, params ListProjectBranchEndpointsParams) (r *EndpointsResponse, _ error) {
@@ -1102,9 +1127,7 @@ func (UnimplementedHandler) ListProjectBranchEndpoints(ctx context.Context, para
 // ListProjectBranchRoles implements listProjectBranchRoles operation.
 //
 // Retrieves a list of Postgres roles from the specified branch.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
-// For related information, see [Manage roles](https://neon.tech/docs/manage/roles/).
+// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
 //
 // GET /projects/{project_id}/branches/{branch_id}/roles
 func (UnimplementedHandler) ListProjectBranchRoles(ctx context.Context, params ListProjectBranchRolesParams) (r *RolesResponse, _ error) {
@@ -1114,12 +1137,11 @@ func (UnimplementedHandler) ListProjectBranchRoles(ctx context.Context, params L
 // ListProjectBranches implements listProjectBranches operation.
 //
 // Retrieves a list of branches for the specified project.
-// You can obtain a `project_id` by listing the projects for your Neon account.
 // Each Neon project has a root branch named `main`.
 // A `branch_id` value has a `br-` prefix.
 // A project may contain child branches that were branched from `main` or from another branch.
 // A parent branch is identified by the `parent_id` value, which is the `id` of the parent branch.
-// For related information, see [Manage branches](https://neon.tech/docs/manage/branches/).
+// For related information, see [Manage branches](https://neon.com/docs/manage/branches/).
 //
 // GET /projects/{project_id}/branches
 func (UnimplementedHandler) ListProjectBranches(ctx context.Context, params ListProjectBranchesParams) (r *ListProjectBranchesOK, _ error) {
@@ -1130,9 +1152,8 @@ func (UnimplementedHandler) ListProjectBranches(ctx context.Context, params List
 //
 // Retrieves a list of compute endpoints for the specified project.
 // A compute endpoint is a Neon compute instance.
-// You can obtain a `project_id` by listing the projects for your Neon account.
 // For information about compute endpoints, see [Manage computes](https://neon.
-// tech/docs/manage/endpoints/).
+// com/docs/manage/endpoints/).
 //
 // GET /projects/{project_id}/endpoints
 func (UnimplementedHandler) ListProjectEndpoints(ctx context.Context, params ListProjectEndpointsParams) (r *EndpointsResponse, _ error) {
@@ -1142,7 +1163,6 @@ func (UnimplementedHandler) ListProjectEndpoints(ctx context.Context, params Lis
 // ListProjectOperations implements listProjectOperations operation.
 //
 // Retrieves a list of operations for the specified Neon project.
-// You can obtain a `project_id` by listing the projects for your Neon account.
 // The number of operations returned can be large.
 // To paginate the response, issue an initial request with a `limit` value.
 // Then, add the `cursor` value that was returned in the response to the next request.
@@ -1175,9 +1195,13 @@ func (UnimplementedHandler) ListProjectVPCEndpoints(ctx context.Context, params 
 
 // ListProjects implements listProjects operation.
 //
-// Retrieves a list of projects for an organization.
-// You may need to specify an org_id parameter depending on your API key type.
-// For more information, see [Manage projects](https://neon.tech/docs/manage/projects/).
+// Retrieves a list of projects for the specified organization.
+// If using a personal API key, include the `org_id` parameter to specify which organization to work
+// with.
+// If using an org API key, `org_id` is automatically inferred from the key.
+// For more information, see [Manage organizations using the Neon API](https://neon.
+// com/docs/manage/orgs-api)
+// and [Manage projects](https://neon.com/docs/manage/projects/).
 //
 // GET /projects
 func (UnimplementedHandler) ListProjects(ctx context.Context, params ListProjectsParams) (r *ListProjectsOK, _ error) {
@@ -1187,7 +1211,7 @@ func (UnimplementedHandler) ListProjects(ctx context.Context, params ListProject
 // ListSharedProjects implements listSharedProjects operation.
 //
 // Retrieves a list of projects shared with your Neon account.
-// For more information, see [Manage projects](https://neon.tech/docs/manage/projects/).
+// For more information, see [Manage projects](https://neon.com/docs/manage/projects/).
 //
 // GET /projects/shared
 func (UnimplementedHandler) ListSharedProjects(ctx context.Context, params ListSharedProjectsParams) (r *ListSharedProjectsOK, _ error) {
@@ -1196,7 +1220,8 @@ func (UnimplementedHandler) ListSharedProjects(ctx context.Context, params ListS
 
 // ListSnapshots implements listSnapshots operation.
 //
-// List the snapshots for the specified project.
+// Lists the snapshots for the specified project.
+// Each snapshot represents a point-in-time backup of the project data.
 // **Note**: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/snapshots
@@ -1206,8 +1231,10 @@ func (UnimplementedHandler) ListSnapshots(ctx context.Context, params ListSnapsh
 
 // RecoverProject implements recoverProject operation.
 //
-// Recovers a deleted project during the deletion grace period.
-// You can obtain a `project_id` by listing the projects for your Neon account.
+// Recovers a deleted project within the 7-day deletion recovery period.
+// Restores branches, endpoints, settings, and connection strings.
+// Some integrations require manual reconfiguration after recovery.
+// To list recoverable projects, use `GET /projects?recoverable=true`.
 //
 // POST /projects/{project_id}/recover
 func (UnimplementedHandler) RecoverProject(ctx context.Context, params RecoverProjectParams) (r *ProjectRecoverResponse, _ error) {
@@ -1216,10 +1243,9 @@ func (UnimplementedHandler) RecoverProject(ctx context.Context, params RecoverPr
 
 // RemoveOrganizationMember implements removeOrganizationMember operation.
 //
-// Remove member from the organization.
-// Only an admin of the organization can perform this action.
-// If another admin is being removed, it will not be allows in case it is the only admin left in the
-// organization.
+// Removes the specified member from the organization.
+// Only organization admins can perform this action.
+// The last admin in an organization cannot be removed.
 //
 // DELETE /organizations/{org_id}/members/{member_id}
 func (UnimplementedHandler) RemoveOrganizationMember(ctx context.Context, params RemoveOrganizationMemberParams) error {
@@ -1234,10 +1260,7 @@ func (UnimplementedHandler) RemoveOrganizationMember(ctx context.Context, params
 // The old password remains valid until last operation finishes.
 // Connections to the compute endpoint are dropped. If idle,
 // the compute endpoint becomes active for a short period of time.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
-// You can obtain the `role_name` by listing the roles for a branch.
-// For related information, see [Manage roles](https://neon.tech/docs/manage/roles/).
+// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
 //
 // POST /projects/{project_id}/branches/{branch_id}/roles/{role_name}/reset_password
 func (UnimplementedHandler) ResetProjectBranchRolePassword(ctx context.Context, params ResetProjectBranchRolePasswordParams) (r *RoleOperations, _ error) {
@@ -1246,34 +1269,21 @@ func (UnimplementedHandler) ResetProjectBranchRolePassword(ctx context.Context, 
 
 // RestartProjectEndpoint implements restartProjectEndpoint operation.
 //
-// Restart the specified compute endpoint: suspend immediately followed by start operations.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain an `endpoint_id` by listing your project's compute endpoints.
+// Restarts the specified compute endpoint by immediately suspending it and then starting it again.
 // An `endpoint_id` has an `ep-` prefix.
 // For information about compute endpoints, see [Manage computes](https://neon.
-// tech/docs/manage/endpoints/).
+// com/docs/manage/endpoints/).
 //
 // POST /projects/{project_id}/endpoints/{endpoint_id}/restart
 func (UnimplementedHandler) RestartProjectEndpoint(ctx context.Context, params RestartProjectEndpointParams) (r *EndpointOperations, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// RestoreProject implements restoreProject operation.
-//
-// DEPRECATED, use `/projects/{project_id}/recover` instead. Restores a deleted project during the
-// deletion grace period.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-//
-// Deprecated: schema marks this operation as deprecated.
-//
-// POST /projects/{project_id}/restore
-func (UnimplementedHandler) RestoreProject(ctx context.Context, params RestoreProjectParams) (r *ProjectRecoverResponse, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // RestoreProjectBranch implements restoreProjectBranch operation.
 //
-// Restores a branch to an earlier state in its own or another branch's history.
+// Restores a branch to an earlier state in its own or another branch's history
+// by specifying an LSN or timestamp.
+// Creates a new branch from the historical state.
 //
 // POST /projects/{project_id}/branches/{branch_id}/restore
 func (UnimplementedHandler) RestoreProjectBranch(ctx context.Context, req *BranchRestoreRequest, params RestoreProjectBranchParams) (r *BranchOperations, _ error) {
@@ -1282,7 +1292,8 @@ func (UnimplementedHandler) RestoreProjectBranch(ctx context.Context, req *Branc
 
 // RestoreSnapshot implements restoreSnapshot operation.
 //
-// Restore the specified snapshot to a new branch and optionally finalize the restore operation.
+// Restores the specified snapshot to a new branch,
+// and optionally finalizes the restore operation to replace the original branch.
 // **Note**: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/snapshots/{snapshot_id}/restore
@@ -1295,9 +1306,8 @@ func (UnimplementedHandler) RestoreSnapshot(ctx context.Context, req OptRestoreS
 // Revokes the specified API key.
 // An API key that is no longer needed can be revoked.
 // This action cannot be reversed.
-// You can obtain `key_id` values by listing the API keys for your Neon account.
 // API keys can also be managed in the Neon Console.
-// See [Manage API keys](https://neon.tech/docs/manage/api-keys/).
+// See [Manage API keys](https://neon.com/docs/manage/api-keys/).
 //
 // DELETE /api_keys/{key_id}
 func (UnimplementedHandler) RevokeApiKey(ctx context.Context, params RevokeApiKeyParams) (r *ApiKeyRevokeResponse, _ error) {
@@ -1309,9 +1319,8 @@ func (UnimplementedHandler) RevokeApiKey(ctx context.Context, params RevokeApiKe
 // Revokes the specified organization API key.
 // An API key that is no longer needed can be revoked.
 // This action cannot be reversed.
-// You can obtain `key_id` values by listing the API keys for an organization.
 // API keys can also be managed in the Neon Console.
-// See [Manage API keys](https://neon.tech/docs/manage/api-keys/).
+// See [Manage API keys](https://neon.com/docs/manage/api-keys/).
 //
 // DELETE /organizations/{org_id}/api_keys/{key_id}
 func (UnimplementedHandler) RevokeOrgApiKey(ctx context.Context, params RevokeOrgApiKeyParams) (r *OrgApiKeyRevokeResponse, _ error) {
@@ -1330,7 +1339,11 @@ func (UnimplementedHandler) RevokePermissionFromProject(ctx context.Context, par
 
 // SendNeonAuthTestEmail implements sendNeonAuthTestEmail operation.
 //
-// Sends a test email to the specified email address.
+// Sends a test email using the configured email server settings to verify SMTP connectivity and
+// credentials.
+// The request body must include the SMTP server settings
+// (`host`, `port`, `username`, `password`, `sender_email`, `sender_name`) and the `recipient_email`
+// address.
 //
 // POST /projects/{project_id}/branches/{branch_id}/auth/send_test_email
 func (UnimplementedHandler) SendNeonAuthTestEmail(ctx context.Context, req *SendNeonAuthTestEmailRequest, params SendNeonAuthTestEmailParams) (r *SendNeonAuthTestEmailResponse, _ error) {
@@ -1341,19 +1354,31 @@ func (UnimplementedHandler) SendNeonAuthTestEmail(ctx context.Context, req *Send
 //
 // Sets the specified branch as the project's default branch.
 // The default designation is automatically removed from the previous default branch.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
-// For more information, see [Manage branches](https://neon.tech/docs/manage/branches/).
+// For more information, see [Manage branches](https://neon.com/docs/manage/branches/).
 //
 // POST /projects/{project_id}/branches/{branch_id}/set_as_default
 func (UnimplementedHandler) SetDefaultProjectBranch(ctx context.Context, params SetDefaultProjectBranchParams) (r *BranchOperations, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
+// SetOrganizationSpendingLimit implements setOrganizationSpendingLimit operation.
+//
+// Sets the monthly spending limit for the specified organization.
+// To remove a previously configured limit, send a DELETE request to this endpoint.
+// When a limit is configured, email notifications are sent at 80% and 100% of the limit.
+// Computes are not suspended when the limit is reached.
+// Available to organization admins on Launch and Scale plans only.
+//
+// PUT /organizations/{org_id}/billing/spending_limit
+func (UnimplementedHandler) SetOrganizationSpendingLimit(ctx context.Context, req *SpendingLimitUpdateRequest, params SetOrganizationSpendingLimitParams) (r *SpendingLimitResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // SetSnapshotSchedule implements setSnapshotSchedule operation.
 //
-// Update the backup schedule for the specified branch.
-// **Note** : This endpoint is currently in Beta.
+// Updates the backup schedule for the specified branch.
+// The schedule defines how often automatic snapshots are created (e.g., `hourly`, `daily`).
+// **Note**: This endpoint is currently in Beta.
 //
 // PUT /projects/{project_id}/branches/{branch_id}/backup_schedule
 func (UnimplementedHandler) SetSnapshotSchedule(ctx context.Context, req *BackupSchedule, params SetSnapshotScheduleParams) error {
@@ -1365,8 +1390,6 @@ func (UnimplementedHandler) SetSnapshotSchedule(ctx context.Context, req *Backup
 // Starts the anonymization process for an anonymized branch that is in the initialized, error, or
 // anonymized state.
 // This will apply all defined masking rules to anonymize sensitive data in the branch databases.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
 // The branch must be an anonymized branch to start anonymization.
 // **Note**: This endpoint is currently in Beta.
 //
@@ -1377,13 +1400,11 @@ func (UnimplementedHandler) StartAnonymization(ctx context.Context, params Start
 
 // StartProjectEndpoint implements startProjectEndpoint operation.
 //
-// Starts a compute endpoint. The compute endpoint is ready to use
-// after the last operation in chain finishes successfully.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain an `endpoint_id` by listing your project's compute endpoints.
+// Starts a compute endpoint.
+// The compute endpoint is ready to use after the last operation in the chain finishes successfully.
 // An `endpoint_id` has an `ep-` prefix.
 // For information about compute endpoints, see [Manage computes](https://neon.
-// tech/docs/manage/endpoints/).
+// com/docs/manage/endpoints/).
 //
 // POST /projects/{project_id}/endpoints/{endpoint_id}/start
 func (UnimplementedHandler) StartProjectEndpoint(ctx context.Context, params StartProjectEndpointParams) (r *EndpointOperations, _ error) {
@@ -1392,12 +1413,10 @@ func (UnimplementedHandler) StartProjectEndpoint(ctx context.Context, params Sta
 
 // SuspendProjectEndpoint implements suspendProjectEndpoint operation.
 //
-// Suspend the specified compute endpoint
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain an `endpoint_id` by listing your project's compute endpoints.
+// Suspends the specified compute endpoint.
 // An `endpoint_id` has an `ep-` prefix.
 // For information about compute endpoints, see [Manage computes](https://neon.
-// tech/docs/manage/endpoints/).
+// com/docs/manage/endpoints/).
 //
 // POST /projects/{project_id}/endpoints/{endpoint_id}/suspend
 func (UnimplementedHandler) SuspendProjectEndpoint(ctx context.Context, params SuspendProjectEndpointParams) (r *EndpointOperations, _ error) {
@@ -1406,7 +1425,7 @@ func (UnimplementedHandler) SuspendProjectEndpoint(ctx context.Context, params S
 
 // TransferNeonAuthProviderProject implements transferNeonAuthProviderProject operation.
 //
-// Transfer ownership of your Neon-managed auth project to your own auth provider account.
+// Transfers ownership of your Neon-managed auth project to your own auth provider account.
 //
 // POST /projects/auth/transfer_ownership
 func (UnimplementedHandler) TransferNeonAuthProviderProject(ctx context.Context, req *NeonAuthTransferAuthProviderProjectRequest) (r *NeonAuthTransferAuthProviderProjectResponse, _ error) {
@@ -1425,8 +1444,10 @@ func (UnimplementedHandler) TransferProjectsFromOrgToOrg(ctx context.Context, re
 
 // TransferProjectsFromUserToOrg implements transferProjectsFromUserToOrg operation.
 //
-// Transfers selected projects, identified by their IDs, from your personal account to a specified
-// organization.
+// DEPRECATED. Personal accounts have been migrated to organizations, making this operation no longer
+// applicable.
+//
+// Deprecated: schema marks this operation as deprecated.
 //
 // POST /users/me/projects/transfer
 func (UnimplementedHandler) TransferProjectsFromUserToOrg(ctx context.Context, req *TransferProjectsToOrganizationRequest) (r TransferProjectsFromUserToOrgRes, _ error) {
@@ -1446,8 +1467,6 @@ func (UnimplementedHandler) UpdateBranchNeonAuthOauthProvider(ctx context.Contex
 //
 // Updates the masking rules for the specified anonymized branch.
 // Masking rules define how sensitive data should be anonymized using PostgreSQL Anonymizer.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
 // **Note**: This endpoint is currently in Beta.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/masking_rules
@@ -1457,16 +1476,30 @@ func (UnimplementedHandler) UpdateMaskingRules(ctx context.Context, req *Masking
 
 // UpdateNeonAuthAllowLocalhost implements updateNeonAuthAllowLocalhost operation.
 //
-// Updates the allow localhost configuration for the specified branch.
+// Updates the localhost allow setting for the specified branch's Neon Auth integration.
+// When enabled, authentication flows work from `localhost` without adding it to the redirect URI
+// whitelist.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/allow_localhost
 func (UnimplementedHandler) UpdateNeonAuthAllowLocalhost(ctx context.Context, req *UpdateNeonAuthAllowLocalhostRequest, params UpdateNeonAuthAllowLocalhostParams) (r *NeonAuthAllowLocalhostResponse, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
+// UpdateNeonAuthConfig implements updateNeonAuthConfig operation.
+//
+// Updates the auth configuration for the branch.
+// Currently supports updating the application name used in auth emails.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/auth/config
+func (UnimplementedHandler) UpdateNeonAuthConfig(ctx context.Context, req *NeonAuthConfigUpdate, params UpdateNeonAuthConfigParams) (r *NeonAuthConfigResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // UpdateNeonAuthEmailAndPasswordConfig implements updateNeonAuthEmailAndPasswordConfig operation.
 //
-// Updates the email and password authentication configuration for Neon Auth.
+// Updates the email and password authentication configuration for the specified branch's Neon Auth
+// integration.
+// Only the fields provided in the request body are updated.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/email_and_password
 func (UnimplementedHandler) UpdateNeonAuthEmailAndPasswordConfig(ctx context.Context, req *NeonAuthEmailAndPasswordConfigUpdate, params UpdateNeonAuthEmailAndPasswordConfigParams) (r *NeonAuthEmailAndPasswordConfig, _ error) {
@@ -1475,7 +1508,9 @@ func (UnimplementedHandler) UpdateNeonAuthEmailAndPasswordConfig(ctx context.Con
 
 // UpdateNeonAuthEmailProvider implements updateNeonAuthEmailProvider operation.
 //
-// Updates the email provider configuration for the specified branch.
+// Updates the email provider configuration for the specified branch's Neon Auth integration.
+// The email provider handles transactional messages such as verification emails and password reset
+// links.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/email_provider
 func (UnimplementedHandler) UpdateNeonAuthEmailProvider(ctx context.Context, req *NeonAuthEmailServerConfig, params UpdateNeonAuthEmailProviderParams) (r *NeonAuthEmailServerConfig, _ error) {
@@ -1491,6 +1526,16 @@ func (UnimplementedHandler) UpdateNeonAuthEmailProvider(ctx context.Context, req
 //
 // PATCH /projects/{project_id}/auth/email_server
 func (UnimplementedHandler) UpdateNeonAuthEmailServer(ctx context.Context, req *NeonAuthEmailServerConfig, params UpdateNeonAuthEmailServerParams) (r *NeonAuthEmailServerConfig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateNeonAuthMagicLinkPlugin implements updateNeonAuthMagicLinkPlugin operation.
+//
+// Updates the magic link plugin configuration for Neon Auth.
+// The magic link plugin enables passwordless authentication via email magic links.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/magic-link
+func (UnimplementedHandler) UpdateNeonAuthMagicLinkPlugin(ctx context.Context, req *NeonAuthMagicLinkConfigUpdate, params UpdateNeonAuthMagicLinkPluginParams) (r *NeonAuthMagicLinkConfig, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1517,9 +1562,24 @@ func (UnimplementedHandler) UpdateNeonAuthOrganizationPlugin(ctx context.Context
 	return r, ht.ErrNotImplemented
 }
 
+// UpdateNeonAuthPhoneNumberPlugin implements updateNeonAuthPhoneNumberPlugin operation.
+//
+// Updates the phone number plugin configuration for Neon Auth.
+// Only the fields provided in the request body are updated; omitted fields retain their current
+// values.
+// The phone number plugin enables phone-based OTP authentication.
+// OTP codes are delivered via the `send.otp` webhook event with `delivery_preference: "sms"`.
+// A webhook must be configured with the `send.otp` event enabled for SMS delivery to work.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/phone-number
+func (UnimplementedHandler) UpdateNeonAuthPhoneNumberPlugin(ctx context.Context, req *NeonAuthPhoneNumberConfigUpdate, params UpdateNeonAuthPhoneNumberPluginParams) (r *NeonAuthPhoneNumberConfig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // UpdateNeonAuthUserRole implements updateNeonAuthUserRole operation.
 //
-// Updates the role of an auth user for the specified project.
+// Updates the role of a user in the Neon Auth user directory for the specified branch.
+// The role controls the user's level of access within the Neon Auth integration.
 //
 // PUT /projects/{project_id}/branches/{branch_id}/auth/users/{auth_user_id}/role
 func (UnimplementedHandler) UpdateNeonAuthUserRole(ctx context.Context, req *UpdateNeonAuthUserRoleRequest, params UpdateNeonAuthUserRoleParams) (r *UpdateNeonAuthUserRoleResponse, _ error) {
@@ -1528,7 +1588,8 @@ func (UnimplementedHandler) UpdateNeonAuthUserRole(ctx context.Context, req *Upd
 
 // UpdateNeonAuthWebhookConfig implements updateNeonAuthWebhookConfig operation.
 //
-// Updates the webhook configuration for Neon Auth on a specific branch.
+// Updates the webhook configuration for the specified branch's Neon Auth integration.
+// Webhooks notify an external endpoint when auth events occur, such as user creation or sign-in.
 //
 // PUT /projects/{project_id}/branches/{branch_id}/auth/webhooks
 func (UnimplementedHandler) UpdateNeonAuthWebhookConfig(ctx context.Context, req *NeonAuthWebhookConfig, params UpdateNeonAuthWebhookConfigParams) (r *NeonAuthWebhookConfig, _ error) {
@@ -1537,7 +1598,9 @@ func (UnimplementedHandler) UpdateNeonAuthWebhookConfig(ctx context.Context, req
 
 // UpdateOrganizationMember implements updateOrganizationMember operation.
 //
-// Only an admin can perform this action.
+// Updates the role of an existing member in the specified organization.
+// The requested role must be valid for the organization.
+// Only organization admins can call this endpoint.
 //
 // PATCH /organizations/{org_id}/members/{member_id}
 func (UnimplementedHandler) UpdateOrganizationMember(ctx context.Context, req *OrganizationMemberUpdateRequest, params UpdateOrganizationMemberParams) (r *Member, _ error) {
@@ -1547,7 +1610,8 @@ func (UnimplementedHandler) UpdateOrganizationMember(ctx context.Context, req *O
 // UpdateProject implements updateProject operation.
 //
 // Updates the specified project.
-// You can obtain a `project_id` by listing the projects for your Neon account.
+// Configurable properties include the project name, default compute settings, history retention
+// period, and IP allowlist.
 //
 // PATCH /projects/{project_id}
 func (UnimplementedHandler) UpdateProject(ctx context.Context, req *ProjectUpdateRequest, params UpdateProjectParams) (r *UpdateProjectOK, _ error) {
@@ -1557,9 +1621,7 @@ func (UnimplementedHandler) UpdateProject(ctx context.Context, req *ProjectUpdat
 // UpdateProjectBranch implements updateProjectBranch operation.
 //
 // Updates the specified branch.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` by listing the project's branches.
-// For more information, see [Manage branches](https://neon.tech/docs/manage/branches/).
+// For more information, see [Manage branches](https://neon.com/docs/manage/branches/).
 //
 // PATCH /projects/{project_id}/branches/{branch_id}
 func (UnimplementedHandler) UpdateProjectBranch(ctx context.Context, req *BranchUpdateRequest, params UpdateProjectBranchParams) (r *BranchOperations, _ error) {
@@ -1571,8 +1633,6 @@ func (UnimplementedHandler) UpdateProjectBranch(ctx context.Context, req *Branch
 // Updates the Neon Data API configuration for the specified branch.
 // You can optionally provide settings to update the Data API configuration.
 // The schema cache is always refreshed as part of this operation.
-// You can obtain the `project_id` and `branch_id` by listing the projects and branches for your Neon
-// account.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/data-api/{database_name}
 func (UnimplementedHandler) UpdateProjectBranchDataAPI(ctx context.Context, req OptDataAPIUpdateRequest, params UpdateProjectBranchDataAPIParams) error {
@@ -1582,9 +1642,7 @@ func (UnimplementedHandler) UpdateProjectBranchDataAPI(ctx context.Context, req 
 // UpdateProjectBranchDatabase implements updateProjectBranchDatabase operation.
 //
 // Updates the specified database in the branch.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain the `branch_id` and `database_name` by listing the branch's databases.
-// For related information, see [Manage databases](https://neon.tech/docs/manage/databases/).
+// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/databases/{database_name}
 func (UnimplementedHandler) UpdateProjectBranchDatabase(ctx context.Context, req *DatabaseUpdateRequest, params UpdateProjectBranchDatabaseParams) (r *DatabaseOperations, _ error) {
@@ -1594,11 +1652,9 @@ func (UnimplementedHandler) UpdateProjectBranchDatabase(ctx context.Context, req
 // UpdateProjectEndpoint implements updateProjectEndpoint operation.
 //
 // Updates the specified compute endpoint.
-// You can obtain a `project_id` by listing the projects for your Neon account.
-// You can obtain an `endpoint_id` and `branch_id` by listing your project's compute endpoints.
 // An `endpoint_id` has an `ep-` prefix. A `branch_id` has a `br-` prefix.
 // For more information about compute endpoints, see [Manage computes](https://neon.
-// tech/docs/manage/endpoints/).
+// com/docs/manage/endpoints/).
 // If the returned list of operations is not empty, the compute endpoint is not ready to use.
 // The client must wait for the last operation to finish before using the compute endpoint.
 // If the compute endpoint was idle before the update, it becomes active for a short period of time,
@@ -1611,7 +1667,7 @@ func (UnimplementedHandler) UpdateProjectEndpoint(ctx context.Context, req *Endp
 
 // UpdateSnapshot implements updateSnapshot operation.
 //
-// Update the specified snapshot.
+// Updates the specified snapshot.
 // **Note**: This endpoint is currently in Beta.
 //
 // PATCH /projects/{project_id}/snapshots/{snapshot_id}

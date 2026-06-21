@@ -21,8 +21,8 @@ type DeleteProjectEndpointRes interface {
 	deleteProjectEndpointRes()
 }
 
-type GetConsumptionHistoryPerAccountRes interface {
-	getConsumptionHistoryPerAccountRes()
+type GetConsumptionHistoryPerBranchV2Res interface {
+	getConsumptionHistoryPerBranchV2Res()
 }
 
 type GetConsumptionHistoryPerProjectRes interface {

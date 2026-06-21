@@ -68,8 +68,6 @@ resource "neon_endpoint" "test" {
   autoscaling_limit_min_cu = 0.25
   autoscaling_limit_max_cu = 1
   suspend_timeout_seconds  = 300
-  pooler_enabled           = true
-  pooler_mode              = "transaction"
   disabled                 = false
 }
 `),
@@ -77,7 +75,6 @@ resource "neon_endpoint" "test" {
 					testutil.CheckResourceAttr("neon_endpoint.test", "id", "ep-test-001"),
 					testutil.CheckResourceAttr("neon_endpoint.test", "host", "ep-test-001.us-east-1.aws.neon.tech"),
 					testutil.CheckResourceAttr("neon_endpoint.test", "type", "read_write"),
-					testutil.CheckResourceAttr("neon_endpoint.test", "pooler_enabled", "true"),
 					testutil.CheckResourceAttr("neon_endpoint.test", "autoscaling_limit_min_cu", "0.25"),
 				),
 			},
@@ -103,8 +100,6 @@ resource "neon_endpoint" "test" {
   autoscaling_limit_min_cu = 0.25
   autoscaling_limit_max_cu = 1
   suspend_timeout_seconds  = 300
-  pooler_enabled           = true
-  pooler_mode              = "transaction"
   disabled                 = false
 }
 `),

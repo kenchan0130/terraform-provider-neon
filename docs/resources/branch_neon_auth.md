@@ -16,7 +16,7 @@ Manages a NeonAuth integration on a branch.
 resource "neon_branch_neon_auth" "example" {
   project_id    = "your-project-id"
   branch_id     = "your-branch-id"
-  auth_provider = "stack_v2"
+  auth_provider = "stack"
 }
 ```
 
@@ -25,7 +25,7 @@ resource "neon_branch_neon_auth" "example" {
 
 ### Required
 
-- `auth_provider` (String) The authentication provider (e.g. stack, stack_v2, better_auth).
+- `auth_provider` (String) The authentication provider (e.g. stack, better_auth).
 - `branch_id` (String) The Neon branch ID.
 - `project_id` (String) The Neon project ID.
 

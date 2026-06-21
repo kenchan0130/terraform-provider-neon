@@ -51,7 +51,6 @@ Optional:
 - `autoscaling_limit_max_cu` (Number) The maximum number of Compute Units.
 - `autoscaling_limit_min_cu` (Number) The minimum number of Compute Units.
 - `pg_settings` (Map of String) A raw representation of Postgres settings.
-- `pgbouncer_settings` (Map of String) A raw representation of PgBouncer settings.
 - `suspend_timeout_seconds` (Number) Duration of inactivity in seconds after which the compute endpoint is automatically suspended.
 
 

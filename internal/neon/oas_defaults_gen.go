@@ -33,7 +33,7 @@ func (s *DataAPISettings) setDefaults() {
 		s.DbAnonRole.SetTo(val)
 	}
 	{
-		val := string(".\"role\"")
+		val := string(".role")
 		s.JwtRoleClaimKey.SetTo(val)
 	}
 	{
@@ -67,6 +67,22 @@ func (s *GeneralError) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *NeonAuthMagicLinkConfig) setDefaults() {
+	{
+		val := bool(false)
+		s.Enabled = val
+	}
+	{
+		val := int32(5)
+		s.ExpiresIn = val
+	}
+	{
+		val := bool(false)
+		s.DisableSignUp = val
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *NeonAuthOrganizationConfig) setDefaults() {
 	{
 		val := bool(true)
@@ -87,6 +103,18 @@ func (s *NeonAuthOrganizationConfig) setDefaults() {
 	{
 		val := bool(false)
 		s.SendInvitationEmail = val
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *NeonAuthPhoneNumberConfig) setDefaults() {
+	{
+		val := bool(false)
+		s.Enabled = val
+	}
+	{
+		val := int(300)
+		s.OtpExpiresIn.SetTo(val)
 	}
 }
 
