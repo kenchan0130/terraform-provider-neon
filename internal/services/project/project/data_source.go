@@ -67,11 +67,6 @@ func (d *projectDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 						Computed:    true,
 						ElementType: types.StringType,
 					},
-					"pgbouncer_settings": schema.MapAttribute{
-						Description: "A raw representation of PgBouncer settings.",
-						Computed:    true,
-						ElementType: types.StringType,
-					},
 					"autoscaling_limit_min_cu": schema.Float64Attribute{
 						Description: "The minimum number of Compute Units.",
 						Computed:    true,

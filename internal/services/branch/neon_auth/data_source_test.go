@@ -31,7 +31,7 @@ data "neon_branch_neon_auth" "test" {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testutil.CheckResourceAttr("data.neon_branch_neon_auth.test", "project_id", "test-project-id"),
 					testutil.CheckResourceAttr("data.neon_branch_neon_auth.test", "branch_id", "br-test-001"),
-					testutil.CheckResourceAttr("data.neon_branch_neon_auth.test", "auth_provider", "stack_v2"),
+					testutil.CheckResourceAttr("data.neon_branch_neon_auth.test", "auth_provider", "stack"),
 					testutil.CheckResourceAttr("data.neon_branch_neon_auth.test", "auth_provider_project_id", "auth-proj-001"),
 					testutil.CheckResourceAttr("data.neon_branch_neon_auth.test", "db_name", "neondb"),
 					testutil.CheckResourceAttr("data.neon_branch_neon_auth.test", "jwks_url", "https://example.com/.well-known/jwks.json"),

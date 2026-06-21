@@ -11,7 +11,7 @@ import (
 )
 
 const neonAuthIntegrationJSON = `{
-	"auth_provider": "stack_v2",
+	"auth_provider": "stack",
 	"auth_provider_project_id": "auth-proj-001",
 	"branch_id": "br-test-001",
 	"db_name": "neondb",
@@ -34,7 +34,7 @@ func setupTrustedDomainMocks(transport *httpmock.MockTransport) {
 
 	transport.RegisterResponder(http.MethodGet,
 		"https://neon.example.com/api/v2/projects/test-project-id/branches/br-test-001/auth/domains",
-		testutil.JSONResponder(200, `{"domains": [{"domain": "https://example.com", "auth_provider": "stack_v2"}]}`),
+		testutil.JSONResponder(200, `{"domains": [{"domain": "https://example.com", "auth_provider": "stack"}]}`),
 	)
 
 	transport.RegisterResponder(http.MethodDelete,
@@ -64,7 +64,7 @@ resource "neon_branch_neon_auth_trusted_domain" "test" {
 					testutil.CheckResourceAttr("neon_branch_neon_auth_trusted_domain.test", "project_id", "test-project-id"),
 					testutil.CheckResourceAttr("neon_branch_neon_auth_trusted_domain.test", "branch_id", "br-test-001"),
 					testutil.CheckResourceAttr("neon_branch_neon_auth_trusted_domain.test", "domain", "https://example.com"),
-					testutil.CheckResourceAttr("neon_branch_neon_auth_trusted_domain.test", "auth_provider", "stack_v2"),
+					testutil.CheckResourceAttr("neon_branch_neon_auth_trusted_domain.test", "auth_provider", "stack"),
 				),
 			},
 		},

@@ -39,9 +39,8 @@ var preloadLibrariesAttrTypes = map[string]attr.Type{
 }
 
 var settingsAttrTypes = map[string]attr.Type{
-	"pg_settings":        types.MapType{ElemType: types.StringType},
-	"pgbouncer_settings": types.MapType{ElemType: types.StringType},
-	"preload_libraries":  types.ObjectType{AttrTypes: preloadLibrariesAttrTypes},
+	"pg_settings":       types.MapType{ElemType: types.StringType},
+	"preload_libraries": types.ObjectType{AttrTypes: preloadLibrariesAttrTypes},
 }
 
 type endpointResourceModel struct {
@@ -53,8 +52,6 @@ type endpointResourceModel struct {
 	AutoscalingLimitMinCu types.Float64 `tfsdk:"autoscaling_limit_min_cu"`
 	AutoscalingLimitMaxCu types.Float64 `tfsdk:"autoscaling_limit_max_cu"`
 	SuspendTimeoutSeconds types.Int64   `tfsdk:"suspend_timeout_seconds"`
-	PoolerEnabled         types.Bool    `tfsdk:"pooler_enabled"`
-	PoolerMode            types.String  `tfsdk:"pooler_mode"`
 	Disabled              types.Bool    `tfsdk:"disabled"`
 	PasswordlessAccess    types.Bool    `tfsdk:"passwordless_access"`
 	Provisioner           types.String  `tfsdk:"compute_provisioner"`
@@ -149,22 +146,6 @@ func endpointResourceSchemaConfigurableAttributes() map[string]schema.Attribute 
 				int64planmodifier.UseStateForUnknown(),
 			},
 		},
-		"pooler_enabled": schema.BoolAttribute{
-			Description: "Whether connection pooling is enabled.",
-			Optional:    true,
-			Computed:    true,
-			PlanModifiers: []planmodifier.Bool{
-				boolplanmodifier.UseStateForUnknown(),
-			},
-		},
-		"pooler_mode": schema.StringAttribute{
-			Description: "The connection pooler mode. Must be `transaction`.",
-			Optional:    true,
-			Computed:    true,
-			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
-			},
-		},
 		"disabled": schema.BoolAttribute{
 			Description: "Whether the endpoint is disabled.",
 			Optional:    true,
@@ -214,15 +195,6 @@ func endpointSettingsResourceSchema() schema.SingleNestedAttribute {
 		Attributes: map[string]schema.Attribute{
 			"pg_settings": schema.MapAttribute{
 				Description: "A raw representation of Postgres settings.",
-				ElementType: types.StringType,
-				Optional:    true,
-				Computed:    true,
-				PlanModifiers: []planmodifier.Map{
-					mapplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"pgbouncer_settings": schema.MapAttribute{
-				Description: "A raw representation of PgBouncer settings.",
 				ElementType: types.StringType,
 				Optional:    true,
 				Computed:    true,
@@ -378,8 +350,7 @@ func (r *endpointResource) Create(ctx context.Context, req resource.CreateReques
 	}
 
 	setEndpointCommonFields(&data, &ep.Name, &ep.AutoscalingLimitMinCu, &ep.AutoscalingLimitMaxCu,
-		&ep.SuspendTimeoutSeconds, &ep.PoolerEnabled, &ep.PoolerMode, &ep.Disabled, //nolint:staticcheck // intentionally using deprecated API field for backward compatibility
-		&ep.PasswordlessAccess, &ep.Provisioner)
+		&ep.SuspendTimeoutSeconds, &ep.Disabled, &ep.PasswordlessAccess, &ep.Provisioner)
 
 	buildSettingsRequest(ctx, data.Settings, &ep.Settings, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
@@ -446,8 +417,7 @@ func (r *endpointResource) Update(ctx context.Context, req resource.UpdateReques
 	ep := neon.EndpointUpdateRequestEndpoint{}
 
 	setEndpointCommonFields(&data, &ep.Name, &ep.AutoscalingLimitMinCu, &ep.AutoscalingLimitMaxCu,
-		&ep.SuspendTimeoutSeconds, &ep.PoolerEnabled, &ep.PoolerMode, &ep.Disabled, //nolint:staticcheck // intentionally using deprecated API field for backward compatibility
-		&ep.PasswordlessAccess, &ep.Provisioner)
+		&ep.SuspendTimeoutSeconds, &ep.Disabled, &ep.PasswordlessAccess, &ep.Provisioner)
 
 	buildSettingsRequest(ctx, data.Settings, &ep.Settings, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
@@ -509,8 +479,6 @@ func setEndpointCommonFields(
 	minCu *neon.OptComputeUnit,
 	maxCu *neon.OptComputeUnit,
 	suspendTimeout *neon.OptSuspendTimeoutSeconds,
-	poolerEnabled *neon.OptBool,
-	poolerMode *neon.OptEndpointPoolerMode,
 	disabled *neon.OptBool,
 	passwordlessAccess *neon.OptBool,
 	provisioner *neon.OptProvisioner,
@@ -526,12 +494,6 @@ func setEndpointCommonFields(
 	}
 	if !data.SuspendTimeoutSeconds.IsNull() && !data.SuspendTimeoutSeconds.IsUnknown() {
 		*suspendTimeout = neon.NewOptSuspendTimeoutSeconds(neon.SuspendTimeoutSeconds(data.SuspendTimeoutSeconds.ValueInt64()))
-	}
-	if !data.PoolerEnabled.IsNull() && !data.PoolerEnabled.IsUnknown() {
-		*poolerEnabled = neon.NewOptBool(data.PoolerEnabled.ValueBool())
-	}
-	if !data.PoolerMode.IsNull() && !data.PoolerMode.IsUnknown() {
-		*poolerMode = neon.NewOptEndpointPoolerMode(neon.EndpointPoolerMode(data.PoolerMode.ValueString()))
 	}
 	if !data.Disabled.IsNull() && !data.Disabled.IsUnknown() {
 		*disabled = neon.NewOptBool(data.Disabled.ValueBool())
@@ -557,11 +519,6 @@ func buildSettingsRequest(ctx context.Context, settings types.Object, target *ne
 		return
 	}
 
-	buildPgbouncerSettingsRequest(ctx, attrs, &s.PgbouncerSettings, diags)
-	if diags.HasError() {
-		return
-	}
-
 	buildPreloadLibrariesRequest(ctx, attrs, &s.PreloadLibraries, diags)
 	if diags.HasError() {
 		return
@@ -583,22 +540,6 @@ func buildPgSettingsRequest(ctx context.Context, attrs map[string]attr.Value, ta
 	diags.Append(pgMap.ElementsAs(ctx, &m, false)...)
 	if !diags.HasError() {
 		*target = neon.NewOptPgSettingsData(neon.PgSettingsData(m))
-	}
-}
-
-func buildPgbouncerSettingsRequest(ctx context.Context, attrs map[string]attr.Value, target *neon.OptPgbouncerSettingsData, diags *diag.Diagnostics) {
-	pgbSettings, ok := attrs["pgbouncer_settings"]
-	if !ok {
-		return
-	}
-	pgbMap, ok := pgbSettings.(types.Map)
-	if !ok || pgbMap.IsNull() || pgbMap.IsUnknown() {
-		return
-	}
-	m := make(map[string]string)
-	diags.Append(pgbMap.ElementsAs(ctx, &m, false)...)
-	if !diags.HasError() {
-		*target = neon.NewOptPgbouncerSettingsData(neon.PgbouncerSettingsData(m))
 	}
 }
 
@@ -651,8 +592,6 @@ func mapEndpointCoreFields(ep *neon.Endpoint, data *endpointResourceModel) {
 	data.AutoscalingLimitMinCu = types.Float64Value(float64(ep.AutoscalingLimitMinCu))
 	data.AutoscalingLimitMaxCu = types.Float64Value(float64(ep.AutoscalingLimitMaxCu))
 	data.SuspendTimeoutSeconds = types.Int64Value(int64(ep.SuspendTimeoutSeconds))
-	data.PoolerEnabled = types.BoolValue(ep.PoolerEnabled)
-	data.PoolerMode = types.StringValue(string(ep.PoolerMode))
 	data.Disabled = types.BoolValue(ep.Disabled)
 	data.PasswordlessAccess = types.BoolValue(ep.PasswordlessAccess)
 	data.Host = types.StringValue(ep.Host)
@@ -715,18 +654,6 @@ func mapEndpointSettingsToModel(ep *neon.Endpoint, data *endpointResourceModel, 
 		settingsAttrs["pg_settings"] = pgMap
 	} else {
 		settingsAttrs["pg_settings"] = types.MapNull(types.StringType)
-	}
-
-	if ep.Settings.PgbouncerSettings.IsSet() {
-		elems := make(map[string]attr.Value)
-		for k, v := range ep.Settings.PgbouncerSettings.Value {
-			elems[k] = types.StringValue(v)
-		}
-		pgbMap, d := types.MapValue(types.StringType, elems)
-		diags.Append(d...)
-		settingsAttrs["pgbouncer_settings"] = pgbMap
-	} else {
-		settingsAttrs["pgbouncer_settings"] = types.MapNull(types.StringType)
 	}
 
 	if ep.Settings.PreloadLibraries.IsSet() {

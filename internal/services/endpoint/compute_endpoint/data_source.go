@@ -63,14 +63,6 @@ func endpointDataSourceSchemaAttributes() map[string]schema.Attribute {
 			Description: "The duration of inactivity in seconds after which the compute is suspended.",
 			Computed:    true,
 		},
-		"pooler_enabled": schema.BoolAttribute{
-			Description: "Whether connection pooling is enabled.",
-			Computed:    true,
-		},
-		"pooler_mode": schema.StringAttribute{
-			Description: "The connection pooler mode.",
-			Computed:    true,
-		},
 		"disabled": schema.BoolAttribute{
 			Description: "Whether the endpoint is disabled.",
 			Computed:    true,
@@ -138,11 +130,6 @@ func endpointSettingsDataSourceSchema() schema.SingleNestedAttribute {
 		Attributes: map[string]schema.Attribute{
 			"pg_settings": schema.MapAttribute{
 				Description: "A raw representation of Postgres settings.",
-				ElementType: types.StringType,
-				Computed:    true,
-			},
-			"pgbouncer_settings": schema.MapAttribute{
-				Description: "A raw representation of PgBouncer settings.",
 				ElementType: types.StringType,
 				Computed:    true,
 			},

@@ -69,7 +69,6 @@ var settingsAttrTypes = map[string]attr.Type{
 
 var defaultEndpointSettingsAttrTypes = map[string]attr.Type{
 	"pg_settings":              types.MapType{ElemType: types.StringType},
-	"pgbouncer_settings":       types.MapType{ElemType: types.StringType},
 	"autoscaling_limit_min_cu": types.Float64Type,
 	"autoscaling_limit_max_cu": types.Float64Type,
 	"suspend_timeout_seconds":  types.Int64Type,
@@ -97,7 +96,6 @@ type projectResourceModel struct {
 // Intermediate model structs for conversion.
 type defaultEndpointSettingsModel struct {
 	PgSettings            types.Map     `tfsdk:"pg_settings"`
-	PgbouncerSettings     types.Map     `tfsdk:"pgbouncer_settings"`
 	AutoscalingLimitMinCu types.Float64 `tfsdk:"autoscaling_limit_min_cu"`
 	AutoscalingLimitMaxCu types.Float64 `tfsdk:"autoscaling_limit_max_cu"`
 	SuspendTimeoutSeconds types.Int64   `tfsdk:"suspend_timeout_seconds"`
@@ -253,15 +251,6 @@ func defaultEndpointSettingsSchema() schema.SingleNestedAttribute {
 		Attributes: map[string]schema.Attribute{
 			"pg_settings": schema.MapAttribute{
 				Description: "A raw representation of Postgres settings.",
-				Optional:    true,
-				Computed:    true,
-				ElementType: types.StringType,
-				PlanModifiers: []planmodifier.Map{
-					mapplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"pgbouncer_settings": schema.MapAttribute{
-				Description: "A raw representation of PgBouncer settings.",
 				Optional:    true,
 				Computed:    true,
 				ElementType: types.StringType,
@@ -724,13 +713,6 @@ func buildDefaultEndpointSettingsRequest(ctx context.Context, obj basetypes.Obje
 			des.PgSettings = neon.NewOptPgSettingsData(neon.PgSettingsData(pgSettings))
 		}
 	}
-	if !m.PgbouncerSettings.IsNull() && !m.PgbouncerSettings.IsUnknown() {
-		pgbouncerSettings := make(map[string]string)
-		diags.Append(m.PgbouncerSettings.ElementsAs(ctx, &pgbouncerSettings, false)...)
-		if !diags.HasError() {
-			des.PgbouncerSettings = neon.NewOptPgbouncerSettingsData(neon.PgbouncerSettingsData(pgbouncerSettings))
-		}
-	}
 	return des
 }
 
@@ -884,7 +866,6 @@ func mapProjectDefaultEndpointSettings(ctx context.Context, p *neon.Project, dat
 		AutoscalingLimitMaxCu: types.Float64Null(),
 		SuspendTimeoutSeconds: types.Int64Null(),
 		PgSettings:            types.MapNull(types.StringType),
-		PgbouncerSettings:     types.MapNull(types.StringType),
 	}
 	if des.AutoscalingLimitMinCu.IsSet() {
 		m.AutoscalingLimitMinCu = types.Float64Value(float64(des.AutoscalingLimitMinCu.Value))
@@ -903,15 +884,6 @@ func mapProjectDefaultEndpointSettings(ctx context.Context, p *neon.Project, dat
 		mapVal, d := types.MapValue(types.StringType, pgMap)
 		diags.Append(d...)
 		m.PgSettings = mapVal
-	}
-	if des.PgbouncerSettings.IsSet() {
-		pgbMap := make(map[string]attr.Value)
-		for k, v := range des.PgbouncerSettings.Value {
-			pgbMap[k] = types.StringValue(v)
-		}
-		mapVal, d := types.MapValue(types.StringType, pgbMap)
-		diags.Append(d...)
-		m.PgbouncerSettings = mapVal
 	}
 	obj, d := types.ObjectValueFrom(ctx, defaultEndpointSettingsAttrTypes, m)
 	diags.Append(d...)

@@ -45,8 +45,6 @@ Read-Only:
 - `id` (String) The endpoint ID.
 - `name` (String) Optional name of the compute endpoint.
 - `passwordless_access` (Boolean) Whether to permit passwordless access to the compute endpoint.
-- `pooler_enabled` (Boolean) Whether connection pooling is enabled.
-- `pooler_mode` (String) The connection pooler mode.
 - `region_id` (String) The region identifier.
 - `suspend_timeout_seconds` (Number) The duration of inactivity in seconds after which the compute is suspended.
 - `type` (String) The endpoint type.

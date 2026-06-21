@@ -43,8 +43,6 @@ data "neon_endpoint" "example" {
 - `name` (String) Optional name of the compute endpoint.
 - `passwordless_access` (Boolean) Whether to permit passwordless access to the compute endpoint.
 - `pending_state` (String) The pending state of the compute endpoint.
-- `pooler_enabled` (Boolean) Whether connection pooling is enabled.
-- `pooler_mode` (String) The connection pooler mode.
 - `region_id` (String) The region identifier.
 - `settings` (Attributes) Endpoint settings. (see [below for nested schema](#nestedatt--settings))
 - `started_at` (String) A timestamp indicating when the compute endpoint was last started.
@@ -59,7 +57,6 @@ data "neon_endpoint" "example" {
 Read-Only:
 
 - `pg_settings` (Map of String) A raw representation of Postgres settings.
-- `pgbouncer_settings` (Map of String) A raw representation of PgBouncer settings.
 - `preload_libraries` (Attributes) Preload libraries configuration. (see [below for nested schema](#nestedatt--settings--preload_libraries))
 
 <a id="nestedatt--settings--preload_libraries"></a>

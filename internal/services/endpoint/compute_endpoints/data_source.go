@@ -30,8 +30,6 @@ type endpointModel struct {
 	AutoscalingLimitMinCu types.Float64 `tfsdk:"autoscaling_limit_min_cu"`
 	AutoscalingLimitMaxCu types.Float64 `tfsdk:"autoscaling_limit_max_cu"`
 	SuspendTimeoutSeconds types.Int64   `tfsdk:"suspend_timeout_seconds"`
-	PoolerEnabled         types.Bool    `tfsdk:"pooler_enabled"`
-	PoolerMode            types.String  `tfsdk:"pooler_mode"`
 	Disabled              types.Bool    `tfsdk:"disabled"`
 	PasswordlessAccess    types.Bool    `tfsdk:"passwordless_access"`
 	ComputeProvisioner    types.String  `tfsdk:"compute_provisioner"`
@@ -98,14 +96,6 @@ func (d *endpointsDataSource) Schema(_ context.Context, _ datasource.SchemaReque
 						},
 						"suspend_timeout_seconds": schema.Int64Attribute{
 							Description: "The duration of inactivity in seconds after which the compute is suspended.",
-							Computed:    true,
-						},
-						"pooler_enabled": schema.BoolAttribute{
-							Description: "Whether connection pooling is enabled.",
-							Computed:    true,
-						},
-						"pooler_mode": schema.StringAttribute{
-							Description: "The connection pooler mode.",
 							Computed:    true,
 						},
 						"disabled": schema.BoolAttribute{
@@ -179,8 +169,6 @@ func (d *endpointsDataSource) Read(ctx context.Context, req datasource.ReadReque
 			AutoscalingLimitMinCu: types.Float64Value(float64(ep.AutoscalingLimitMinCu)),
 			AutoscalingLimitMaxCu: types.Float64Value(float64(ep.AutoscalingLimitMaxCu)),
 			SuspendTimeoutSeconds: types.Int64Value(int64(ep.SuspendTimeoutSeconds)),
-			PoolerEnabled:         types.BoolValue(ep.PoolerEnabled),
-			PoolerMode:            types.StringValue(string(ep.PoolerMode)),
 			Disabled:              types.BoolValue(ep.Disabled),
 			PasswordlessAccess:    types.BoolValue(ep.PasswordlessAccess),
 			ComputeProvisioner:    types.StringValue(string(ep.Provisioner)),
