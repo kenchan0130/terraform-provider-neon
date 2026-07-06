@@ -4,10 +4,15 @@ package neon
 
 import (
 	"bytes"
+	"mime"
+	"mime/multipart"
 	"net/http"
 
+	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
+	"github.com/ogen-go/ogen/conv"
 	ht "github.com/ogen-go/ogen/http"
+	"github.com/ogen-go/ogen/uri"
 )
 
 func encodeAcceptProjectTransferRequestRequest(
@@ -156,6 +161,20 @@ func encodeCreateBranchNeonAuthNewUserRequest(
 	return nil
 }
 
+func encodeCreateCredentialRequest(
+	req *CreateCredentialRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeCreateNeonAuthRequest(
 	req *EnableNeonAuthIntegrationRequest,
 	r *http.Request,
@@ -288,6 +307,20 @@ func encodeCreateProjectBranchAnonymizedRequest(
 	return nil
 }
 
+func encodeCreateProjectBranchBucketRequest(
+	req *BucketCreateRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeCreateProjectBranchDataAPIRequest(
 	req OptDataAPICreateRequest,
 	r *http.Request,
@@ -319,6 +352,61 @@ func encodeCreateProjectBranchDatabaseRequest(
 	}
 	encoded := e.Bytes()
 	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeCreateProjectBranchFunctionDeploymentRequest(
+	req *FunctionDeployRequestMultipart,
+	r *http.Request,
+) error {
+	const contentType = "multipart/form-data"
+	request := req
+
+	q := uri.NewFormEncoder(map[string]string{})
+	{
+		// Encode "runtime" form field.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "runtime",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := request.Runtime.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "environment" form field.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "environment",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := request.Environment.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return errors.Wrap(err, "encode query")
+		}
+	}
+	body, boundary := ht.CreateMultipartBody(func(w *multipart.Writer) error {
+		if val, ok := request.Zip.Get(); ok {
+			if err := val.WriteMultipart("zip", w); err != nil {
+				return errors.Wrap(err, "write \"zip\"")
+			}
+		}
+		if err := q.WriteMultipart(w); err != nil {
+			return errors.Wrap(err, "write multipart")
+		}
+		return nil
+	})
+	ht.SetCloserBody(r, body, mime.FormatMediaType(contentType, map[string]string{"boundary": boundary}))
 	return nil
 }
 
@@ -460,6 +548,20 @@ func encodeFinalizeRestoreBranchRequest(
 
 func encodeGrantPermissionToProjectRequest(
 	req *GrantPermissionToProjectRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodePresignProjectBranchBucketObjectRequest(
+	req *PresignRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -836,6 +938,20 @@ func encodeUpdateProjectBranchDataAPIRequest(
 
 func encodeUpdateProjectBranchDatabaseRequest(
 	req *DatabaseUpdateRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateProjectBranchFunctionRequest(
+	req *NeonFunctionUpdateRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

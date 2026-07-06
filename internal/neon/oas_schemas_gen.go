@@ -4,12 +4,14 @@ package neon
 
 import (
 	"fmt"
+	"io"
 	"net/url"
 	"time"
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
 	"github.com/google/uuid"
+	ht "github.com/ogen-go/ogen/http"
 )
 
 func (s *GeneralErrorStatusCode) Error() string {
@@ -2238,6 +2240,127 @@ func (s *Branch) SetRecovery(val OptBranchRecoveryInfo) {
 	s.Recovery = val
 }
 
+// Ref: #/components/schemas/BranchAiGateway
+type BranchAiGateway struct {
+	// Always `true` in 200 responses. Present for forward compatibility,
+	// mirroring BranchStorage.enabled.
+	Enabled bool `json:"enabled"`
+	// The AI-gateway endpoint root for this branch — an OpenAI-compatible
+	// base URL. No dialect path is included; clients append the route
+	// (e.g. `/ai-gateway/openai/v1/responses`) themselves.
+	BaseURL url.URL `json:"base_url"`
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *BranchAiGateway) GetEnabled() bool {
+	return s.Enabled
+}
+
+// GetBaseURL returns the value of BaseURL.
+func (s *BranchAiGateway) GetBaseURL() url.URL {
+	return s.BaseURL
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *BranchAiGateway) SetEnabled(val bool) {
+	s.Enabled = val
+}
+
+// SetBaseURL sets the value of BaseURL.
+func (s *BranchAiGateway) SetBaseURL(val url.URL) {
+	s.BaseURL = val
+}
+
+func (*BranchAiGateway) getProjectBranchAiGatewayRes() {}
+
+// Ref: #/components/schemas/BranchAiGatewayNotEnabled
+type BranchAiGatewayNotEnabled struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+	// Machine-readable reason why the AI gateway is unavailable:
+	// - `ai_gateway_unavailable`: the project's region/cell has no AI gateway configured.
+	// - `branch_not_found`: the project or branch does not exist, or the caller does not
+	// have access to it.
+	Reason BranchAiGatewayNotEnabledReason `json:"reason"`
+}
+
+// GetCode returns the value of Code.
+func (s *BranchAiGatewayNotEnabled) GetCode() string {
+	return s.Code
+}
+
+// GetMessage returns the value of Message.
+func (s *BranchAiGatewayNotEnabled) GetMessage() string {
+	return s.Message
+}
+
+// GetReason returns the value of Reason.
+func (s *BranchAiGatewayNotEnabled) GetReason() BranchAiGatewayNotEnabledReason {
+	return s.Reason
+}
+
+// SetCode sets the value of Code.
+func (s *BranchAiGatewayNotEnabled) SetCode(val string) {
+	s.Code = val
+}
+
+// SetMessage sets the value of Message.
+func (s *BranchAiGatewayNotEnabled) SetMessage(val string) {
+	s.Message = val
+}
+
+// SetReason sets the value of Reason.
+func (s *BranchAiGatewayNotEnabled) SetReason(val BranchAiGatewayNotEnabledReason) {
+	s.Reason = val
+}
+
+func (*BranchAiGatewayNotEnabled) getProjectBranchAiGatewayRes() {}
+
+// Machine-readable reason why the AI gateway is unavailable:
+// - `ai_gateway_unavailable`: the project's region/cell has no AI gateway configured.
+// - `branch_not_found`: the project or branch does not exist, or the caller does not
+// have access to it.
+type BranchAiGatewayNotEnabledReason string
+
+const (
+	BranchAiGatewayNotEnabledReasonAiGatewayUnavailable BranchAiGatewayNotEnabledReason = "ai_gateway_unavailable"
+	BranchAiGatewayNotEnabledReasonBranchNotFound       BranchAiGatewayNotEnabledReason = "branch_not_found"
+)
+
+// AllValues returns all BranchAiGatewayNotEnabledReason values.
+func (BranchAiGatewayNotEnabledReason) AllValues() []BranchAiGatewayNotEnabledReason {
+	return []BranchAiGatewayNotEnabledReason{
+		BranchAiGatewayNotEnabledReasonAiGatewayUnavailable,
+		BranchAiGatewayNotEnabledReasonBranchNotFound,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BranchAiGatewayNotEnabledReason) MarshalText() ([]byte, error) {
+	switch s {
+	case BranchAiGatewayNotEnabledReasonAiGatewayUnavailable:
+		return []byte(s), nil
+	case BranchAiGatewayNotEnabledReasonBranchNotFound:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BranchAiGatewayNotEnabledReason) UnmarshalText(data []byte) error {
+	switch BranchAiGatewayNotEnabledReason(data) {
+	case BranchAiGatewayNotEnabledReasonAiGatewayUnavailable:
+		*s = BranchAiGatewayNotEnabledReasonAiGatewayUnavailable
+		return nil
+	case BranchAiGatewayNotEnabledReasonBranchNotFound:
+		*s = BranchAiGatewayNotEnabledReasonBranchNotFound
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Merged schema.
 // Ref: #/components/schemas/BranchAnonymizedCreateRequest
 type BranchAnonymizedCreateRequest struct {
@@ -2566,6 +2689,33 @@ func (s *BranchOperations) SetOperations(val []Operation) {
 }
 
 func (*BranchOperations) deleteProjectBranchRes() {}
+
+// Merged schema.
+// Ref: #/components/schemas/BranchRecoverResponse
+type BranchRecoverResponse struct {
+	Branch    Branch     `json:"branch"`
+	Endpoints []Endpoint `json:"endpoints"`
+}
+
+// GetBranch returns the value of Branch.
+func (s *BranchRecoverResponse) GetBranch() Branch {
+	return s.Branch
+}
+
+// GetEndpoints returns the value of Endpoints.
+func (s *BranchRecoverResponse) GetEndpoints() []Endpoint {
+	return s.Endpoints
+}
+
+// SetBranch sets the value of Branch.
+func (s *BranchRecoverResponse) SetBranch(val Branch) {
+	s.Branch = val
+}
+
+// SetEndpoints sets the value of Endpoints.
+func (s *BranchRecoverResponse) SetEndpoints(val []Endpoint) {
+	s.Endpoints = val
+}
 
 // Recovery information for a deleted branch. Only present when listing deleted branches
 // with `include_deleted=true`.
@@ -2988,6 +3138,177 @@ func (s *BranchSchemaResponse) SetJSON(val OptBranchSchemaJSON) {
 
 type BranchState string
 
+// Ref: #/components/schemas/BranchStorage
+type BranchStorage struct {
+	// Always `true` in 200 responses. Present for forward compatibility: a
+	// future version may add intermediate states; callers should treat `true`
+	// as "storage is usable for this branch right now.".
+	Enabled bool `json:"enabled"`
+	// The S3-compatible endpoint URL for this branch.
+	S3Endpoint url.URL `json:"s3_endpoint"`
+	// The AWS region for this branch's storage. The platform normalizes
+	// the us-east-1 convention server-side: a non-empty region string is
+	// always returned in 200 responses (e.g. `"us-east-1"` for the S3
+	// default region).
+	Region string `json:"region"`
+	// Whether the S3 client must use path-style addressing
+	// (bucket-in-path rather than virtual-hosted subdomain).
+	// Always true: the wildcard TLS cert covers one level of subdomain
+	// (*.storage.<suffix>), so the branch ID occupies that label and the
+	// bucket name must travel in the request path, not as a further
+	// subdomain. Callers must set the S3 SDK's ForcePathStyle (or
+	// equivalent) to true.
+	ForcePathStyle bool `json:"force_path_style"`
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *BranchStorage) GetEnabled() bool {
+	return s.Enabled
+}
+
+// GetS3Endpoint returns the value of S3Endpoint.
+func (s *BranchStorage) GetS3Endpoint() url.URL {
+	return s.S3Endpoint
+}
+
+// GetRegion returns the value of Region.
+func (s *BranchStorage) GetRegion() string {
+	return s.Region
+}
+
+// GetForcePathStyle returns the value of ForcePathStyle.
+func (s *BranchStorage) GetForcePathStyle() bool {
+	return s.ForcePathStyle
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *BranchStorage) SetEnabled(val bool) {
+	s.Enabled = val
+}
+
+// SetS3Endpoint sets the value of S3Endpoint.
+func (s *BranchStorage) SetS3Endpoint(val url.URL) {
+	s.S3Endpoint = val
+}
+
+// SetRegion sets the value of Region.
+func (s *BranchStorage) SetRegion(val string) {
+	s.Region = val
+}
+
+// SetForcePathStyle sets the value of ForcePathStyle.
+func (s *BranchStorage) SetForcePathStyle(val bool) {
+	s.ForcePathStyle = val
+}
+
+func (*BranchStorage) getProjectBranchStorageRes() {}
+
+// Ref: #/components/schemas/BranchStorageNotEnabled
+type BranchStorageNotEnabled struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+	// Machine-readable reason why storage is unavailable:
+	// - `org_not_entitled`: the org's `PlatformBranchableStorage` feature flag is off.
+	// - `region_unavailable`: the project's region has no storage admin service wired.
+	// - `branch_directory_missing`: the branch is not registered in the storage service.
+	// - `branch_not_found`: the project or branch does not exist, or the caller does not
+	// have access to it.
+	Reason BranchStorageNotEnabledReason `json:"reason"`
+}
+
+// GetCode returns the value of Code.
+func (s *BranchStorageNotEnabled) GetCode() string {
+	return s.Code
+}
+
+// GetMessage returns the value of Message.
+func (s *BranchStorageNotEnabled) GetMessage() string {
+	return s.Message
+}
+
+// GetReason returns the value of Reason.
+func (s *BranchStorageNotEnabled) GetReason() BranchStorageNotEnabledReason {
+	return s.Reason
+}
+
+// SetCode sets the value of Code.
+func (s *BranchStorageNotEnabled) SetCode(val string) {
+	s.Code = val
+}
+
+// SetMessage sets the value of Message.
+func (s *BranchStorageNotEnabled) SetMessage(val string) {
+	s.Message = val
+}
+
+// SetReason sets the value of Reason.
+func (s *BranchStorageNotEnabled) SetReason(val BranchStorageNotEnabledReason) {
+	s.Reason = val
+}
+
+func (*BranchStorageNotEnabled) getProjectBranchStorageRes() {}
+
+// Machine-readable reason why storage is unavailable:
+// - `org_not_entitled`: the org's `PlatformBranchableStorage` feature flag is off.
+// - `region_unavailable`: the project's region has no storage admin service wired.
+// - `branch_directory_missing`: the branch is not registered in the storage service.
+// - `branch_not_found`: the project or branch does not exist, or the caller does not
+// have access to it.
+type BranchStorageNotEnabledReason string
+
+const (
+	BranchStorageNotEnabledReasonOrgNotEntitled         BranchStorageNotEnabledReason = "org_not_entitled"
+	BranchStorageNotEnabledReasonRegionUnavailable      BranchStorageNotEnabledReason = "region_unavailable"
+	BranchStorageNotEnabledReasonBranchDirectoryMissing BranchStorageNotEnabledReason = "branch_directory_missing"
+	BranchStorageNotEnabledReasonBranchNotFound         BranchStorageNotEnabledReason = "branch_not_found"
+)
+
+// AllValues returns all BranchStorageNotEnabledReason values.
+func (BranchStorageNotEnabledReason) AllValues() []BranchStorageNotEnabledReason {
+	return []BranchStorageNotEnabledReason{
+		BranchStorageNotEnabledReasonOrgNotEntitled,
+		BranchStorageNotEnabledReasonRegionUnavailable,
+		BranchStorageNotEnabledReasonBranchDirectoryMissing,
+		BranchStorageNotEnabledReasonBranchNotFound,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BranchStorageNotEnabledReason) MarshalText() ([]byte, error) {
+	switch s {
+	case BranchStorageNotEnabledReasonOrgNotEntitled:
+		return []byte(s), nil
+	case BranchStorageNotEnabledReasonRegionUnavailable:
+		return []byte(s), nil
+	case BranchStorageNotEnabledReasonBranchDirectoryMissing:
+		return []byte(s), nil
+	case BranchStorageNotEnabledReasonBranchNotFound:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BranchStorageNotEnabledReason) UnmarshalText(data []byte) error {
+	switch BranchStorageNotEnabledReason(data) {
+	case BranchStorageNotEnabledReasonOrgNotEntitled:
+		*s = BranchStorageNotEnabledReasonOrgNotEntitled
+		return nil
+	case BranchStorageNotEnabledReasonRegionUnavailable:
+		*s = BranchStorageNotEnabledReasonRegionUnavailable
+		return nil
+	case BranchStorageNotEnabledReasonBranchDirectoryMissing:
+		*s = BranchStorageNotEnabledReasonBranchDirectoryMissing
+		return nil
+	case BranchStorageNotEnabledReasonBranchNotFound:
+		*s = BranchStorageNotEnabledReasonBranchNotFound
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/BranchUpdateRequest
 type BranchUpdateRequest struct {
 	Branch BranchUpdateRequestBranch `json:"branch"`
@@ -3058,6 +3379,334 @@ func (s *BranchesCountResponse) GetCount() int {
 // SetCount sets the value of Count.
 func (s *BranchesCountResponse) SetCount(val int) {
 	s.Count = val
+}
+
+// Ref: #/components/schemas/Bucket
+type Bucket struct {
+	// The bucket name (unique within a branch).
+	Name        string            `json:"name"`
+	AccessLevel BucketAccessLevel `json:"access_level"`
+	// When the bucket was created. For a bucket inherited from an
+	// ancestor branch this is the ancestor's creation time (the branch
+	// fork never re-creates the bucket).
+	CreatedAt time.Time `json:"created_at"`
+}
+
+// GetName returns the value of Name.
+func (s *Bucket) GetName() string {
+	return s.Name
+}
+
+// GetAccessLevel returns the value of AccessLevel.
+func (s *Bucket) GetAccessLevel() BucketAccessLevel {
+	return s.AccessLevel
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Bucket) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// SetName sets the value of Name.
+func (s *Bucket) SetName(val string) {
+	s.Name = val
+}
+
+// SetAccessLevel sets the value of AccessLevel.
+func (s *Bucket) SetAccessLevel(val BucketAccessLevel) {
+	s.AccessLevel = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Bucket) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// Controls anonymous access to objects in the bucket.
+// - `private`: all reads and writes require authenticated requests (default).
+// - `public_read`: anonymous `GetObject`/`HeadObject` requests succeed; listing,
+// writes, and deletes still require authenticated requests.
+// Ref: #/components/schemas/BucketAccessLevel
+type BucketAccessLevel string
+
+const (
+	BucketAccessLevelPrivate    BucketAccessLevel = "private"
+	BucketAccessLevelPublicRead BucketAccessLevel = "public_read"
+)
+
+// AllValues returns all BucketAccessLevel values.
+func (BucketAccessLevel) AllValues() []BucketAccessLevel {
+	return []BucketAccessLevel{
+		BucketAccessLevelPrivate,
+		BucketAccessLevelPublicRead,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BucketAccessLevel) MarshalText() ([]byte, error) {
+	switch s {
+	case BucketAccessLevelPrivate:
+		return []byte(s), nil
+	case BucketAccessLevelPublicRead:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BucketAccessLevel) UnmarshalText(data []byte) error {
+	switch BucketAccessLevel(data) {
+	case BucketAccessLevelPrivate:
+		*s = BucketAccessLevelPrivate
+		return nil
+	case BucketAccessLevelPublicRead:
+		*s = BucketAccessLevelPublicRead
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/BucketCreateRequest
+type BucketCreateRequest struct {
+	// The bucket name.
+	Name string `json:"name"`
+	// Access level for the bucket. Defaults to `private`. Set to `public_read`
+	// to allow anonymous `GetObject`/`HeadObject` on objects in this bucket.
+	AccessLevel OptBucketCreateRequestAccessLevel `json:"access_level"`
+}
+
+// GetName returns the value of Name.
+func (s *BucketCreateRequest) GetName() string {
+	return s.Name
+}
+
+// GetAccessLevel returns the value of AccessLevel.
+func (s *BucketCreateRequest) GetAccessLevel() OptBucketCreateRequestAccessLevel {
+	return s.AccessLevel
+}
+
+// SetName sets the value of Name.
+func (s *BucketCreateRequest) SetName(val string) {
+	s.Name = val
+}
+
+// SetAccessLevel sets the value of AccessLevel.
+func (s *BucketCreateRequest) SetAccessLevel(val OptBucketCreateRequestAccessLevel) {
+	s.AccessLevel = val
+}
+
+// Access level for the bucket. Defaults to `private`. Set to `public_read`
+// to allow anonymous `GetObject`/`HeadObject` on objects in this bucket.
+type BucketCreateRequestAccessLevel string
+
+const (
+	BucketCreateRequestAccessLevelPrivate    BucketCreateRequestAccessLevel = "private"
+	BucketCreateRequestAccessLevelPublicRead BucketCreateRequestAccessLevel = "public_read"
+)
+
+// AllValues returns all BucketCreateRequestAccessLevel values.
+func (BucketCreateRequestAccessLevel) AllValues() []BucketCreateRequestAccessLevel {
+	return []BucketCreateRequestAccessLevel{
+		BucketCreateRequestAccessLevelPrivate,
+		BucketCreateRequestAccessLevelPublicRead,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BucketCreateRequestAccessLevel) MarshalText() ([]byte, error) {
+	switch s {
+	case BucketCreateRequestAccessLevelPrivate:
+		return []byte(s), nil
+	case BucketCreateRequestAccessLevelPublicRead:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BucketCreateRequestAccessLevel) UnmarshalText(data []byte) error {
+	switch BucketCreateRequestAccessLevel(data) {
+	case BucketCreateRequestAccessLevelPrivate:
+		*s = BucketCreateRequestAccessLevelPrivate
+		return nil
+	case BucketCreateRequestAccessLevelPublicRead:
+		*s = BucketCreateRequestAccessLevelPublicRead
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/BucketObject
+type BucketObject struct {
+	// The full object key.
+	Key string `json:"key"`
+	// The object size in bytes.
+	Size int64 `json:"size"`
+	// The time the object was last modified.
+	LastModified time.Time `json:"last_modified"`
+	// The object's entity tag (content hash).
+	Etag string `json:"etag"`
+}
+
+// GetKey returns the value of Key.
+func (s *BucketObject) GetKey() string {
+	return s.Key
+}
+
+// GetSize returns the value of Size.
+func (s *BucketObject) GetSize() int64 {
+	return s.Size
+}
+
+// GetLastModified returns the value of LastModified.
+func (s *BucketObject) GetLastModified() time.Time {
+	return s.LastModified
+}
+
+// GetEtag returns the value of Etag.
+func (s *BucketObject) GetEtag() string {
+	return s.Etag
+}
+
+// SetKey sets the value of Key.
+func (s *BucketObject) SetKey(val string) {
+	s.Key = val
+}
+
+// SetSize sets the value of Size.
+func (s *BucketObject) SetSize(val int64) {
+	s.Size = val
+}
+
+// SetLastModified sets the value of LastModified.
+func (s *BucketObject) SetLastModified(val time.Time) {
+	s.LastModified = val
+}
+
+// SetEtag sets the value of Etag.
+func (s *BucketObject) SetEtag(val string) {
+	s.Etag = val
+}
+
+// Ref: #/components/schemas/BucketObjectsDeletePrefixResponse
+type BucketObjectsDeletePrefixResponse struct {
+	// The number of objects soft-deleted under the prefix. 0 when no live
+	// object matched the prefix on this branch.
+	Deleted int64 `json:"deleted"`
+}
+
+// GetDeleted returns the value of Deleted.
+func (s *BucketObjectsDeletePrefixResponse) GetDeleted() int64 {
+	return s.Deleted
+}
+
+// SetDeleted sets the value of Deleted.
+func (s *BucketObjectsDeletePrefixResponse) SetDeleted(val int64) {
+	s.Deleted = val
+}
+
+func (*BucketObjectsDeletePrefixResponse) deleteProjectBranchBucketObjectsByPrefixRes() {}
+
+// Ref: #/components/schemas/BucketObjectsListResponse
+type BucketObjectsListResponse struct {
+	// Common prefixes (folder names) collapsed under the requested
+	// `delimiter`. Empty when no `delimiter` was supplied.
+	Folders []string `json:"folders"`
+	// Objects whose keys did not collapse into a folder.
+	Objects []BucketObject `json:"objects"`
+	// The prefix that was applied to this listing (echoed back).
+	Prefix string `json:"prefix"`
+	// Pagination cursor to pass as `cursor` on the next request. Empty
+	// when the listing is not truncated.
+	NextCursor OptString `json:"next_cursor"`
+	// True when more results exist beyond this page.
+	IsTruncated bool `json:"is_truncated"`
+}
+
+// GetFolders returns the value of Folders.
+func (s *BucketObjectsListResponse) GetFolders() []string {
+	return s.Folders
+}
+
+// GetObjects returns the value of Objects.
+func (s *BucketObjectsListResponse) GetObjects() []BucketObject {
+	return s.Objects
+}
+
+// GetPrefix returns the value of Prefix.
+func (s *BucketObjectsListResponse) GetPrefix() string {
+	return s.Prefix
+}
+
+// GetNextCursor returns the value of NextCursor.
+func (s *BucketObjectsListResponse) GetNextCursor() OptString {
+	return s.NextCursor
+}
+
+// GetIsTruncated returns the value of IsTruncated.
+func (s *BucketObjectsListResponse) GetIsTruncated() bool {
+	return s.IsTruncated
+}
+
+// SetFolders sets the value of Folders.
+func (s *BucketObjectsListResponse) SetFolders(val []string) {
+	s.Folders = val
+}
+
+// SetObjects sets the value of Objects.
+func (s *BucketObjectsListResponse) SetObjects(val []BucketObject) {
+	s.Objects = val
+}
+
+// SetPrefix sets the value of Prefix.
+func (s *BucketObjectsListResponse) SetPrefix(val string) {
+	s.Prefix = val
+}
+
+// SetNextCursor sets the value of NextCursor.
+func (s *BucketObjectsListResponse) SetNextCursor(val OptString) {
+	s.NextCursor = val
+}
+
+// SetIsTruncated sets the value of IsTruncated.
+func (s *BucketObjectsListResponse) SetIsTruncated(val bool) {
+	s.IsTruncated = val
+}
+
+// Ref: #/components/schemas/BucketResponse
+type BucketResponse struct {
+	Bucket Bucket `json:"bucket"`
+}
+
+// GetBucket returns the value of Bucket.
+func (s *BucketResponse) GetBucket() Bucket {
+	return s.Bucket
+}
+
+// SetBucket sets the value of Bucket.
+func (s *BucketResponse) SetBucket(val Bucket) {
+	s.Bucket = val
+}
+
+func (*BucketResponse) createProjectBranchBucketRes() {}
+
+// Ref: #/components/schemas/BucketsListResponse
+type BucketsListResponse struct {
+	Buckets []Bucket `json:"buckets"`
+}
+
+// GetBuckets returns the value of Buckets.
+func (s *BucketsListResponse) GetBuckets() []Bucket {
+	return s.Buckets
+}
+
+// SetBuckets sets the value of Buckets.
+func (s *BucketsListResponse) SetBuckets(val []Bucket) {
+	s.Buckets = val
 }
 
 type ComputeUnit float64
@@ -3674,6 +4323,195 @@ func (s *CreateBranchNeonAuthNewUserRequest) SetName(val OptString) {
 	s.Name = val
 }
 
+// Ref: #/components/schemas/CreateCredentialRequest
+type CreateCredentialRequest struct {
+	// Free-form customer label for the credential.
+	Name   OptString         `json:"name"`
+	Scopes []CredentialScope `json:"scopes"`
+	// Principal type for the credential. Only `user` is customer-managed
+	// and accepted here. `function` and `system` credentials are
+	// platform-internal (e.g. function-serve auto-mint, presign signer)
+	// and are never issued through the customer-facing API.
+	PrincipalType CreateCredentialRequestPrincipalType `json:"principal_type"`
+}
+
+// GetName returns the value of Name.
+func (s *CreateCredentialRequest) GetName() OptString {
+	return s.Name
+}
+
+// GetScopes returns the value of Scopes.
+func (s *CreateCredentialRequest) GetScopes() []CredentialScope {
+	return s.Scopes
+}
+
+// GetPrincipalType returns the value of PrincipalType.
+func (s *CreateCredentialRequest) GetPrincipalType() CreateCredentialRequestPrincipalType {
+	return s.PrincipalType
+}
+
+// SetName sets the value of Name.
+func (s *CreateCredentialRequest) SetName(val OptString) {
+	s.Name = val
+}
+
+// SetScopes sets the value of Scopes.
+func (s *CreateCredentialRequest) SetScopes(val []CredentialScope) {
+	s.Scopes = val
+}
+
+// SetPrincipalType sets the value of PrincipalType.
+func (s *CreateCredentialRequest) SetPrincipalType(val CreateCredentialRequestPrincipalType) {
+	s.PrincipalType = val
+}
+
+// Principal type for the credential. Only `user` is customer-managed
+// and accepted here. `function` and `system` credentials are
+// platform-internal (e.g. function-serve auto-mint, presign signer)
+// and are never issued through the customer-facing API.
+type CreateCredentialRequestPrincipalType string
+
+const (
+	CreateCredentialRequestPrincipalTypeUser CreateCredentialRequestPrincipalType = "user"
+)
+
+// AllValues returns all CreateCredentialRequestPrincipalType values.
+func (CreateCredentialRequestPrincipalType) AllValues() []CreateCredentialRequestPrincipalType {
+	return []CreateCredentialRequestPrincipalType{
+		CreateCredentialRequestPrincipalTypeUser,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s CreateCredentialRequestPrincipalType) MarshalText() ([]byte, error) {
+	switch s {
+	case CreateCredentialRequestPrincipalTypeUser:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *CreateCredentialRequestPrincipalType) UnmarshalText(data []byte) error {
+	switch CreateCredentialRequestPrincipalType(data) {
+	case CreateCredentialRequestPrincipalTypeUser:
+		*s = CreateCredentialRequestPrincipalTypeUser
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/CreateCredentialResponse
+type CreateCredentialResponse struct {
+	// Opaque credential id (e.g. nak_live_<32hex>).
+	TokenID string `json:"token_id"`
+	// First 12 hex chars of token_id; safe to log.
+	TokenIDShort string `json:"token_id_short"`
+	// Customer-supplied label, echoed back from the request. Absent when not provided.
+	Name OptString `json:"name"`
+	// Bearer token; returned exactly once.
+	APIToken string `json:"api_token"`
+	// Nsk_live_<64 hex>; the AWS_SECRET_ACCESS_KEY, returned exactly once.
+	S3SecretAccessKey string            `json:"s3_secret_access_key"`
+	Scopes            []CredentialScope `json:"scopes"`
+	BranchID          string            `json:"branch_id"`
+	CreatedAt         time.Time         `json:"created_at"`
+	// When the credential expires; absent means never expires.
+	ExpiresAt OptDateTime `json:"expires_at"`
+}
+
+// GetTokenID returns the value of TokenID.
+func (s *CreateCredentialResponse) GetTokenID() string {
+	return s.TokenID
+}
+
+// GetTokenIDShort returns the value of TokenIDShort.
+func (s *CreateCredentialResponse) GetTokenIDShort() string {
+	return s.TokenIDShort
+}
+
+// GetName returns the value of Name.
+func (s *CreateCredentialResponse) GetName() OptString {
+	return s.Name
+}
+
+// GetAPIToken returns the value of APIToken.
+func (s *CreateCredentialResponse) GetAPIToken() string {
+	return s.APIToken
+}
+
+// GetS3SecretAccessKey returns the value of S3SecretAccessKey.
+func (s *CreateCredentialResponse) GetS3SecretAccessKey() string {
+	return s.S3SecretAccessKey
+}
+
+// GetScopes returns the value of Scopes.
+func (s *CreateCredentialResponse) GetScopes() []CredentialScope {
+	return s.Scopes
+}
+
+// GetBranchID returns the value of BranchID.
+func (s *CreateCredentialResponse) GetBranchID() string {
+	return s.BranchID
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *CreateCredentialResponse) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetExpiresAt returns the value of ExpiresAt.
+func (s *CreateCredentialResponse) GetExpiresAt() OptDateTime {
+	return s.ExpiresAt
+}
+
+// SetTokenID sets the value of TokenID.
+func (s *CreateCredentialResponse) SetTokenID(val string) {
+	s.TokenID = val
+}
+
+// SetTokenIDShort sets the value of TokenIDShort.
+func (s *CreateCredentialResponse) SetTokenIDShort(val string) {
+	s.TokenIDShort = val
+}
+
+// SetName sets the value of Name.
+func (s *CreateCredentialResponse) SetName(val OptString) {
+	s.Name = val
+}
+
+// SetAPIToken sets the value of APIToken.
+func (s *CreateCredentialResponse) SetAPIToken(val string) {
+	s.APIToken = val
+}
+
+// SetS3SecretAccessKey sets the value of S3SecretAccessKey.
+func (s *CreateCredentialResponse) SetS3SecretAccessKey(val string) {
+	s.S3SecretAccessKey = val
+}
+
+// SetScopes sets the value of Scopes.
+func (s *CreateCredentialResponse) SetScopes(val []CredentialScope) {
+	s.Scopes = val
+}
+
+// SetBranchID sets the value of BranchID.
+func (s *CreateCredentialResponse) SetBranchID(val string) {
+	s.BranchID = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *CreateCredentialResponse) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetExpiresAt sets the value of ExpiresAt.
+func (s *CreateCredentialResponse) SetExpiresAt(val OptDateTime) {
+	s.ExpiresAt = val
+}
+
 // Merged schema.
 type CreateProjectBranchReq struct {
 	Endpoints       []BranchCreateRequestEndpointOptions `json:"endpoints"`
@@ -4015,6 +4853,194 @@ func (s *CreatedProject) SetBranch(val Branch) {
 // SetEndpoints sets the value of Endpoints.
 func (s *CreatedProject) SetEndpoints(val []Endpoint) {
 	s.Endpoints = val
+}
+
+// Ref: #/components/schemas/CredentialMeta
+type CredentialMeta struct {
+	// Opaque credential id (e.g. nak_live_<32hex>).
+	TokenID      string `json:"token_id"`
+	TokenIDShort string `json:"token_id_short"`
+	// Customer-supplied label; absent when not provided at issuance.
+	Name          OptString         `json:"name"`
+	Scopes        []CredentialScope `json:"scopes"`
+	BranchID      OptString         `json:"branch_id"`
+	PrincipalType string            `json:"principal_type"`
+	FunctionID    OptString         `json:"function_id"`
+	CreatedAt     time.Time         `json:"created_at"`
+	LastUsedAt    OptDateTime       `json:"last_used_at"`
+	RevokedAt     OptDateTime       `json:"revoked_at"`
+	// When the credential expires; absent means never expires. The
+	// verifier refuses to authenticate after `expires_at <= now()`.
+	ExpiresAt OptDateTime `json:"expires_at"`
+}
+
+// GetTokenID returns the value of TokenID.
+func (s *CredentialMeta) GetTokenID() string {
+	return s.TokenID
+}
+
+// GetTokenIDShort returns the value of TokenIDShort.
+func (s *CredentialMeta) GetTokenIDShort() string {
+	return s.TokenIDShort
+}
+
+// GetName returns the value of Name.
+func (s *CredentialMeta) GetName() OptString {
+	return s.Name
+}
+
+// GetScopes returns the value of Scopes.
+func (s *CredentialMeta) GetScopes() []CredentialScope {
+	return s.Scopes
+}
+
+// GetBranchID returns the value of BranchID.
+func (s *CredentialMeta) GetBranchID() OptString {
+	return s.BranchID
+}
+
+// GetPrincipalType returns the value of PrincipalType.
+func (s *CredentialMeta) GetPrincipalType() string {
+	return s.PrincipalType
+}
+
+// GetFunctionID returns the value of FunctionID.
+func (s *CredentialMeta) GetFunctionID() OptString {
+	return s.FunctionID
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *CredentialMeta) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetLastUsedAt returns the value of LastUsedAt.
+func (s *CredentialMeta) GetLastUsedAt() OptDateTime {
+	return s.LastUsedAt
+}
+
+// GetRevokedAt returns the value of RevokedAt.
+func (s *CredentialMeta) GetRevokedAt() OptDateTime {
+	return s.RevokedAt
+}
+
+// GetExpiresAt returns the value of ExpiresAt.
+func (s *CredentialMeta) GetExpiresAt() OptDateTime {
+	return s.ExpiresAt
+}
+
+// SetTokenID sets the value of TokenID.
+func (s *CredentialMeta) SetTokenID(val string) {
+	s.TokenID = val
+}
+
+// SetTokenIDShort sets the value of TokenIDShort.
+func (s *CredentialMeta) SetTokenIDShort(val string) {
+	s.TokenIDShort = val
+}
+
+// SetName sets the value of Name.
+func (s *CredentialMeta) SetName(val OptString) {
+	s.Name = val
+}
+
+// SetScopes sets the value of Scopes.
+func (s *CredentialMeta) SetScopes(val []CredentialScope) {
+	s.Scopes = val
+}
+
+// SetBranchID sets the value of BranchID.
+func (s *CredentialMeta) SetBranchID(val OptString) {
+	s.BranchID = val
+}
+
+// SetPrincipalType sets the value of PrincipalType.
+func (s *CredentialMeta) SetPrincipalType(val string) {
+	s.PrincipalType = val
+}
+
+// SetFunctionID sets the value of FunctionID.
+func (s *CredentialMeta) SetFunctionID(val OptString) {
+	s.FunctionID = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *CredentialMeta) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetLastUsedAt sets the value of LastUsedAt.
+func (s *CredentialMeta) SetLastUsedAt(val OptDateTime) {
+	s.LastUsedAt = val
+}
+
+// SetRevokedAt sets the value of RevokedAt.
+func (s *CredentialMeta) SetRevokedAt(val OptDateTime) {
+	s.RevokedAt = val
+}
+
+// SetExpiresAt sets the value of ExpiresAt.
+func (s *CredentialMeta) SetExpiresAt(val OptDateTime) {
+	s.ExpiresAt = val
+}
+
+// A single capability a credential may exercise. A credential is granted
+// a set of these; it may only perform actions explicitly listed in its
+// scopes.
+// Ref: #/components/schemas/CredentialScope
+type CredentialScope string
+
+const (
+	CredentialScopeStorageRead     CredentialScope = "storage:read"
+	CredentialScopeStorageWrite    CredentialScope = "storage:write"
+	CredentialScopeAiGatewayInvoke CredentialScope = "ai_gateway:invoke"
+	CredentialScopeFunctionsInvoke CredentialScope = "functions:invoke"
+)
+
+// AllValues returns all CredentialScope values.
+func (CredentialScope) AllValues() []CredentialScope {
+	return []CredentialScope{
+		CredentialScopeStorageRead,
+		CredentialScopeStorageWrite,
+		CredentialScopeAiGatewayInvoke,
+		CredentialScopeFunctionsInvoke,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s CredentialScope) MarshalText() ([]byte, error) {
+	switch s {
+	case CredentialScopeStorageRead:
+		return []byte(s), nil
+	case CredentialScopeStorageWrite:
+		return []byte(s), nil
+	case CredentialScopeAiGatewayInvoke:
+		return []byte(s), nil
+	case CredentialScopeFunctionsInvoke:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *CredentialScope) UnmarshalText(data []byte) error {
+	switch CredentialScope(data) {
+	case CredentialScopeStorageRead:
+		*s = CredentialScopeStorageRead
+		return nil
+	case CredentialScopeStorageWrite:
+		*s = CredentialScopeStorageWrite
+		return nil
+	case CredentialScopeAiGatewayInvoke:
+		*s = CredentialScopeAiGatewayInvoke
+		return nil
+	case CredentialScopeFunctionsInvoke:
+		*s = CredentialScopeFunctionsInvoke
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/CurrentUserAuthAccount
@@ -4958,10 +5984,23 @@ type DeleteNeonAuthUserNoContent struct{}
 // DeleteOrganizationVPCEndpointOK is response for DeleteOrganizationVPCEndpoint operation.
 type DeleteOrganizationVPCEndpointOK struct{}
 
+// DeleteProjectBranchBucketNoContent is response for DeleteProjectBranchBucket operation.
+type DeleteProjectBranchBucketNoContent struct{}
+
+func (*DeleteProjectBranchBucketNoContent) deleteProjectBranchBucketRes() {}
+
+// DeleteProjectBranchBucketObjectNoContent is response for DeleteProjectBranchBucketObject operation.
+type DeleteProjectBranchBucketObjectNoContent struct{}
+
+func (*DeleteProjectBranchBucketObjectNoContent) deleteProjectBranchBucketObjectRes() {}
+
 // DeleteProjectBranchDatabaseNoContent is response for DeleteProjectBranchDatabase operation.
 type DeleteProjectBranchDatabaseNoContent struct{}
 
 func (*DeleteProjectBranchDatabaseNoContent) deleteProjectBranchDatabaseRes() {}
+
+// DeleteProjectBranchFunctionNoContent is response for DeleteProjectBranchFunction operation.
+type DeleteProjectBranchFunctionNoContent struct{}
 
 // DeleteProjectBranchNoContent is response for DeleteProjectBranch operation.
 type DeleteProjectBranchNoContent struct{}
@@ -5965,6 +7004,87 @@ func (s *FinalizeRestoreBranchReq) SetName(val OptString) {
 	s.Name = val
 }
 
+// Ref: #/components/schemas/FunctionDeployRequest
+type FunctionDeployRequestMultipart struct {
+	// Optional ZIP archive of the function source code. Omit to reuse the
+	// latest version's bundle (a config-only change). Required for the
+	// first deployment of a function.
+	Zip     OptMultipartFile                         `json:"zip"`
+	Runtime OptFunctionDeployRequestMultipartRuntime `json:"runtime"`
+	// Optional JSON object (a string-to-string map) of environment
+	// variables for the deployment, e.g. {"KEY":"VALUE"}. Carried as a
+	// JSON-encoded string because multipart form data does not support
+	// typed object parts.
+	// Values are write-only: they are encrypted at rest, and responses
+	// carry only the variable names (the `environment` array), never the
+	// values.
+	Environment OptString `json:"environment"`
+}
+
+// GetZip returns the value of Zip.
+func (s *FunctionDeployRequestMultipart) GetZip() OptMultipartFile {
+	return s.Zip
+}
+
+// GetRuntime returns the value of Runtime.
+func (s *FunctionDeployRequestMultipart) GetRuntime() OptFunctionDeployRequestMultipartRuntime {
+	return s.Runtime
+}
+
+// GetEnvironment returns the value of Environment.
+func (s *FunctionDeployRequestMultipart) GetEnvironment() OptString {
+	return s.Environment
+}
+
+// SetZip sets the value of Zip.
+func (s *FunctionDeployRequestMultipart) SetZip(val OptMultipartFile) {
+	s.Zip = val
+}
+
+// SetRuntime sets the value of Runtime.
+func (s *FunctionDeployRequestMultipart) SetRuntime(val OptFunctionDeployRequestMultipartRuntime) {
+	s.Runtime = val
+}
+
+// SetEnvironment sets the value of Environment.
+func (s *FunctionDeployRequestMultipart) SetEnvironment(val OptString) {
+	s.Environment = val
+}
+
+type FunctionDeployRequestMultipartRuntime string
+
+const (
+	FunctionDeployRequestMultipartRuntimeNodejs24 FunctionDeployRequestMultipartRuntime = "nodejs24"
+)
+
+// AllValues returns all FunctionDeployRequestMultipartRuntime values.
+func (FunctionDeployRequestMultipartRuntime) AllValues() []FunctionDeployRequestMultipartRuntime {
+	return []FunctionDeployRequestMultipartRuntime{
+		FunctionDeployRequestMultipartRuntimeNodejs24,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s FunctionDeployRequestMultipartRuntime) MarshalText() ([]byte, error) {
+	switch s {
+	case FunctionDeployRequestMultipartRuntimeNodejs24:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *FunctionDeployRequestMultipartRuntime) UnmarshalText(data []byte) error {
+	switch FunctionDeployRequestMultipartRuntime(data) {
+	case FunctionDeployRequestMultipartRuntimeNodejs24:
+		*s = FunctionDeployRequestMultipartRuntimeNodejs24
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/GeneralError
 type GeneralError struct {
 	// Unique identifier for the request, useful for debugging.
@@ -6005,6 +7125,14 @@ func (s *GeneralError) SetCode(val ErrorCode) {
 func (s *GeneralError) SetMessage(val string) {
 	s.Message = val
 }
+
+func (*GeneralError) createProjectBranchBucketRes()                {}
+func (*GeneralError) deleteProjectBranchBucketObjectRes()          {}
+func (*GeneralError) deleteProjectBranchBucketObjectsByPrefixRes() {}
+func (*GeneralError) deleteProjectBranchBucketRes()                {}
+func (*GeneralError) getProjectBranchBucketObjectRes()             {}
+func (*GeneralError) presignProjectBranchBucketObjectRes()         {}
+func (*GeneralError) revokeCredentialRes()                         {}
 
 // GeneralErrorStatusCode wraps GeneralError with StatusCode.
 type GeneralErrorStatusCode struct {
@@ -6299,6 +7427,81 @@ func (s *GetProjectAdvisorSecurityIssuesOK) GetIssues() []AdvisorIssue {
 func (s *GetProjectAdvisorSecurityIssuesOK) SetIssues(val []AdvisorIssue) {
 	s.Issues = val
 }
+
+type GetProjectBranchBucketObjectOK struct {
+	Data io.Reader
+}
+
+// Read reads data from the Data reader.
+//
+// Kept to satisfy the io.Reader interface.
+func (s GetProjectBranchBucketObjectOK) Read(p []byte) (n int, err error) {
+	if s.Data == nil {
+		return 0, io.EOF
+	}
+	return s.Data.Read(p)
+}
+
+// GetProjectBranchBucketObjectOKHeaders wraps GetProjectBranchBucketObjectOK with response headers.
+type GetProjectBranchBucketObjectOKHeaders struct {
+	ContentDisposition  OptString
+	ContentLength       OptInt64
+	ETag                OptString
+	XContentTypeOptions OptString
+	Response            GetProjectBranchBucketObjectOK
+}
+
+// GetContentDisposition returns the value of ContentDisposition.
+func (s *GetProjectBranchBucketObjectOKHeaders) GetContentDisposition() OptString {
+	return s.ContentDisposition
+}
+
+// GetContentLength returns the value of ContentLength.
+func (s *GetProjectBranchBucketObjectOKHeaders) GetContentLength() OptInt64 {
+	return s.ContentLength
+}
+
+// GetETag returns the value of ETag.
+func (s *GetProjectBranchBucketObjectOKHeaders) GetETag() OptString {
+	return s.ETag
+}
+
+// GetXContentTypeOptions returns the value of XContentTypeOptions.
+func (s *GetProjectBranchBucketObjectOKHeaders) GetXContentTypeOptions() OptString {
+	return s.XContentTypeOptions
+}
+
+// GetResponse returns the value of Response.
+func (s *GetProjectBranchBucketObjectOKHeaders) GetResponse() GetProjectBranchBucketObjectOK {
+	return s.Response
+}
+
+// SetContentDisposition sets the value of ContentDisposition.
+func (s *GetProjectBranchBucketObjectOKHeaders) SetContentDisposition(val OptString) {
+	s.ContentDisposition = val
+}
+
+// SetContentLength sets the value of ContentLength.
+func (s *GetProjectBranchBucketObjectOKHeaders) SetContentLength(val OptInt64) {
+	s.ContentLength = val
+}
+
+// SetETag sets the value of ETag.
+func (s *GetProjectBranchBucketObjectOKHeaders) SetETag(val OptString) {
+	s.ETag = val
+}
+
+// SetXContentTypeOptions sets the value of XContentTypeOptions.
+func (s *GetProjectBranchBucketObjectOKHeaders) SetXContentTypeOptions(val OptString) {
+	s.XContentTypeOptions = val
+}
+
+// SetResponse sets the value of Response.
+func (s *GetProjectBranchBucketObjectOKHeaders) SetResponse(val GetProjectBranchBucketObjectOK) {
+	s.Response = val
+}
+
+func (*GetProjectBranchBucketObjectOKHeaders) getProjectBranchBucketObjectRes() {}
 
 // Merged schema.
 type GetProjectBranchOK struct {
@@ -6697,6 +7900,21 @@ func (s *LimitsUnsatisfiedResponseLimitsItem) SetActual(val string) {
 	s.Actual = val
 }
 
+// Ref: #/components/schemas/ListCredentialsResponse
+type ListCredentialsResponse struct {
+	Credentials []CredentialMeta `json:"credentials"`
+}
+
+// GetCredentials returns the value of Credentials.
+func (s *ListCredentialsResponse) GetCredentials() []CredentialMeta {
+	return s.Credentials
+}
+
+// SetCredentials sets the value of Credentials.
+func (s *ListCredentialsResponse) SetCredentials(val []CredentialMeta) {
+	s.Credentials = val
+}
+
 // Ref: #/components/schemas/ListNeonAuthIntegrationsResponse
 type ListNeonAuthIntegrationsResponse struct {
 	Data []NeonAuthIntegration `json:"data"`
@@ -6750,6 +7968,32 @@ func (s *ListOperations) SetOperations(val []Operation) {
 
 // SetPagination sets the value of Pagination.
 func (s *ListOperations) SetPagination(val OptPagination) {
+	s.Pagination = val
+}
+
+// Merged schema.
+type ListProjectBranchFunctionsOK struct {
+	Functions  []NeonFunction      `json:"functions"`
+	Pagination OptCursorPagination `json:"pagination"`
+}
+
+// GetFunctions returns the value of Functions.
+func (s *ListProjectBranchFunctionsOK) GetFunctions() []NeonFunction {
+	return s.Functions
+}
+
+// GetPagination returns the value of Pagination.
+func (s *ListProjectBranchFunctionsOK) GetPagination() OptCursorPagination {
+	return s.Pagination
+}
+
+// SetFunctions sets the value of Functions.
+func (s *ListProjectBranchFunctionsOK) SetFunctions(val []NeonFunction) {
+	s.Functions = val
+}
+
+// SetPagination sets the value of Pagination.
+func (s *ListProjectBranchFunctionsOK) SetPagination(val OptCursorPagination) {
 	s.Pagination = val
 }
 
@@ -9110,6 +10354,295 @@ func (s *NeonAuthWebhookConfigEnabledEventsItem) UnmarshalText(data []byte) erro
 	}
 }
 
+// Ref: #/components/schemas/NeonFunction
+type NeonFunction struct {
+	// Opaque, stable function identifier.
+	ID string `json:"id"`
+	// Branch-unique, lowercase DNS-label. Forms the invocation URL's host together with the branch id.
+	// Immutable.
+	Slug string `json:"slug"`
+	// Free-form display name.
+	Name string `json:"name"`
+	// URL at which the function is invoked. The host carries `<branch_id>-<slug>` as its first DNS label
+	// under a Neon-managed functions domain, and the URL ends with a trailing slash so paths concatenate
+	// onto it. Empty string when the function has no servable invoke host (e.g. a deployment without an
+	// invocation front-door).
+	InvocationURL string `json:"invocation_url"`
+	// The most recent deployment, regardless of build status. It may
+	// still be building or it may have failed. Omitted until the first
+	// deployment is created.
+	CurrentDeployment OptNeonFunctionDeployment `json:"current_deployment"`
+	// The most recent deployment whose build completed successfully.
+	// This is the deployment that serves invocations. Omitted until a
+	// deployment succeeds.
+	ActiveDeployment OptNeonFunctionDeployment `json:"active_deployment"`
+	CreatedAt        string                    `json:"created_at"`
+}
+
+// GetID returns the value of ID.
+func (s *NeonFunction) GetID() string {
+	return s.ID
+}
+
+// GetSlug returns the value of Slug.
+func (s *NeonFunction) GetSlug() string {
+	return s.Slug
+}
+
+// GetName returns the value of Name.
+func (s *NeonFunction) GetName() string {
+	return s.Name
+}
+
+// GetInvocationURL returns the value of InvocationURL.
+func (s *NeonFunction) GetInvocationURL() string {
+	return s.InvocationURL
+}
+
+// GetCurrentDeployment returns the value of CurrentDeployment.
+func (s *NeonFunction) GetCurrentDeployment() OptNeonFunctionDeployment {
+	return s.CurrentDeployment
+}
+
+// GetActiveDeployment returns the value of ActiveDeployment.
+func (s *NeonFunction) GetActiveDeployment() OptNeonFunctionDeployment {
+	return s.ActiveDeployment
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *NeonFunction) GetCreatedAt() string {
+	return s.CreatedAt
+}
+
+// SetID sets the value of ID.
+func (s *NeonFunction) SetID(val string) {
+	s.ID = val
+}
+
+// SetSlug sets the value of Slug.
+func (s *NeonFunction) SetSlug(val string) {
+	s.Slug = val
+}
+
+// SetName sets the value of Name.
+func (s *NeonFunction) SetName(val string) {
+	s.Name = val
+}
+
+// SetInvocationURL sets the value of InvocationURL.
+func (s *NeonFunction) SetInvocationURL(val string) {
+	s.InvocationURL = val
+}
+
+// SetCurrentDeployment sets the value of CurrentDeployment.
+func (s *NeonFunction) SetCurrentDeployment(val OptNeonFunctionDeployment) {
+	s.CurrentDeployment = val
+}
+
+// SetActiveDeployment sets the value of ActiveDeployment.
+func (s *NeonFunction) SetActiveDeployment(val OptNeonFunctionDeployment) {
+	s.ActiveDeployment = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *NeonFunction) SetCreatedAt(val string) {
+	s.CreatedAt = val
+}
+
+// Ref: #/components/schemas/NeonFunctionDeployment
+type NeonFunctionDeployment struct {
+	// The deployment id, which is the platform version number (monotonic per function).
+	ID int32 `json:"id"`
+	// Build lifecycle status of the deployment.
+	Status    NeonFunctionDeploymentStatus `json:"status"`
+	MemoryMib int32                        `json:"memory_mib"`
+	Runtime   string                       `json:"runtime"`
+	CreatedAt string                       `json:"created_at"`
+	// The NAMES of the deployment's environment variables, sorted.
+	// Values are encrypted at rest and are never returned — they are
+	// write-only. To change a value, deploy the variable with the new
+	// value; to remove a variable, deploy it with an empty value.
+	Environment []string `json:"environment"`
+	// Human-readable reason the deployment build failed. Present only
+	// when `status` is `failed`.
+	Error OptString `json:"error"`
+}
+
+// GetID returns the value of ID.
+func (s *NeonFunctionDeployment) GetID() int32 {
+	return s.ID
+}
+
+// GetStatus returns the value of Status.
+func (s *NeonFunctionDeployment) GetStatus() NeonFunctionDeploymentStatus {
+	return s.Status
+}
+
+// GetMemoryMib returns the value of MemoryMib.
+func (s *NeonFunctionDeployment) GetMemoryMib() int32 {
+	return s.MemoryMib
+}
+
+// GetRuntime returns the value of Runtime.
+func (s *NeonFunctionDeployment) GetRuntime() string {
+	return s.Runtime
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *NeonFunctionDeployment) GetCreatedAt() string {
+	return s.CreatedAt
+}
+
+// GetEnvironment returns the value of Environment.
+func (s *NeonFunctionDeployment) GetEnvironment() []string {
+	return s.Environment
+}
+
+// GetError returns the value of Error.
+func (s *NeonFunctionDeployment) GetError() OptString {
+	return s.Error
+}
+
+// SetID sets the value of ID.
+func (s *NeonFunctionDeployment) SetID(val int32) {
+	s.ID = val
+}
+
+// SetStatus sets the value of Status.
+func (s *NeonFunctionDeployment) SetStatus(val NeonFunctionDeploymentStatus) {
+	s.Status = val
+}
+
+// SetMemoryMib sets the value of MemoryMib.
+func (s *NeonFunctionDeployment) SetMemoryMib(val int32) {
+	s.MemoryMib = val
+}
+
+// SetRuntime sets the value of Runtime.
+func (s *NeonFunctionDeployment) SetRuntime(val string) {
+	s.Runtime = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *NeonFunctionDeployment) SetCreatedAt(val string) {
+	s.CreatedAt = val
+}
+
+// SetEnvironment sets the value of Environment.
+func (s *NeonFunctionDeployment) SetEnvironment(val []string) {
+	s.Environment = val
+}
+
+// SetError sets the value of Error.
+func (s *NeonFunctionDeployment) SetError(val OptString) {
+	s.Error = val
+}
+
+// Ref: #/components/schemas/NeonFunctionDeploymentResponse
+type NeonFunctionDeploymentResponse struct {
+	Deployment NeonFunctionDeployment `json:"deployment"`
+}
+
+// GetDeployment returns the value of Deployment.
+func (s *NeonFunctionDeploymentResponse) GetDeployment() NeonFunctionDeployment {
+	return s.Deployment
+}
+
+// SetDeployment sets the value of Deployment.
+func (s *NeonFunctionDeploymentResponse) SetDeployment(val NeonFunctionDeployment) {
+	s.Deployment = val
+}
+
+// Build lifecycle status of the deployment.
+type NeonFunctionDeploymentStatus string
+
+const (
+	NeonFunctionDeploymentStatusPending   NeonFunctionDeploymentStatus = "pending"
+	NeonFunctionDeploymentStatusBuilding  NeonFunctionDeploymentStatus = "building"
+	NeonFunctionDeploymentStatusCompleted NeonFunctionDeploymentStatus = "completed"
+	NeonFunctionDeploymentStatusFailed    NeonFunctionDeploymentStatus = "failed"
+)
+
+// AllValues returns all NeonFunctionDeploymentStatus values.
+func (NeonFunctionDeploymentStatus) AllValues() []NeonFunctionDeploymentStatus {
+	return []NeonFunctionDeploymentStatus{
+		NeonFunctionDeploymentStatusPending,
+		NeonFunctionDeploymentStatusBuilding,
+		NeonFunctionDeploymentStatusCompleted,
+		NeonFunctionDeploymentStatusFailed,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s NeonFunctionDeploymentStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case NeonFunctionDeploymentStatusPending:
+		return []byte(s), nil
+	case NeonFunctionDeploymentStatusBuilding:
+		return []byte(s), nil
+	case NeonFunctionDeploymentStatusCompleted:
+		return []byte(s), nil
+	case NeonFunctionDeploymentStatusFailed:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *NeonFunctionDeploymentStatus) UnmarshalText(data []byte) error {
+	switch NeonFunctionDeploymentStatus(data) {
+	case NeonFunctionDeploymentStatusPending:
+		*s = NeonFunctionDeploymentStatusPending
+		return nil
+	case NeonFunctionDeploymentStatusBuilding:
+		*s = NeonFunctionDeploymentStatusBuilding
+		return nil
+	case NeonFunctionDeploymentStatusCompleted:
+		*s = NeonFunctionDeploymentStatusCompleted
+		return nil
+	case NeonFunctionDeploymentStatusFailed:
+		*s = NeonFunctionDeploymentStatusFailed
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/NeonFunctionResponse
+type NeonFunctionResponse struct {
+	Function NeonFunction `json:"function"`
+}
+
+// GetFunction returns the value of Function.
+func (s *NeonFunctionResponse) GetFunction() NeonFunction {
+	return s.Function
+}
+
+// SetFunction sets the value of Function.
+func (s *NeonFunctionResponse) SetFunction(val NeonFunction) {
+	s.Function = val
+}
+
+// Ref: #/components/schemas/NeonFunctionUpdateRequest
+type NeonFunctionUpdateRequest struct {
+	// New display name for the function. `null` clears the display
+	// name; the function's `name` then falls back to its slug. Leading
+	// and trailing whitespace is trimmed; a whitespace-only name is
+	// rejected.
+	Name NilString `json:"name"`
+}
+
+// GetName returns the value of Name.
+func (s *NeonFunctionUpdateRequest) GetName() NilString {
+	return s.Name
+}
+
+// SetName sets the value of Name.
+func (s *NeonFunctionUpdateRequest) SetName(val NilString) {
+	s.Name = val
+}
+
 // NewNilInt64 returns new NilInt64 with value set to v.
 func NewNilInt64(v int64) NilInt64 {
 	return NilInt64{
@@ -9149,6 +10682,51 @@ func (o NilInt64) Get() (v int64, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o NilInt64) Or(d int64) int64 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewNilString returns new NilString with value set to v.
+func NewNilString(v string) NilString {
+	return NilString{
+		Value: v,
+	}
+}
+
+// NilString is nullable string.
+type NilString struct {
+	Value string
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilString) SetTo(v string) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilString) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilString) SetToNull() {
+	o.Null = true
+	var v string
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilString) Get() (v string, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilString) Or(d string) string {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -9338,6 +10916,7 @@ const (
 	OperationActionSwapBindingID                 OperationAction = "swap_binding_id"
 	OperationActionFinalizeMigration             OperationAction = "finalize_migration"
 	OperationActionMarkMigrationPrepared         OperationAction = "mark_migration_prepared"
+	OperationActionUpdateCatalog                 OperationAction = "update_catalog"
 )
 
 // AllValues returns all OperationAction values.
@@ -9375,6 +10954,7 @@ func (OperationAction) AllValues() []OperationAction {
 		OperationActionSwapBindingID,
 		OperationActionFinalizeMigration,
 		OperationActionMarkMigrationPrepared,
+		OperationActionUpdateCatalog,
 	}
 }
 
@@ -9444,6 +11024,8 @@ func (s OperationAction) MarshalText() ([]byte, error) {
 	case OperationActionFinalizeMigration:
 		return []byte(s), nil
 	case OperationActionMarkMigrationPrepared:
+		return []byte(s), nil
+	case OperationActionUpdateCatalog:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -9548,6 +11130,9 @@ func (s *OperationAction) UnmarshalText(data []byte) error {
 		return nil
 	case OperationActionMarkMigrationPrepared:
 		*s = OperationActionMarkMigrationPrepared
+		return nil
+	case OperationActionUpdateCatalog:
+		*s = OperationActionUpdateCatalog
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -10359,6 +11944,52 @@ func (o OptBranchState) Or(d BranchState) BranchState {
 	return d
 }
 
+// NewOptBucketCreateRequestAccessLevel returns new OptBucketCreateRequestAccessLevel with value set to v.
+func NewOptBucketCreateRequestAccessLevel(v BucketCreateRequestAccessLevel) OptBucketCreateRequestAccessLevel {
+	return OptBucketCreateRequestAccessLevel{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptBucketCreateRequestAccessLevel is optional BucketCreateRequestAccessLevel.
+type OptBucketCreateRequestAccessLevel struct {
+	Value BucketCreateRequestAccessLevel
+	Set   bool
+}
+
+// IsSet returns true if OptBucketCreateRequestAccessLevel was set.
+func (o OptBucketCreateRequestAccessLevel) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptBucketCreateRequestAccessLevel) Reset() {
+	var v BucketCreateRequestAccessLevel
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptBucketCreateRequestAccessLevel) SetTo(v BucketCreateRequestAccessLevel) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptBucketCreateRequestAccessLevel) Get() (v BucketCreateRequestAccessLevel, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptBucketCreateRequestAccessLevel) Or(d BucketCreateRequestAccessLevel) BucketCreateRequestAccessLevel {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptComputeUnit returns new OptComputeUnit with value set to v.
 func NewOptComputeUnit(v ComputeUnit) OptComputeUnit {
 	return OptComputeUnit{
@@ -11141,6 +12772,52 @@ func (o OptFinalizeRestoreBranchReq) Or(d FinalizeRestoreBranchReq) FinalizeRest
 	return d
 }
 
+// NewOptFunctionDeployRequestMultipartRuntime returns new OptFunctionDeployRequestMultipartRuntime with value set to v.
+func NewOptFunctionDeployRequestMultipartRuntime(v FunctionDeployRequestMultipartRuntime) OptFunctionDeployRequestMultipartRuntime {
+	return OptFunctionDeployRequestMultipartRuntime{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptFunctionDeployRequestMultipartRuntime is optional FunctionDeployRequestMultipartRuntime.
+type OptFunctionDeployRequestMultipartRuntime struct {
+	Value FunctionDeployRequestMultipartRuntime
+	Set   bool
+}
+
+// IsSet returns true if OptFunctionDeployRequestMultipartRuntime was set.
+func (o OptFunctionDeployRequestMultipartRuntime) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptFunctionDeployRequestMultipartRuntime) Reset() {
+	var v FunctionDeployRequestMultipartRuntime
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptFunctionDeployRequestMultipartRuntime) SetTo(v FunctionDeployRequestMultipartRuntime) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptFunctionDeployRequestMultipartRuntime) Get() (v FunctionDeployRequestMultipartRuntime, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptFunctionDeployRequestMultipartRuntime) Or(d FunctionDeployRequestMultipartRuntime) FunctionDeployRequestMultipartRuntime {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptGetOrganizationMembersSortBy returns new OptGetOrganizationMembersSortBy with value set to v.
 func NewOptGetOrganizationMembersSortBy(v GetOrganizationMembersSortBy) OptGetOrganizationMembersSortBy {
 	return OptGetOrganizationMembersSortBy{
@@ -11457,6 +13134,52 @@ func (o OptMaintenanceWindow) Get() (v MaintenanceWindow, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptMaintenanceWindow) Or(d MaintenanceWindow) MaintenanceWindow {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptMultipartFile returns new OptMultipartFile with value set to v.
+func NewOptMultipartFile(v ht.MultipartFile) OptMultipartFile {
+	return OptMultipartFile{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptMultipartFile is optional ht.MultipartFile.
+type OptMultipartFile struct {
+	Value ht.MultipartFile
+	Set   bool
+}
+
+// IsSet returns true if OptMultipartFile was set.
+func (o OptMultipartFile) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptMultipartFile) Reset() {
+	var v ht.MultipartFile
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptMultipartFile) SetTo(v ht.MultipartFile) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptMultipartFile) Get() (v ht.MultipartFile, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptMultipartFile) Or(d ht.MultipartFile) ht.MultipartFile {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -11831,6 +13554,52 @@ func (o OptNeonAuthProviderProjectTransferStatus) Or(d NeonAuthProviderProjectTr
 	return d
 }
 
+// NewOptNeonFunctionDeployment returns new OptNeonFunctionDeployment with value set to v.
+func NewOptNeonFunctionDeployment(v NeonFunctionDeployment) OptNeonFunctionDeployment {
+	return OptNeonFunctionDeployment{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNeonFunctionDeployment is optional NeonFunctionDeployment.
+type OptNeonFunctionDeployment struct {
+	Value NeonFunctionDeployment
+	Set   bool
+}
+
+// IsSet returns true if OptNeonFunctionDeployment was set.
+func (o OptNeonFunctionDeployment) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNeonFunctionDeployment) Reset() {
+	var v NeonFunctionDeployment
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptNeonFunctionDeployment) SetTo(v NeonFunctionDeployment) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNeonFunctionDeployment) Get() (v NeonFunctionDeployment, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNeonFunctionDeployment) Or(d NeonFunctionDeployment) NeonFunctionDeployment {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptNilDataAPISettings returns new OptNilDataAPISettings with value set to v.
 func NewOptNilDataAPISettings(v DataAPISettings) OptNilDataAPISettings {
 	return OptNilDataAPISettings{
@@ -12014,6 +13783,69 @@ func (o OptNilInt64) Get() (v int64, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNilInt64) Or(d int64) int64 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilProjectPermissionLevel returns new OptNilProjectPermissionLevel with value set to v.
+func NewOptNilProjectPermissionLevel(v ProjectPermissionLevel) OptNilProjectPermissionLevel {
+	return OptNilProjectPermissionLevel{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilProjectPermissionLevel is optional nullable ProjectPermissionLevel.
+type OptNilProjectPermissionLevel struct {
+	Value ProjectPermissionLevel
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilProjectPermissionLevel was set.
+func (o OptNilProjectPermissionLevel) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilProjectPermissionLevel) Reset() {
+	var v ProjectPermissionLevel
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilProjectPermissionLevel) SetTo(v ProjectPermissionLevel) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilProjectPermissionLevel) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilProjectPermissionLevel) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v ProjectPermissionLevel
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilProjectPermissionLevel) Get() (v ProjectPermissionLevel, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilProjectPermissionLevel) Or(d ProjectPermissionLevel) ProjectPermissionLevel {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -12629,52 +14461,6 @@ func (o OptProjectOwnerData) Get() (v ProjectOwnerData, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptProjectOwnerData) Or(d ProjectOwnerData) ProjectOwnerData {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptProjectPermissionLevel returns new OptProjectPermissionLevel with value set to v.
-func NewOptProjectPermissionLevel(v ProjectPermissionLevel) OptProjectPermissionLevel {
-	return OptProjectPermissionLevel{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptProjectPermissionLevel is optional ProjectPermissionLevel.
-type OptProjectPermissionLevel struct {
-	Value ProjectPermissionLevel
-	Set   bool
-}
-
-// IsSet returns true if OptProjectPermissionLevel was set.
-func (o OptProjectPermissionLevel) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptProjectPermissionLevel) Reset() {
-	var v ProjectPermissionLevel
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptProjectPermissionLevel) SetTo(v ProjectPermissionLevel) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptProjectPermissionLevel) Get() (v ProjectPermissionLevel, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptProjectPermissionLevel) Or(d ProjectPermissionLevel) ProjectPermissionLevel {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -13922,6 +15708,166 @@ func (s *PreloadLibraries) SetEnabledLibraries(val []string) {
 	s.EnabledLibraries = val
 }
 
+// Options for the presigned URL. The `operation` selects upload (`PUT`)
+// or download (`GET`); the remaining fields are optional.
+// Ref: #/components/schemas/PresignRequest
+type PresignRequest struct {
+	// The transfer direction. `upload` returns a presigned `PUT` URL;
+	// `download` returns a presigned `GET` URL.
+	Operation PresignRequestOperation `json:"operation"`
+	// The `Content-Type` to bind into the signed request. Only meaningful
+	// for `upload`: when set, the caller MUST send the same `Content-Type`
+	// header on the `PUT`, and the value is echoed back in the response
+	// `headers`. Ignored for `download`.
+	ContentType OptString `json:"content_type"`
+	// How long the presigned URL stays valid, in seconds. Defaults to 900
+	// (15 minutes); capped at 604800 (7 days).
+	ExpiresInSeconds OptInt64 `json:"expires_in_seconds"`
+}
+
+// GetOperation returns the value of Operation.
+func (s *PresignRequest) GetOperation() PresignRequestOperation {
+	return s.Operation
+}
+
+// GetContentType returns the value of ContentType.
+func (s *PresignRequest) GetContentType() OptString {
+	return s.ContentType
+}
+
+// GetExpiresInSeconds returns the value of ExpiresInSeconds.
+func (s *PresignRequest) GetExpiresInSeconds() OptInt64 {
+	return s.ExpiresInSeconds
+}
+
+// SetOperation sets the value of Operation.
+func (s *PresignRequest) SetOperation(val PresignRequestOperation) {
+	s.Operation = val
+}
+
+// SetContentType sets the value of ContentType.
+func (s *PresignRequest) SetContentType(val OptString) {
+	s.ContentType = val
+}
+
+// SetExpiresInSeconds sets the value of ExpiresInSeconds.
+func (s *PresignRequest) SetExpiresInSeconds(val OptInt64) {
+	s.ExpiresInSeconds = val
+}
+
+// The transfer direction. `upload` returns a presigned `PUT` URL;
+// `download` returns a presigned `GET` URL.
+type PresignRequestOperation string
+
+const (
+	PresignRequestOperationUpload   PresignRequestOperation = "upload"
+	PresignRequestOperationDownload PresignRequestOperation = "download"
+)
+
+// AllValues returns all PresignRequestOperation values.
+func (PresignRequestOperation) AllValues() []PresignRequestOperation {
+	return []PresignRequestOperation{
+		PresignRequestOperationUpload,
+		PresignRequestOperationDownload,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s PresignRequestOperation) MarshalText() ([]byte, error) {
+	switch s {
+	case PresignRequestOperationUpload:
+		return []byte(s), nil
+	case PresignRequestOperationDownload:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *PresignRequestOperation) UnmarshalText(data []byte) error {
+	switch PresignRequestOperation(data) {
+	case PresignRequestOperationUpload:
+		*s = PresignRequestOperationUpload
+		return nil
+	case PresignRequestOperationDownload:
+		*s = PresignRequestOperationDownload
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/PresignResponse
+type PresignResponse struct {
+	// The presigned URL. Transfer the object bytes by issuing
+	// `method url` with the returned `headers`.
+	URL string `json:"url"`
+	// The HTTP method to use against `url`: `PUT` for an upload,
+	// `GET` for a download.
+	Method string `json:"method"`
+	// Headers the caller MUST send verbatim on the request (e.g.
+	// `Content-Type` when it was signed on an upload). May be empty.
+	Headers PresignResponseHeaders `json:"headers"`
+	// When the presigned URL stops being valid.
+	ExpiresAt time.Time `json:"expires_at"`
+}
+
+// GetURL returns the value of URL.
+func (s *PresignResponse) GetURL() string {
+	return s.URL
+}
+
+// GetMethod returns the value of Method.
+func (s *PresignResponse) GetMethod() string {
+	return s.Method
+}
+
+// GetHeaders returns the value of Headers.
+func (s *PresignResponse) GetHeaders() PresignResponseHeaders {
+	return s.Headers
+}
+
+// GetExpiresAt returns the value of ExpiresAt.
+func (s *PresignResponse) GetExpiresAt() time.Time {
+	return s.ExpiresAt
+}
+
+// SetURL sets the value of URL.
+func (s *PresignResponse) SetURL(val string) {
+	s.URL = val
+}
+
+// SetMethod sets the value of Method.
+func (s *PresignResponse) SetMethod(val string) {
+	s.Method = val
+}
+
+// SetHeaders sets the value of Headers.
+func (s *PresignResponse) SetHeaders(val PresignResponseHeaders) {
+	s.Headers = val
+}
+
+// SetExpiresAt sets the value of ExpiresAt.
+func (s *PresignResponse) SetExpiresAt(val time.Time) {
+	s.ExpiresAt = val
+}
+
+func (*PresignResponse) presignProjectBranchBucketObjectRes() {}
+
+// Headers the caller MUST send verbatim on the request (e.g.
+// `Content-Type` when it was signed on an upload). May be empty.
+type PresignResponseHeaders map[string]string
+
+func (s *PresignResponseHeaders) init() PresignResponseHeaders {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
+}
+
 // Ref: #/components/schemas/Project
 type Project struct {
 	// Bytes-Hour. Project consumed that much storage hourly during the billing period. The value has
@@ -14008,7 +15954,8 @@ type Project struct {
 	// restart around this time.
 	MaintenanceScheduledFor OptDateTime `json:"maintenance_scheduled_for"`
 	// A timestamp indicating when HIPAA was enabled for this project.
-	HipaaEnabledAt OptDateTime `json:"hipaa_enabled_at"`
+	HipaaEnabledAt             OptDateTime                  `json:"hipaa_enabled_at"`
+	EffectiveProjectPermission OptNilProjectPermissionLevel `json:"effective_project_permission"`
 }
 
 // GetDataStorageBytesHour returns the value of DataStorageBytesHour.
@@ -14176,6 +16123,11 @@ func (s *Project) GetHipaaEnabledAt() OptDateTime {
 	return s.HipaaEnabledAt
 }
 
+// GetEffectiveProjectPermission returns the value of EffectiveProjectPermission.
+func (s *Project) GetEffectiveProjectPermission() OptNilProjectPermissionLevel {
+	return s.EffectiveProjectPermission
+}
+
 // SetDataStorageBytesHour sets the value of DataStorageBytesHour.
 func (s *Project) SetDataStorageBytesHour(val int64) {
 	s.DataStorageBytesHour = val
@@ -14339,6 +16291,11 @@ func (s *Project) SetMaintenanceScheduledFor(val OptDateTime) {
 // SetHipaaEnabledAt sets the value of HipaaEnabledAt.
 func (s *Project) SetHipaaEnabledAt(val OptDateTime) {
 	s.HipaaEnabledAt = val
+}
+
+// SetEffectiveProjectPermission sets the value of EffectiveProjectPermission.
+func (s *Project) SetEffectiveProjectPermission(val OptNilProjectPermissionLevel) {
+	s.EffectiveProjectPermission = val
 }
 
 // Ref: #/components/schemas/ProjectAuditLogLevel
@@ -14692,8 +16649,8 @@ type ProjectListItem struct {
 	// A timestamp indicating when the project was deleted.
 	DeletedAt OptDateTime `json:"deleted_at"`
 	// A timestamp indicating the project will be recoverable until this date and time.
-	RecoverableUntil           OptDateTime               `json:"recoverable_until"`
-	EffectiveProjectPermission OptProjectPermissionLevel `json:"effective_project_permission"`
+	RecoverableUntil           OptDateTime                  `json:"recoverable_until"`
+	EffectiveProjectPermission OptNilProjectPermissionLevel `json:"effective_project_permission"`
 }
 
 // GetID returns the value of ID.
@@ -14837,7 +16794,7 @@ func (s *ProjectListItem) GetRecoverableUntil() OptDateTime {
 }
 
 // GetEffectiveProjectPermission returns the value of EffectiveProjectPermission.
-func (s *ProjectListItem) GetEffectiveProjectPermission() OptProjectPermissionLevel {
+func (s *ProjectListItem) GetEffectiveProjectPermission() OptNilProjectPermissionLevel {
 	return s.EffectiveProjectPermission
 }
 
@@ -14982,7 +16939,7 @@ func (s *ProjectListItem) SetRecoverableUntil(val OptDateTime) {
 }
 
 // SetEffectiveProjectPermission sets the value of EffectiveProjectPermission.
-func (s *ProjectListItem) SetEffectiveProjectPermission(val OptProjectPermissionLevel) {
+func (s *ProjectListItem) SetEffectiveProjectPermission(val OptNilProjectPermissionLevel) {
 	s.EffectiveProjectPermission = val
 }
 
@@ -15082,7 +17039,7 @@ func (s *ProjectPermission) SetRevokedAt(val OptDateTime) {
 	s.RevokedAt = val
 }
 
-// The caller's effective permission for a project list item when
+// The caller's effective permission for a project when
 // per-project permissions are enabled. Values correspond to viewer,
 // editor, and admin/manage project access levels. Omitted for personal
 // projects, flag-off organizations, and non-user subjects.
@@ -15692,6 +17649,11 @@ func (s *RestoredSnapshot) SetOperations(val []Operation) {
 	s.Operations = val
 }
 
+// RevokeCredentialNoContent is response for RevokeCredential operation.
+type RevokeCredentialNoContent struct{}
+
+func (*RevokeCredentialNoContent) revokeCredentialRes() {}
+
 // Ref: #/components/schemas/Role
 type Role struct {
 	// The ID of the branch to which the role belongs.
@@ -16174,6 +18136,11 @@ func (s *SnapshotUpdateRequest) SetSnapshot(val SnapshotUpdateRequestSnapshot) {
 
 type SnapshotUpdateRequestSnapshot struct {
 	Name OptString `json:"name"`
+	// The date and time when the snapshot will expire.
+	// Omit to leave the current expiration unchanged. Send `null` to
+	// clear the expiration so the snapshot never expires. A future
+	// timestamp sets the absolute expiration.
+	ExpiresAt OptNilDateTime `json:"expires_at"`
 }
 
 // GetName returns the value of Name.
@@ -16181,9 +18148,19 @@ func (s *SnapshotUpdateRequestSnapshot) GetName() OptString {
 	return s.Name
 }
 
+// GetExpiresAt returns the value of ExpiresAt.
+func (s *SnapshotUpdateRequestSnapshot) GetExpiresAt() OptNilDateTime {
+	return s.ExpiresAt
+}
+
 // SetName sets the value of Name.
 func (s *SnapshotUpdateRequestSnapshot) SetName(val OptString) {
 	s.Name = val
+}
+
+// SetExpiresAt sets the value of ExpiresAt.
+func (s *SnapshotUpdateRequestSnapshot) SetExpiresAt(val OptNilDateTime) {
+	s.ExpiresAt = val
 }
 
 type SortOrderParam string

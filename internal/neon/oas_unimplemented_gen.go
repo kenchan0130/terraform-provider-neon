@@ -143,6 +143,18 @@ func (UnimplementedHandler) CreateBranchNeonAuthNewUser(ctx context.Context, req
 	return r, ht.ErrNotImplemented
 }
 
+// CreateCredential implements createCredential operation.
+//
+// Issues a new scoped service credential anchored to the specified
+// branch. The response carries `api_token` and `s3_secret_access_key`
+// exactly once — they are not stored server-side.
+// **Note**: This endpoint is currently in Private Beta.
+//
+// POST /projects/{project_id}/branches/{branch_id}/credentials
+func (UnimplementedHandler) CreateCredential(ctx context.Context, req *CreateCredentialRequest, params CreateCredentialParams) (r *CreateCredentialResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CreateNeonAuth implements createNeonAuth operation.
 //
 // Enables Neon Auth for the specified branch by connecting it to an authentication provider.
@@ -269,6 +281,17 @@ func (UnimplementedHandler) CreateProjectBranchAnonymized(ctx context.Context, r
 	return r, ht.ErrNotImplemented
 }
 
+// CreateProjectBranchBucket implements createProjectBranchBucket operation.
+//
+// Creates a new branchable object-storage bucket on the specified branch.
+// Buckets are managed by the Neon Platform branchable-storage service.
+// **Note**: This endpoint is currently in Private Beta.
+//
+// POST /projects/{project_id}/branches/{branch_id}/buckets
+func (UnimplementedHandler) CreateProjectBranchBucket(ctx context.Context, req *BucketCreateRequest, params CreateProjectBranchBucketParams) (r CreateProjectBranchBucketRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CreateProjectBranchDataAPI implements createProjectBranchDataAPI operation.
 //
 // Creates a new instance of Neon Data API in the specified branch.
@@ -288,6 +311,20 @@ func (UnimplementedHandler) CreateProjectBranchDataAPI(ctx context.Context, req 
 //
 // POST /projects/{project_id}/branches/{branch_id}/databases
 func (UnimplementedHandler) CreateProjectBranchDatabase(ctx context.Context, req *DatabaseCreateRequest, params CreateProjectBranchDatabaseParams) (r *DatabaseOperations, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateProjectBranchFunctionDeployment implements createProjectBranchFunctionDeployment operation.
+//
+// Creates a deployment for the function. Supply any subset of zip,
+// environment, and runtime; omitted fields inherit the
+// function's latest version. At least one field must be supplied. The
+// first deployment of a function must include zip. The newest deployment
+// becomes active.
+// **Note**: This endpoint is currently in Private Beta.
+//
+// POST /projects/{project_id}/branches/{branch_id}/functions/{slug}/deployments
+func (UnimplementedHandler) CreateProjectBranchFunctionDeployment(ctx context.Context, req *FunctionDeployRequestMultipart, params CreateProjectBranchFunctionDeploymentParams) (r *NeonFunctionDeploymentResponse, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -469,6 +506,49 @@ func (UnimplementedHandler) DeleteProjectBranch(ctx context.Context, params Dele
 	return r, ht.ErrNotImplemented
 }
 
+// DeleteProjectBranchBucket implements deleteProjectBranchBucket operation.
+//
+// Deletes the named bucket from the specified branch.
+// **Note**: This endpoint is currently in Private Beta.
+//
+// DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}
+func (UnimplementedHandler) DeleteProjectBranchBucket(ctx context.Context, params DeleteProjectBranchBucketParams) (r DeleteProjectBranchBucketRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DeleteProjectBranchBucketObject implements deleteProjectBranchBucketObject operation.
+//
+// Deletes the named object from the bucket on the specified branch.
+// Served by the user's session (no customer S3 credentials required).
+// **Note**: This endpoint is currently in Private Beta.
+//
+// DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects/{object_key}
+func (UnimplementedHandler) DeleteProjectBranchBucketObject(ctx context.Context, params DeleteProjectBranchBucketObjectParams) (r DeleteProjectBranchBucketObjectRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DeleteProjectBranchBucketObjectsByPrefix implements deleteProjectBranchBucketObjectsByPrefix operation.
+//
+// Soft-deletes every object on the specified branch whose key starts with
+// `prefix`, in a single call. Intended to back a "delete folder" action in
+// an object browser: a `prefix` of `app/avatars/` removes every object
+// beneath that folder. Served by the user's session (no customer S3
+// credentials required).
+// `prefix` must be non-empty, end with `/`, be at most 1024 bytes, and
+// contain no control characters - a partial-segment prefix cannot
+// accidentally delete sibling keys. Returns the number of objects
+// soft-deleted (`deleted`), which may be 0 when no live object matched the
+// prefix on this branch.
+// Only objects physically present on this branch are tombstoned; objects
+// inherited from an ancestor branch via copy-on-write (not materialized on
+// this branch) are out of scope.
+// **Note**: This endpoint is currently in Private Beta.
+//
+// DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects-by-prefix
+func (UnimplementedHandler) DeleteProjectBranchBucketObjectsByPrefix(ctx context.Context, params DeleteProjectBranchBucketObjectsByPrefixParams) (r DeleteProjectBranchBucketObjectsByPrefixRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DeleteProjectBranchDataAPI implements deleteProjectBranchDataAPI operation.
 //
 // Deletes the Neon Data API for the specified branch.
@@ -487,6 +567,16 @@ func (UnimplementedHandler) DeleteProjectBranchDataAPI(ctx context.Context, para
 // DELETE /projects/{project_id}/branches/{branch_id}/databases/{database_name}
 func (UnimplementedHandler) DeleteProjectBranchDatabase(ctx context.Context, params DeleteProjectBranchDatabaseParams) (r DeleteProjectBranchDatabaseRes, _ error) {
 	return r, ht.ErrNotImplemented
+}
+
+// DeleteProjectBranchFunction implements deleteProjectBranchFunction operation.
+//
+// Deletes the function identified by its slug.
+// **Note**: This endpoint is currently in Private Beta.
+//
+// DELETE /projects/{project_id}/branches/{branch_id}/functions/{slug}
+func (UnimplementedHandler) DeleteProjectBranchFunction(ctx context.Context, params DeleteProjectBranchFunctionParams) error {
+	return ht.ErrNotImplemented
 }
 
 // DeleteProjectBranchRole implements deleteProjectBranchRole operation.
@@ -698,6 +788,8 @@ func (UnimplementedHandler) GetCurrentUserInfo(ctx context.Context) (r *CurrentU
 // GetCurrentUserOrganizations implements getCurrentUserOrganizations operation.
 //
 // Retrieves the organizations that the currently authenticated user belongs to.
+// When called with an organization- or project-scoped API key (which is not
+// tied to a user), this returns the single organization that owns the key.
 //
 // GET /users/me/organizations
 func (UnimplementedHandler) GetCurrentUserOrganizations(ctx context.Context) (r *OrganizationsResponse, _ error) {
@@ -892,6 +984,40 @@ func (UnimplementedHandler) GetProjectBranch(ctx context.Context, params GetProj
 	return r, ht.ErrNotImplemented
 }
 
+// GetProjectBranchAiGateway implements getProjectBranchAiGateway operation.
+//
+// Returns the AI Gateway endpoint host for the specified branch, used to
+// render code-snippet base URLs. A 200 response means the branch is
+// registered and this region serves the AI gateway. A 404 response
+// includes a `reason` field indicating why the gateway is unavailable.
+// **Note**: This endpoint is currently in Private Beta.
+//
+// GET /projects/{project_id}/branches/{branch_id}/ai_gateway
+func (UnimplementedHandler) GetProjectBranchAiGateway(ctx context.Context, params GetProjectBranchAiGatewayParams) (r GetProjectBranchAiGatewayRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetProjectBranchBucketObject implements getProjectBranchBucketObject operation.
+//
+// Streams the raw bytes of the named object from the bucket on the
+// specified branch, including objects inherited from ancestor branches.
+// Served by the user's session (no customer S3 credentials required).
+// The body is returned as `application/octet-stream` so a browser treats
+// it as a download; the `Content-Length` and `ETag` response headers echo
+// the stored object metadata.
+// BINARY-STREAM EXCEPTION TO THE BUILD-GENERATED-TYPES RULE (#7029): the
+// successful 200 body is the raw object stream, proxied verbatim from the
+// platform storage admin endpoint. It is modeled as an
+// `application/octet-stream` binary body (not a JSON response schema) and
+// is streamed without buffering the whole object in memory. Error
+// responses still use the generated `GeneralError` shape.
+// **Note**: This endpoint is currently in Private Beta.
+//
+// GET /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects/{object_key}/download
+func (UnimplementedHandler) GetProjectBranchBucketObject(ctx context.Context, params GetProjectBranchBucketObjectParams) (r GetProjectBranchBucketObjectRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetProjectBranchDataAPI implements getProjectBranchDataAPI operation.
 //
 // Retrieves the Neon Data API configuration for the specified branch,
@@ -909,6 +1035,16 @@ func (UnimplementedHandler) GetProjectBranchDataAPI(ctx context.Context, params 
 //
 // GET /projects/{project_id}/branches/{branch_id}/databases/{database_name}
 func (UnimplementedHandler) GetProjectBranchDatabase(ctx context.Context, params GetProjectBranchDatabaseParams) (r *DatabaseResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetProjectBranchFunction implements getProjectBranchFunction operation.
+//
+// Returns the function identified by its slug.
+// **Note**: This endpoint is currently in Private Beta.
+//
+// GET /projects/{project_id}/branches/{branch_id}/functions/{slug}
+func (UnimplementedHandler) GetProjectBranchFunction(ctx context.Context, params GetProjectBranchFunctionParams) (r *NeonFunctionResponse, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -950,6 +1086,19 @@ func (UnimplementedHandler) GetProjectBranchSchema(ctx context.Context, params G
 //
 // GET /projects/{project_id}/branches/{branch_id}/compare_schema
 func (UnimplementedHandler) GetProjectBranchSchemaComparison(ctx context.Context, params GetProjectBranchSchemaComparisonParams) (r *BranchSchemaCompareResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetProjectBranchStorage implements getProjectBranchStorage operation.
+//
+// Returns whether branchable object-storage is usable for the specified
+// branch. A 200 response means the branch is registered in the storage
+// service and the S3 data plane will accept requests for it. A 404
+// response includes a `reason` field indicating why storage is unavailable.
+// **Note**: This endpoint is currently in Private Beta.
+//
+// GET /projects/{project_id}/branches/{branch_id}/storage
+func (UnimplementedHandler) GetProjectBranchStorage(ctx context.Context, params GetProjectBranchStorageParams) (r GetProjectBranchStorageRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1037,6 +1186,17 @@ func (UnimplementedHandler) ListBranchNeonAuthTrustedDomains(ctx context.Context
 	return r, ht.ErrNotImplemented
 }
 
+// ListCredentials implements listCredentials operation.
+//
+// Returns metadata for customer-issued credentials on the branch.
+// Secrets are never included.
+// **Note**: This endpoint is currently in Private Beta.
+//
+// GET /projects/{project_id}/branches/{branch_id}/credentials
+func (UnimplementedHandler) ListCredentials(ctx context.Context, params ListCredentialsParams) (r *ListCredentialsResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListNeonAuthIntegrations implements listNeonAuthIntegrations operation.
 //
 // DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth` instead.
@@ -1102,6 +1262,33 @@ func (UnimplementedHandler) ListOrganizationVPCEndpointsAllRegions(ctx context.C
 	return r, ht.ErrNotImplemented
 }
 
+// ListProjectBranchBucketObjects implements listProjectBranchBucketObjects operation.
+//
+// Lists objects visible in the named bucket on the specified branch,
+// including those inherited from ancestor branches. Listing is served by
+// the user's session (no customer S3 credentials required).
+// When `delimiter` is supplied (typically `/`), keys are collapsed into
+// common prefixes (`folders`) so callers can render a folder-style
+// browser; keys that do not contain the delimiter after `prefix` are
+// returned as `objects`.
+// **Note**: This endpoint is currently in Private Beta.
+//
+// GET /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects
+func (UnimplementedHandler) ListProjectBranchBucketObjects(ctx context.Context, params ListProjectBranchBucketObjectsParams) (r *BucketObjectsListResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListProjectBranchBuckets implements listProjectBranchBuckets operation.
+//
+// Lists branchable object-storage buckets visible on the specified branch,
+// including those inherited from ancestor branches.
+// **Note**: This endpoint is currently in Private Beta.
+//
+// GET /projects/{project_id}/branches/{branch_id}/buckets
+func (UnimplementedHandler) ListProjectBranchBuckets(ctx context.Context, params ListProjectBranchBucketsParams) (r *BucketsListResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListProjectBranchDatabases implements listProjectBranchDatabases operation.
 //
 // Retrieves a list of databases for the specified branch.
@@ -1121,6 +1308,16 @@ func (UnimplementedHandler) ListProjectBranchDatabases(ctx context.Context, para
 //
 // GET /projects/{project_id}/branches/{branch_id}/endpoints
 func (UnimplementedHandler) ListProjectBranchEndpoints(ctx context.Context, params ListProjectBranchEndpointsParams) (r *EndpointsResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListProjectBranchFunctions implements listProjectBranchFunctions operation.
+//
+// Lists functions on the specified branch.
+// **Note**: This endpoint is currently in Private Beta.
+//
+// GET /projects/{project_id}/branches/{branch_id}/functions
+func (UnimplementedHandler) ListProjectBranchFunctions(ctx context.Context, params ListProjectBranchFunctionsParams) (r *ListProjectBranchFunctionsOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1229,6 +1426,27 @@ func (UnimplementedHandler) ListSnapshots(ctx context.Context, params ListSnapsh
 	return r, ht.ErrNotImplemented
 }
 
+// PresignProjectBranchBucketObject implements presignProjectBranchBucketObject operation.
+//
+// Returns a presigned URL that transfers bytes directly to or from the
+// object's bucket on the specified branch, without the caller ever
+// handling S3 credentials. The `operation` field selects the direction:
+// - `upload` returns a presigned `PUT` URL (the caller `PUT`s the file
+// bytes straight to `url` with the returned `headers`). Authorized with
+// project write access.
+// - `download` returns a presigned `GET` URL (the caller `GET`s the
+// bytes straight from `url`). Authorized with project read access.
+// The platform mints a short-lived credential and builds the SigV4-signed
+// URL against the branch's S3 data-plane host, returning it together with
+// the HTTP method, any headers the caller must echo, and the URL's expiry.
+// Served by the user's session (no customer S3 credentials required).
+// **Note**: This endpoint is currently in Private Beta.
+//
+// POST /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects/{object_key}/presign
+func (UnimplementedHandler) PresignProjectBranchBucketObject(ctx context.Context, req *PresignRequest, params PresignProjectBranchBucketObjectParams) (r PresignProjectBranchBucketObjectRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // RecoverProject implements recoverProject operation.
 //
 // Recovers a deleted project within the 7-day deletion recovery period.
@@ -1238,6 +1456,21 @@ func (UnimplementedHandler) ListSnapshots(ctx context.Context, params ListSnapsh
 //
 // POST /projects/{project_id}/recover
 func (UnimplementedHandler) RecoverProject(ctx context.Context, params RecoverProjectParams) (r *ProjectRecoverResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// RecoverProjectBranch implements recoverProjectBranch operation.
+//
+// Recovers a deleted branch within the 7-day deletion recovery period.
+// The branch must have been soft deleted and not yet permanently deleted.
+// Recovery restores the branch and its endpoints to an idle state.
+// Connection strings remain valid after recovery.
+// TTL branches become non-TTL branches after recovery.
+// To list deleted branches available for recovery, use `GET
+// /projects/{project_id}/branches?include_deleted=true`.
+//
+// POST /projects/{project_id}/branches/{branch_id}/recover
+func (UnimplementedHandler) RecoverProjectBranch(ctx context.Context, params RecoverProjectBranchParams) (r *BranchRecoverResponse, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1311,6 +1544,16 @@ func (UnimplementedHandler) RestoreSnapshot(ctx context.Context, req OptRestoreS
 //
 // DELETE /api_keys/{key_id}
 func (UnimplementedHandler) RevokeApiKey(ctx context.Context, params RevokeApiKeyParams) (r *ApiKeyRevokeResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// RevokeCredential implements revokeCredential operation.
+//
+// Soft-deletes the credential.  Idempotent.
+// **Note**: This endpoint is currently in Private Beta.
+//
+// DELETE /projects/{project_id}/branches/{branch_id}/credentials/{token_id}
+func (UnimplementedHandler) RevokeCredential(ctx context.Context, params RevokeCredentialParams) (r RevokeCredentialRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1646,6 +1889,24 @@ func (UnimplementedHandler) UpdateProjectBranchDataAPI(ctx context.Context, req 
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/databases/{database_name}
 func (UnimplementedHandler) UpdateProjectBranchDatabase(ctx context.Context, req *DatabaseUpdateRequest, params UpdateProjectBranchDatabaseParams) (r *DatabaseOperations, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateProjectBranchFunction implements updateProjectBranchFunction operation.
+//
+// Updates the function's mutable metadata — currently only the display
+// `name`. A string sets the display name; `null` clears it, after which
+// the function's `name` falls back to its slug. Leading and trailing
+// whitespace is trimmed; a whitespace-only name is rejected. Acts only
+// on a function owned by the branch: a slug that is only inherited from
+// an ancestor branch returns 404 — rename it on the branch that owns
+// it. Like every other change on a branch, a rename is isolated per
+// branch: a branch forked before the rename keeps the name it had at
+// fork time.
+// **Note**: This endpoint is currently in Private Beta.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/functions/{slug}
+func (UnimplementedHandler) UpdateProjectBranchFunction(ctx context.Context, req *NeonFunctionUpdateRequest, params UpdateProjectBranchFunctionParams) (r *NeonFunctionResponse, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
