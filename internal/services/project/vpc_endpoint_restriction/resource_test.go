@@ -83,6 +83,59 @@ resource "neon_project_vpc_endpoint_restriction" "test" {
 	})
 }
 
+func TestVPCEndpointRestrictionResource_ReadParentProjectDeleted(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/projects/test-project-id/vpc_endpoints/vpce-test-001",
+		testutil.JSONResponder(200, `{}`),
+	)
+
+	callCount := 0
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id/vpc_endpoints",
+		func(req *http.Request) (*http.Response, error) {
+			callCount++
+			if callCount <= 1 {
+				return testutil.JSONResponder(200, `{"endpoints": [{"vpc_endpoint_id": "vpce-test-001", "label": "my-vpc-endpoint"}]}`)(req)
+			}
+			// The parent project was deleted outside of Terraform.
+			return testutil.JSONResponder(404, `{"code": "not_found", "message": "project not found"}`)(req)
+		},
+	)
+
+	transport.RegisterResponder(http.MethodDelete,
+		"https://neon.example.com/api/v2/projects/test-project-id/vpc_endpoints/vpce-test-001",
+		testutil.JSONResponder(200, `{}`),
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_project_vpc_endpoint_restriction" "test" {
+  project_id      = "test-project-id"
+  vpc_endpoint_id = "vpce-test-001"
+  label           = "my-vpc-endpoint"
+}
+`),
+			},
+			{
+				Config: testutil.TestConfig(`
+resource "neon_project_vpc_endpoint_restriction" "test" {
+  project_id      = "test-project-id"
+  vpc_endpoint_id = "vpce-test-001"
+  label           = "my-vpc-endpoint"
+}
+`),
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
 func TestVPCEndpointRestrictionResource_APIError(t *testing.T) {
 	transport := httpmock.NewMockTransport()
 	httpClient := &http.Client{Transport: transport}

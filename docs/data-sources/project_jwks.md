@@ -34,5 +34,5 @@ data "neon_project_jwks" "example" {
 - `jwks_url` (String) The URL that lists the JWKS.
 - `jwt_audience` (String) The name of the required JWT Audience to be used.
 - `provider_name` (String) The name of the authentication provider (e.g., Clerk, Stytch, Auth0).
-- `role_names` (List of String) The roles the JWKS is mapped to.
+- `role_names` (Set of String) The roles the JWKS is mapped to.
 - `updated_at` (String) The last update timestamp.

@@ -30,7 +30,7 @@ resource "neon_snapshot" "example" {
 
 ### Optional
 
-- `expires_at` (String) The time at which the snapshot will be automatically deleted. Use ISO 8601 format.
+- `expires_at` (String) The time at which the snapshot will be automatically deleted. Use ISO 8601 format. Removing this from the configuration clears the expiration.
 - `lsn` (String) The target Log Sequence Number (LSN) to take the snapshot from. Must fall within the restore window. Cannot be used with `timestamp`.
 - `name` (String) A name for the snapshot.
 - `timestamp` (String) The target timestamp for the snapshot. Must fall within the restore window. Use ISO 8601 format. Cannot be used with `lsn`.

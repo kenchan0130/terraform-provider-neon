@@ -173,6 +173,20 @@ func (r *neonAuthResource) Create(ctx context.Context, req resource.CreateReques
 		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
+		// The integration was successfully enabled server-side even though
+		// this read-back call failed (e.g. transient network/5xx error or
+		// propagation delay). Persist what we already know into state before
+		// returning the error so Terraform does not treat the resource as
+		// never having been created, which would orphan the enabled
+		// integration and cause a conflicting re-create on the next apply.
+		if data.DatabaseName.IsNull() || data.DatabaseName.IsUnknown() {
+			data.DbName = types.StringNull()
+		} else {
+			data.DbName = data.DatabaseName
+		}
+		data.CreatedAt = types.StringNull()
+
+		resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 		resp.Diagnostics.AddError("Failed to read NeonAuth integration after create", err.Error())
 		return
 	}

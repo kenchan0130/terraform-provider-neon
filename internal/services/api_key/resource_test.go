@@ -66,6 +66,7 @@ resource "neon_api_key" "test" {
 					testutil.CheckResourceAttr("neon_api_key.test", "id", "12345"),
 					testutil.CheckResourceAttr("neon_api_key.test", "name", "my-api-key"),
 					testutil.CheckResourceAttr("neon_api_key.test", "key", "neon-api-key-secret-value"),
+					testutil.CheckResourceAttr("neon_api_key.test", "created_at", "2025-01-01T00:00:00Z"),
 				),
 			},
 		},

@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -107,8 +108,8 @@ func (d *databaseDataSource) Read(ctx context.Context, req datasource.ReadReques
 	data.BranchID = types.StringValue(db.BranchID)
 	data.Name = types.StringValue(db.Name)
 	data.OwnerName = types.StringValue(db.OwnerName)
-	data.CreatedAt = types.StringValue(db.CreatedAt.String())
-	data.UpdatedAt = types.StringValue(db.UpdatedAt.String())
+	data.CreatedAt = types.StringValue(db.CreatedAt.Format(time.RFC3339))
+	data.UpdatedAt = types.StringValue(db.UpdatedAt.Format(time.RFC3339))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

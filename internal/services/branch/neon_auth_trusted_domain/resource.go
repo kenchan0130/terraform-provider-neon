@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 var (
@@ -147,6 +148,10 @@ func (r *neonAuthTrustedDomainResource) Read(ctx context.Context, req resource.R
 		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
+		if neonerror.IsNotFound(err) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError("Failed to list NeonAuth trusted domains", err.Error())
 		return
 	}

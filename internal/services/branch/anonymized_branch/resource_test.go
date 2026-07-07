@@ -159,6 +159,74 @@ resource "neon_anonymized_branch" "test" {
 	})
 }
 
+// TestAnonymizedBranchResource_ReadBackFailureAfterCreate verifies that when
+// branch creation succeeds but a subsequent read-back call (masking rules)
+// fails, the branch ID is still persisted to state (as tainted) instead of
+// leaving the created branch untracked by Terraform. On the next apply,
+// Terraform should replace the tainted resource and converge successfully.
+func TestAnonymizedBranchResource_ReadBackFailureAfterCreate(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	setupAnonymizedBranchMocks(transport)
+
+	maskingRulesCallCount := 0
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id/branches/br-anon-001/masking_rules",
+		func(req *http.Request) (*http.Response, error) {
+			maskingRulesCallCount++
+			if maskingRulesCallCount == 1 {
+				return testutil.JSONResponder(500, `{"message":"internal error"}`)(req)
+			}
+			return testutil.JSONResponder(200, maskingRulesJSON)(req)
+		},
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_anonymized_branch" "test" {
+  project_id = "test-project-id"
+  name       = "anon-branch"
+
+  masking_rules {
+    database_name    = "mydb"
+    schema_name      = "public"
+    table_name       = "users"
+    column_name      = "email"
+    masking_function = "anon.fake_email()"
+  }
+}
+`),
+				ExpectError: regexp.MustCompile(`Failed to read masking rules`),
+			},
+			{
+				Config: testutil.TestConfig(`
+resource "neon_anonymized_branch" "test" {
+  project_id = "test-project-id"
+  name       = "anon-branch"
+
+  masking_rules {
+    database_name    = "mydb"
+    schema_name      = "public"
+    table_name       = "users"
+    column_name      = "email"
+    masking_function = "anon.fake_email()"
+  }
+}
+`),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testutil.CheckResourceAttr("neon_anonymized_branch.test", "id", "br-anon-001"),
+					testutil.CheckResourceAttr("neon_anonymized_branch.test", "state", "created"),
+					testutil.CheckResourceAttr("neon_anonymized_branch.test", "masking_rules.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func TestAnonymizedBranchResource_APIError(t *testing.T) {
 	transport := httpmock.NewMockTransport()
 	httpClient := &http.Client{Transport: transport}

@@ -137,6 +137,98 @@ resource "neon_organization_api_key" "test" {
 	})
 }
 
+func TestOrgApiKeyResource_ReadNotFoundRemovesResource(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/organizations/org-test-id/api_keys",
+		testutil.JSONResponder(200, `{
+			"id": 67890,
+			"key": "neon-org-api-key-secret-value",
+			"name": "my-org-api-key",
+			"created_at": "2025-01-01T00:00:00Z",
+			"created_by": "00000000-0000-0000-0000-000000000000"
+		}`),
+	)
+
+	getCount := 0
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/organizations/org-test-id/api_keys",
+		func(req *http.Request) (*http.Response, error) {
+			getCount++
+			if getCount == 1 {
+				return testutil.JSONResponder(200, `[{
+					"id": 67890,
+					"name": "my-org-api-key",
+					"created_at": "2025-01-01T00:00:00Z",
+					"created_by": {"id": "00000000-0000-0000-0000-000000000000", "name": "test-user", "image": ""},
+					"last_used_at": null,
+					"last_used_from_addr": ""
+				}]`)(req)
+			}
+			return testutil.JSONResponder(404, `{"code":"not_found","message":"organization not found"}`)(req)
+		},
+	)
+
+	// Registered defensively in case the resource is still tracked in state
+	// when the test framework performs its post-test cleanup.
+	transport.RegisterResponder(http.MethodDelete,
+		"https://neon.example.com/api/v2/organizations/org-test-id/api_keys/67890",
+		testutil.JSONResponder(404, `{"code":"not_found","message":"organization API key not found"}`),
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_organization_api_key" "test" {
+  org_id = "org-test-id"
+  name   = "my-org-api-key"
+}
+`),
+			},
+			{
+				Config: testutil.TestConfig(`
+resource "neon_organization_api_key" "test" {
+  org_id = "org-test-id"
+  name   = "my-org-api-key"
+}
+`),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
+func TestOrgApiKeyResource_DeleteNotFoundSucceeds(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	setupOrgApiKeyMocks(transport)
+
+	transport.RegisterResponder(http.MethodDelete,
+		"https://neon.example.com/api/v2/organizations/org-test-id/api_keys/67890",
+		testutil.JSONResponder(404, `{"code":"not_found","message":"organization API key not found"}`),
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_organization_api_key" "test" {
+  org_id = "org-test-id"
+  name   = "my-org-api-key"
+}
+`),
+			},
+		},
+	})
+}
+
 func TestOrgApiKeyResource_APIError(t *testing.T) {
 	transport := httpmock.NewMockTransport()
 	httpClient := &http.Client{Transport: transport}

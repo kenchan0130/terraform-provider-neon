@@ -148,12 +148,8 @@ func branchSchemaConfigurableAttributes() map[string]schema.Attribute {
 			},
 		},
 		"expires_at": schema.StringAttribute{
-			Description: "The timestamp when the branch is scheduled to expire and be automatically deleted (ISO 8601 / RFC 3339 format).",
+			Description: "The timestamp when the branch is scheduled to expire and be automatically deleted (ISO 8601 / RFC 3339 format). Removing this from the configuration clears the expiration.",
 			Optional:    true,
-			Computed:    true,
-			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
-			},
 		},
 	}
 }
@@ -466,6 +462,24 @@ func (r *branchResource) ImportState(ctx context.Context, req resource.ImportSta
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), parts[1])...)
 }
 
+// timestampValuePreservingConfig returns the practitioner-supplied timestamp
+// string as-is when it refers to the same instant as the API-returned value,
+// so that non-canonical RFC 3339 representations (e.g. a non-UTC offset or a
+// different sub-second precision) supplied in config don't get silently
+// rewritten by the API's normalized representation. Rewriting a value the
+// practitioner explicitly set would cause "Provider produced inconsistent
+// result after apply" errors, since expires_at and parent_timestamp are not
+// Computed. When the existing value is null/unknown or does not refer to the
+// same instant, the API's canonical RFC 3339 representation is used.
+func timestampValuePreservingConfig(existing types.String, apiValue time.Time) types.String {
+	if !existing.IsNull() && !existing.IsUnknown() {
+		if t, err := time.Parse(time.RFC3339, existing.ValueString()); err == nil && t.Equal(apiValue) {
+			return existing
+		}
+	}
+	return types.StringValue(apiValue.Format(time.RFC3339))
+}
+
 func (r *branchResource) mapBranchToModel(b *neon.Branch, data *branchResourceModel) {
 	data.ID = types.StringValue(b.ID)
 	data.ProjectID = types.StringValue(b.ProjectID)
@@ -484,7 +498,7 @@ func (r *branchResource) mapBranchToModel(b *neon.Branch, data *branchResourceMo
 	}
 
 	if b.ParentTimestamp.IsSet() {
-		data.ParentTimestamp = types.StringValue(b.ParentTimestamp.Value.Format(time.RFC3339))
+		data.ParentTimestamp = timestampValuePreservingConfig(data.ParentTimestamp, b.ParentTimestamp.Value)
 	} else {
 		data.ParentTimestamp = types.StringNull()
 	}
@@ -512,7 +526,7 @@ func (r *branchResource) mapBranchToModel(b *neon.Branch, data *branchResourceMo
 	data.DataTransferBytes = types.Int64Value(b.DataTransferBytes)
 
 	if v, ok := b.ExpiresAt.Get(); ok {
-		data.ExpiresAt = types.StringValue(v.Format(time.RFC3339))
+		data.ExpiresAt = timestampValuePreservingConfig(data.ExpiresAt, v)
 	} else {
 		data.ExpiresAt = types.StringNull()
 	}

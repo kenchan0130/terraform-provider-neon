@@ -22,7 +22,7 @@ type jwksDataSourceModel struct {
 	ProviderName types.String `tfsdk:"provider_name"`
 	BranchID     types.String `tfsdk:"branch_id"`
 	JwtAudience  types.String `tfsdk:"jwt_audience"`
-	RoleNames    types.List   `tfsdk:"role_names"`
+	RoleNames    types.Set    `tfsdk:"role_names"`
 	CreatedAt    types.String `tfsdk:"created_at"`
 	UpdatedAt    types.String `tfsdk:"updated_at"`
 }
@@ -63,7 +63,7 @@ func (d *jwksDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 				Description: "The name of the required JWT Audience to be used.",
 				Computed:    true,
 			},
-			"role_names": schema.ListAttribute{
+			"role_names": schema.SetAttribute{
 				Description: "The roles the JWKS is mapped to.",
 				Computed:    true,
 				ElementType: types.StringType,
@@ -130,14 +130,14 @@ func (d *jwksDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 				data.JwtAudience = types.StringNull()
 			}
 
-			if len(j.RoleNames) > 0 {
+			if j.RoleNames != nil {
 				roleNameValues := make([]types.String, len(j.RoleNames))
 				for k, name := range j.RoleNames {
 					roleNameValues[k] = types.StringValue(name)
 				}
-				data.RoleNames, _ = types.ListValueFrom(ctx, types.StringType, roleNameValues)
+				data.RoleNames, _ = types.SetValueFrom(ctx, types.StringType, roleNameValues)
 			} else {
-				data.RoleNames = types.ListNull(types.StringType)
+				data.RoleNames = types.SetNull(types.StringType)
 			}
 
 			data.CreatedAt = types.StringValue(j.CreatedAt.Format(time.RFC3339))

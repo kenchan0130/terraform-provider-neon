@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -13,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 var (
@@ -105,13 +107,8 @@ func (r *snapshotResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 				},
 			},
 			"expires_at": schema.StringAttribute{
-				Description: "The time at which the snapshot will be automatically deleted. Use ISO 8601 format.",
+				Description: "The time at which the snapshot will be automatically deleted. Use ISO 8601 format. Removing this from the configuration clears the expiration.",
 				Optional:    true,
-				Computed:    true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"manual": schema.BoolAttribute{
 				Description: "Whether the snapshot was manually created.",
@@ -194,6 +191,10 @@ func (r *snapshotResource) Read(ctx context.Context, req resource.ReadRequest, r
 		ProjectID: data.ProjectID.ValueString(),
 	})
 	if err != nil {
+		if neonerror.IsNotFound(err) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError("Failed to list snapshots", err.Error())
 		return
 	}
@@ -225,6 +226,16 @@ func (r *snapshotResource) Update(ctx context.Context, req resource.UpdateReques
 	updateReq := &neon.SnapshotUpdateRequest{}
 	if !plan.Name.IsNull() && !plan.Name.IsUnknown() {
 		updateReq.Snapshot.Name = neon.NewOptString(plan.Name.ValueString())
+	}
+	if plan.ExpiresAt.IsNull() {
+		updateReq.Snapshot.ExpiresAt = neon.OptNilDateTime{Set: true, Null: true}
+	} else if !plan.ExpiresAt.IsUnknown() {
+		t, err := time.Parse(time.RFC3339, plan.ExpiresAt.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Invalid expires_at format", fmt.Sprintf("Expected RFC 3339 format: %s", err.Error()))
+			return
+		}
+		updateReq.Snapshot.ExpiresAt = neon.OptNilDateTime{Value: t, Set: true}
 	}
 
 	result, err := r.client.UpdateSnapshot(ctx, updateReq, neon.UpdateSnapshotParams{
@@ -271,6 +282,24 @@ func (r *snapshotResource) ImportState(ctx context.Context, req resource.ImportS
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), parts[1])...)
 }
 
+// timestampValuePreservingConfig returns the practitioner-supplied timestamp
+// string as-is when it refers to the same instant as the API-returned value,
+// so that non-canonical RFC 3339 representations (e.g. a non-UTC offset or a
+// different sub-second precision) supplied in config don't get silently
+// rewritten by the API's normalized representation. Rewriting a value the
+// practitioner explicitly set would cause "Provider produced inconsistent
+// result after apply" errors, since expires_at is not Computed. When the
+// existing value is null/unknown or does not refer to the same instant, the
+// API's canonical RFC 3339 representation is used.
+func timestampValuePreservingConfig(existing types.String, apiValue time.Time) types.String {
+	if !existing.IsNull() && !existing.IsUnknown() {
+		if t, err := time.Parse(time.RFC3339, existing.ValueString()); err == nil && t.Equal(apiValue) {
+			return existing
+		}
+	}
+	return types.StringValue(apiValue.Format(time.RFC3339))
+}
+
 func mapSnapshotToModel(s *neon.Snapshot, data *snapshotResourceModel) {
 	data.ID = types.StringValue(s.ID)
 	data.Name = types.StringValue(s.Name)
@@ -298,7 +327,11 @@ func mapSnapshotToModel(s *neon.Snapshot, data *snapshotResourceModel) {
 	}
 
 	if v, ok := s.ExpiresAt.Get(); ok {
-		data.ExpiresAt = types.StringValue(v)
+		if t, err := time.Parse(time.RFC3339, v); err == nil {
+			data.ExpiresAt = timestampValuePreservingConfig(data.ExpiresAt, t)
+		} else {
+			data.ExpiresAt = types.StringValue(v)
+		}
 	} else {
 		data.ExpiresAt = types.StringNull()
 	}

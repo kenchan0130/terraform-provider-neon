@@ -29,7 +29,7 @@ resource "neon_branch" "example" {
 ### Optional
 
 - `archived` (Boolean) Whether to create the branch as archived.
-- `expires_at` (String) The timestamp when the branch is scheduled to expire and be automatically deleted (ISO 8601 / RFC 3339 format).
+- `expires_at` (String) The timestamp when the branch is scheduled to expire and be automatically deleted (ISO 8601 / RFC 3339 format). Removing this from the configuration clears the expiration.
 - `init_source` (String) The source of initialization for the branch. Valid values are 'schema-only' and 'parent-data' (default).
 - `name` (String) The branch name.
 - `parent_id` (String) The parent branch ID.

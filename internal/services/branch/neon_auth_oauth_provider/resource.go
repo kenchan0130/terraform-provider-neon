@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 var (
@@ -50,10 +51,13 @@ func (r *neonAuthOauthProviderResource) Schema(_ context.Context, _ resource.Sch
 		Description: "Manages a NeonAuth OAuth provider on a branch.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Description: "The OAuth provider ID (e.g. `google`, `github`, `microsoft`, `vercel`).",
-				Computed:    true,
+				Description: "The OAuth provider ID.",
+				Required:    true,
+				Validators: []validator.String{
+					stringvalidator.OneOf("google", "github", "microsoft", "vercel"),
+				},
 				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
+					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"project_id": schema.StringAttribute{
@@ -71,8 +75,11 @@ func (r *neonAuthOauthProviderResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"type": schema.StringAttribute{
-				Description: "The OAuth provider type (e.g. `standard`, `shared`).",
-				Required:    true,
+				Description: "The OAuth provider type (e.g. `standard`, `shared`), as reported by the API.",
+				Computed:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"client_id": schema.StringAttribute{
 				Description: "The OAuth client ID.",
@@ -140,7 +147,7 @@ func (r *neonAuthOauthProviderResource) Create(ctx context.Context, req resource
 	applyWriteOnlyAttributes(&data, &config)
 
 	createReq := &neon.NeonAuthAddOAuthProviderRequest{
-		ID: neon.NeonAuthOauthProviderId(data.Type.ValueString()),
+		ID: neon.NeonAuthOauthProviderId(data.ID.ValueString()),
 	}
 	if !data.ClientID.IsNull() && !data.ClientID.IsUnknown() {
 		createReq.ClientID = neon.NewOptString(data.ClientID.ValueString())
@@ -174,6 +181,10 @@ func (r *neonAuthOauthProviderResource) Read(ctx context.Context, req resource.R
 		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
+		if neonerror.IsNotFound(err) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError("Failed to list NeonAuth OAuth providers", err.Error())
 		return
 	}

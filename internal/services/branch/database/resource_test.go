@@ -93,6 +93,85 @@ resource "neon_database" "test" {
 	})
 }
 
+func TestDatabaseResource_Update(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/projects/test-project-id/branches/br-test-001/databases",
+		testutil.JSONResponder(201, `{"database": `+databaseJSON+`, "operations": []}`),
+	)
+
+	// The API returns a new updated_at when owner_name changes. If
+	// updated_at were still pinned by UseStateForUnknown, Terraform would
+	// fail with "Provider produced inconsistent result after apply".
+	updatedDatabaseJSON := `{
+		"id": 12345,
+		"branch_id": "br-test-001",
+		"name": "mydb",
+		"owner_name": "newrole",
+		"created_at": "2025-01-01T00:00:00Z",
+		"updated_at": "2025-02-02T00:00:00Z"
+	}`
+
+	updated := false
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id/branches/br-test-001/databases/mydb",
+		func(req *http.Request) (*http.Response, error) {
+			if updated {
+				return testutil.JSONResponder(200, `{"database": `+updatedDatabaseJSON+`}`)(req)
+			}
+			return testutil.JSONResponder(200, `{"database": `+databaseJSON+`}`)(req)
+		},
+	)
+
+	transport.RegisterResponder(http.MethodPatch,
+		"https://neon.example.com/api/v2/projects/test-project-id/branches/br-test-001/databases/mydb",
+		func(req *http.Request) (*http.Response, error) {
+			updated = true
+			return testutil.JSONResponder(200, `{"database": `+updatedDatabaseJSON+`, "operations": []}`)(req)
+		},
+	)
+
+	transport.RegisterResponder(http.MethodDelete,
+		"https://neon.example.com/api/v2/projects/test-project-id/branches/br-test-001/databases/mydb",
+		testutil.JSONResponder(200, `{"database": `+updatedDatabaseJSON+`, "operations": []}`),
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_database" "test" {
+  project_id = "test-project-id"
+  branch_id  = "br-test-001"
+  name       = "mydb"
+  owner_name = "myrole"
+}
+`),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testutil.CheckResourceAttr("neon_database.test", "owner_name", "myrole"),
+				),
+			},
+			{
+				Config: testutil.TestConfig(`
+resource "neon_database" "test" {
+  project_id = "test-project-id"
+  branch_id  = "br-test-001"
+  name       = "mydb"
+  owner_name = "newrole"
+}
+`),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testutil.CheckResourceAttr("neon_database.test", "owner_name", "newrole"),
+					testutil.CheckResourceAttr("neon_database.test", "updated_at", "2025-02-02T00:00:00Z"),
+				),
+			},
+		},
+	})
+}
+
 func TestDatabaseResource_APIError(t *testing.T) {
 	transport := httpmock.NewMockTransport()
 	httpClient := &http.Client{Transport: transport}

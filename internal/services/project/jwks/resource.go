@@ -9,11 +9,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 var (
@@ -33,7 +34,7 @@ type jwksResourceModel struct {
 	ProviderName types.String `tfsdk:"provider_name"`
 	BranchID     types.String `tfsdk:"branch_id"`
 	JwtAudience  types.String `tfsdk:"jwt_audience"`
-	RoleNames    types.List   `tfsdk:"role_names"`
+	RoleNames    types.Set    `tfsdk:"role_names"`
 	CreatedAt    types.String `tfsdk:"created_at"`
 	UpdatedAt    types.String `tfsdk:"updated_at"`
 }
@@ -92,14 +93,14 @@ func (r *jwksResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
-			"role_names": schema.ListAttribute{
+			"role_names": schema.SetAttribute{
 				Description: "The roles the JWKS should be mapped to. By default, the JWKS is mapped to the authenticator, authenticated and anonymous roles.",
 				Optional:    true,
 				Computed:    true,
 				ElementType: types.StringType,
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.RequiresReplace(),
-					listplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.RequiresReplace(),
+					setplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"created_at": schema.StringAttribute{
@@ -187,6 +188,10 @@ func (r *jwksResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		ProjectID: data.ProjectID.ValueString(),
 	})
 	if err != nil {
+		if neonerror.IsNotFound(err) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError("Failed to read JWKS", err.Error())
 		return
 	}
@@ -255,14 +260,14 @@ func (r *jwksResource) mapJWKSToModel(j *neon.JWKS, data *jwksResourceModel) {
 		data.JwtAudience = types.StringNull()
 	}
 
-	if len(j.RoleNames) > 0 {
+	if j.RoleNames != nil {
 		roleNameValues := make([]types.String, len(j.RoleNames))
 		for i, name := range j.RoleNames {
 			roleNameValues[i] = types.StringValue(name)
 		}
-		data.RoleNames, _ = types.ListValueFrom(context.Background(), types.StringType, roleNameValues)
+		data.RoleNames, _ = types.SetValueFrom(context.Background(), types.StringType, roleNameValues)
 	} else {
-		data.RoleNames = types.ListNull(types.StringType)
+		data.RoleNames = types.SetNull(types.StringType)
 	}
 
 	data.CreatedAt = types.StringValue(j.CreatedAt.Format(time.RFC3339))

@@ -110,6 +110,57 @@ resource "neon_branch_neon_auth" "test" {
 	})
 }
 
+// TestNeonAuthResource_CreateReadBackFailurePersistsState verifies that when
+// CreateNeonAuth succeeds but the immediate read-back (GetNeonAuth) fails,
+// the resource is still saved to state (tainted) instead of being silently
+// dropped. This is confirmed indirectly: Terraform's automatic test cleanup
+// destroys everything left in state, so if DisableNeonAuth is invoked, the
+// resource must have been persisted; if the bug were present, state would be
+// empty and no destroy call would ever be made.
+func TestNeonAuthResource_CreateReadBackFailurePersistsState(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/projects/test-project-id/branches/br-test-001/auth",
+		testutil.JSONResponder(201, neonAuthCreateResponseJSON),
+	)
+
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id/branches/br-test-001/auth",
+		testutil.JSONResponder(500, `{"message":"internal error"}`),
+	)
+
+	deleteCalls := 0
+	transport.RegisterResponder(http.MethodDelete,
+		"https://neon.example.com/api/v2/projects/test-project-id/branches/br-test-001/auth",
+		func(req *http.Request) (*http.Response, error) {
+			deleteCalls++
+			return testutil.JSONResponder(200, `{}`)(req)
+		},
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_branch_neon_auth" "test" {
+  project_id    = "test-project-id"
+  branch_id     = "br-test-001"
+  auth_provider = "stack"
+}
+`),
+				ExpectError: regexp.MustCompile(`Failed to read NeonAuth integration after create`),
+			},
+		},
+	})
+
+	if deleteCalls == 0 {
+		t.Fatal("expected DisableNeonAuth to be called during test cleanup, meaning the resource was not persisted to state after the read-back failure (orphaned integration)")
+	}
+}
+
 func TestNeonAuthResource_APIError(t *testing.T) {
 	transport := httpmock.NewMockTransport()
 	httpClient := &http.Client{Transport: transport}

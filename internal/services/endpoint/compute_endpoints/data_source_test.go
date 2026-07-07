@@ -87,6 +87,8 @@ data "neon_endpoints" "test" {
 					testutil.CheckResourceAttr("data.neon_endpoints.test", "endpoints.0.autoscaling_limit_min_cu", "0.25"),
 					testutil.CheckResourceAttr("data.neon_endpoints.test", "endpoints.0.autoscaling_limit_max_cu", "1"),
 					testutil.CheckResourceAttr("data.neon_endpoints.test", "endpoints.0.disabled", "false"),
+					testutil.CheckResourceAttr("data.neon_endpoints.test", "endpoints.0.created_at", "2025-01-01T00:00:00Z"),
+					testutil.CheckResourceAttr("data.neon_endpoints.test", "endpoints.0.updated_at", "2025-01-01T00:00:00Z"),
 					testutil.CheckResourceAttr("data.neon_endpoints.test", "endpoints.1.id", "ep-test-002"),
 					testutil.CheckResourceAttr("data.neon_endpoints.test", "endpoints.1.branch_id", "br-test-002"),
 					testutil.CheckResourceAttr("data.neon_endpoints.test", "endpoints.1.type", "read_only"),

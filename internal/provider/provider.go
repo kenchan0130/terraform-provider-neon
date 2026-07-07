@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/action"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -122,6 +123,28 @@ func (s *neonSecuritySource) TokenCookieAuth(_ context.Context, _ string) (neon.
 func (p *NeonProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
 	var config neonProviderModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if config.APIKey.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("api_key"),
+			"Unknown Neon API Key",
+			"The provider cannot be configured because the `api_key` attribute has an unknown value at plan time. "+
+				"Either set a static value, use the `NEON_API_KEY` environment variable, or ensure the value is known before applying.",
+		)
+	}
+
+	if config.BaseURL.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("base_url"),
+			"Unknown Neon Base URL",
+			"The provider cannot be configured because the `base_url` attribute has an unknown value at plan time. "+
+				"Either set a static value or ensure the value is known before applying.",
+		)
+	}
+
 	if resp.Diagnostics.HasError() {
 		return
 	}

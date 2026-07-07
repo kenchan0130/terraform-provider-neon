@@ -3,6 +3,7 @@ package compute_endpoints
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -172,8 +173,8 @@ func (d *endpointsDataSource) Read(ctx context.Context, req datasource.ReadReque
 			Disabled:              types.BoolValue(ep.Disabled),
 			PasswordlessAccess:    types.BoolValue(ep.PasswordlessAccess),
 			ComputeProvisioner:    types.StringValue(string(ep.Provisioner)),
-			CreatedAt:             types.StringValue(ep.CreatedAt.String()),
-			UpdatedAt:             types.StringValue(ep.UpdatedAt.String()),
+			CreatedAt:             types.StringValue(ep.CreatedAt.Format(time.RFC3339)),
+			UpdatedAt:             types.StringValue(ep.UpdatedAt.Format(time.RFC3339)),
 		}
 
 		if v, ok := ep.Name.Get(); ok {
