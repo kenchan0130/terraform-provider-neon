@@ -5,6 +5,22 @@ type AcceptProjectTransferRequestRes interface {
 	acceptProjectTransferRequestRes()
 }
 
+type CreateProjectBranchBucketRes interface {
+	createProjectBranchBucketRes()
+}
+
+type DeleteProjectBranchBucketObjectRes interface {
+	deleteProjectBranchBucketObjectRes()
+}
+
+type DeleteProjectBranchBucketObjectsByPrefixRes interface {
+	deleteProjectBranchBucketObjectsByPrefixRes()
+}
+
+type DeleteProjectBranchBucketRes interface {
+	deleteProjectBranchBucketRes()
+}
+
 type DeleteProjectBranchDatabaseRes interface {
 	deleteProjectBranchDatabaseRes()
 }
@@ -33,8 +49,28 @@ type GetConsumptionHistoryPerProjectV2Res interface {
 	getConsumptionHistoryPerProjectV2Res()
 }
 
+type GetProjectBranchAiGatewayRes interface {
+	getProjectBranchAiGatewayRes()
+}
+
+type GetProjectBranchBucketObjectRes interface {
+	getProjectBranchBucketObjectRes()
+}
+
 type GetProjectBranchRolePasswordRes interface {
 	getProjectBranchRolePasswordRes()
+}
+
+type GetProjectBranchStorageRes interface {
+	getProjectBranchStorageRes()
+}
+
+type PresignProjectBranchBucketObjectRes interface {
+	presignProjectBranchBucketObjectRes()
+}
+
+type RevokeCredentialRes interface {
+	revokeCredentialRes()
 }
 
 type TransferProjectsFromOrgToOrgRes interface {

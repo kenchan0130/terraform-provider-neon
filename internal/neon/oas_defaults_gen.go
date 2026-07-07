@@ -11,6 +11,14 @@ func (s *AddProjectJWKSRequest) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *BucketCreateRequest) setDefaults() {
+	{
+		val := BucketCreateRequestAccessLevel("private")
+		s.AccessLevel.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *DataAPICreateRequest) setDefaults() {
 	{
 		val := bool(false)
@@ -123,6 +131,14 @@ func (s *NeonAuthWebhookConfig) setDefaults() {
 	{
 		val := int(5)
 		s.TimeoutSeconds.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *PresignRequest) setDefaults() {
+	{
+		val := int64(900)
+		s.ExpiresInSeconds.SetTo(val)
 	}
 }
 

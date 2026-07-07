@@ -20,6 +20,7 @@ import (
 var regexMap = map[string]ogenregex.Regexp{
 	"^([a-z0-9-]{1,60}(,[a-z0-9-]{1,60}){0,99})?$": ogenregex.MustCompile("^([a-z0-9-]{1,60}(,[a-z0-9-]{1,60}){0,99})?$"),
 	"^[a-z0-9-]{1,60}$":                            ogenregex.MustCompile("^[a-z0-9-]{1,60}$"),
+	"^[a-z0-9]{1,20}$":                             ogenregex.MustCompile("^[a-z0-9]{1,20}$"),
 }
 var (
 	// Allocate option closure once.
