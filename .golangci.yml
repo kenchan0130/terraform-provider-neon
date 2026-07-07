@@ -51,6 +51,12 @@ linters:
           disabled: true
   exclusions:
     rules:
+      # Terraform schema definitions naturally repeat self-documenting attribute
+      # names (e.g. "project_id") and descriptions across resource/data source/
+      # ephemeral schemas. Keeping them as literals is clearer than constants.
+      - path: internal/services/.*/(resource|data_source|ephemeral)\.go
+        linters:
+          - goconst
       - path: _test\.go
         linters:
           - bodyclose
