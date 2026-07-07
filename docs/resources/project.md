@@ -35,7 +35,7 @@ resource "neon_project" "example" {
 - `pg_version` (Number) The Postgres version.
 - `region_id` (String) The region identifier. Cannot be changed after creation.
 - `settings` (Attributes) Project settings. (see [below for nested schema](#nestedatt--settings))
-- `store_passwords` (Boolean) Whether passwords are stored for roles in the project.
+- `store_passwords` (Boolean) Whether passwords are stored for roles in the project. Cannot be changed after creation.
 
 ### Read-Only
 

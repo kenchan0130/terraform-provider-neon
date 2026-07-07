@@ -239,6 +239,21 @@ func (r *anonymizedBranchResource) Create(ctx context.Context, req resource.Crea
 		data.ParentID = types.StringNull()
 	}
 
+	// Persist an intermediate state as soon as the branch ID is known, before
+	// performing the additional read-back calls below. If any of those calls
+	// fail, the branch is already tracked in state (tainted) instead of
+	// becoming orphaned in Neon while being unmanaged by Terraform.
+	if data.MaskingRules.IsUnknown() {
+		data.MaskingRules = types.ListNull(types.ObjectType{AttrTypes: maskingRuleAttrTypes()})
+	}
+	data.State = types.StringNull()
+	data.CreatedAt = types.StringNull()
+	data.UpdatedAt = types.StringNull()
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	r.readState(ctx, &data, resp)
 }
 

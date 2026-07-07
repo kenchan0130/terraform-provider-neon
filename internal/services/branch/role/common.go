@@ -2,6 +2,7 @@ package role
 
 import (
 	"context"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -47,8 +48,8 @@ func fetchRole(ctx context.Context, client *neon.Client, data *roleModel) diag.D
 		data.AuthenticationMethod = types.StringNull()
 	}
 
-	data.CreatedAt = types.StringValue(r.CreatedAt.String())
-	data.UpdatedAt = types.StringValue(r.UpdatedAt.String())
+	data.CreatedAt = types.StringValue(r.CreatedAt.Format(time.RFC3339))
+	data.UpdatedAt = types.StringValue(r.UpdatedAt.Format(time.RFC3339))
 
 	return diags
 }

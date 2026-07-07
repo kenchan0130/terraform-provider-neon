@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -21,6 +22,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
+	"github.com/kenchan0130/terraform-provider-neon/internal/planmodifiers"
 )
 
 var (
@@ -246,14 +248,14 @@ func endpointSchemaComputedAttributes() map[string]schema.Attribute {
 			Description: "The current state of the compute endpoint.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChange(),
 			},
 		},
 		"last_active": schema.StringAttribute{
 			Description: "A timestamp indicating when the compute endpoint was last active.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChange(),
 			},
 		},
 		"creation_source": schema.StringAttribute{
@@ -267,28 +269,28 @@ func endpointSchemaComputedAttributes() map[string]schema.Attribute {
 			Description: "Attached compute's release version number.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChange(),
 			},
 		},
 		"pending_state": schema.StringAttribute{
 			Description: "The pending state of the compute endpoint.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChange(),
 			},
 		},
 		"started_at": schema.StringAttribute{
 			Description: "A timestamp indicating when the compute endpoint was last started.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChange(),
 			},
 		},
 		"suspended_at": schema.StringAttribute{
 			Description: "A timestamp indicating when the compute endpoint was last suspended.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChange(),
 			},
 		},
 		"created_at": schema.StringAttribute{
@@ -302,7 +304,7 @@ func endpointSchemaComputedAttributes() map[string]schema.Attribute {
 			Description: "The last update timestamp.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChange(),
 			},
 		},
 	}
@@ -599,19 +601,25 @@ func mapEndpointCoreFields(ep *neon.Endpoint, data *endpointResourceModel) {
 	data.CurrentState = types.StringValue(string(ep.CurrentState))
 	data.CreationSource = types.StringValue(ep.CreationSource)
 	data.Provisioner = types.StringValue(string(ep.Provisioner))
-	data.CreatedAt = types.StringValue(ep.CreatedAt.String())
-	data.UpdatedAt = types.StringValue(ep.UpdatedAt.String())
+	data.CreatedAt = types.StringValue(ep.CreatedAt.Format(time.RFC3339))
+	data.UpdatedAt = types.StringValue(ep.UpdatedAt.Format(time.RFC3339))
 }
 
 func mapEndpointOptionalFields(ep *neon.Endpoint, data *endpointResourceModel) {
+	// The API may omit name in the response (e.g. on update). If data
+	// already carries a known value (e.g. from the plan, via
+	// UseStateForUnknown), keep it instead of overwriting it with null,
+	// which would otherwise create a mismatch between the planned value
+	// and the applied state. Only fall back to null when the incoming
+	// value is unknown (e.g. brand new create with no config value).
 	if v, ok := ep.Name.Get(); ok {
 		data.Name = types.StringValue(v)
-	} else {
+	} else if data.Name.IsUnknown() {
 		data.Name = types.StringNull()
 	}
 
 	if ep.LastActive.IsSet() {
-		data.LastActive = types.StringValue(ep.LastActive.Value.String())
+		data.LastActive = types.StringValue(ep.LastActive.Value.Format(time.RFC3339))
 	} else {
 		data.LastActive = types.StringNull()
 	}
@@ -629,13 +637,13 @@ func mapEndpointOptionalFields(ep *neon.Endpoint, data *endpointResourceModel) {
 	}
 
 	if ep.StartedAt.IsSet() {
-		data.StartedAt = types.StringValue(ep.StartedAt.Value.String())
+		data.StartedAt = types.StringValue(ep.StartedAt.Value.Format(time.RFC3339))
 	} else {
 		data.StartedAt = types.StringNull()
 	}
 
 	if ep.SuspendedAt.IsSet() {
-		data.SuspendedAt = types.StringValue(ep.SuspendedAt.Value.String())
+		data.SuspendedAt = types.StringValue(ep.SuspendedAt.Value.Format(time.RFC3339))
 	} else {
 		data.SuspendedAt = types.StringNull()
 	}

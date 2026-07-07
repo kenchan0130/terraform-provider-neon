@@ -115,7 +115,7 @@ func (r *branchDataAPIResource) Create(ctx context.Context, req resource.CreateR
 		DatabaseName: data.DatabaseName.ValueString(),
 	}
 
-	_, err := r.client.CreateProjectBranchDataAPI(ctx, neon.OptDataAPICreateRequest{}, params)
+	createResult, err := r.client.CreateProjectBranchDataAPI(ctx, neon.OptDataAPICreateRequest{}, params)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create branch data API", err.Error())
 		return
@@ -128,6 +128,12 @@ func (r *branchDataAPIResource) Create(ctx context.Context, req resource.CreateR
 		DatabaseName: data.DatabaseName.ValueString(),
 	})
 	if err != nil {
+		// The Data API was created successfully but the read-back failed.
+		// Persist what we know from the create response so the resource is
+		// tracked in state (tainted) instead of becoming an orphan.
+		data.URL = types.StringValue(formatURL(createResult.URL))
+		data.Status = types.StringNull()
+		resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 		resp.Diagnostics.AddError("Failed to read branch data API after create", err.Error())
 		return
 	}

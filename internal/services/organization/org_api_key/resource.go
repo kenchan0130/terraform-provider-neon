@@ -3,6 +3,7 @@ package org_api_key
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -11,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 var (
@@ -132,7 +134,7 @@ func (r *organizationApiKeyResource) Create(ctx context.Context, req resource.Cr
 	data.ID = types.Int64Value(result.ID)
 	data.Name = types.StringValue(result.Name)
 	data.Key = types.StringValue(result.Key)
-	data.CreatedAt = types.StringValue(result.CreatedAt.String())
+	data.CreatedAt = types.StringValue(result.CreatedAt.Format(time.RFC3339))
 
 	if v, ok := result.ProjectID.Get(); ok {
 		data.ProjectID = types.StringValue(v)
@@ -152,6 +154,10 @@ func (r *organizationApiKeyResource) Read(ctx context.Context, req resource.Read
 		OrgID: data.OrgID.ValueString(),
 	})
 	if err != nil {
+		if neonerror.IsNotFound(err) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError("Failed to list organization API keys", err.Error())
 		return
 	}
@@ -159,7 +165,7 @@ func (r *organizationApiKeyResource) Read(ctx context.Context, req resource.Read
 	for i := range items {
 		if items[i].ID == data.ID.ValueInt64() {
 			data.Name = types.StringValue(items[i].Name)
-			data.CreatedAt = types.StringValue(items[i].CreatedAt.String())
+			data.CreatedAt = types.StringValue(items[i].CreatedAt.Format(time.RFC3339))
 			if v, ok := items[i].ProjectID.Get(); ok {
 				data.ProjectID = types.StringValue(v)
 			}
@@ -190,6 +196,9 @@ func (r *organizationApiKeyResource) Delete(ctx context.Context, req resource.De
 		OrgID: data.OrgID.ValueString(),
 	})
 	if err != nil {
+		if neonerror.IsNotFound(err) {
+			return
+		}
 		resp.Diagnostics.AddError("Failed to revoke organization API key", err.Error())
 		return
 	}

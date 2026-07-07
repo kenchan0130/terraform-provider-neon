@@ -3,6 +3,7 @@ package project
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -22,6 +23,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
+	"github.com/kenchan0130/terraform-provider-neon/internal/planmodifiers"
 )
 
 var (
@@ -196,10 +198,11 @@ func projectSchemaAttributes() map[string]schema.Attribute {
 			},
 		},
 		"store_passwords": schema.BoolAttribute{
-			Description: "Whether passwords are stored for roles in the project.",
+			Description: "Whether passwords are stored for roles in the project. Cannot be changed after creation.",
 			Optional:    true,
 			Computed:    true,
 			PlanModifiers: []planmodifier.Bool{
+				boolplanmodifier.RequiresReplace(),
 				boolplanmodifier.UseStateForUnknown(),
 			},
 		},
@@ -234,7 +237,7 @@ func projectSchemaAttributes() map[string]schema.Attribute {
 			Description: "The last update timestamp.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChange(),
 			},
 		},
 	}
@@ -680,6 +683,9 @@ func (r *projectResource) Delete(ctx context.Context, req resource.DeleteRequest
 		ProjectID: data.ID.ValueString(),
 	})
 	if err != nil {
+		if neonerror.IsNotFound(err) {
+			return
+		}
 		resp.Diagnostics.AddError("Failed to delete project", err.Error())
 		return
 	}
@@ -844,8 +850,8 @@ func mapProjectCoreFields(p *neon.Project, data *projectResourceModel) {
 	data.HistoryRetentionSeconds = types.Int32Value(p.HistoryRetentionSeconds)
 	data.StorePasswords = types.BoolValue(p.StorePasswords)
 	data.Provisioner = types.StringValue(string(p.Provisioner))
-	data.CreatedAt = types.StringValue(p.CreatedAt.String())
-	data.UpdatedAt = types.StringValue(p.UpdatedAt.String())
+	data.CreatedAt = types.StringValue(p.CreatedAt.Format(time.RFC3339))
+	data.UpdatedAt = types.StringValue(p.UpdatedAt.Format(time.RFC3339))
 
 	if p.OrgID.IsSet() {
 		data.OrgID = types.StringValue(p.OrgID.Value)

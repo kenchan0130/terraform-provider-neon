@@ -69,9 +69,9 @@ resource "neon_project_jwks" "test" {
 					testutil.CheckResourceAttr("neon_project_jwks.test", "branch_id", "br-test-001"),
 					testutil.CheckResourceAttr("neon_project_jwks.test", "jwt_audience", "neon"),
 					testutil.CheckResourceAttr("neon_project_jwks.test", "role_names.#", "3"),
-					testutil.CheckResourceAttr("neon_project_jwks.test", "role_names.0", "authenticator"),
-					testutil.CheckResourceAttr("neon_project_jwks.test", "role_names.1", "authenticated"),
-					testutil.CheckResourceAttr("neon_project_jwks.test", "role_names.2", "anonymous"),
+					resource.TestCheckTypeSetElemAttr("neon_project_jwks.test", "role_names.*", "authenticator"),
+					resource.TestCheckTypeSetElemAttr("neon_project_jwks.test", "role_names.*", "authenticated"),
+					resource.TestCheckTypeSetElemAttr("neon_project_jwks.test", "role_names.*", "anonymous"),
 				),
 			},
 		},
@@ -103,6 +103,118 @@ resource "neon_project_jwks" "test" {
 				ImportState:       true,
 				ImportStateId:     "test-project-id/jwks-test-001",
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestJWKSResource_ReadNotFoundRemovesResource(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/projects/test-project-id/jwks",
+		testutil.JSONResponder(201, `{
+			"jwks": `+jwksJSON+`,
+			"operations": []
+		}`),
+	)
+
+	getCount := 0
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id/jwks",
+		func(req *http.Request) (*http.Response, error) {
+			getCount++
+			if getCount == 1 {
+				return testutil.JSONResponder(200, `{"jwks": [`+jwksJSON+`]}`)(req)
+			}
+			return testutil.JSONResponder(404, `{"code":"not_found","message":"project not found"}`)(req)
+		},
+	)
+
+	transport.RegisterResponder(http.MethodDelete,
+		"https://neon.example.com/api/v2/projects/test-project-id/jwks/jwks-test-001",
+		testutil.JSONResponder(200, jwksJSON),
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_project_jwks" "test" {
+  project_id    = "test-project-id"
+  jwks_url      = "https://example.com/.well-known/jwks.json"
+  provider_name = "Clerk"
+  branch_id     = "br-test-001"
+  jwt_audience  = "neon"
+}
+`),
+			},
+			{
+				Config: testutil.TestConfig(`
+resource "neon_project_jwks" "test" {
+  project_id    = "test-project-id"
+  jwks_url      = "https://example.com/.well-known/jwks.json"
+  provider_name = "Clerk"
+  branch_id     = "br-test-001"
+  jwt_audience  = "neon"
+}
+`),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
+func TestJWKSResource_EmptyRoleNamesPreserved(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	emptyRoleNamesJWKSJSON := `{
+		"id": "jwks-test-002",
+		"project_id": "test-project-id",
+		"jwks_url": "https://example.com/.well-known/jwks.json",
+		"provider_name": "Clerk",
+		"role_names": [],
+		"created_at": "2025-01-01T00:00:00Z",
+		"updated_at": "2025-01-01T00:00:00Z"
+	}`
+
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/projects/test-project-id/jwks",
+		testutil.JSONResponder(201, `{
+			"jwks": `+emptyRoleNamesJWKSJSON+`,
+			"operations": []
+		}`),
+	)
+
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id/jwks",
+		testutil.JSONResponder(200, `{"jwks": [`+emptyRoleNamesJWKSJSON+`]}`),
+	)
+
+	transport.RegisterResponder(http.MethodDelete,
+		"https://neon.example.com/api/v2/projects/test-project-id/jwks/jwks-test-002",
+		testutil.JSONResponder(200, emptyRoleNamesJWKSJSON),
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_project_jwks" "test" {
+  project_id    = "test-project-id"
+  jwks_url      = "https://example.com/.well-known/jwks.json"
+  provider_name = "Clerk"
+  role_names    = []
+}
+`),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testutil.CheckResourceAttr("neon_project_jwks.test", "role_names.#", "0"),
+				),
 			},
 		},
 	})

@@ -3,6 +3,7 @@ package project_access
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -95,7 +96,7 @@ func (d *projectAccessDataSource) Read(ctx context.Context, req datasource.ReadR
 				return
 			}
 			data.GrantedToEmail = types.StringValue(perm.GrantedToEmail)
-			data.GrantedAt = types.StringValue(perm.GrantedAt.String())
+			data.GrantedAt = types.StringValue(perm.GrantedAt.Format(time.RFC3339))
 			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 			return
 		}

@@ -97,6 +97,67 @@ resource "neon_branch_data_api" "test" {
 	})
 }
 
+// TestBranchDataAPIResource_ReadBackFailureAfterCreate verifies that when the
+// Create call succeeds but the immediate read-back fails, the resource is
+// still persisted to state (as tainted) instead of becoming an orphan that
+// Terraform no longer tracks. On the next apply, Terraform should replace
+// the tainted resource and converge successfully.
+func TestBranchDataAPIResource_ReadBackFailureAfterCreate(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/projects/test-project-id/branches/br-test-001/data-api/test-db",
+		testutil.JSONResponder(201, `{"url": "https://data-api.example.com/test-db"}`),
+	)
+
+	getCallCount := 0
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id/branches/br-test-001/data-api/test-db",
+		func(req *http.Request) (*http.Response, error) {
+			getCallCount++
+			if getCallCount == 1 {
+				return testutil.JSONResponder(500, `{"message":"internal error"}`)(req)
+			}
+			return testutil.JSONResponder(200, dataAPIGetResponseJSON)(req)
+		},
+	)
+
+	transport.RegisterResponder(http.MethodDelete,
+		"https://neon.example.com/api/v2/projects/test-project-id/branches/br-test-001/data-api/test-db",
+		testutil.JSONResponder(200, `{}`),
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_branch_data_api" "test" {
+  project_id    = "test-project-id"
+  branch_id     = "br-test-001"
+  database_name = "test-db"
+}
+`),
+				ExpectError: regexp.MustCompile(`Failed to read branch data API after create`),
+			},
+			{
+				Config: testutil.TestConfig(`
+resource "neon_branch_data_api" "test" {
+  project_id    = "test-project-id"
+  branch_id     = "br-test-001"
+  database_name = "test-db"
+}
+`),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testutil.CheckResourceAttr("neon_branch_data_api.test", "url", "https://data-api.example.com/test-db"),
+					testutil.CheckResourceAttr("neon_branch_data_api.test", "status", "active"),
+				),
+			},
+		},
+	})
+}
+
 func TestBranchDataAPIResource_APIError(t *testing.T) {
 	transport := httpmock.NewMockTransport()
 	httpClient := &http.Client{Transport: transport}

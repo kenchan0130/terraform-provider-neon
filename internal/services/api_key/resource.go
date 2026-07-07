@@ -3,6 +3,7 @@ package api_key
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -109,7 +110,7 @@ func (r *apiKeyResource) Create(ctx context.Context, req resource.CreateRequest,
 	data.ID = types.Int64Value(result.ID)
 	data.Name = types.StringValue(result.Name)
 	data.Key = types.StringValue(result.Key)
-	data.CreatedAt = types.StringValue(result.CreatedAt.String())
+	data.CreatedAt = types.StringValue(result.CreatedAt.Format(time.RFC3339))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -132,7 +133,7 @@ func (r *apiKeyResource) Read(ctx context.Context, req resource.ReadRequest, res
 	for i := range items {
 		if items[i].ID == data.ID.ValueInt64() {
 			data.Name = types.StringValue(items[i].Name)
-			data.CreatedAt = types.StringValue(items[i].CreatedAt.String())
+			data.CreatedAt = types.StringValue(items[i].CreatedAt.Format(time.RFC3339))
 			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 			return
 		}

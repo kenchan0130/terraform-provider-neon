@@ -100,6 +100,48 @@ resource "neon_branch_neon_auth_trusted_domain" "test" {
 	})
 }
 
+// TestNeonAuthTrustedDomainResource_ListNotFound verifies that a 404 from the
+// list API during Read (e.g. because the parent branch/integration was
+// deleted out-of-band) removes the resource from state instead of failing
+// the refresh with an error.
+func TestNeonAuthTrustedDomainResource_ListNotFound(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	setupTrustedDomainMocks(transport)
+
+	listCalls := 0
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id/branches/br-test-001/auth/domains",
+		func(req *http.Request) (*http.Response, error) {
+			listCalls++
+			if listCalls > 1 {
+				return testutil.JSONResponder(404, `{"code":"not_found","message":"not found"}`)(req)
+			}
+			return testutil.JSONResponder(200, `{"domains": [{"domain": "https://example.com", "auth_provider": "stack"}]}`)(req)
+		},
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_branch_neon_auth_trusted_domain" "test" {
+  project_id = "test-project-id"
+  branch_id  = "br-test-001"
+  domain     = "https://example.com"
+}
+`),
+			},
+			{
+				RefreshState:       true,
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
 func TestNeonAuthTrustedDomainResource_APIError(t *testing.T) {
 	transport := httpmock.NewMockTransport()
 	httpClient := &http.Client{Transport: transport}

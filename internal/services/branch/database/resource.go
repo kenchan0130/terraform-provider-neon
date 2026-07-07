@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -14,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
+	"github.com/kenchan0130/terraform-provider-neon/internal/planmodifiers"
 )
 
 var (
@@ -91,7 +93,7 @@ func (r *databaseResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 				Description: "The last update timestamp.",
 				Computed:    true,
 				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
+					planmodifiers.UnknownOnResourceChange(),
 				},
 			},
 		},
@@ -238,6 +240,6 @@ func (r *databaseResource) mapDatabaseToModel(db *neon.Database, data *databaseR
 	data.BranchID = types.StringValue(db.BranchID)
 	data.Name = types.StringValue(db.Name)
 	data.OwnerName = types.StringValue(db.OwnerName)
-	data.CreatedAt = types.StringValue(db.CreatedAt.String())
-	data.UpdatedAt = types.StringValue(db.UpdatedAt.String())
+	data.CreatedAt = types.StringValue(db.CreatedAt.Format(time.RFC3339))
+	data.UpdatedAt = types.StringValue(db.UpdatedAt.Format(time.RFC3339))
 }

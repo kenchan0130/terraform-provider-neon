@@ -10,13 +10,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
+	"github.com/kenchan0130/terraform-provider-neon/internal/planmodifiers"
 )
 
 var (
@@ -80,14 +79,14 @@ func (r *vpcEndpointResource) Schema(_ context.Context, _ resource.SchemaRequest
 				Description: "The current state of the VPC endpoint. Possible values are `new` or `accepted`.",
 				Computed:    true,
 				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
+					planmodifiers.UnknownOnResourceChange(),
 				},
 			},
 			"num_restricted_projects": schema.Int64Attribute{
 				Description: "The number of projects that are restricted to use this VPC endpoint.",
 				Computed:    true,
 				PlanModifiers: []planmodifier.Int64{
-					int64planmodifier.UseStateForUnknown(),
+					planmodifiers.UnknownOnResourceChangeInt64(),
 				},
 			},
 			"example_restricted_projects": schema.ListAttribute{
@@ -95,7 +94,7 @@ func (r *vpcEndpointResource) Schema(_ context.Context, _ resource.SchemaRequest
 				Computed:    true,
 				ElementType: types.StringType,
 				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
+					planmodifiers.UnknownOnResourceChangeList(),
 				},
 			},
 		},

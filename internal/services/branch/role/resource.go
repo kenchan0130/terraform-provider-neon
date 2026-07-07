@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -73,7 +74,9 @@ func (r *roleResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 			"no_login": schema.BoolAttribute{
 				Description: "Whether the role has the NOLOGIN attribute.",
 				Optional:    true,
+				Computed:    true,
 				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
 					boolplanmodifier.RequiresReplace(),
 				},
 			},
@@ -233,10 +236,12 @@ func (r *roleResource) mapRoleToModel(role *neon.Role, data *roleResourceModel) 
 
 	if role.AuthenticationMethod.IsSet() {
 		data.AuthenticationMethod = types.StringValue(role.AuthenticationMethod.Value)
+		data.NoLogin = types.BoolValue(role.AuthenticationMethod.Value == "no_login")
 	} else {
 		data.AuthenticationMethod = types.StringNull()
+		data.NoLogin = types.BoolNull()
 	}
 
-	data.CreatedAt = types.StringValue(role.CreatedAt.String())
-	data.UpdatedAt = types.StringValue(role.UpdatedAt.String())
+	data.CreatedAt = types.StringValue(role.CreatedAt.Format(time.RFC3339))
+	data.UpdatedAt = types.StringValue(role.UpdatedAt.Format(time.RFC3339))
 }

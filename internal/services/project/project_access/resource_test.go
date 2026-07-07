@@ -137,6 +137,75 @@ resource "neon_project_access" "test" {
 	})
 }
 
+func TestProjectAccessResource_ReadParentProjectDeleted(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	callCount := 0
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/projects/proj-001/permissions",
+		testutil.JSONResponder(200, `{
+			"id": "perm-001",
+			"granted_to_email": "user@example.com",
+			"granted_at": "2025-01-01T00:00:00Z"
+		}`),
+	)
+
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/proj-001/permissions",
+		func(req *http.Request) (*http.Response, error) {
+			callCount++
+			if callCount <= 1 {
+				return testutil.JSONResponder(200, `{
+					"project_permissions": [{
+						"id": "perm-001",
+						"granted_to_email": "user@example.com",
+						"granted_at": "2025-01-01T00:00:00Z"
+					}]
+				}`)(req)
+			}
+			// The parent project was deleted outside of Terraform.
+			return testutil.JSONResponder(404, `{
+				"code": "not_found",
+				"message": "project not found"
+			}`)(req)
+		},
+	)
+
+	transport.RegisterResponder(http.MethodDelete,
+		"https://neon.example.com/api/v2/projects/proj-001/permissions/perm-001",
+		testutil.JSONResponder(200, `{
+			"id": "perm-001",
+			"granted_to_email": "user@example.com",
+			"granted_at": "2025-01-01T00:00:00Z",
+			"revoked_at": "2025-01-02T00:00:00Z"
+		}`),
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_project_access" "test" {
+  project_id       = "proj-001"
+  granted_to_email = "user@example.com"
+}
+`),
+			},
+			{
+				Config: testutil.TestConfig(`
+resource "neon_project_access" "test" {
+  project_id       = "proj-001"
+  granted_to_email = "user@example.com"
+}
+`),
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
 func TestProjectAccessResource_APIError(t *testing.T) {
 	transport := httpmock.NewMockTransport()
 	httpClient := &http.Client{Transport: transport}

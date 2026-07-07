@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -12,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 var (
@@ -111,7 +113,7 @@ func (r *projectAccessResource) Create(ctx context.Context, req resource.CreateR
 
 	data.PermissionID = types.StringValue(result.ID)
 	data.GrantedToEmail = types.StringValue(result.GrantedToEmail)
-	data.GrantedAt = types.StringValue(result.GrantedAt.String())
+	data.GrantedAt = types.StringValue(result.GrantedAt.Format(time.RFC3339))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -127,6 +129,10 @@ func (r *projectAccessResource) Read(ctx context.Context, req resource.ReadReque
 		ProjectID: data.ProjectID.ValueString(),
 	})
 	if err != nil {
+		if neonerror.IsNotFound(err) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError("Failed to list project permissions", err.Error())
 		return
 	}
@@ -138,7 +144,7 @@ func (r *projectAccessResource) Read(ctx context.Context, req resource.ReadReque
 				return
 			}
 			data.GrantedToEmail = types.StringValue(perm.GrantedToEmail)
-			data.GrantedAt = types.StringValue(perm.GrantedAt.String())
+			data.GrantedAt = types.StringValue(perm.GrantedAt.Format(time.RFC3339))
 			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 			return
 		}

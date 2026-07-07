@@ -35,7 +35,7 @@ resource "neon_project_jwks" "example" {
 
 - `branch_id` (String) The branch ID on which the JWKS URL will be accepted. If not specified, the JWKS URL will be accepted on all branches.
 - `jwt_audience` (String) The name of the required JWT Audience to be used.
-- `role_names` (List of String) The roles the JWKS should be mapped to. By default, the JWKS is mapped to the authenticator, authenticated and anonymous roles.
+- `role_names` (Set of String) The roles the JWKS should be mapped to. By default, the JWKS is mapped to the authenticator, authenticated and anonymous roles.
 
 ### Read-Only
 
