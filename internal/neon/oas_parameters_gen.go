@@ -759,8 +759,7 @@ func decodeAddProjectJWKSParams(args [1]string, argsEscaped bool, r *http.Reques
 type AssignOrganizationVPCEndpointParams struct {
 	// The Neon organization ID.
 	OrgID string
-	// The Neon region ID.
-	// Azure regions are currently not supported.
+	// The Neon region ID. Azure regions are currently not supported.
 	RegionID string
 	// The VPC endpoint ID.
 	VpcEndpointID string
@@ -3155,16 +3154,16 @@ func decodeCreateProjectTransferRequestParams(args [1]string, argsEscaped bool, 
 
 // CreateSnapshotParams is parameters of createSnapshot operation.
 type CreateSnapshotParams struct {
-	// The target Log Sequence Number (LSN) to take the snapshot from.
-	// Must fall within the restore window. Cannot be used with `timestamp`.
+	// The target Log Sequence Number (LSN) to take the snapshot from. Must fall within the restore window.
+	// Cannot be used with `timestamp`.
 	Lsn OptString `json:",omitempty,omitzero"`
-	// The target timestamp for the snapshot. Must fall within the restore window.
-	// Use ISO 8601 format (e.g. 2025-08-05T22:00:00Z). Cannot be used with `lsn`.
+	// The target timestamp for the snapshot. Must fall within the restore window. Use ISO 8601 format
+	// (e.g. 2025-08-05T22:00:00Z). Cannot be used with `lsn`.
 	Timestamp OptString `json:",omitempty,omitzero"`
 	// A name for the snapshot.
 	Name OptString `json:",omitempty,omitzero"`
-	// The time at which the snapshot will be automatically deleted.
-	// Use ISO 8601 format (e.g. 2025-08-05T22:00:00Z).
+	// The time at which the snapshot will be automatically deleted. Use ISO 8601 format (e.g.
+	// 2025-08-05T22:00:00Z).
 	ExpiresAt OptString `json:",omitempty,omitzero"`
 	// The Neon project ID.
 	ProjectID string
@@ -4733,8 +4732,7 @@ func decodeDeleteOrganizationSpendingLimitParams(args [1]string, argsEscaped boo
 type DeleteOrganizationVPCEndpointParams struct {
 	// The Neon organization ID.
 	OrgID string
-	// The Neon region ID.
-	// Azure regions are currently not supported.
+	// The Neon region ID. Azure regions are currently not supported.
 	RegionID string
 	// The VPC endpoint ID.
 	VpcEndpointID string
@@ -5012,10 +5010,11 @@ func decodeDeleteProjectParams(args [1]string, argsEscaped bool, r *http.Request
 
 // DeleteProjectBranchParams is parameters of deleteProjectBranch operation.
 type DeleteProjectBranchParams struct {
-	// If true, the branch is permanently deleted immediately without a recovery window.
-	// If false (default), the branch can be recovered within 7 days via the recover endpoint.
-	// This parameter is part of the Branch Recovery feature, which is in preview and not available to
-	// all users.
+	// If true, the branch is permanently deleted immediately without a recovery window. If false
+	// (default), the branch can be recovered within 7 days via the recover endpoint.
+	//
+	// This parameter is part of the Branch Recovery feature, which is in preview and not available to all
+	// users.
 	HardDelete OptBool `json:",omitempty,omitzero"`
 	// The Neon project ID.
 	ProjectID string
@@ -5473,8 +5472,8 @@ type DeleteProjectBranchBucketObjectParams struct {
 	BranchID string
 	// The bucket name.
 	BucketName string
-	// The object key. Keys may contain `/`; the `/` characters of nested
-	// keys must be percent-encoded (`%2F`) in the path segment.
+	// The object key. Keys may contain `/`; the `/` characters of nested keys must be percent-encoded
+	// (`%2F`) in the path segment.
 	ObjectKey string
 }
 
@@ -5776,9 +5775,8 @@ func decodeDeleteProjectBranchBucketObjectParams(args [4]string, argsEscaped boo
 
 // DeleteProjectBranchBucketObjectsByPrefixParams is parameters of deleteProjectBranchBucketObjectsByPrefix operation.
 type DeleteProjectBranchBucketObjectsByPrefixParams struct {
-	// The key prefix (folder) to delete. Must be non-empty and end with
-	// `/`. Every object on this branch whose key starts with this prefix
-	// is soft-deleted.
+	// The key prefix (folder) to delete. Must be non-empty and end with `/`. Every object on this branch
+	// whose key starts with this prefix is soft-deleted.
 	Prefix string
 	// The Neon project ID.
 	ProjectID string
@@ -7874,8 +7872,8 @@ func decodeFinalizeRestoreBranchParams(args [2]string, argsEscaped bool, r *http
 
 // GetActiveRegionsParams is parameters of getActiveRegions operation.
 type GetActiveRegionsParams struct {
-	// Organization ID. When provided, returns only regions available to this organization.
-	// Recommended for accurate region availability.
+	// Organization ID. When provided, returns only regions available to this organization. Recommended for
+	// accurate region availability.
 	OrgID OptString `json:",omitempty,omitzero"`
 }
 
@@ -8601,60 +8599,68 @@ func decodeGetConnectionURIParams(args [1]string, argsEscaped bool, r *http.Requ
 
 // GetConsumptionHistoryPerBranchV2Params is parameters of getConsumptionHistoryPerBranchV2 operation.
 type GetConsumptionHistoryPerBranchV2Params struct {
-	// Cursor from the previous response (`pagination.cursor`). Pass it to fetch the next page
-	// of branches. Pages are ordered by project ID, then branch ID.
+	// Cursor from the previous response (`pagination.cursor`). Pass it to fetch the next page of branches.
+	// Pages are ordered by project ID, then branch ID.
 	Cursor OptString `json:",omitempty,omitzero"`
 	// Maximum number of branches per page. Allowed range: 1 to 1000. Default: 100.
 	Limit OptInt `json:",omitempty,omitzero"`
 	// Project IDs to include (required, 1 to 100). Returns metrics for branches in these projects.
+	//
 	// Pass multiple IDs as repeated query parameters or a comma-separated list:
-	// - `project_ids=cold-poetry-09157238&project_ids=quiet-snow-71788278`
-	// - `project_ids=cold-poetry-09157238,quiet-snow-71788278`.
+	//
+	//  - `project_ids=cold-poetry-09157238&project_ids=quiet-snow-71788278`
+	//  - `project_ids=cold-poetry-09157238,quiet-snow-71788278`
 	ProjectIds []string `json:",omitempty"`
-	// Optional branch IDs to filter the response (up to 100). If omitted, all branches in the
-	// listed projects are included.
+	// Optional branch IDs to filter the response (up to 100). If omitted, all branches in the listed
+	// projects are included.
+	//
 	// Pass multiple IDs as repeated query parameters or a comma-separated list:
-	// - `branch_ids=br-aged-salad-637688&branch_ids=br-sweet-breeze-497520`
-	// - `branch_ids=br-aged-salad-637688,br-sweet-breeze-497520`.
+	//
+	//  - `branch_ids=br-aged-salad-637688&branch_ids=br-sweet-breeze-497520`
+	//  - `branch_ids=br-aged-salad-637688,br-sweet-breeze-497520`
 	BranchIds []string `json:",omitempty"`
-	// Specify the start `date-time` for the consumption period.
-	// The `date-time` value is rounded according to the specified `granularity`.
-	// For example, `2024-03-15T15:30:00Z` for `daily` granularity will be rounded to
-	// `2024-03-15T00:00:00Z`.
-	// The specified `date-time` value must respect the specified `granularity`:
-	// - For `hourly`, consumption metrics are limited to the last 168 hours.
-	// - For `daily`, consumption metrics are limited to the last 60 days.
-	// - For `monthly`, consumption metrics are limited to the last year.
-	// Branch-level metrics are returned from when the account first ingests branch-level
-	// consumption data. Periods before that time contain no branch metrics.
+	// Specify the start `date-time` for the consumption period. The `date-time` value is rounded according
+	// to the specified `granularity`. For example, `2024-03-15T15:30:00Z` for `daily` granularity will be
+	// rounded to `2024-03-15T00:00:00Z`. The specified `date-time` value must respect the specified
+	// `granularity`:
+	//
+	//  - For `hourly`, consumption metrics are limited to the last 168 hours.
+	//  - For `daily`, consumption metrics are limited to the last 60 days.
+	//  - For `monthly`, consumption metrics are limited to the last year.
+	//
+	// Branch-level metrics are returned from when the account first ingests branch-level consumption data.
+	// Periods before that time contain no branch metrics.
 	From time.Time
-	// Specify the end `date-time` for the consumption period.
-	// The `date-time` value is rounded according to the specified `granularity`.
-	// For example, `2024-03-15T15:30:00Z` for `daily` granularity will be rounded to
-	// `2024-03-15T00:00:00Z`.
-	// The specified `date-time` value must respect the specified `granularity`:
-	// - For `hourly`, consumption metrics are limited to the last 168 hours.
-	// - For `daily`, consumption metrics are limited to the last 60 days.
-	// - For `monthly`, consumption metrics are limited to the last year.
+	// Specify the end `date-time` for the consumption period. The `date-time` value is rounded according
+	// to the specified `granularity`. For example, `2024-03-15T15:30:00Z` for `daily` granularity will be
+	// rounded to `2024-03-15T00:00:00Z`. The specified `date-time` value must respect the specified
+	// `granularity`:
+	//
+	//  - For `hourly`, consumption metrics are limited to the last 168 hours.
+	//  - For `daily`, consumption metrics are limited to the last 60 days.
+	//  - For `monthly`, consumption metrics are limited to the last year.
 	To time.Time
-	// Specify the granularity of consumption metrics.
-	// Hourly, daily, and monthly metrics are available for the last 168 hours, 60 days,
-	// and 1 year, respectively.
+	// Specify the granularity of consumption metrics. Hourly, daily, and monthly metrics are available for
+	// the last 168 hours, 60 days, and 1 year, respectively.
 	Granularity ConsumptionHistoryGranularity
 	// Organization ID. Metrics are returned for projects in this organization.
 	OrgID string
 	// Required. List the metrics to return. Only these values are supported:
-	// - `compute_unit_seconds`
-	// - `root_branch_bytes_month`
-	// - `child_branch_bytes_month`
-	// - `instant_restore_bytes_month`
-	// - `public_network_transfer_bytes`
-	// - `private_network_transfer_bytes`
-	// Not supported on this endpoint: `extra_branches_month`, `snapshot_storage_bytes_month`.
-	// Use `GET /consumption_history/v2/projects` for those.
+	//
+	//  - `compute_unit_seconds`
+	//  - `root_branch_bytes_month`
+	//  - `child_branch_bytes_month`
+	//  - `instant_restore_bytes_month`
+	//  - `public_network_transfer_bytes`
+	//  - `private_network_transfer_bytes`
+	//
+	// Not supported on this endpoint: `extra_branches_month`, `snapshot_storage_bytes_month`. Use
+	// `GET /consumption_history/v2/projects` for those.
+	//
 	// Pass multiple values as repeated query parameters or a comma-separated list:
-	// - `metrics=compute_unit_seconds&metrics=public_network_transfer_bytes`
-	// - `metrics=compute_unit_seconds,public_network_transfer_bytes`.
+	//
+	//  - `metrics=compute_unit_seconds&metrics=public_network_transfer_bytes`
+	//  - `metrics=compute_unit_seconds,public_network_transfer_bytes`
 	Metrics ConsumptionHistoryQueryMetrics
 }
 
@@ -8855,6 +8861,7 @@ func decodeGetConsumptionHistoryPerBranchV2Params(args [0]string, argsEscaped bo
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.ProjectIds = nil
 				return d.DecodeArray(func(d uri.Decoder) error {
 					var paramsDotProjectIdsVal string
 					if err := func() error {
@@ -8945,6 +8952,7 @@ func decodeGetConsumptionHistoryPerBranchV2Params(args [0]string, argsEscaped bo
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.BranchIds = nil
 				return d.DecodeArray(func(d uri.Decoder) error {
 					var paramsDotBranchIdsVal string
 					if err := func() error {
@@ -9207,6 +9215,7 @@ func decodeGetConsumptionHistoryPerBranchV2Params(args [0]string, argsEscaped bo
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
 				var paramsDotMetricsVal []string
 				if err := func() error {
+					paramsDotMetricsVal = nil
 					return d.DecodeArray(func(d uri.Decoder) error {
 						var paramsDotMetricsValVal string
 						if err := func() error {
@@ -9256,64 +9265,66 @@ type GetConsumptionHistoryPerProjectParams struct {
 	Cursor OptString `json:",omitempty,omitzero"`
 	// Specify a value from 1 to 100 to limit number of projects in the response.
 	Limit OptInt `json:",omitempty,omitzero"`
-	// Specify a list of project IDs to filter the response.
-	// If omitted, the response will contain all projects.
-	// A list of project IDs can be specified as an array of parameter values or as a comma-separated
-	// list in a single parameter value.
-	// - As an array of parameter values:
-	// `project_ids=cold-poetry-09157238%20&project_ids=quiet-snow-71788278`
-	// - As a comma-separated list in a single parameter value: `project_ids=cold-poetry-09157238,
-	// quiet-snow-71788278`.
+	// Specify a list of project IDs to filter the response. If omitted, the response will contain all
+	// projects. A list of project IDs can be specified as an array of parameter values or as a
+	// comma-separated list in a single parameter value.
+	//
+	//  - As an array of parameter values:
+	//    `project_ids=cold-poetry-09157238%20&project_ids=quiet-snow-71788278`
+	//  - As a comma-separated list in a single parameter value:
+	//    `project_ids=cold-poetry-09157238,quiet-snow-71788278`
 	ProjectIds []string `json:",omitempty"`
-	// Specify the start `date-time` for the consumption period.
-	// The `date-time` value is rounded according to the specified `granularity`.
-	// For example, `2024-03-15T15:30:00Z` for `daily` granularity will be rounded to
-	// `2024-03-15T00:00:00Z`.
-	// The specified `date-time` value must respect the specified `granularity`:
-	// - For `hourly`, consumption metrics are limited to the last 168 hours.
-	// - For `daily`, consumption metrics are limited to the last 60 days.
-	// - For `monthly`, consumption metrics are limited to the last year.
+	// Specify the start `date-time` for the consumption period. The `date-time` value is rounded according
+	// to the specified `granularity`. For example, `2024-03-15T15:30:00Z` for `daily` granularity will be
+	// rounded to `2024-03-15T00:00:00Z`. The specified `date-time` value must respect the specified
+	// `granularity`:
+	//
+	//  - For `hourly`, consumption metrics are limited to the last 168 hours.
+	//  - For `daily`, consumption metrics are limited to the last 60 days.
+	//  - For `monthly`, consumption metrics are limited to the last year.
+	//
 	// The consumption history is available starting from `March 1, 2024, at 00:00:00 UTC`.
 	From time.Time
-	// Specify the end `date-time` for the consumption period.
-	// The `date-time` value is rounded according to the specified granularity.
-	// For example, `2024-03-15T15:30:00Z` for `daily` granularity will be rounded to
-	// `2024-03-15T00:00:00Z`.
-	// The specified `date-time` value must respect the specified `granularity`:
-	// - For `hourly`, consumption metrics are limited to the last 168 hours.
-	// - For `daily`, consumption metrics are limited to the last 60 days.
-	// - For `monthly`, consumption metrics are limited to the last year.
+	// Specify the end `date-time` for the consumption period. The `date-time` value is rounded according
+	// to the specified granularity. For example, `2024-03-15T15:30:00Z` for `daily` granularity will be
+	// rounded to `2024-03-15T00:00:00Z`. The specified `date-time` value must respect the specified
+	// `granularity`:
+	//
+	//  - For `hourly`, consumption metrics are limited to the last 168 hours.
+	//  - For `daily`, consumption metrics are limited to the last 60 days.
+	//  - For `monthly`, consumption metrics are limited to the last year.
 	To time.Time
-	// Specify the granularity of consumption metrics.
-	// Hourly, daily, and monthly metrics are available for the last 168 hours, 60 days,
-	// and 1 year, respectively.
+	// Specify the granularity of consumption metrics. Hourly, daily, and monthly metrics are available for
+	// the last 168 hours, 60 days, and 1 year, respectively.
 	Granularity ConsumptionHistoryGranularity
-	// Specify the organization for which the project consumption metrics should be returned.
-	// If this parameter is not provided, the endpoint will return the metrics for the
-	// authenticated user's projects.
+	// Specify the organization for which the project consumption metrics should be returned. If this
+	// parameter is not provided, the endpoint will return the metrics for the authenticated user's
+	// projects.
 	OrgID OptString `json:",omitempty,omitzero"`
-	// The field is deprecated. Please use `metrics` instead.
-	// If `metrics` is specified, this field is ignored.
-	// Include metrics utilized in previous pricing models.
-	// - **data_storage_bytes_hour**: The sum of the maximum observed storage values for each hour,
-	// which never decreases.
+	// The field is deprecated. Please use `metrics` instead. If `metrics` is specified, this field is
+	// ignored. Include metrics utilized in previous pricing models.
+	//
+	//  - data_storage_bytes_hour: The sum of the maximum observed storage values for each hour, which
+	//    never decreases.
 	//
 	// Deprecated: schema marks this parameter as deprecated.
 	IncludeV1Metrics OptBool `json:",omitempty,omitzero"`
-	// Specify a list of metrics to include in the response.
-	// If omitted, active_time, compute_time, written_data, synthetic_storage_size are returned.
-	// Possible values:
-	// - `active_time_seconds`
-	// - `compute_time_seconds`
-	// - `written_data_bytes`
-	// - `synthetic_storage_size_bytes`
-	// - `data_storage_bytes_hour`
-	// - `logical_size_bytes`
-	// - `logical_size_bytes_hour`
-	// A list of metrics can be specified as an array of parameter values or as a comma-separated list in
-	// a single parameter value.
-	// - As an array of parameter values: `metrics=cpu_seconds&metrics=ram_bytes`
-	// - As a comma-separated list in a single parameter value: `metrics=cpu_seconds,ram_bytes`.
+	// Specify a list of metrics to include in the response. If omitted, active_time, compute_time,
+	// written_data, synthetic_storage_size are returned. Possible values:
+	//
+	//  - `active_time_seconds`
+	//  - `compute_time_seconds`
+	//  - `written_data_bytes`
+	//  - `synthetic_storage_size_bytes`
+	//  - `data_storage_bytes_hour`
+	//  - `logical_size_bytes`
+	//  - `logical_size_bytes_hour`
+	//
+	// A list of metrics can be specified as an array of parameter values or as a comma-separated list in a
+	// single parameter value.
+	//
+	//  - As an array of parameter values: `metrics=cpu_seconds&metrics=ram_bytes`
+	//  - As a comma-separated list in a single parameter value: `metrics=cpu_seconds,ram_bytes`
 	Metrics ConsumptionHistoryQueryMetrics
 }
 
@@ -9520,6 +9531,7 @@ func decodeGetConsumptionHistoryPerProjectParams(args [0]string, argsEscaped boo
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.ProjectIds = nil
 				return d.DecodeArray(func(d uri.Decoder) error {
 					var paramsDotProjectIdsVal string
 					if err := func() error {
@@ -9835,6 +9847,7 @@ func decodeGetConsumptionHistoryPerProjectParams(args [0]string, argsEscaped boo
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
 				var paramsDotMetricsVal []string
 				if err := func() error {
+					paramsDotMetricsVal = nil
 					return d.DecodeArray(func(d uri.Decoder) error {
 						var paramsDotMetricsValVal string
 						if err := func() error {
@@ -9878,56 +9891,60 @@ func decodeGetConsumptionHistoryPerProjectParams(args [0]string, argsEscaped boo
 
 // GetConsumptionHistoryPerProjectV2Params is parameters of getConsumptionHistoryPerProjectV2 operation.
 type GetConsumptionHistoryPerProjectV2Params struct {
-	// Cursor from the previous response (`pagination.cursor`). Pass it to fetch the next page
-	// of projects. Pages are ordered by project creation order (newest first).
+	// Cursor from the previous response (`pagination.cursor`). Pass it to fetch the next page of projects.
+	// Pages are ordered by project creation order (newest first).
 	Cursor OptString `json:",omitempty,omitzero"`
 	// Maximum number of projects per page. Allowed range: 1 to 100. Default: 10.
 	Limit OptInt `json:",omitempty,omitzero"`
-	// Optional project IDs to filter the response (up to 100). If omitted, projects in the
-	// organization are included across pages (use `cursor` and `limit`).
+	// Optional project IDs to filter the response (up to 100). If omitted, projects in the organization
+	// are included across pages (use `cursor` and `limit`).
+	//
 	// Pass multiple IDs as repeated query parameters or a comma-separated list:
-	// - `project_ids=cold-poetry-09157238&project_ids=quiet-snow-71788278`
-	// - `project_ids=cold-poetry-09157238,quiet-snow-71788278`.
+	//
+	//  - `project_ids=cold-poetry-09157238&project_ids=quiet-snow-71788278`
+	//  - `project_ids=cold-poetry-09157238,quiet-snow-71788278`
 	ProjectIds []string `json:",omitempty"`
-	// Specify the start `date-time` for the consumption period.
-	// The `date-time` value is rounded according to the specified `granularity`.
-	// For example, `2024-03-15T15:30:00Z` for `daily` granularity will be rounded to
-	// `2024-03-15T00:00:00Z`.
-	// The specified `date-time` value must respect the specified `granularity`:
-	// - For `hourly`, consumption metrics are limited to the last 168 hours.
-	// - For `daily`, consumption metrics are limited to the last 60 days.
-	// - For `monthly`, consumption metrics are limited to the last year.
-	// The earliest allowed `from` value is `March 1, 2024, at 00:00:00 UTC`.
-	// Metrics are returned from when the account upgraded to an eligible plan, which may be
-	// later than that date.
+	// Specify the start `date-time` for the consumption period. The `date-time` value is rounded according
+	// to the specified `granularity`. For example, `2024-03-15T15:30:00Z` for `daily` granularity will be
+	// rounded to `2024-03-15T00:00:00Z`. The specified `date-time` value must respect the specified
+	// `granularity`:
+	//
+	//  - For `hourly`, consumption metrics are limited to the last 168 hours.
+	//  - For `daily`, consumption metrics are limited to the last 60 days.
+	//  - For `monthly`, consumption metrics are limited to the last year.
+	//
+	// The earliest allowed `from` value is `March 1, 2024, at 00:00:00 UTC`. Metrics are returned from
+	// when the account upgraded to an eligible plan, which may be later than that date.
 	From time.Time
-	// Specify the end `date-time` for the consumption period.
-	// The `date-time` value is rounded according to the specified `granularity`.
-	// For example, `2024-03-15T15:30:00Z` for `daily` granularity will be rounded to
-	// `2024-03-15T00:00:00Z`.
-	// The specified `date-time` value must respect the specified `granularity`:
-	// - For `hourly`, consumption metrics are limited to the last 168 hours.
-	// - For `daily`, consumption metrics are limited to the last 60 days.
-	// - For `monthly`, consumption metrics are limited to the last year.
+	// Specify the end `date-time` for the consumption period. The `date-time` value is rounded according
+	// to the specified `granularity`. For example, `2024-03-15T15:30:00Z` for `daily` granularity will be
+	// rounded to `2024-03-15T00:00:00Z`. The specified `date-time` value must respect the specified
+	// `granularity`:
+	//
+	//  - For `hourly`, consumption metrics are limited to the last 168 hours.
+	//  - For `daily`, consumption metrics are limited to the last 60 days.
+	//  - For `monthly`, consumption metrics are limited to the last year.
 	To time.Time
-	// Specify the granularity of consumption metrics.
-	// Hourly, daily, and monthly metrics are available for the last 168 hours, 60 days,
-	// and 1 year, respectively.
+	// Specify the granularity of consumption metrics. Hourly, daily, and monthly metrics are available for
+	// the last 168 hours, 60 days, and 1 year, respectively.
 	Granularity ConsumptionHistoryGranularity
 	// Organization ID. Metrics are returned for projects in this organization.
 	OrgID string
 	// Required. List the metrics to return. Supported values:
-	// - `compute_unit_seconds`
-	// - `root_branch_bytes_month`
-	// - `child_branch_bytes_month`
-	// - `instant_restore_bytes_month`
-	// - `public_network_transfer_bytes`
-	// - `private_network_transfer_bytes`
-	// - `extra_branches_month`
-	// - `snapshot_storage_bytes_month`
+	//
+	//  - `compute_unit_seconds`
+	//  - `root_branch_bytes_month`
+	//  - `child_branch_bytes_month`
+	//  - `instant_restore_bytes_month`
+	//  - `public_network_transfer_bytes`
+	//  - `private_network_transfer_bytes`
+	//  - `extra_branches_month`
+	//  - `snapshot_storage_bytes_month`
+	//
 	// Pass multiple values as repeated query parameters or a comma-separated list:
-	// - `metrics=compute_unit_seconds&metrics=extra_branches_month`
-	// - `metrics=compute_unit_seconds,extra_branches_month`.
+	//
+	//  - `metrics=compute_unit_seconds&metrics=extra_branches_month`
+	//  - `metrics=compute_unit_seconds,extra_branches_month`
 	Metrics ConsumptionHistoryQueryMetrics
 }
 
@@ -10121,6 +10138,7 @@ func decodeGetConsumptionHistoryPerProjectV2Params(args [0]string, argsEscaped b
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.ProjectIds = nil
 				return d.DecodeArray(func(d uri.Decoder) error {
 					var paramsDotProjectIdsVal string
 					if err := func() error {
@@ -10383,6 +10401,7 @@ func decodeGetConsumptionHistoryPerProjectV2Params(args [0]string, argsEscaped b
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
 				var paramsDotMetricsVal []string
 				if err := func() error {
+					paramsDotMetricsVal = nil
 					return d.DecodeArray(func(d uri.Decoder) error {
 						var paramsDotMetricsValVal string
 						if err := func() error {
@@ -12108,8 +12127,8 @@ func decodeGetOrganizationMemberParams(args [2]string, argsEscaped bool, r *http
 type GetOrganizationMembersParams struct {
 	// Sort the members by the specified field. Defaults to `joined_at`.
 	SortBy OptGetOrganizationMembersSortBy `json:",omitempty,omitzero"`
-	// A cursor to use in pagination. A cursor defines your place in the data list. Include `response.
-	// pagination.next` in subsequent API calls to fetch next page of the list.
+	// A cursor to use in pagination. A cursor defines your place in the data list. Include
+	// `response.pagination.next` in subsequent API calls to fetch next page of the list.
 	Cursor OptString `json:",omitempty,omitzero"`
 	// Defines the sorting order of entities.
 	SortOrder OptSortOrderParam `json:",omitempty,omitzero"`
@@ -12555,8 +12574,7 @@ func decodeGetOrganizationSpendingLimitParams(args [1]string, argsEscaped bool, 
 type GetOrganizationVPCEndpointDetailsParams struct {
 	// The Neon organization ID.
 	OrgID string
-	// The Neon region ID.
-	// Azure regions are currently not supported.
+	// The Neon region ID. Azure regions are currently not supported.
 	RegionID string
 	// The VPC endpoint ID.
 	VpcEndpointID string
@@ -13512,8 +13530,8 @@ type GetProjectBranchBucketObjectParams struct {
 	BranchID string
 	// The bucket name.
 	BucketName string
-	// The object key. Keys may contain `/`; the `/` characters of nested
-	// keys must be percent-encoded (`%2F`) in the path segment.
+	// The object key. Keys may contain `/`; the `/` characters of nested keys must be percent-encoded
+	// (`%2F`) in the path segment.
 	ObjectKey string
 }
 
@@ -14916,8 +14934,9 @@ type GetProjectBranchSchemaParams struct {
 	// The point in time for which the schema is retrieved.
 	Timestamp OptDateTime `json:",omitempty,omitzero"`
 	// The format of the schema to retrieve. Possible values:
-	// - `sql` (default)
-	// - `json`.
+	//
+	//  - `sql` (default)
+	//  - `json`
 	Format OptString `json:",omitempty,omitzero"`
 }
 
@@ -17605,11 +17624,11 @@ func decodeListOrganizationVPCEndpointsAllRegionsParams(args [1]string, argsEsca
 type ListProjectBranchBucketObjectsParams struct {
 	// Only list objects whose key starts with this prefix.
 	Prefix OptString `json:",omitempty,omitzero"`
-	// Collapse keys sharing a common prefix up to the first occurrence of
-	// this delimiter (typically `/`) into the `folders` array.
+	// Collapse keys sharing a common prefix up to the first occurrence of this delimiter (typically `/`)
+	// into the `folders` array.
 	Delimiter OptString `json:",omitempty,omitzero"`
-	// Opaque pagination cursor returned as `next_cursor` by a previous
-	// call. Resume listing after the last item of the previous page.
+	// Opaque pagination cursor returned as `next_cursor` by a previous call. Resume listing after the last
+	// item of the previous page.
 	Cursor OptString `json:",omitempty,omitzero"`
 	// Maximum number of items (objects + folders) to return.
 	Limit OptInt32 `json:",omitempty,omitzero"`
@@ -18558,8 +18577,8 @@ func decodeListProjectBranchEndpointsParams(args [2]string, argsEscaped bool, r 
 
 // ListProjectBranchFunctionsParams is parameters of listProjectBranchFunctions operation.
 type ListProjectBranchFunctionsParams struct {
-	// A cursor to use in pagination. A cursor defines your place in the data list. Include `response.
-	// pagination.next` in subsequent API calls to fetch next page of the list.
+	// A cursor to use in pagination. A cursor defines your place in the data list. Include
+	// `response.pagination.next` in subsequent API calls to fetch next page of the list.
 	Cursor OptString `json:",omitempty,omitzero"`
 	// Specify a value from 1 to 1000 to limit number of functions in the response.
 	Limit OptInt `json:",omitempty,omitzero"`
@@ -19014,17 +19033,18 @@ type ListProjectBranchesParams struct {
 	// Sort the branches by sort_field. If not provided, branches will be sorted by updated_at descending
 	// order.
 	SortBy OptListProjectBranchesSortBy `json:",omitempty,omitzero"`
-	// A cursor to use in pagination. A cursor defines your place in the data list. Include `response.
-	// pagination.next` in subsequent API calls to fetch next page of the list.
+	// A cursor to use in pagination. A cursor defines your place in the data list. Include
+	// `response.pagination.next` in subsequent API calls to fetch next page of the list.
 	Cursor OptString `json:",omitempty,omitzero"`
 	// Defines the sorting order of entities.
 	SortOrder OptSortOrderParam `json:",omitempty,omitzero"`
 	// The maximum number of records to be returned in the response.
 	Limit OptInt `json:",omitempty,omitzero"`
-	// If true, return recoverable deleted branches too (soft-deleted within the recovery window).
-	// If false or not provided, return only active (non-deleted) branches.
-	// This parameter is part of the Branch Recovery feature, which is in preview and not available to
-	// all users.
+	// If true, return recoverable deleted branches too (soft-deleted within the recovery window). If false
+	// or not provided, return only active (non-deleted) branches.
+	//
+	// This parameter is part of the Branch Recovery feature, which is in preview and not available to all
+	// users.
 	IncludeDeleted OptBool `json:",omitempty,omitzero"`
 	// The Neon project ID.
 	ProjectID string
@@ -19964,12 +19984,10 @@ type ListProjectsParams struct {
 	Search OptString `json:",omitempty,omitzero"`
 	// Search for projects by `org_id`.
 	OrgID OptString `json:",omitempty,omitzero"`
-	// Specify an explicit timeout in milliseconds to limit response delay.
-	// After timing out, the incomplete list of project data fetched so far will be returned.
-	// Projects still being fetched when the timeout occurred are listed in the "unavailable" attribute
-	// of the response.
-	// If not specified, an implicit implementation defined timeout is chosen with the same behaviour as
-	// above.
+	// Specify an explicit timeout in milliseconds to limit response delay. After timing out, the
+	// incomplete list of project data fetched so far will be returned. Projects still being fetched when
+	// the timeout occurred are listed in the "unavailable" attribute of the response. If not specified, an
+	// implicit implementation defined timeout is chosen with the same behaviour as above.
 	Timeout OptInt `json:",omitempty,omitzero"`
 	// Show only deleted projects within the recovery window.
 	Recoverable OptBool `json:",omitempty,omitzero"`
@@ -20379,12 +20397,10 @@ type ListSharedProjectsParams struct {
 	Limit OptInt `json:",omitempty,omitzero"`
 	// Search query by name or id.
 	Search OptString `json:",omitempty,omitzero"`
-	// Specify an explicit timeout in milliseconds to limit response delay.
-	// After timing out, the incomplete list of project data fetched so far will be returned.
-	// Projects still being fetched when the timeout occurred are listed in the "unavailable" attribute
-	// of the response.
-	// If not specified, an implicit implementation defined timeout is chosen with the same behaviour as
-	// above.
+	// Specify an explicit timeout in milliseconds to limit response delay. After timing out, the
+	// incomplete list of project data fetched so far will be returned. Projects still being fetched when
+	// the timeout occurred are listed in the "unavailable" attribute of the response. If not specified, an
+	// implicit implementation defined timeout is chosen with the same behaviour as above.
 	Timeout OptInt `json:",omitempty,omitzero"`
 }
 
@@ -20746,8 +20762,8 @@ type PresignProjectBranchBucketObjectParams struct {
 	BranchID string
 	// The bucket name.
 	BucketName string
-	// The object key. Keys may contain `/`; the `/` characters of nested
-	// keys must be percent-encoded (`%2F`) in the path segment.
+	// The object key. Keys may contain `/`; the `/` characters of nested keys must be percent-encoded
+	// (`%2F`) in the path segment.
 	ObjectKey string
 }
 
@@ -21969,8 +21985,8 @@ func decodeRestoreProjectBranchParams(args [2]string, argsEscaped bool, r *http.
 
 // RestoreSnapshotParams is parameters of restoreSnapshot operation.
 type RestoreSnapshotParams struct {
-	// DEPRECATED. Use the `name` field in the request body instead.
-	// A name for the newly restored branch. If omitted, a default name will be generated.
+	// DEPRECATED. Use the `name` field in the request body instead. A name for the newly restored branch.
+	// If omitted, a default name will be generated.
 	//
 	// Deprecated: schema marks this parameter as deprecated.
 	Name OptString `json:",omitempty,omitzero"`

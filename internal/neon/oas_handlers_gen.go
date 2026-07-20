@@ -73,7 +73,7 @@ func (s *Server) handleAcceptProjectTransferRequestRequest(args [2]string, argsE
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -294,8 +294,8 @@ func (s *Server) handleAcceptProjectTransferRequestRequest(args [2]string, argsE
 
 // handleAddBranchNeonAuthOauthProviderRequest handles addBranchNeonAuthOauthProvider operation.
 //
-// Adds an OAuth provider configuration to the specified branch's Neon Auth integration.
-// After adding, users can authenticate using the configured provider.
+// Adds an OAuth provider configuration to the specified branch's Neon Auth integration. After adding,
+// users can authenticate using the configured provider.
 //
 // POST /projects/{project_id}/branches/{branch_id}/auth/oauth_providers
 func (s *Server) handleAddBranchNeonAuthOauthProviderRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -331,7 +331,7 @@ func (s *Server) handleAddBranchNeonAuthOauthProviderRequest(args [2]string, arg
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -552,8 +552,8 @@ func (s *Server) handleAddBranchNeonAuthOauthProviderRequest(args [2]string, arg
 
 // handleAddBranchNeonAuthTrustedDomainRequest handles addBranchNeonAuthTrustedDomain operation.
 //
-// Adds a domain to the redirect URI whitelist for the specified branch.
-// Only domains in this list are permitted as redirect targets after authentication.
+// Adds a domain to the redirect URI whitelist for the specified branch. Only domains in this list are
+// permitted as redirect targets after authentication.
 //
 // POST /projects/{project_id}/branches/{branch_id}/auth/domains
 func (s *Server) handleAddBranchNeonAuthTrustedDomainRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -589,7 +589,7 @@ func (s *Server) handleAddBranchNeonAuthTrustedDomainRequest(args [2]string, arg
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -810,8 +810,8 @@ func (s *Server) handleAddBranchNeonAuthTrustedDomainRequest(args [2]string, arg
 
 // handleAddNeonAuthDomainToRedirectURIWhitelistRequest handles addNeonAuthDomainToRedirectURIWhitelist operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Adds a domain
-// to the redirect_uri whitelist for the specified project.
+// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Adds a domain to
+// the redirect_uri whitelist for the specified project.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -849,7 +849,7 @@ func (s *Server) handleAddNeonAuthDomainToRedirectURIWhitelistRequest(args [1]st
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -1066,8 +1066,8 @@ func (s *Server) handleAddNeonAuthDomainToRedirectURIWhitelistRequest(args [1]st
 
 // handleAddNeonAuthOauthProviderRequest handles addNeonAuthOauthProvider operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead.
-// Adds an OAuth provider to the specified project.
+// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead. Adds an
+// OAuth provider to the specified project.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -1105,7 +1105,7 @@ func (s *Server) handleAddNeonAuthOauthProviderRequest(args [1]string, argsEscap
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -1323,13 +1323,18 @@ func (s *Server) handleAddNeonAuthOauthProviderRequest(args [1]string, argsEscap
 // handleAddProjectJWKSRequest handles addProjectJWKS operation.
 //
 // Adds a JWKS URL to the specified project for verifying JWTs used as the authentication mechanism.
+//
 // The URL must be a valid HTTPS URL that returns a JSON Web Key Set.
+//
 // The `provider_name` field allows you to specify which authentication provider you're using (e.g.,
 // Clerk, Auth0, AWS Cognito).
+//
 // The `branch_id` scopes the JWKS URL to specific branches; if not specified, it applies to all
 // branches.
+//
 // The `role_names` scopes the URL to specific roles; if not specified, default roles are used
 // (`authenticator`, `authenticated`, `anonymous`).
+//
 // The `jwt_audience` specifies which `aud` values are accepted in JWTs.
 //
 // POST /projects/{project_id}/jwks
@@ -1366,7 +1371,7 @@ func (s *Server) handleAddProjectJWKSRequest(args [1]string, argsEscaped bool, w
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -1619,7 +1624,7 @@ func (s *Server) handleAssignOrganizationVPCEndpointRequest(args [3]string, args
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -1844,11 +1849,9 @@ func (s *Server) handleAssignOrganizationVPCEndpointRequest(args [3]string, args
 
 // handleAssignProjectVPCEndpointRequest handles assignProjectVPCEndpoint operation.
 //
-// Sets or updates a VPC endpoint restriction for a Neon project.
-// When a VPC endpoint restriction is set, the project only accepts connections
-// from the specified VPC.
-// A VPC endpoint can be set as a restriction only after it is assigned to the
-// parent organization of the Neon project.
+// Sets or updates a VPC endpoint restriction for a Neon project. When a VPC endpoint restriction is
+// set, the project only accepts connections from the specified VPC. A VPC endpoint can be set as a
+// restriction only after it is assigned to the parent organization of the Neon project.
 //
 // POST /projects/{project_id}/vpc_endpoints/{vpc_endpoint_id}
 func (s *Server) handleAssignProjectVPCEndpointRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -1884,7 +1887,7 @@ func (s *Server) handleAssignProjectVPCEndpointRequest(args [2]string, argsEscap
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -2105,8 +2108,8 @@ func (s *Server) handleAssignProjectVPCEndpointRequest(args [2]string, argsEscap
 
 // handleCountProjectBranchesRequest handles countProjectBranches operation.
 //
-// Retrieves the total number of branches in the specified project.
-// Supports an optional `search` parameter to count branches matching a name filter.
+// Retrieves the total number of branches in the specified project. Supports an optional `search`
+// parameter to count branches matching a name filter.
 //
 // GET /projects/{project_id}/branches/count
 func (s *Server) handleCountProjectBranchesRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -2142,7 +2145,7 @@ func (s *Server) handleCountProjectBranchesRequest(args [1]string, argsEscaped b
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -2348,15 +2351,14 @@ func (s *Server) handleCountProjectBranchesRequest(args [1]string, argsEscaped b
 
 // handleCreateApiKeyRequest handles createApiKey operation.
 //
-// Creates an API key.
-// The `key_name` is a user-specified name for the key.
-// Returns an `id` and `key`; the `key` is a randomly generated, 64-bit token required to access the
-// Neon API.
-// Store the key securely — it is only returned once.
-// API keys can also be managed in the Neon Console.
-// See [Manage API keys](https://neon.com/docs/manage/api-keys/).
+// Creates an API key. The `key_name` is a user-specified name for the key. Returns an `id` and `key`;
+// the `key` is a randomly generated, 64-bit token required to access the Neon API. Store the key
+// securely — it is only returned once. API keys can also be managed in the Neon Console. See
+// [Manage API keys].
 //
 // POST /api_keys
+//
+// [Manage API keys]: https://neon.com/docs/manage/api-keys/
 func (s *Server) handleCreateApiKeyRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -2390,7 +2392,7 @@ func (s *Server) handleCreateApiKeyRequest(args [0]string, argsEscaped bool, w h
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -2592,9 +2594,9 @@ func (s *Server) handleCreateApiKeyRequest(args [0]string, argsEscaped bool, w h
 
 // handleCreateBranchNeonAuthNewUserRequest handles createBranchNeonAuthNewUser operation.
 //
-// Creates a new user in the Neon Auth user directory for the specified branch.
-// The user is created in the `neon_auth.users_sync` table and can immediately authenticate
-// using the branch's configured auth providers.
+// Creates a new user in the Neon Auth user directory for the specified branch. The user is created in
+// the `neon_auth.users_sync` table and can immediately authenticate using the branch's configured auth
+// providers.
 //
 // POST /projects/{project_id}/branches/{branch_id}/auth/users
 func (s *Server) handleCreateBranchNeonAuthNewUserRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -2630,7 +2632,7 @@ func (s *Server) handleCreateBranchNeonAuthNewUserRequest(args [2]string, argsEs
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -2851,10 +2853,10 @@ func (s *Server) handleCreateBranchNeonAuthNewUserRequest(args [2]string, argsEs
 
 // handleCreateCredentialRequest handles createCredential operation.
 //
-// Issues a new scoped service credential anchored to the specified
-// branch. The response carries `api_token` and `s3_secret_access_key`
-// exactly once — they are not stored server-side.
-// **Note**: This endpoint is currently in Private Beta.
+// Issues a new scoped service credential anchored to the specified branch. The response carries
+// `api_token` and `s3_secret_access_key` exactly once — they are not stored server-side.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/credentials
 func (s *Server) handleCreateCredentialRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -2890,7 +2892,7 @@ func (s *Server) handleCreateCredentialRequest(args [2]string, argsEscaped bool,
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -3111,9 +3113,9 @@ func (s *Server) handleCreateCredentialRequest(args [2]string, argsEscaped bool,
 
 // handleCreateNeonAuthRequest handles createNeonAuth operation.
 //
-// Enables Neon Auth for the specified branch by connecting it to an authentication provider.
-// Creating the integration provisions the `neon_auth` schema in the branch database, which stores
-// user identity data synchronized from the provider.
+// Enables Neon Auth for the specified branch by connecting it to an authentication provider. Creating
+// the integration provisions the `neon_auth` schema in the branch database, which stores user identity
+// data synchronized from the provider.
 //
 // POST /projects/{project_id}/branches/{branch_id}/auth
 func (s *Server) handleCreateNeonAuthRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -3149,7 +3151,7 @@ func (s *Server) handleCreateNeonAuthRequest(args [2]string, argsEscaped bool, w
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -3371,8 +3373,8 @@ func (s *Server) handleCreateNeonAuthRequest(args [2]string, argsEscaped bool, w
 // handleCreateNeonAuthIntegrationRequest handles createNeonAuthIntegration operation.
 //
 // DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth` instead. Creates a project on a
-// third-party authentication provider's platform for use with Neon Auth.
-// Use this endpoint if the frontend integration flow can't be used.
+// third-party authentication provider's platform for use with Neon Auth. Use this endpoint if the
+// frontend integration flow can't be used.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -3410,7 +3412,7 @@ func (s *Server) handleCreateNeonAuthIntegrationRequest(args [0]string, argsEsca
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -3612,10 +3614,9 @@ func (s *Server) handleCreateNeonAuthIntegrationRequest(args [0]string, argsEsca
 
 // handleCreateNeonAuthNewUserRequest handles createNeonAuthNewUser operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/users` instead. Creates a new
-// user in Neon Auth.
-// The user will be created in your neon_auth.users_sync table and automatically propagated to your
-// auth project, whether Neon-managed or provider-owned.
+// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/users` instead. Creates a new user
+// in Neon Auth. The user will be created in your neon_auth.users_sync table and automatically
+// propagated to your auth project, whether Neon-managed or provider-owned.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -3653,7 +3654,7 @@ func (s *Server) handleCreateNeonAuthNewUserRequest(args [0]string, argsEscaped 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -3855,9 +3856,8 @@ func (s *Server) handleCreateNeonAuthNewUserRequest(args [0]string, argsEscaped 
 
 // handleCreateNeonAuthProviderSDKKeysRequest handles createNeonAuthProviderSDKKeys operation.
 //
-// Generates SDK or API Keys for the auth provider. These might be called different things depending
-// on the auth provider you're using, but are generally used for setting up the frontend and backend
-// SDKs.
+// Generates SDK or API Keys for the auth provider. These might be called different things depending on
+// the auth provider you're using, but are generally used for setting up the frontend and backend SDKs.
 //
 // POST /projects/auth/keys
 func (s *Server) handleCreateNeonAuthProviderSDKKeysRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -3893,7 +3893,7 @@ func (s *Server) handleCreateNeonAuthProviderSDKKeysRequest(args [0]string, args
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -4095,15 +4095,14 @@ func (s *Server) handleCreateNeonAuthProviderSDKKeysRequest(args [0]string, args
 
 // handleCreateOrgApiKeyRequest handles createOrgApiKey operation.
 //
-// Creates an API key for the specified organization.
-// The `key_name` is a user-specified name for the key.
-// Returns an `id` and `key`; the `key` is a randomly generated, 64-bit token required to access the
-// Neon API.
-// Store the key securely — it is only returned once.
-// API keys can also be managed in the Neon Console.
-// See [Manage API keys](https://neon.com/docs/manage/api-keys/).
+// Creates an API key for the specified organization. The `key_name` is a user-specified name for the
+// key. Returns an `id` and `key`; the `key` is a randomly generated, 64-bit token required to access
+// the Neon API. Store the key securely — it is only returned once. API keys can also be managed in
+// the Neon Console. See [Manage API keys].
 //
 // POST /organizations/{org_id}/api_keys
+//
+// [Manage API keys]: https://neon.com/docs/manage/api-keys/
 func (s *Server) handleCreateOrgApiKeyRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -4137,7 +4136,7 @@ func (s *Server) handleCreateOrgApiKeyRequest(args [1]string, argsEscaped bool, 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -4354,11 +4353,9 @@ func (s *Server) handleCreateOrgApiKeyRequest(args [1]string, argsEscaped bool, 
 
 // handleCreateOrganizationInvitationsRequest handles createOrganizationInvitations operation.
 //
-// Creates invitations for a specific organization.
-// If the invited user has an existing account, they automatically join as a member.
-// If they don't yet have an account, they are invited to create one, after which they become a
-// member.
-// Each invited user receives an email notification.
+// Creates invitations for a specific organization. If the invited user has an existing account, they
+// automatically join as a member. If they don't yet have an account, they are invited to create one,
+// after which they become a member. Each invited user receives an email notification.
 //
 // POST /organizations/{org_id}/invitations
 func (s *Server) handleCreateOrganizationInvitationsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -4394,7 +4391,7 @@ func (s *Server) handleCreateOrganizationInvitationsRequest(args [1]string, args
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -4611,18 +4608,18 @@ func (s *Server) handleCreateOrganizationInvitationsRequest(args [1]string, args
 
 // handleCreateProjectRequest handles createProject operation.
 //
-// Creates a Neon project within an organization.
-// If using a personal API key, include the `org_id` parameter to specify which organization to
-// create the project in.
-// If using an org API key, `org_id` is automatically inferred from the key.
-// Plan limits define how many projects you can create.
-// For more information, see [Manage projects](https://neon.com/docs/manage/projects/).
-// You can specify a region and Postgres version in the request body.
-// Neon currently supports PostgreSQL 14, 15, 16, 17, and 18.
-// For supported regions and `region_id` values, see [Regions](https://neon.
-// com/docs/introduction/regions/).
+// Creates a Neon project within an organization. If using a personal API key, include the `org_id`
+// parameter to specify which organization to create the project in. If using an org API key, `org_id`
+// is automatically inferred from the key. Plan limits define how many projects you can create. For
+// more information, see [Manage projects].
+//
+// You can specify a region and Postgres version in the request body. Neon currently supports
+// PostgreSQL 14, 15, 16, 17, and 18. For supported regions and `region_id` values, see [Regions].
 //
 // POST /projects
+//
+// [Manage projects]: https://neon.com/docs/manage/projects/
+// [Regions]: https://neon.com/docs/introduction/regions/
 func (s *Server) handleCreateProjectRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -4656,7 +4653,7 @@ func (s *Server) handleCreateProjectRequest(args [0]string, argsEscaped bool, w 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -4858,16 +4855,15 @@ func (s *Server) handleCreateProjectRequest(args [0]string, argsEscaped bool, w 
 
 // handleCreateProjectBranchRequest handles createProjectBranch operation.
 //
-// Creates a branch in the specified project.
-// No request body is required, but you can specify one to create a compute endpoint or select a
-// non-default parent branch.
-// By default, the branch is created from the project's default branch with no compute endpoint, and
-// the branch name is auto-generated.
-// To access the branch, add a `read_write` endpoint.
-// Each branch supports one read-write endpoint and multiple read-only endpoints.
-// For related information, see [Manage branches](https://neon.com/docs/manage/branches/).
+// Creates a branch in the specified project. No request body is required, but you can specify one to
+// create a compute endpoint or select a non-default parent branch. By default, the branch is created
+// from the project's default branch with no compute endpoint, and the branch name is auto-generated.
+// To access the branch, add a `read_write` endpoint. Each branch supports one read-write endpoint and
+// multiple read-only endpoints. For related information, see [Manage branches].
 //
 // POST /projects/{project_id}/branches
+//
+// [Manage branches]: https://neon.com/docs/manage/branches/
 func (s *Server) handleCreateProjectBranchRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -4901,7 +4897,7 @@ func (s *Server) handleCreateProjectBranchRequest(args [1]string, argsEscaped bo
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -5118,13 +5114,13 @@ func (s *Server) handleCreateProjectBranchRequest(args [1]string, argsEscaped bo
 
 // handleCreateProjectBranchAnonymizedRequest handles createProjectBranchAnonymized operation.
 //
-// Creates a new branch with anonymized data using PostgreSQL Anonymizer for static masking.
-// This allows developers to work with masked production data.
-// Optionally, provide `masking_rules` to set initial masking rules for the branch
-// and `start_anonymization` to automatically start anonymization after creation. This
-// combines functionality of updating masking rules and starting anonymization into the
-// branch creation request.
-// **Note**: This endpoint is currently in Beta.
+// Creates a new branch with anonymized data using PostgreSQL Anonymizer for static masking. This
+// allows developers to work with masked production data. Optionally, provide `masking_rules` to set
+// initial masking rules for the branch and `start_anonymization` to automatically start anonymization
+// after creation. This combines functionality of updating masking rules and starting anonymization
+// into the branch creation request.
+//
+// Note: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/branch_anonymized
 func (s *Server) handleCreateProjectBranchAnonymizedRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -5160,7 +5156,7 @@ func (s *Server) handleCreateProjectBranchAnonymizedRequest(args [1]string, args
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -5377,9 +5373,10 @@ func (s *Server) handleCreateProjectBranchAnonymizedRequest(args [1]string, args
 
 // handleCreateProjectBranchBucketRequest handles createProjectBranchBucket operation.
 //
-// Creates a new branchable object-storage bucket on the specified branch.
-// Buckets are managed by the Neon Platform branchable-storage service.
-// **Note**: This endpoint is currently in Private Beta.
+// Creates a new branchable object-storage bucket on the specified branch. Buckets are managed by the
+// Neon Platform branchable-storage service.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/buckets
 func (s *Server) handleCreateProjectBranchBucketRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -5415,7 +5412,7 @@ func (s *Server) handleCreateProjectBranchBucketRequest(args [2]string, argsEsca
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -5636,9 +5633,9 @@ func (s *Server) handleCreateProjectBranchBucketRequest(args [2]string, argsEsca
 
 // handleCreateProjectBranchDataAPIRequest handles createProjectBranchDataAPI operation.
 //
-// Creates a new instance of Neon Data API in the specified branch.
-// The Data API exposes a REST interface over the branch database. The `database_name` path parameter
-// determines which database the API serves.
+// Creates a new instance of Neon Data API in the specified branch. The Data API exposes a REST
+// interface over the branch database. The `database_name` path parameter determines which database the
+// API serves.
 //
 // POST /projects/{project_id}/branches/{branch_id}/data-api/{database_name}
 func (s *Server) handleCreateProjectBranchDataAPIRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -5674,7 +5671,7 @@ func (s *Server) handleCreateProjectBranchDataAPIRequest(args [3]string, argsEsc
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -5899,11 +5896,12 @@ func (s *Server) handleCreateProjectBranchDataAPIRequest(args [3]string, argsEsc
 
 // handleCreateProjectBranchDatabaseRequest handles createProjectBranchDatabase operation.
 //
-// Creates a database in the specified branch.
-// A branch can have multiple databases.
-// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
+// Creates a database in the specified branch. A branch can have multiple databases. For related
+// information, see [Manage databases].
 //
 // POST /projects/{project_id}/branches/{branch_id}/databases
+//
+// [Manage databases]: https://neon.com/docs/manage/databases/
 func (s *Server) handleCreateProjectBranchDatabaseRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -5937,7 +5935,7 @@ func (s *Server) handleCreateProjectBranchDatabaseRequest(args [2]string, argsEs
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -6158,12 +6156,11 @@ func (s *Server) handleCreateProjectBranchDatabaseRequest(args [2]string, argsEs
 
 // handleCreateProjectBranchFunctionDeploymentRequest handles createProjectBranchFunctionDeployment operation.
 //
-// Creates a deployment for the function. Supply any subset of zip,
-// environment, and runtime; omitted fields inherit the
-// function's latest version. At least one field must be supplied. The
-// first deployment of a function must include zip. The newest deployment
-// becomes active.
-// **Note**: This endpoint is currently in Private Beta.
+// Creates a deployment for the function. Supply any subset of zip, environment, and runtime; omitted
+// fields inherit the function's latest version. At least one field must be supplied. The first
+// deployment of a function must include zip. The newest deployment becomes active.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/functions/{slug}/deployments
 func (s *Server) handleCreateProjectBranchFunctionDeploymentRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -6199,7 +6196,7 @@ func (s *Server) handleCreateProjectBranchFunctionDeploymentRequest(args [3]stri
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -6424,13 +6421,14 @@ func (s *Server) handleCreateProjectBranchFunctionDeploymentRequest(args [3]stri
 
 // handleCreateProjectBranchRoleRequest handles createProjectBranchRole operation.
 //
-// Creates a Postgres role in the specified branch.
-// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
-// Connections established to the active compute endpoint will be dropped.
-// If the compute endpoint is idle, the endpoint becomes active for a short period of time and is
-// suspended afterward.
+// Creates a Postgres role in the specified branch. For related information, see [Manage roles].
+//
+// Connections established to the active compute endpoint will be dropped. If the compute endpoint is
+// idle, the endpoint becomes active for a short period of time and is suspended afterward.
 //
 // POST /projects/{project_id}/branches/{branch_id}/roles
+//
+// [Manage roles]: https://neon.com/docs/manage/roles/
 func (s *Server) handleCreateProjectBranchRoleRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -6464,7 +6462,7 @@ func (s *Server) handleCreateProjectBranchRoleRequest(args [2]string, argsEscape
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -6685,15 +6683,16 @@ func (s *Server) handleCreateProjectBranchRoleRequest(args [2]string, argsEscape
 
 // handleCreateProjectEndpointRequest handles createProjectEndpoint operation.
 //
-// Creates a compute endpoint for the specified branch.
-// A compute endpoint is a Neon compute instance.
-// There is a maximum of one read-write compute endpoint per branch.
-// If the specified branch already has a read-write compute endpoint, the operation fails.
-// A branch can have multiple read-only compute endpoints.
-// For more information about compute endpoints, see [Manage computes](https://neon.
-// com/docs/manage/endpoints/).
+// Creates a compute endpoint for the specified branch. A compute endpoint is a Neon compute instance.
+// There is a maximum of one read-write compute endpoint per branch. If the specified branch already
+// has a read-write compute endpoint, the operation fails. A branch can have multiple read-only compute
+// endpoints.
+//
+// For more information about compute endpoints, see [Manage computes].
 //
 // POST /projects/{project_id}/endpoints
+//
+// [Manage computes]: https://neon.com/docs/manage/endpoints/
 func (s *Server) handleCreateProjectEndpointRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -6727,7 +6726,7 @@ func (s *Server) handleCreateProjectEndpointRequest(args [1]string, argsEscaped 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -6944,11 +6943,10 @@ func (s *Server) handleCreateProjectEndpointRequest(args [1]string, argsEscaped 
 
 // handleCreateProjectTransferRequestRequest handles createProjectTransferRequest operation.
 //
-// Creates a transfer request for the specified project. The request expires after a set period.
-// To accept the request, the recipient calls `PUT
-// /projects/{project_id}/transfer_requests/{request_id}`
-// or uses the Neon Console claim link.
-// The optional `ru` parameter redirects the recipient after acceptance.
+// Creates a transfer request for the specified project. The request expires after a set period. To
+// accept the request, the recipient calls `PUT /projects/{project_id}/transfer_requests/{request_id}`
+// or uses the Neon Console claim link. The optional `ru` parameter redirects the recipient after
+// acceptance.
 //
 // POST /projects/{project_id}/transfer_requests
 func (s *Server) handleCreateProjectTransferRequestRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -6984,7 +6982,7 @@ func (s *Server) handleCreateProjectTransferRequestRequest(args [1]string, argsE
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -7201,9 +7199,9 @@ func (s *Server) handleCreateProjectTransferRequestRequest(args [1]string, argsE
 
 // handleCreateSnapshotRequest handles createSnapshot operation.
 //
-// Creates a snapshot from the specified branch.
-// This operation may initiate an asynchronous process.
-// **Note**: This endpoint is currently in Beta.
+// Creates a snapshot from the specified branch. This operation may initiate an asynchronous process.
+//
+// Note: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/snapshot
 func (s *Server) handleCreateSnapshotRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -7239,7 +7237,7 @@ func (s *Server) handleCreateSnapshotRequest(args [2]string, argsEscaped bool, w
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -7497,7 +7495,7 @@ func (s *Server) handleDeleteBranchNeonAuthOauthProviderRequest(args [3]string, 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -7707,8 +7705,8 @@ func (s *Server) handleDeleteBranchNeonAuthOauthProviderRequest(args [3]string, 
 
 // handleDeleteBranchNeonAuthTrustedDomainRequest handles deleteBranchNeonAuthTrustedDomain operation.
 //
-// Removes a domain from the redirect URI whitelist for the specified branch.
-// After removal, the domain can no longer be used as a redirect target after authentication.
+// Removes a domain from the redirect URI whitelist for the specified branch. After removal, the domain
+// can no longer be used as a redirect target after authentication.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/auth/domains
 func (s *Server) handleDeleteBranchNeonAuthTrustedDomainRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -7744,7 +7742,7 @@ func (s *Server) handleDeleteBranchNeonAuthTrustedDomainRequest(args [2]string, 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -7965,8 +7963,8 @@ func (s *Server) handleDeleteBranchNeonAuthTrustedDomainRequest(args [2]string, 
 
 // handleDeleteBranchNeonAuthUserRequest handles deleteBranchNeonAuthUser operation.
 //
-// Deletes the specified user from the Neon Auth user directory for the specified branch.
-// Removes the user record from `neon_auth.users_sync`. This action cannot be undone.
+// Deletes the specified user from the Neon Auth user directory for the specified branch. Removes the
+// user record from `neon_auth.users_sync`. This action cannot be undone.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/auth/users/{auth_user_id}
 func (s *Server) handleDeleteBranchNeonAuthUserRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -8002,7 +8000,7 @@ func (s *Server) handleDeleteBranchNeonAuthUserRequest(args [3]string, argsEscap
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -8212,8 +8210,8 @@ func (s *Server) handleDeleteBranchNeonAuthUserRequest(args [3]string, argsEscap
 
 // handleDeleteNeonAuthDomainFromRedirectURIWhitelistRequest handles deleteNeonAuthDomainFromRedirectURIWhitelist operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Deletes a
-// domain from the redirect_uri whitelist for the specified project.
+// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Deletes a domain
+// from the redirect_uri whitelist for the specified project.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -8251,7 +8249,7 @@ func (s *Server) handleDeleteNeonAuthDomainFromRedirectURIWhitelistRequest(args 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -8506,7 +8504,7 @@ func (s *Server) handleDeleteNeonAuthIntegrationRequest(args [2]string, argsEsca
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -8767,7 +8765,7 @@ func (s *Server) handleDeleteNeonAuthOauthProviderRequest(args [2]string, argsEs
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -9012,7 +9010,7 @@ func (s *Server) handleDeleteNeonAuthUserRequest(args [2]string, argsEscaped boo
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -9218,9 +9216,9 @@ func (s *Server) handleDeleteNeonAuthUserRequest(args [2]string, argsEscaped boo
 
 // handleDeleteOrganizationSpendingLimitRequest handles deleteOrganizationSpendingLimit operation.
 //
-// Removes the configured monthly spending limit for the specified organization.
-// Idempotent — removing an already-unset limit still succeeds.
-// Available to organization admins on Launch and Scale plans only.
+// Removes the configured monthly spending limit for the specified organization. Idempotent —
+// removing an already-unset limit still succeeds. Available to organization admins on Launch and Scale
+// plans only.
 //
 // DELETE /organizations/{org_id}/billing/spending_limit
 func (s *Server) handleDeleteOrganizationSpendingLimitRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -9256,7 +9254,7 @@ func (s *Server) handleDeleteOrganizationSpendingLimitRequest(args [1]string, ar
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -9458,9 +9456,8 @@ func (s *Server) handleDeleteOrganizationSpendingLimitRequest(args [1]string, ar
 
 // handleDeleteOrganizationVPCEndpointRequest handles deleteOrganizationVPCEndpoint operation.
 //
-// Deletes the VPC endpoint from the specified Neon organization.
-// If you delete a VPC endpoint from a Neon organization, that VPC endpoint cannot
-// be added back to the Neon organization.
+// Deletes the VPC endpoint from the specified Neon organization. If you delete a VPC endpoint from a
+// Neon organization, that VPC endpoint cannot be added back to the Neon organization.
 //
 // DELETE /organizations/{org_id}/vpc/region/{region_id}/vpc_endpoints/{vpc_endpoint_id}
 func (s *Server) handleDeleteOrganizationVPCEndpointRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -9496,7 +9493,7 @@ func (s *Server) handleDeleteOrganizationVPCEndpointRequest(args [3]string, args
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -9706,9 +9703,9 @@ func (s *Server) handleDeleteOrganizationVPCEndpointRequest(args [3]string, args
 
 // handleDeleteProjectRequest handles deleteProject operation.
 //
-// Deletes the specified project and all its endpoints, branches, databases, and users.
-// Deleted projects can be recovered within 7 days using `POST /projects/{project_id}/recover`.
-// To list recoverable projects, use `GET /projects?recoverable=true`.
+// Deletes the specified project and all its endpoints, branches, databases, and users. Deleted
+// projects can be recovered within 7 days using `POST /projects/{project_id}/recover`. To list
+// recoverable projects, use `GET /projects?recoverable=true`.
 //
 // DELETE /projects/{project_id}
 func (s *Server) handleDeleteProjectRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -9744,7 +9741,7 @@ func (s *Server) handleDeleteProjectRequest(args [1]string, argsEscaped bool, w 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -9948,14 +9945,17 @@ func (s *Server) handleDeleteProjectRequest(args [1]string, argsEscaped bool, w 
 //
 // Deletes the specified branch from a project and places all compute endpoints into an idle state,
 // breaking existing client connections.
-// The deletion completes after all operations finish.
-// You cannot delete a project's root or default branch, or a branch that has a child branch.
-// A project must have at least one branch.
-// By default, deleted branches can be recovered within a 7-day grace period.
-// Use the `hard_delete` parameter to permanently delete the branch immediately.
-// For related information, see [Manage branches](https://neon.com/docs/manage/branches/).
+//
+// The deletion completes after all operations finish. You cannot delete a project's root or default
+// branch, or a branch that has a child branch. A project must have at least one branch.
+//
+// By default, deleted branches can be recovered within a 7-day grace period. Use the `hard_delete`
+// parameter to permanently delete the branch immediately. For related information, see
+// [Manage branches].
 //
 // DELETE /projects/{project_id}/branches/{branch_id}
+//
+// [Manage branches]: https://neon.com/docs/manage/branches/
 func (s *Server) handleDeleteProjectBranchRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -9989,7 +9989,7 @@ func (s *Server) handleDeleteProjectBranchRequest(args [2]string, argsEscaped bo
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -10200,7 +10200,8 @@ func (s *Server) handleDeleteProjectBranchRequest(args [2]string, argsEscaped bo
 // handleDeleteProjectBranchBucketRequest handles deleteProjectBranchBucket operation.
 //
 // Deletes the named bucket from the specified branch.
-// **Note**: This endpoint is currently in Private Beta.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}
 func (s *Server) handleDeleteProjectBranchBucketRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -10236,7 +10237,7 @@ func (s *Server) handleDeleteProjectBranchBucketRequest(args [3]string, argsEsca
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -10446,9 +10447,10 @@ func (s *Server) handleDeleteProjectBranchBucketRequest(args [3]string, argsEsca
 
 // handleDeleteProjectBranchBucketObjectRequest handles deleteProjectBranchBucketObject operation.
 //
-// Deletes the named object from the bucket on the specified branch.
-// Served by the user's session (no customer S3 credentials required).
-// **Note**: This endpoint is currently in Private Beta.
+// Deletes the named object from the bucket on the specified branch. Served by the user's session (no
+// customer S3 credentials required).
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects/{object_key}
 func (s *Server) handleDeleteProjectBranchBucketObjectRequest(args [4]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -10484,7 +10486,7 @@ func (s *Server) handleDeleteProjectBranchBucketObjectRequest(args [4]string, ar
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -10698,20 +10700,19 @@ func (s *Server) handleDeleteProjectBranchBucketObjectRequest(args [4]string, ar
 
 // handleDeleteProjectBranchBucketObjectsByPrefixRequest handles deleteProjectBranchBucketObjectsByPrefix operation.
 //
-// Soft-deletes every object on the specified branch whose key starts with
-// `prefix`, in a single call. Intended to back a "delete folder" action in
-// an object browser: a `prefix` of `app/avatars/` removes every object
-// beneath that folder. Served by the user's session (no customer S3
-// credentials required).
-// `prefix` must be non-empty, end with `/`, be at most 1024 bytes, and
-// contain no control characters - a partial-segment prefix cannot
-// accidentally delete sibling keys. Returns the number of objects
-// soft-deleted (`deleted`), which may be 0 when no live object matched the
-// prefix on this branch.
-// Only objects physically present on this branch are tombstoned; objects
-// inherited from an ancestor branch via copy-on-write (not materialized on
-// this branch) are out of scope.
-// **Note**: This endpoint is currently in Private Beta.
+// Soft-deletes every object on the specified branch whose key starts with `prefix`, in a single call.
+// Intended to back a "delete folder" action in an object browser: a `prefix` of `app/avatars/` removes
+// every object beneath that folder. Served by the user's session (no customer S3 credentials
+// required).
+//
+// `prefix` must be non-empty, end with `/`, be at most 1024 bytes, and contain no control characters -
+// a partial-segment prefix cannot accidentally delete sibling keys. Returns the number of objects
+// soft-deleted (`deleted`), which may be 0 when no live object matched the prefix on this branch.
+//
+// Only objects physically present on this branch are tombstoned; objects inherited from an ancestor
+// branch via copy-on-write (not materialized on this branch) are out of scope.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects-by-prefix
 func (s *Server) handleDeleteProjectBranchBucketObjectsByPrefixRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -10747,7 +10748,7 @@ func (s *Server) handleDeleteProjectBranchBucketObjectsByPrefixRequest(args [3]s
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -10961,8 +10962,8 @@ func (s *Server) handleDeleteProjectBranchBucketObjectsByPrefixRequest(args [3]s
 
 // handleDeleteProjectBranchDataAPIRequest handles deleteProjectBranchDataAPI operation.
 //
-// Deletes the Neon Data API for the specified branch.
-// Existing connections using the Data API endpoint will fail after deletion.
+// Deletes the Neon Data API for the specified branch. Existing connections using the Data API endpoint
+// will fail after deletion.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/data-api/{database_name}
 func (s *Server) handleDeleteProjectBranchDataAPIRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -10998,7 +10999,7 @@ func (s *Server) handleDeleteProjectBranchDataAPIRequest(args [3]string, argsEsc
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -11208,10 +11209,11 @@ func (s *Server) handleDeleteProjectBranchDataAPIRequest(args [3]string, argsEsc
 
 // handleDeleteProjectBranchDatabaseRequest handles deleteProjectBranchDatabase operation.
 //
-// Deletes the specified database from the branch.
-// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
+// Deletes the specified database from the branch. For related information, see [Manage databases].
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/databases/{database_name}
+//
+// [Manage databases]: https://neon.com/docs/manage/databases/
 func (s *Server) handleDeleteProjectBranchDatabaseRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -11245,7 +11247,7 @@ func (s *Server) handleDeleteProjectBranchDatabaseRequest(args [3]string, argsEs
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -11456,7 +11458,8 @@ func (s *Server) handleDeleteProjectBranchDatabaseRequest(args [3]string, argsEs
 // handleDeleteProjectBranchFunctionRequest handles deleteProjectBranchFunction operation.
 //
 // Deletes the function identified by its slug.
-// **Note**: This endpoint is currently in Private Beta.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/functions/{slug}
 func (s *Server) handleDeleteProjectBranchFunctionRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -11492,7 +11495,7 @@ func (s *Server) handleDeleteProjectBranchFunctionRequest(args [3]string, argsEs
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -11702,10 +11705,11 @@ func (s *Server) handleDeleteProjectBranchFunctionRequest(args [3]string, argsEs
 
 // handleDeleteProjectBranchRoleRequest handles deleteProjectBranchRole operation.
 //
-// Deletes the specified Postgres role from the branch.
-// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
+// Deletes the specified Postgres role from the branch. For related information, see [Manage roles].
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/roles/{role_name}
+//
+// [Manage roles]: https://neon.com/docs/manage/roles/
 func (s *Server) handleDeleteProjectBranchRoleRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -11739,7 +11743,7 @@ func (s *Server) handleDeleteProjectBranchRoleRequest(args [3]string, argsEscape
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -11949,15 +11953,16 @@ func (s *Server) handleDeleteProjectBranchRoleRequest(args [3]string, argsEscape
 
 // handleDeleteProjectEndpointRequest handles deleteProjectEndpoint operation.
 //
-// Deletes the specified compute endpoint.
-// A compute endpoint is a Neon compute instance.
-// Deleting a compute endpoint drops existing network connections to the compute endpoint.
-// The deletion is completed when the last operation in the chain finishes successfully.
-// An `endpoint_id` has an `ep-` prefix.
-// For information about compute endpoints, see [Manage computes](https://neon.
-// com/docs/manage/endpoints/).
+// Deletes the specified compute endpoint. A compute endpoint is a Neon compute instance. Deleting a
+// compute endpoint drops existing network connections to the compute endpoint. The deletion is
+// completed when the last operation in the chain finishes successfully.
+//
+// An `endpoint_id` has an `ep-` prefix. For information about compute endpoints, see
+// [Manage computes].
 //
 // DELETE /projects/{project_id}/endpoints/{endpoint_id}
+//
+// [Manage computes]: https://neon.com/docs/manage/endpoints/
 func (s *Server) handleDeleteProjectEndpointRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -11991,7 +11996,7 @@ func (s *Server) handleDeleteProjectEndpointRequest(args [2]string, argsEscaped 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -12197,8 +12202,8 @@ func (s *Server) handleDeleteProjectEndpointRequest(args [2]string, argsEscaped 
 
 // handleDeleteProjectJWKSRequest handles deleteProjectJWKS operation.
 //
-// Removes the specified JWKS URL from the project.
-// JWTs signed by keys from the removed URL can no longer authenticate to the project's endpoints.
+// Removes the specified JWKS URL from the project. JWTs signed by keys from the removed URL can no
+// longer authenticate to the project's endpoints.
 //
 // DELETE /projects/{project_id}/jwks/{jwks_id}
 func (s *Server) handleDeleteProjectJWKSRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -12234,7 +12239,7 @@ func (s *Server) handleDeleteProjectJWKSRequest(args [2]string, argsEscaped bool
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -12476,7 +12481,7 @@ func (s *Server) handleDeleteProjectVPCEndpointRequest(args [2]string, argsEscap
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -12683,7 +12688,8 @@ func (s *Server) handleDeleteProjectVPCEndpointRequest(args [2]string, argsEscap
 // handleDeleteSnapshotRequest handles deleteSnapshot operation.
 //
 // Deletes the specified snapshot.
-// **Note**: This endpoint is currently in Beta.
+//
+// Note: This endpoint is currently in Beta.
 //
 // DELETE /projects/{project_id}/snapshots/{snapshot_id}
 func (s *Server) handleDeleteSnapshotRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -12719,7 +12725,7 @@ func (s *Server) handleDeleteSnapshotRequest(args [2]string, argsEscaped bool, w
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -12925,12 +12931,10 @@ func (s *Server) handleDeleteSnapshotRequest(args [2]string, argsEscaped bool, w
 
 // handleDisableNeonAuthRequest handles disableNeonAuth operation.
 //
-// Disables the Neon Auth integration for the specified branch, removing the connection
-// to the authentication provider.
-// If `delete_data` is `true`, also deletes the `neon_auth` schema and all associated tables
-// from the branch database.
-// The integration can be re-enabled by calling `POST
-// /projects/{project_id}/branches/{branch_id}/auth`.
+// Disables the Neon Auth integration for the specified branch, removing the connection to the
+// authentication provider. If `delete_data` is `true`, also deletes the `neon_auth` schema and all
+// associated tables from the branch database. The integration can be re-enabled by calling
+// `POST /projects/{project_id}/branches/{branch_id}/auth`.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/auth
 func (s *Server) handleDisableNeonAuthRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -12966,7 +12970,7 @@ func (s *Server) handleDisableNeonAuthRequest(args [2]string, argsEscaped bool, 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -13187,16 +13191,18 @@ func (s *Server) handleDisableNeonAuthRequest(args [2]string, argsEscaped bool, 
 
 // handleFinalizeRestoreBranchRequest handles finalizeRestoreBranch operation.
 //
-// Finalize the restore operation for a branch created from a snapshot.
-// This operation updates the branch so it functions as the original branch it replaced.
-// This includes:
-// - Reassigning any computes from the original branch to the restored branch (this will restart the
-// computes)
-// - Renaming the restored branch to the original branch's name
-// - Renaming the original branch so it no longer uses the original name
+// Finalize the restore operation for a branch created from a snapshot. This operation updates the
+// branch so it functions as the original branch it replaced. This includes:
+//
+//   - Reassigning any computes from the original branch to the restored branch (this will restart the
+//     computes)
+//   - Renaming the restored branch to the original branch's name
+//   - Renaming the original branch so it no longer uses the original name
+//
 // This operation only applies to branches created using the `restoreSnapshot` endpoint with
 // `finalize_restore: false`.
-// **Note**: This endpoint is currently in Beta.
+//
+// Note: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/finalize_restore
 func (s *Server) handleFinalizeRestoreBranchRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -13232,7 +13238,7 @@ func (s *Server) handleFinalizeRestoreBranchRequest(args [2]string, argsEscaped 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -13454,8 +13460,9 @@ func (s *Server) handleFinalizeRestoreBranchRequest(args [2]string, argsEscaped 
 // handleGetActiveRegionsRequest handles getActiveRegions operation.
 //
 // Lists supported Neon regions.
-// **Note:** Not all regions are available to all organizations. Pass the `org_id`
-// parameter to get an accurate list of regions available to your organization.
+//
+// Note: Not all regions are available to all organizations. Pass the `org_id` parameter to get an
+// accurate list of regions available to your organization.
 //
 // GET /regions
 func (s *Server) handleGetActiveRegionsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -13491,7 +13498,7 @@ func (s *Server) handleGetActiveRegionsRequest(args [0]string, argsEscaped bool,
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -13695,9 +13702,9 @@ func (s *Server) handleGetActiveRegionsRequest(args [0]string, argsEscaped bool,
 //
 // Retrieves the current status of an anonymized branch, including its state and progress information.
 // This endpoint allows you to monitor the anonymization process from initialization through
-// completion.
-// Only anonymized branches will have status information available.
-// **Note**: This endpoint is currently in Beta.
+// completion. Only anonymized branches will have status information available.
+//
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/anonymized_status
 func (s *Server) handleGetAnonymizedBranchStatusRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -13733,7 +13740,7 @@ func (s *Server) handleGetAnonymizedBranchStatusRequest(args [2]string, argsEsca
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -13939,9 +13946,8 @@ func (s *Server) handleGetAnonymizedBranchStatusRequest(args [2]string, argsEsca
 
 // handleGetAuthDetailsRequest handles getAuthDetails operation.
 //
-// Returns authentication details for the credentials used in the request,
-// including the credential type (API key, Bearer token, or OAuth session)
-// and the associated identity.
+// Returns authentication details for the credentials used in the request, including the credential
+// type (API key, Bearer token, or OAuth session) and the associated identity.
 //
 // GET /auth
 func (s *Server) handleGetAuthDetailsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -13977,7 +13983,7 @@ func (s *Server) handleGetAuthDetailsRequest(args [0]string, argsEscaped bool, w
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -14164,11 +14170,10 @@ func (s *Server) handleGetAuthDetailsRequest(args [0]string, argsEscaped bool, w
 
 // handleGetAvailablePreloadLibrariesRequest handles getAvailablePreloadLibraries operation.
 //
-// Returns the shared preload libraries available for the specified project's Postgres version.
-// Shared preload libraries are Postgres extensions that require the `shared_preload_libraries`
-// setting and a compute restart to activate.
-// Use this list to determine which libraries can be enabled in the project's
-// `settings.preload_libraries` configuration.
+// Returns the shared preload libraries available for the specified project's Postgres version. Shared
+// preload libraries are Postgres extensions that require the `shared_preload_libraries` setting and a
+// compute restart to activate. Use this list to determine which libraries can be enabled in the
+// project's `settings.preload_libraries` configuration.
 //
 // GET /projects/{project_id}/available_preload_libraries
 func (s *Server) handleGetAvailablePreloadLibrariesRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -14204,7 +14209,7 @@ func (s *Server) handleGetAvailablePreloadLibrariesRequest(args [1]string, argsE
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -14406,9 +14411,9 @@ func (s *Server) handleGetAvailablePreloadLibrariesRequest(args [1]string, argsE
 
 // handleGetConnectionURIRequest handles getConnectionURI operation.
 //
-// Retrieves a connection URI for the specified database.
-// The URI uses the standard PostgreSQL connection string format. Set `pooled=true` to include the
-// `-pooler` suffix for a connection pooler URI.
+// Retrieves a connection URI for the specified database. The URI uses the standard PostgreSQL
+// connection string format. Set `pooled=true` to include the `-pooler` suffix for a connection pooler
+// URI.
 //
 // GET /projects/{project_id}/connection_uri
 func (s *Server) handleGetConnectionURIRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -14444,7 +14449,7 @@ func (s *Server) handleGetConnectionURIRequest(args [1]string, argsEscaped bool,
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -14666,18 +14671,21 @@ func (s *Server) handleGetConnectionURIRequest(args [1]string, argsEscaped bool,
 
 // handleGetConsumptionHistoryPerBranchV2Request handles getConsumptionHistoryPerBranchV2 operation.
 //
-// Returns consumption metrics for each branch across one or more projects listed in
-// `project_ids` (1 to 100 projects). Available for accounts on paid usage-based Launch, Scale,
-// Agent, and Enterprise plans.
+// Returns consumption metrics for each branch across one or more projects listed in `project_ids` (1
+// to 100 projects). Available for accounts on paid usage-based Launch, Scale, Agent, and Enterprise
+// plans.
+//
 // History starts when the account first ingests branch-level consumption data.
-// The `metrics` query parameter is required. Only these six values are supported on this
-// endpoint:
+//
+// The `metrics` query parameter is required. Only these six values are supported on this endpoint:
 // `compute_unit_seconds`, `root_branch_bytes_month`, `child_branch_bytes_month`,
 // `instant_restore_bytes_month`, `public_network_transfer_bytes`, `private_network_transfer_bytes`.
-// This endpoint does not support `extra_branches_month` or `snapshot_storage_bytes_month`.
-// Use `GET /consumption_history/v2/projects` for those.
-// Consumption metrics within each branch are returned in ascending time order (oldest first).
-// This request does not wake project computes.
+//
+// This endpoint does not support `extra_branches_month` or `snapshot_storage_bytes_month`. Use
+// `GET /consumption_history/v2/projects` for those.
+//
+// Consumption metrics within each branch are returned in ascending time order (oldest first). This
+// request does not wake project computes.
 //
 // GET /consumption_history/v2/branches
 func (s *Server) handleGetConsumptionHistoryPerBranchV2Request(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -14713,7 +14721,7 @@ func (s *Server) handleGetConsumptionHistoryPerBranchV2Request(args [0]string, a
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -14948,9 +14956,8 @@ func (s *Server) handleGetConsumptionHistoryPerBranchV2Request(args [0]string, a
 // handleGetConsumptionHistoryPerProjectRequest handles getConsumptionHistoryPerProject operation.
 //
 // Retrieves consumption metrics for Scale, Business, and Enterprise plan projects. History begins at
-// the time of upgrade.
-// Results are ordered by time in ascending order (oldest to newest).
-// Issuing a call to this API does not wake a project's compute endpoint.
+// the time of upgrade. Results are ordered by time in ascending order (oldest to newest). Issuing a
+// call to this API does not wake a project's compute endpoint.
 //
 // GET /consumption_history/projects
 func (s *Server) handleGetConsumptionHistoryPerProjectRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -14986,7 +14993,7 @@ func (s *Server) handleGetConsumptionHistoryPerProjectRequest(args [0]string, ar
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -15221,16 +15228,19 @@ func (s *Server) handleGetConsumptionHistoryPerProjectRequest(args [0]string, ar
 // handleGetConsumptionHistoryPerProjectV2Request handles getConsumptionHistoryPerProjectV2 operation.
 //
 // Returns consumption metrics for up to `limit` projects per page. If `project_ids` is omitted,
-// projects in the organization are included across pages (use `cursor`). If `project_ids` is
-// provided, the response is limited to those projects (up to 100). Available for accounts on
-// Launch, Scale, Agent, Business, and Enterprise plans.
+// projects in the organization are included across pages (use `cursor`). If `project_ids` is provided,
+// the response is limited to those projects (up to 100). Available for accounts on Launch, Scale,
+// Agent, Business, and Enterprise plans.
+//
 // History starts when the account upgrades to an eligible plan.
-// The `metrics` query parameter is required. Supported values:
-// `compute_unit_seconds`, `root_branch_bytes_month`, `child_branch_bytes_month`,
-// `instant_restore_bytes_month`, `public_network_transfer_bytes`, `private_network_transfer_bytes`,
-// `extra_branches_month`, `snapshot_storage_bytes_month`.
-// Consumption metrics within each project are returned in ascending time order (oldest first).
-// This request does not wake project computes.
+//
+// The `metrics` query parameter is required. Supported values: `compute_unit_seconds`,
+// `root_branch_bytes_month`, `child_branch_bytes_month`, `instant_restore_bytes_month`,
+// `public_network_transfer_bytes`, `private_network_transfer_bytes`, `extra_branches_month`,
+// `snapshot_storage_bytes_month`.
+//
+// Consumption metrics within each project are returned in ascending time order (oldest first). This
+// request does not wake project computes.
 //
 // GET /consumption_history/v2/projects
 func (s *Server) handleGetConsumptionHistoryPerProjectV2Request(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -15266,7 +15276,7 @@ func (s *Server) handleGetConsumptionHistoryPerProjectV2Request(args [0]string, 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -15496,8 +15506,8 @@ func (s *Server) handleGetConsumptionHistoryPerProjectV2Request(args [0]string, 
 
 // handleGetCurrentUserInfoRequest handles getCurrentUserInfo operation.
 //
-// Retrieves information about the currently authenticated Neon user,
-// including account identifiers, plan details, and linked auth accounts.
+// Retrieves information about the currently authenticated Neon user, including account identifiers,
+// plan details, and linked auth accounts.
 //
 // GET /users/me
 func (s *Server) handleGetCurrentUserInfoRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -15533,7 +15543,7 @@ func (s *Server) handleGetCurrentUserInfoRequest(args [0]string, argsEscaped boo
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -15721,8 +15731,9 @@ func (s *Server) handleGetCurrentUserInfoRequest(args [0]string, argsEscaped boo
 // handleGetCurrentUserOrganizationsRequest handles getCurrentUserOrganizations operation.
 //
 // Retrieves the organizations that the currently authenticated user belongs to.
-// When called with an organization- or project-scoped API key (which is not
-// tied to a user), this returns the single organization that owns the key.
+//
+// When called with an organization- or project-scoped API key (which is not tied to a user), this
+// returns the single organization that owns the key.
 //
 // GET /users/me/organizations
 func (s *Server) handleGetCurrentUserOrganizationsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -15758,7 +15769,7 @@ func (s *Server) handleGetCurrentUserOrganizationsRequest(args [0]string, argsEs
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -15945,9 +15956,10 @@ func (s *Server) handleGetCurrentUserOrganizationsRequest(args [0]string, argsEs
 
 // handleGetMaskingRulesRequest handles getMaskingRules operation.
 //
-// Retrieves the masking rules for the specified anonymized branch.
-// Masking rules define how sensitive data should be anonymized using PostgreSQL Anonymizer.
-// **Note**: This endpoint is currently in Beta.
+// Retrieves the masking rules for the specified anonymized branch. Masking rules define how sensitive
+// data should be anonymized using PostgreSQL Anonymizer.
+//
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/masking_rules
 func (s *Server) handleGetMaskingRulesRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -15983,7 +15995,7 @@ func (s *Server) handleGetMaskingRulesRequest(args [2]string, argsEscaped bool, 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -16189,8 +16201,8 @@ func (s *Server) handleGetMaskingRulesRequest(args [2]string, argsEscaped bool, 
 
 // handleGetNeonAuthRequest handles getNeonAuth operation.
 //
-// Retrieves the Neon Auth integration details for the specified branch,
-// including the auth provider type and integration status.
+// Retrieves the Neon Auth integration details for the specified branch, including the auth provider
+// type and integration status.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth
 func (s *Server) handleGetNeonAuthRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -16226,7 +16238,7 @@ func (s *Server) handleGetNeonAuthRequest(args [2]string, argsEscaped bool, w ht
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -16432,9 +16444,8 @@ func (s *Server) handleGetNeonAuthRequest(args [2]string, argsEscaped bool, w ht
 
 // handleGetNeonAuthAllowLocalhostRequest handles getNeonAuthAllowLocalhost operation.
 //
-// Retrieves the localhost allow setting for the specified branch's Neon Auth integration.
-// When enabled, authentication flows work from `localhost` without adding it to the redirect URI
-// whitelist.
+// Retrieves the localhost allow setting for the specified branch's Neon Auth integration. When
+// enabled, authentication flows work from `localhost` without adding it to the redirect URI whitelist.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/allow_localhost
 func (s *Server) handleGetNeonAuthAllowLocalhostRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -16470,7 +16481,7 @@ func (s *Server) handleGetNeonAuthAllowLocalhostRequest(args [2]string, argsEsca
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -16677,8 +16688,7 @@ func (s *Server) handleGetNeonAuthAllowLocalhostRequest(args [2]string, argsEsca
 // handleGetNeonAuthEmailAndPasswordConfigRequest handles getNeonAuthEmailAndPasswordConfig operation.
 //
 // Retrieves the email and password authentication configuration for the specified branch's Neon Auth
-// integration,
-// including whether it is enabled and the email verification method.
+// integration, including whether it is enabled and the email verification method.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/email_and_password
 func (s *Server) handleGetNeonAuthEmailAndPasswordConfigRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -16714,7 +16724,7 @@ func (s *Server) handleGetNeonAuthEmailAndPasswordConfigRequest(args [2]string, 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -16957,7 +16967,7 @@ func (s *Server) handleGetNeonAuthEmailProviderRequest(args [2]string, argsEscap
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -17163,8 +17173,8 @@ func (s *Server) handleGetNeonAuthEmailProviderRequest(args [2]string, argsEscap
 
 // handleGetNeonAuthEmailServerRequest handles getNeonAuthEmailServer operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/email_provider` instead. Gets
-// the email server configuration for the specified project.
+// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/email_provider` instead. Gets the
+// email server configuration for the specified project.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -17202,7 +17212,7 @@ func (s *Server) handleGetNeonAuthEmailServerRequest(args [1]string, argsEscaped
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -17404,8 +17414,8 @@ func (s *Server) handleGetNeonAuthEmailServerRequest(args [1]string, argsEscaped
 
 // handleGetNeonAuthPhoneNumberPluginRequest handles getNeonAuthPhoneNumberPlugin operation.
 //
-// Returns the phone number plugin configuration for Neon Auth.
-// The phone number plugin enables phone-based OTP authentication.
+// Returns the phone number plugin configuration for Neon Auth. The phone number plugin enables
+// phone-based OTP authentication.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/plugins/phone-number
 func (s *Server) handleGetNeonAuthPhoneNumberPluginRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -17441,7 +17451,7 @@ func (s *Server) handleGetNeonAuthPhoneNumberPluginRequest(args [2]string, argsE
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -17647,9 +17657,8 @@ func (s *Server) handleGetNeonAuthPhoneNumberPluginRequest(args [2]string, argsE
 
 // handleGetNeonAuthPluginConfigsRequest handles getNeonAuthPluginConfigs operation.
 //
-// Returns all plugin configurations for Neon Auth in a single response.
-// This endpoint aggregates organization, email provider, email and password,
-// OAuth providers, and localhost settings.
+// Returns all plugin configurations for Neon Auth in a single response. This endpoint aggregates
+// organization, email provider, email and password, OAuth providers, and localhost settings.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/plugins
 func (s *Server) handleGetNeonAuthPluginConfigsRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -17685,7 +17694,7 @@ func (s *Server) handleGetNeonAuthPluginConfigsRequest(args [2]string, argsEscap
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -17891,8 +17900,8 @@ func (s *Server) handleGetNeonAuthPluginConfigsRequest(args [2]string, argsEscap
 
 // handleGetNeonAuthWebhookConfigRequest handles getNeonAuthWebhookConfig operation.
 //
-// Returns the webhook configuration for the specified branch's Neon Auth integration,
-// including the endpoint URL and the events that trigger it.
+// Returns the webhook configuration for the specified branch's Neon Auth integration, including the
+// endpoint URL and the events that trigger it.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/webhooks
 func (s *Server) handleGetNeonAuthWebhookConfigRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -17928,7 +17937,7 @@ func (s *Server) handleGetNeonAuthWebhookConfigRequest(args [2]string, argsEscap
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -18170,7 +18179,7 @@ func (s *Server) handleGetOrganizationRequest(args [1]string, argsEscaped bool, 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -18408,7 +18417,7 @@ func (s *Server) handleGetOrganizationInvitationsRequest(args [1]string, argsEsc
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -18646,7 +18655,7 @@ func (s *Server) handleGetOrganizationMemberRequest(args [2]string, argsEscaped 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -18888,7 +18897,7 @@ func (s *Server) handleGetOrganizationMembersRequest(args [1]string, argsEscaped
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -19107,8 +19116,8 @@ func (s *Server) handleGetOrganizationMembersRequest(args [1]string, argsEscaped
 // handleGetOrganizationSpendingLimitRequest handles getOrganizationSpendingLimit operation.
 //
 // Returns the configured monthly spending limit for the specified organization.
-// `spending_limit_cents: null` indicates that no limit is currently set.
-// Available to organization members with read access on Launch and Scale plans only.
+// `spending_limit_cents: null` indicates that no limit is currently set. Available to organization
+// members with read access on Launch and Scale plans only.
 //
 // GET /organizations/{org_id}/billing/spending_limit
 func (s *Server) handleGetOrganizationSpendingLimitRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -19144,7 +19153,7 @@ func (s *Server) handleGetOrganizationSpendingLimitRequest(args [1]string, argsE
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -19382,7 +19391,7 @@ func (s *Server) handleGetOrganizationVPCEndpointDetailsRequest(args [3]string, 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -19592,9 +19601,8 @@ func (s *Server) handleGetOrganizationVPCEndpointDetailsRequest(args [3]string, 
 
 // handleGetProjectRequest handles getProject operation.
 //
-// Retrieves information about the specified project.
-// Returned details include the project settings, compute configuration, history retention, owner
-// information, and current usage metrics.
+// Retrieves information about the specified project. Returned details include the project settings,
+// compute configuration, history retention, owner information, and current usage metrics.
 //
 // GET /projects/{project_id}
 func (s *Server) handleGetProjectRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -19630,7 +19638,7 @@ func (s *Server) handleGetProjectRequest(args [1]string, argsEscaped bool, w htt
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -19832,8 +19840,9 @@ func (s *Server) handleGetProjectRequest(args [1]string, argsEscaped bool, w htt
 
 // handleGetProjectAdvisorSecurityIssuesRequest handles getProjectAdvisorSecurityIssues operation.
 //
-// Analyzes the database for security and performance issues.
-// Returns a list of issues categorized by severity (ERROR, WARN, INFO).
+// Analyzes the database for security and performance issues. Returns a list of issues categorized by
+// severity (ERROR, WARN, INFO).
+//
 // Requires read access to the project and Data API enabled.
 //
 // GET /projects/{project_id}/advisors
@@ -19870,7 +19879,7 @@ func (s *Server) handleGetProjectAdvisorSecurityIssuesRequest(args [1]string, ar
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -20088,14 +20097,15 @@ func (s *Server) handleGetProjectAdvisorSecurityIssuesRequest(args [1]string, ar
 
 // handleGetProjectBranchRequest handles getProjectBranch operation.
 //
-// Retrieves information about the specified branch.
-// A `branch_id` value has a `br-` prefix.
-// Each Neon project is initially created with a root and default branch named `main`.
-// A project can contain one or more branches.
-// A parent branch is identified by a `parent_id` value, which is the `id` of the parent branch.
-// For related information, see [Manage branches](https://neon.com/docs/manage/branches/).
+// Retrieves information about the specified branch. A `branch_id` value has a `br-` prefix.
+//
+// Each Neon project is initially created with a root and default branch named `main`. A project can
+// contain one or more branches. A parent branch is identified by a `parent_id` value, which is the
+// `id` of the parent branch. For related information, see [Manage branches].
 //
 // GET /projects/{project_id}/branches/{branch_id}
+//
+// [Manage branches]: https://neon.com/docs/manage/branches/
 func (s *Server) handleGetProjectBranchRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -20129,7 +20139,7 @@ func (s *Server) handleGetProjectBranchRequest(args [2]string, argsEscaped bool,
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -20335,11 +20345,11 @@ func (s *Server) handleGetProjectBranchRequest(args [2]string, argsEscaped bool,
 
 // handleGetProjectBranchAiGatewayRequest handles getProjectBranchAiGateway operation.
 //
-// Returns the AI Gateway endpoint host for the specified branch, used to
-// render code-snippet base URLs. A 200 response means the branch is
-// registered and this region serves the AI gateway. A 404 response
-// includes a `reason` field indicating why the gateway is unavailable.
-// **Note**: This endpoint is currently in Private Beta.
+// Returns the AI Gateway endpoint host for the specified branch, used to render code-snippet base
+// URLs. A 200 response means the branch is registered and this region serves the AI gateway. A 404
+// response includes a `reason` field indicating why the gateway is unavailable.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/ai_gateway
 func (s *Server) handleGetProjectBranchAiGatewayRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -20375,7 +20385,7 @@ func (s *Server) handleGetProjectBranchAiGatewayRequest(args [2]string, argsEsca
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -20581,19 +20591,19 @@ func (s *Server) handleGetProjectBranchAiGatewayRequest(args [2]string, argsEsca
 
 // handleGetProjectBranchBucketObjectRequest handles getProjectBranchBucketObject operation.
 //
-// Streams the raw bytes of the named object from the bucket on the
-// specified branch, including objects inherited from ancestor branches.
-// Served by the user's session (no customer S3 credentials required).
-// The body is returned as `application/octet-stream` so a browser treats
-// it as a download; the `Content-Length` and `ETag` response headers echo
-// the stored object metadata.
-// BINARY-STREAM EXCEPTION TO THE BUILD-GENERATED-TYPES RULE (#7029): the
-// successful 200 body is the raw object stream, proxied verbatim from the
-// platform storage admin endpoint. It is modeled as an
-// `application/octet-stream` binary body (not a JSON response schema) and
-// is streamed without buffering the whole object in memory. Error
-// responses still use the generated `GeneralError` shape.
-// **Note**: This endpoint is currently in Private Beta.
+// Streams the raw bytes of the named object from the bucket on the specified branch, including objects
+// inherited from ancestor branches. Served by the user's session (no customer S3 credentials
+// required).
+//
+// The body is returned as `application/octet-stream` so a browser treats it as a download; the
+// `Content-Length` and `ETag` response headers echo the stored object metadata.
+//
+// BINARY-STREAM EXCEPTION TO THE BUILD-GENERATED-TYPES RULE (#7029): the successful 200 body is the
+// raw object stream, proxied verbatim from the platform storage admin endpoint. It is modeled as an
+// `application/octet-stream` binary body (not a JSON response schema) and is streamed without
+// buffering the whole object in memory. Error responses still use the generated `GeneralError` shape.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects/{object_key}/download
 func (s *Server) handleGetProjectBranchBucketObjectRequest(args [4]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -20629,7 +20639,7 @@ func (s *Server) handleGetProjectBranchBucketObjectRequest(args [4]string, argsE
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -20843,8 +20853,8 @@ func (s *Server) handleGetProjectBranchBucketObjectRequest(args [4]string, argsE
 
 // handleGetProjectBranchDataAPIRequest handles getProjectBranchDataAPI operation.
 //
-// Retrieves the Neon Data API configuration for the specified branch,
-// including endpoint URL, enabled state, and database settings.
+// Retrieves the Neon Data API configuration for the specified branch, including endpoint URL, enabled
+// state, and database settings.
 //
 // GET /projects/{project_id}/branches/{branch_id}/data-api/{database_name}
 func (s *Server) handleGetProjectBranchDataAPIRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -20880,7 +20890,7 @@ func (s *Server) handleGetProjectBranchDataAPIRequest(args [3]string, argsEscape
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -21090,10 +21100,11 @@ func (s *Server) handleGetProjectBranchDataAPIRequest(args [3]string, argsEscape
 
 // handleGetProjectBranchDatabaseRequest handles getProjectBranchDatabase operation.
 //
-// Retrieves information about the specified database.
-// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
+// Retrieves information about the specified database. For related information, see [Manage databases].
 //
 // GET /projects/{project_id}/branches/{branch_id}/databases/{database_name}
+//
+// [Manage databases]: https://neon.com/docs/manage/databases/
 func (s *Server) handleGetProjectBranchDatabaseRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -21127,7 +21138,7 @@ func (s *Server) handleGetProjectBranchDatabaseRequest(args [3]string, argsEscap
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -21338,7 +21349,8 @@ func (s *Server) handleGetProjectBranchDatabaseRequest(args [3]string, argsEscap
 // handleGetProjectBranchFunctionRequest handles getProjectBranchFunction operation.
 //
 // Returns the function identified by its slug.
-// **Note**: This endpoint is currently in Private Beta.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/functions/{slug}
 func (s *Server) handleGetProjectBranchFunctionRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -21374,7 +21386,7 @@ func (s *Server) handleGetProjectBranchFunctionRequest(args [3]string, argsEscap
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -21584,11 +21596,12 @@ func (s *Server) handleGetProjectBranchFunctionRequest(args [3]string, argsEscap
 
 // handleGetProjectBranchRoleRequest handles getProjectBranchRole operation.
 //
-// Retrieves details about the specified role.
-// In Neon, the terms "role" and "user" are synonymous.
-// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
+// Retrieves details about the specified role. In Neon, the terms "role" and "user" are synonymous. For
+// related information, see [Manage roles].
 //
 // GET /projects/{project_id}/branches/{branch_id}/roles/{role_name}
+//
+// [Manage roles]: https://neon.com/docs/manage/roles/
 func (s *Server) handleGetProjectBranchRoleRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -21622,7 +21635,7 @@ func (s *Server) handleGetProjectBranchRoleRequest(args [3]string, argsEscaped b
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -21832,10 +21845,12 @@ func (s *Server) handleGetProjectBranchRoleRequest(args [3]string, argsEscaped b
 
 // handleGetProjectBranchRolePasswordRequest handles getProjectBranchRolePassword operation.
 //
-// Retrieves the password for the specified Postgres role, if possible.
-// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
+// Retrieves the password for the specified Postgres role, if possible. For related information, see
+// [Manage roles].
 //
 // GET /projects/{project_id}/branches/{branch_id}/roles/{role_name}/reveal_password
+//
+// [Manage roles]: https://neon.com/docs/manage/roles/
 func (s *Server) handleGetProjectBranchRolePasswordRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -21869,7 +21884,7 @@ func (s *Server) handleGetProjectBranchRolePasswordRequest(args [3]string, argsE
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -22117,7 +22132,7 @@ func (s *Server) handleGetProjectBranchSchemaRequest(args [2]string, argsEscaped
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -22375,7 +22390,7 @@ func (s *Server) handleGetProjectBranchSchemaComparisonRequest(args [2]string, a
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -22605,11 +22620,11 @@ func (s *Server) handleGetProjectBranchSchemaComparisonRequest(args [2]string, a
 
 // handleGetProjectBranchStorageRequest handles getProjectBranchStorage operation.
 //
-// Returns whether branchable object-storage is usable for the specified
-// branch. A 200 response means the branch is registered in the storage
-// service and the S3 data plane will accept requests for it. A 404
-// response includes a `reason` field indicating why storage is unavailable.
-// **Note**: This endpoint is currently in Private Beta.
+// Returns whether branchable object-storage is usable for the specified branch. A 200 response means
+// the branch is registered in the storage service and the S3 data plane will accept requests for it. A
+// 404 response includes a `reason` field indicating why storage is unavailable.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/storage
 func (s *Server) handleGetProjectBranchStorageRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -22645,7 +22660,7 @@ func (s *Server) handleGetProjectBranchStorageRequest(args [2]string, argsEscape
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -22851,13 +22866,13 @@ func (s *Server) handleGetProjectBranchStorageRequest(args [2]string, argsEscape
 
 // handleGetProjectEndpointRequest handles getProjectEndpoint operation.
 //
-// Retrieves information about the specified compute endpoint.
-// A compute endpoint is a Neon compute instance.
-// An `endpoint_id` has an `ep-` prefix.
-// For information about compute endpoints, see [Manage computes](https://neon.
-// com/docs/manage/endpoints/).
+// Retrieves information about the specified compute endpoint. A compute endpoint is a Neon compute
+// instance. An `endpoint_id` has an `ep-` prefix. For information about compute endpoints, see
+// [Manage computes].
 //
 // GET /projects/{project_id}/endpoints/{endpoint_id}
+//
+// [Manage computes]: https://neon.com/docs/manage/endpoints/
 func (s *Server) handleGetProjectEndpointRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -22891,7 +22906,7 @@ func (s *Server) handleGetProjectEndpointRequest(args [2]string, argsEscaped boo
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -23134,7 +23149,7 @@ func (s *Server) handleGetProjectJWKSRequest(args [1]string, argsEscaped bool, w
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -23336,8 +23351,8 @@ func (s *Server) handleGetProjectJWKSRequest(args [1]string, argsEscaped bool, w
 
 // handleGetProjectOperationRequest handles getProjectOperation operation.
 //
-// Retrieves details for the specified operation.
-// An operation is an action performed on a Neon project resource.
+// Retrieves details for the specified operation. An operation is an action performed on a Neon project
+// resource.
 //
 // GET /projects/{project_id}/operations/{operation_id}
 func (s *Server) handleGetProjectOperationRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -23373,7 +23388,7 @@ func (s *Server) handleGetProjectOperationRequest(args [2]string, argsEscaped bo
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -23579,9 +23594,9 @@ func (s *Server) handleGetProjectOperationRequest(args [2]string, argsEscaped bo
 
 // handleGetSnapshotScheduleRequest handles getSnapshotSchedule operation.
 //
-// Returns the backup schedule for the specified branch, including the configured snapshot
-// frequencies.
-// **Note**: This endpoint is currently in Beta.
+// Returns the backup schedule for the specified branch, including the configured snapshot frequencies.
+//
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/backup_schedule
 func (s *Server) handleGetSnapshotScheduleRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -23617,7 +23632,7 @@ func (s *Server) handleGetSnapshotScheduleRequest(args [2]string, argsEscaped bo
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -23859,7 +23874,7 @@ func (s *Server) handleGrantPermissionToProjectRequest(args [1]string, argsEscap
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -24076,12 +24091,13 @@ func (s *Server) handleGrantPermissionToProjectRequest(args [1]string, argsEscap
 
 // handleListApiKeysRequest handles listApiKeys operation.
 //
-// Retrieves the API keys for your Neon account.
-// The response does not include API key tokens. A token is only provided when creating an API key.
-// API keys can also be managed in the Neon Console.
-// For more information, see [Manage API keys](https://neon.com/docs/manage/api-keys/).
+// Retrieves the API keys for your Neon account. The response does not include API key tokens. A token
+// is only provided when creating an API key. API keys can also be managed in the Neon Console. For
+// more information, see [Manage API keys].
 //
 // GET /api_keys
+//
+// [Manage API keys]: https://neon.com/docs/manage/api-keys/
 func (s *Server) handleListApiKeysRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -24115,7 +24131,7 @@ func (s *Server) handleListApiKeysRequest(args [0]string, argsEscaped bool, w ht
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -24338,7 +24354,7 @@ func (s *Server) handleListBranchNeonAuthOauthProvidersRequest(args [2]string, a
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -24544,8 +24560,8 @@ func (s *Server) handleListBranchNeonAuthOauthProvidersRequest(args [2]string, a
 
 // handleListBranchNeonAuthTrustedDomainsRequest handles listBranchNeonAuthTrustedDomains operation.
 //
-// Lists the trusted domains in the redirect URI whitelist for the specified branch.
-// Only domains in this list are permitted as redirect targets after authentication.
+// Lists the trusted domains in the redirect URI whitelist for the specified branch. Only domains in
+// this list are permitted as redirect targets after authentication.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/domains
 func (s *Server) handleListBranchNeonAuthTrustedDomainsRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -24581,7 +24597,7 @@ func (s *Server) handleListBranchNeonAuthTrustedDomainsRequest(args [2]string, a
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -24787,9 +24803,9 @@ func (s *Server) handleListBranchNeonAuthTrustedDomainsRequest(args [2]string, a
 
 // handleListCredentialsRequest handles listCredentials operation.
 //
-// Returns metadata for customer-issued credentials on the branch.
-// Secrets are never included.
-// **Note**: This endpoint is currently in Private Beta.
+// Returns metadata for customer-issued credentials on the branch. Secrets are never included.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/credentials
 func (s *Server) handleListCredentialsRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -24825,7 +24841,7 @@ func (s *Server) handleListCredentialsRequest(args [2]string, argsEscaped bool, 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -25069,7 +25085,7 @@ func (s *Server) handleListNeonAuthIntegrationsRequest(args [1]string, argsEscap
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -25310,7 +25326,7 @@ func (s *Server) handleListNeonAuthOauthProvidersRequest(args [1]string, argsEsc
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -25551,7 +25567,7 @@ func (s *Server) handleListNeonAuthRedirectURIWhitelistDomainsRequest(args [1]st
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -25753,12 +25769,13 @@ func (s *Server) handleListNeonAuthRedirectURIWhitelistDomainsRequest(args [1]st
 
 // handleListOrgApiKeysRequest handles listOrgApiKeys operation.
 //
-// Retrieves the API keys for the specified organization.
-// The response does not include API key tokens. A token is only provided when creating an API key.
-// API keys can also be managed in the Neon Console.
-// For more information, see [Manage API keys](https://neon.com/docs/manage/api-keys/).
+// Retrieves the API keys for the specified organization. The response does not include API key tokens.
+// A token is only provided when creating an API key. API keys can also be managed in the Neon Console.
+// For more information, see [Manage API keys].
 //
 // GET /organizations/{org_id}/api_keys
+//
+// [Manage API keys]: https://neon.com/docs/manage/api-keys/
 func (s *Server) handleListOrgApiKeysRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -25792,7 +25809,7 @@ func (s *Server) handleListOrgApiKeysRequest(args [1]string, argsEscaped bool, w
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -26030,7 +26047,7 @@ func (s *Server) handleListOrganizationVPCEndpointsRequest(args [2]string, argsE
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -26272,7 +26289,7 @@ func (s *Server) handleListOrganizationVPCEndpointsAllRegionsRequest(args [1]str
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -26474,14 +26491,14 @@ func (s *Server) handleListOrganizationVPCEndpointsAllRegionsRequest(args [1]str
 
 // handleListProjectBranchBucketObjectsRequest handles listProjectBranchBucketObjects operation.
 //
-// Lists objects visible in the named bucket on the specified branch,
-// including those inherited from ancestor branches. Listing is served by
-// the user's session (no customer S3 credentials required).
-// When `delimiter` is supplied (typically `/`), keys are collapsed into
-// common prefixes (`folders`) so callers can render a folder-style
-// browser; keys that do not contain the delimiter after `prefix` are
+// Lists objects visible in the named bucket on the specified branch, including those inherited from
+// ancestor branches. Listing is served by the user's session (no customer S3 credentials required).
+//
+// When `delimiter` is supplied (typically `/`), keys are collapsed into common prefixes (`folders`) so
+// callers can render a folder-style browser; keys that do not contain the delimiter after `prefix` are
 // returned as `objects`.
-// **Note**: This endpoint is currently in Private Beta.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects
 func (s *Server) handleListProjectBranchBucketObjectsRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -26517,7 +26534,7 @@ func (s *Server) handleListProjectBranchBucketObjectsRequest(args [3]string, arg
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -26743,9 +26760,10 @@ func (s *Server) handleListProjectBranchBucketObjectsRequest(args [3]string, arg
 
 // handleListProjectBranchBucketsRequest handles listProjectBranchBuckets operation.
 //
-// Lists branchable object-storage buckets visible on the specified branch,
-// including those inherited from ancestor branches.
-// **Note**: This endpoint is currently in Private Beta.
+// Lists branchable object-storage buckets visible on the specified branch, including those inherited
+// from ancestor branches.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/buckets
 func (s *Server) handleListProjectBranchBucketsRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -26781,7 +26799,7 @@ func (s *Server) handleListProjectBranchBucketsRequest(args [2]string, argsEscap
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -26987,11 +27005,12 @@ func (s *Server) handleListProjectBranchBucketsRequest(args [2]string, argsEscap
 
 // handleListProjectBranchDatabasesRequest handles listProjectBranchDatabases operation.
 //
-// Retrieves a list of databases for the specified branch.
-// A branch can have multiple databases.
-// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
+// Retrieves a list of databases for the specified branch. A branch can have multiple databases. For
+// related information, see [Manage databases].
 //
 // GET /projects/{project_id}/branches/{branch_id}/databases
+//
+// [Manage databases]: https://neon.com/docs/manage/databases/
 func (s *Server) handleListProjectBranchDatabasesRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -27025,7 +27044,7 @@ func (s *Server) handleListProjectBranchDatabasesRequest(args [2]string, argsEsc
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -27231,9 +27250,8 @@ func (s *Server) handleListProjectBranchDatabasesRequest(args [2]string, argsEsc
 
 // handleListProjectBranchEndpointsRequest handles listProjectBranchEndpoints operation.
 //
-// Retrieves a list of compute endpoints for the specified branch.
-// Neon permits only one read-write compute endpoint per branch.
-// A branch can have multiple read-only compute endpoints.
+// Retrieves a list of compute endpoints for the specified branch. Neon permits only one read-write
+// compute endpoint per branch. A branch can have multiple read-only compute endpoints.
 //
 // GET /projects/{project_id}/branches/{branch_id}/endpoints
 func (s *Server) handleListProjectBranchEndpointsRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -27269,7 +27287,7 @@ func (s *Server) handleListProjectBranchEndpointsRequest(args [2]string, argsEsc
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -27476,7 +27494,8 @@ func (s *Server) handleListProjectBranchEndpointsRequest(args [2]string, argsEsc
 // handleListProjectBranchFunctionsRequest handles listProjectBranchFunctions operation.
 //
 // Lists functions on the specified branch.
-// **Note**: This endpoint is currently in Private Beta.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/functions
 func (s *Server) handleListProjectBranchFunctionsRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -27512,7 +27531,7 @@ func (s *Server) handleListProjectBranchFunctionsRequest(args [2]string, argsEsc
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -27726,10 +27745,12 @@ func (s *Server) handleListProjectBranchFunctionsRequest(args [2]string, argsEsc
 
 // handleListProjectBranchRolesRequest handles listProjectBranchRoles operation.
 //
-// Retrieves a list of Postgres roles from the specified branch.
-// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
+// Retrieves a list of Postgres roles from the specified branch. For related information, see
+// [Manage roles].
 //
 // GET /projects/{project_id}/branches/{branch_id}/roles
+//
+// [Manage roles]: https://neon.com/docs/manage/roles/
 func (s *Server) handleListProjectBranchRolesRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -27763,7 +27784,7 @@ func (s *Server) handleListProjectBranchRolesRequest(args [2]string, argsEscaped
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -27970,13 +27991,15 @@ func (s *Server) handleListProjectBranchRolesRequest(args [2]string, argsEscaped
 // handleListProjectBranchesRequest handles listProjectBranches operation.
 //
 // Retrieves a list of branches for the specified project.
-// Each Neon project has a root branch named `main`.
-// A `branch_id` value has a `br-` prefix.
-// A project may contain child branches that were branched from `main` or from another branch.
-// A parent branch is identified by the `parent_id` value, which is the `id` of the parent branch.
-// For related information, see [Manage branches](https://neon.com/docs/manage/branches/).
+//
+// Each Neon project has a root branch named `main`. A `branch_id` value has a `br-` prefix. A project
+// may contain child branches that were branched from `main` or from another branch. A parent branch is
+// identified by the `parent_id` value, which is the `id` of the parent branch. For related
+// information, see [Manage branches].
 //
 // GET /projects/{project_id}/branches
+//
+// [Manage branches]: https://neon.com/docs/manage/branches/
 func (s *Server) handleListProjectBranchesRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -28010,7 +28033,7 @@ func (s *Server) handleListProjectBranchesRequest(args [1]string, argsEscaped bo
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -28236,12 +28259,12 @@ func (s *Server) handleListProjectBranchesRequest(args [1]string, argsEscaped bo
 
 // handleListProjectEndpointsRequest handles listProjectEndpoints operation.
 //
-// Retrieves a list of compute endpoints for the specified project.
-// A compute endpoint is a Neon compute instance.
-// For information about compute endpoints, see [Manage computes](https://neon.
-// com/docs/manage/endpoints/).
+// Retrieves a list of compute endpoints for the specified project. A compute endpoint is a Neon
+// compute instance. For information about compute endpoints, see [Manage computes].
 //
 // GET /projects/{project_id}/endpoints
+//
+// [Manage computes]: https://neon.com/docs/manage/endpoints/
 func (s *Server) handleListProjectEndpointsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -28275,7 +28298,7 @@ func (s *Server) handleListProjectEndpointsRequest(args [1]string, argsEscaped b
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -28477,12 +28500,11 @@ func (s *Server) handleListProjectEndpointsRequest(args [1]string, argsEscaped b
 
 // handleListProjectOperationsRequest handles listProjectOperations operation.
 //
-// Retrieves a list of operations for the specified Neon project.
-// The number of operations returned can be large.
-// To paginate the response, issue an initial request with a `limit` value.
-// Then, add the `cursor` value that was returned in the response to the next request.
-// Operations older than 6 months may be deleted from our systems.
-// If you need more history than that, you should store your own history.
+// Retrieves a list of operations for the specified Neon project. The number of operations returned can
+// be large. To paginate the response, issue an initial request with a `limit` value. Then, add the
+// `cursor` value that was returned in the response to the next request. Operations older than 6 months
+// may be deleted from our systems. If you need more history than that, you should store your own
+// history.
 //
 // GET /projects/{project_id}/operations
 func (s *Server) handleListProjectOperationsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -28518,7 +28540,7 @@ func (s *Server) handleListProjectOperationsRequest(args [1]string, argsEscaped 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -28765,7 +28787,7 @@ func (s *Server) handleListProjectPermissionsRequest(args [1]string, argsEscaped
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -29003,7 +29025,7 @@ func (s *Server) handleListProjectVPCEndpointsRequest(args [1]string, argsEscape
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -29205,15 +29227,15 @@ func (s *Server) handleListProjectVPCEndpointsRequest(args [1]string, argsEscape
 
 // handleListProjectsRequest handles listProjects operation.
 //
-// Retrieves a list of projects for the specified organization.
-// If using a personal API key, include the `org_id` parameter to specify which organization to work
-// with.
-// If using an org API key, `org_id` is automatically inferred from the key.
-// For more information, see [Manage organizations using the Neon API](https://neon.
-// com/docs/manage/orgs-api)
-// and [Manage projects](https://neon.com/docs/manage/projects/).
+// Retrieves a list of projects for the specified organization. If using a personal API key, include
+// the `org_id` parameter to specify which organization to work with. If using an org API key, `org_id`
+// is automatically inferred from the key. For more information, see
+// [Manage organizations using the Neon API] and [Manage projects].
 //
 // GET /projects
+//
+// [Manage organizations using the Neon API]: https://neon.com/docs/manage/orgs-api
+// [Manage projects]: https://neon.com/docs/manage/projects/
 func (s *Server) handleListProjectsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -29247,7 +29269,7 @@ func (s *Server) handleListProjectsRequest(args [0]string, argsEscaped bool, w h
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -29469,10 +29491,12 @@ func (s *Server) handleListProjectsRequest(args [0]string, argsEscaped bool, w h
 
 // handleListSharedProjectsRequest handles listSharedProjects operation.
 //
-// Retrieves a list of projects shared with your Neon account.
-// For more information, see [Manage projects](https://neon.com/docs/manage/projects/).
+// Retrieves a list of projects shared with your Neon account. For more information, see
+// [Manage projects].
 //
 // GET /projects/shared
+//
+// [Manage projects]: https://neon.com/docs/manage/projects/
 func (s *Server) handleListSharedProjectsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -29506,7 +29530,7 @@ func (s *Server) handleListSharedProjectsRequest(args [0]string, argsEscaped boo
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -29720,9 +29744,10 @@ func (s *Server) handleListSharedProjectsRequest(args [0]string, argsEscaped boo
 
 // handleListSnapshotsRequest handles listSnapshots operation.
 //
-// Lists the snapshots for the specified project.
-// Each snapshot represents a point-in-time backup of the project data.
-// **Note**: This endpoint is currently in Beta.
+// Lists the snapshots for the specified project. Each snapshot represents a point-in-time backup of
+// the project data.
+//
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/snapshots
 func (s *Server) handleListSnapshotsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -29758,7 +29783,7 @@ func (s *Server) handleListSnapshotsRequest(args [1]string, argsEscaped bool, w 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -29960,19 +29985,22 @@ func (s *Server) handleListSnapshotsRequest(args [1]string, argsEscaped bool, w 
 
 // handlePresignProjectBranchBucketObjectRequest handles presignProjectBranchBucketObject operation.
 //
-// Returns a presigned URL that transfers bytes directly to or from the
-// object's bucket on the specified branch, without the caller ever
-// handling S3 credentials. The `operation` field selects the direction:
-// - `upload` returns a presigned `PUT` URL (the caller `PUT`s the file
-// bytes straight to `url` with the returned `headers`). Authorized with
-// project write access.
-// - `download` returns a presigned `GET` URL (the caller `GET`s the
-// bytes straight from `url`). Authorized with project read access.
-// The platform mints a short-lived credential and builds the SigV4-signed
-// URL against the branch's S3 data-plane host, returning it together with
-// the HTTP method, any headers the caller must echo, and the URL's expiry.
+// Returns a presigned URL that transfers bytes directly to or from the object's bucket on the
+// specified branch, without the caller ever handling S3 credentials. The `operation` field selects the
+// direction:
+//
+//   - `upload` returns a presigned `PUT` URL (the caller `PUT`s the file bytes straight to `url` with
+//     the returned `headers`). Authorized with project write access.
+//   - `download` returns a presigned `GET` URL (the caller `GET`s the bytes straight from `url`).
+//     Authorized with project read access.
+//
+// The platform mints a short-lived credential and builds the SigV4-signed URL against the branch's S3
+// data-plane host, returning it together with the HTTP method, any headers the caller must echo, and
+// the URL's expiry.
+//
 // Served by the user's session (no customer S3 credentials required).
-// **Note**: This endpoint is currently in Private Beta.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects/{object_key}/presign
 func (s *Server) handlePresignProjectBranchBucketObjectRequest(args [4]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -30008,7 +30036,7 @@ func (s *Server) handlePresignProjectBranchBucketObjectRequest(args [4]string, a
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -30237,9 +30265,8 @@ func (s *Server) handlePresignProjectBranchBucketObjectRequest(args [4]string, a
 
 // handleRecoverProjectRequest handles recoverProject operation.
 //
-// Recovers a deleted project within the 7-day deletion recovery period.
-// Restores branches, endpoints, settings, and connection strings.
-// Some integrations require manual reconfiguration after recovery.
+// Recovers a deleted project within the 7-day deletion recovery period. Restores branches, endpoints,
+// settings, and connection strings. Some integrations require manual reconfiguration after recovery.
 // To list recoverable projects, use `GET /projects?recoverable=true`.
 //
 // POST /projects/{project_id}/recover
@@ -30276,7 +30303,7 @@ func (s *Server) handleRecoverProjectRequest(args [1]string, argsEscaped bool, w
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -30478,13 +30505,13 @@ func (s *Server) handleRecoverProjectRequest(args [1]string, argsEscaped bool, w
 
 // handleRecoverProjectBranchRequest handles recoverProjectBranch operation.
 //
-// Recovers a deleted branch within the 7-day deletion recovery period.
-// The branch must have been soft deleted and not yet permanently deleted.
-// Recovery restores the branch and its endpoints to an idle state.
-// Connection strings remain valid after recovery.
-// TTL branches become non-TTL branches after recovery.
-// To list deleted branches available for recovery, use `GET
-// /projects/{project_id}/branches?include_deleted=true`.
+// Recovers a deleted branch within the 7-day deletion recovery period. The branch must have been soft
+// deleted and not yet permanently deleted. Recovery restores the branch and its endpoints to an idle
+// state. Connection strings remain valid after recovery. TTL branches become non-TTL branches after
+// recovery.
+//
+// To list deleted branches available for recovery, use
+// `GET /projects/{project_id}/branches?include_deleted=true`.
 //
 // POST /projects/{project_id}/branches/{branch_id}/recover
 func (s *Server) handleRecoverProjectBranchRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -30520,7 +30547,7 @@ func (s *Server) handleRecoverProjectBranchRequest(args [2]string, argsEscaped b
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -30726,9 +30753,8 @@ func (s *Server) handleRecoverProjectBranchRequest(args [2]string, argsEscaped b
 
 // handleRemoveOrganizationMemberRequest handles removeOrganizationMember operation.
 //
-// Removes the specified member from the organization.
-// Only organization admins can perform this action.
-// The last admin in an organization cannot be removed.
+// Removes the specified member from the organization. Only organization admins can perform this
+// action. The last admin in an organization cannot be removed.
 //
 // DELETE /organizations/{org_id}/members/{member_id}
 func (s *Server) handleRemoveOrganizationMemberRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -30764,7 +30790,7 @@ func (s *Server) handleRemoveOrganizationMemberRequest(args [2]string, argsEscap
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -30970,15 +30996,16 @@ func (s *Server) handleRemoveOrganizationMemberRequest(args [2]string, argsEscap
 
 // handleResetProjectBranchRolePasswordRequest handles resetProjectBranchRolePassword operation.
 //
-// Resets the password for the specified Postgres role.
-// Returns a new password and operations. The new password is ready to use when the last operation
-// finishes.
-// The old password remains valid until last operation finishes.
-// Connections to the compute endpoint are dropped. If idle,
-// the compute endpoint becomes active for a short period of time.
-// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
+// Resets the password for the specified Postgres role. Returns a new password and operations. The new
+// password is ready to use when the last operation finishes. The old password remains valid until last
+// operation finishes. Connections to the compute endpoint are dropped. If idle, the compute endpoint
+// becomes active for a short period of time.
+//
+// For related information, see [Manage roles].
 //
 // POST /projects/{project_id}/branches/{branch_id}/roles/{role_name}/reset_password
+//
+// [Manage roles]: https://neon.com/docs/manage/roles/
 func (s *Server) handleResetProjectBranchRolePasswordRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -31012,7 +31039,7 @@ func (s *Server) handleResetProjectBranchRolePasswordRequest(args [3]string, arg
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -31222,12 +31249,12 @@ func (s *Server) handleResetProjectBranchRolePasswordRequest(args [3]string, arg
 
 // handleRestartProjectEndpointRequest handles restartProjectEndpoint operation.
 //
-// Restarts the specified compute endpoint by immediately suspending it and then starting it again.
-// An `endpoint_id` has an `ep-` prefix.
-// For information about compute endpoints, see [Manage computes](https://neon.
-// com/docs/manage/endpoints/).
+// Restarts the specified compute endpoint by immediately suspending it and then starting it again. An
+// `endpoint_id` has an `ep-` prefix. For information about compute endpoints, see [Manage computes].
 //
 // POST /projects/{project_id}/endpoints/{endpoint_id}/restart
+//
+// [Manage computes]: https://neon.com/docs/manage/endpoints/
 func (s *Server) handleRestartProjectEndpointRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -31261,7 +31288,7 @@ func (s *Server) handleRestartProjectEndpointRequest(args [2]string, argsEscaped
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -31467,9 +31494,8 @@ func (s *Server) handleRestartProjectEndpointRequest(args [2]string, argsEscaped
 
 // handleRestoreProjectBranchRequest handles restoreProjectBranch operation.
 //
-// Restores a branch to an earlier state in its own or another branch's history
-// by specifying an LSN or timestamp.
-// Creates a new branch from the historical state.
+// Restores a branch to an earlier state in its own or another branch's history by specifying an LSN or
+// timestamp. Creates a new branch from the historical state.
 //
 // POST /projects/{project_id}/branches/{branch_id}/restore
 func (s *Server) handleRestoreProjectBranchRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -31505,7 +31531,7 @@ func (s *Server) handleRestoreProjectBranchRequest(args [2]string, argsEscaped b
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -31726,9 +31752,10 @@ func (s *Server) handleRestoreProjectBranchRequest(args [2]string, argsEscaped b
 
 // handleRestoreSnapshotRequest handles restoreSnapshot operation.
 //
-// Restores the specified snapshot to a new branch,
-// and optionally finalizes the restore operation to replace the original branch.
-// **Note**: This endpoint is currently in Beta.
+// Restores the specified snapshot to a new branch, and optionally finalizes the restore operation to
+// replace the original branch.
+//
+// Note: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/snapshots/{snapshot_id}/restore
 func (s *Server) handleRestoreSnapshotRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -31764,7 +31791,7 @@ func (s *Server) handleRestoreSnapshotRequest(args [2]string, argsEscaped bool, 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -31989,13 +32016,12 @@ func (s *Server) handleRestoreSnapshotRequest(args [2]string, argsEscaped bool, 
 
 // handleRevokeApiKeyRequest handles revokeApiKey operation.
 //
-// Revokes the specified API key.
-// An API key that is no longer needed can be revoked.
-// This action cannot be reversed.
-// API keys can also be managed in the Neon Console.
-// See [Manage API keys](https://neon.com/docs/manage/api-keys/).
+// Revokes the specified API key. An API key that is no longer needed can be revoked. This action
+// cannot be reversed. API keys can also be managed in the Neon Console. See [Manage API keys].
 //
 // DELETE /api_keys/{key_id}
+//
+// [Manage API keys]: https://neon.com/docs/manage/api-keys/
 func (s *Server) handleRevokeApiKeyRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -32029,7 +32055,7 @@ func (s *Server) handleRevokeApiKeyRequest(args [1]string, argsEscaped bool, w h
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -32231,8 +32257,9 @@ func (s *Server) handleRevokeApiKeyRequest(args [1]string, argsEscaped bool, w h
 
 // handleRevokeCredentialRequest handles revokeCredential operation.
 //
-// Soft-deletes the credential.  Idempotent.
-// **Note**: This endpoint is currently in Private Beta.
+// Soft-deletes the credential. Idempotent.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/credentials/{token_id}
 func (s *Server) handleRevokeCredentialRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -32268,7 +32295,7 @@ func (s *Server) handleRevokeCredentialRequest(args [3]string, argsEscaped bool,
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -32478,13 +32505,12 @@ func (s *Server) handleRevokeCredentialRequest(args [3]string, argsEscaped bool,
 
 // handleRevokeOrgApiKeyRequest handles revokeOrgApiKey operation.
 //
-// Revokes the specified organization API key.
-// An API key that is no longer needed can be revoked.
-// This action cannot be reversed.
-// API keys can also be managed in the Neon Console.
-// See [Manage API keys](https://neon.com/docs/manage/api-keys/).
+// Revokes the specified organization API key. An API key that is no longer needed can be revoked. This
+// action cannot be reversed. API keys can also be managed in the Neon Console. See [Manage API keys].
 //
 // DELETE /organizations/{org_id}/api_keys/{key_id}
+//
+// [Manage API keys]: https://neon.com/docs/manage/api-keys/
 func (s *Server) handleRevokeOrgApiKeyRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -32518,7 +32544,7 @@ func (s *Server) handleRevokeOrgApiKeyRequest(args [2]string, argsEscaped bool, 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -32724,8 +32750,8 @@ func (s *Server) handleRevokeOrgApiKeyRequest(args [2]string, argsEscaped bool, 
 
 // handleRevokePermissionFromProjectRequest handles revokePermissionFromProject operation.
 //
-// Revokes project access from the user associated with the specified permission `id`. You can
-// retrieve a user's permission `id` by listing project access.
+// Revokes project access from the user associated with the specified permission `id`. You can retrieve
+// a user's permission `id` by listing project access.
 //
 // DELETE /projects/{project_id}/permissions/{permission_id}
 func (s *Server) handleRevokePermissionFromProjectRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -32761,7 +32787,7 @@ func (s *Server) handleRevokePermissionFromProjectRequest(args [2]string, argsEs
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -32968,10 +32994,8 @@ func (s *Server) handleRevokePermissionFromProjectRequest(args [2]string, argsEs
 // handleSendNeonAuthTestEmailRequest handles sendNeonAuthTestEmail operation.
 //
 // Sends a test email using the configured email server settings to verify SMTP connectivity and
-// credentials.
-// The request body must include the SMTP server settings
-// (`host`, `port`, `username`, `password`, `sender_email`, `sender_name`) and the `recipient_email`
-// address.
+// credentials. The request body must include the SMTP server settings (`host`, `port`, `username`,
+// `password`, `sender_email`, `sender_name`) and the `recipient_email` address.
 //
 // POST /projects/{project_id}/branches/{branch_id}/auth/send_test_email
 func (s *Server) handleSendNeonAuthTestEmailRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -33007,7 +33031,7 @@ func (s *Server) handleSendNeonAuthTestEmailRequest(args [2]string, argsEscaped 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -33228,11 +33252,12 @@ func (s *Server) handleSendNeonAuthTestEmailRequest(args [2]string, argsEscaped 
 
 // handleSetDefaultProjectBranchRequest handles setDefaultProjectBranch operation.
 //
-// Sets the specified branch as the project's default branch.
-// The default designation is automatically removed from the previous default branch.
-// For more information, see [Manage branches](https://neon.com/docs/manage/branches/).
+// Sets the specified branch as the project's default branch. The default designation is automatically
+// removed from the previous default branch. For more information, see [Manage branches].
 //
 // POST /projects/{project_id}/branches/{branch_id}/set_as_default
+//
+// [Manage branches]: https://neon.com/docs/manage/branches/
 func (s *Server) handleSetDefaultProjectBranchRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -33266,7 +33291,7 @@ func (s *Server) handleSetDefaultProjectBranchRequest(args [2]string, argsEscape
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -33472,11 +33497,10 @@ func (s *Server) handleSetDefaultProjectBranchRequest(args [2]string, argsEscape
 
 // handleSetOrganizationSpendingLimitRequest handles setOrganizationSpendingLimit operation.
 //
-// Sets the monthly spending limit for the specified organization.
-// To remove a previously configured limit, send a DELETE request to this endpoint.
-// When a limit is configured, email notifications are sent at 80% and 100% of the limit.
-// Computes are not suspended when the limit is reached.
-// Available to organization admins on Launch and Scale plans only.
+// Sets the monthly spending limit for the specified organization. To remove a previously configured
+// limit, send a DELETE request to this endpoint. When a limit is configured, email notifications are
+// sent at 80% and 100% of the limit. Computes are not suspended when the limit is reached. Available
+// to organization admins on Launch and Scale plans only.
 //
 // PUT /organizations/{org_id}/billing/spending_limit
 func (s *Server) handleSetOrganizationSpendingLimitRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -33512,7 +33536,7 @@ func (s *Server) handleSetOrganizationSpendingLimitRequest(args [1]string, argsE
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -33729,9 +33753,10 @@ func (s *Server) handleSetOrganizationSpendingLimitRequest(args [1]string, argsE
 
 // handleSetSnapshotScheduleRequest handles setSnapshotSchedule operation.
 //
-// Updates the backup schedule for the specified branch.
-// The schedule defines how often automatic snapshots are created (e.g., `hourly`, `daily`).
-// **Note**: This endpoint is currently in Beta.
+// Updates the backup schedule for the specified branch. The schedule defines how often automatic
+// snapshots are created (e.g., `hourly`, `daily`).
+//
+// Note: This endpoint is currently in Beta.
 //
 // PUT /projects/{project_id}/branches/{branch_id}/backup_schedule
 func (s *Server) handleSetSnapshotScheduleRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -33767,7 +33792,7 @@ func (s *Server) handleSetSnapshotScheduleRequest(args [2]string, argsEscaped bo
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -33989,10 +34014,10 @@ func (s *Server) handleSetSnapshotScheduleRequest(args [2]string, argsEscaped bo
 // handleStartAnonymizationRequest handles startAnonymization operation.
 //
 // Starts the anonymization process for an anonymized branch that is in the initialized, error, or
-// anonymized state.
-// This will apply all defined masking rules to anonymize sensitive data in the branch databases.
-// The branch must be an anonymized branch to start anonymization.
-// **Note**: This endpoint is currently in Beta.
+// anonymized state. This will apply all defined masking rules to anonymize sensitive data in the
+// branch databases. The branch must be an anonymized branch to start anonymization.
+//
+// Note: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/anonymize
 func (s *Server) handleStartAnonymizationRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -34028,7 +34053,7 @@ func (s *Server) handleStartAnonymizationRequest(args [2]string, argsEscaped boo
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -34234,13 +34259,15 @@ func (s *Server) handleStartAnonymizationRequest(args [2]string, argsEscaped boo
 
 // handleStartProjectEndpointRequest handles startProjectEndpoint operation.
 //
-// Starts a compute endpoint.
-// The compute endpoint is ready to use after the last operation in the chain finishes successfully.
-// An `endpoint_id` has an `ep-` prefix.
-// For information about compute endpoints, see [Manage computes](https://neon.
-// com/docs/manage/endpoints/).
+// Starts a compute endpoint. The compute endpoint is ready to use after the last operation in the
+// chain finishes successfully.
+//
+// An `endpoint_id` has an `ep-` prefix. For information about compute endpoints, see
+// [Manage computes].
 //
 // POST /projects/{project_id}/endpoints/{endpoint_id}/start
+//
+// [Manage computes]: https://neon.com/docs/manage/endpoints/
 func (s *Server) handleStartProjectEndpointRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -34274,7 +34301,7 @@ func (s *Server) handleStartProjectEndpointRequest(args [2]string, argsEscaped b
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -34480,12 +34507,12 @@ func (s *Server) handleStartProjectEndpointRequest(args [2]string, argsEscaped b
 
 // handleSuspendProjectEndpointRequest handles suspendProjectEndpoint operation.
 //
-// Suspends the specified compute endpoint.
-// An `endpoint_id` has an `ep-` prefix.
-// For information about compute endpoints, see [Manage computes](https://neon.
-// com/docs/manage/endpoints/).
+// Suspends the specified compute endpoint. An `endpoint_id` has an `ep-` prefix. For information about
+// compute endpoints, see [Manage computes].
 //
 // POST /projects/{project_id}/endpoints/{endpoint_id}/suspend
+//
+// [Manage computes]: https://neon.com/docs/manage/endpoints/
 func (s *Server) handleSuspendProjectEndpointRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -34519,7 +34546,7 @@ func (s *Server) handleSuspendProjectEndpointRequest(args [2]string, argsEscaped
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -34761,7 +34788,7 @@ func (s *Server) handleTransferNeonAuthProviderProjectRequest(args [0]string, ar
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -35000,7 +35027,7 @@ func (s *Server) handleTransferProjectsFromOrgToOrgRequest(args [1]string, argsE
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -35256,7 +35283,7 @@ func (s *Server) handleTransferProjectsFromUserToOrgRequest(args [0]string, args
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -35494,7 +35521,7 @@ func (s *Server) handleUpdateBranchNeonAuthOauthProviderRequest(args [3]string, 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -35719,9 +35746,10 @@ func (s *Server) handleUpdateBranchNeonAuthOauthProviderRequest(args [3]string, 
 
 // handleUpdateMaskingRulesRequest handles updateMaskingRules operation.
 //
-// Updates the masking rules for the specified anonymized branch.
-// Masking rules define how sensitive data should be anonymized using PostgreSQL Anonymizer.
-// **Note**: This endpoint is currently in Beta.
+// Updates the masking rules for the specified anonymized branch. Masking rules define how sensitive
+// data should be anonymized using PostgreSQL Anonymizer.
+//
+// Note: This endpoint is currently in Beta.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/masking_rules
 func (s *Server) handleUpdateMaskingRulesRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -35757,7 +35785,7 @@ func (s *Server) handleUpdateMaskingRulesRequest(args [2]string, argsEscaped boo
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -35978,9 +36006,8 @@ func (s *Server) handleUpdateMaskingRulesRequest(args [2]string, argsEscaped boo
 
 // handleUpdateNeonAuthAllowLocalhostRequest handles updateNeonAuthAllowLocalhost operation.
 //
-// Updates the localhost allow setting for the specified branch's Neon Auth integration.
-// When enabled, authentication flows work from `localhost` without adding it to the redirect URI
-// whitelist.
+// Updates the localhost allow setting for the specified branch's Neon Auth integration. When enabled,
+// authentication flows work from `localhost` without adding it to the redirect URI whitelist.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/allow_localhost
 func (s *Server) handleUpdateNeonAuthAllowLocalhostRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -36016,7 +36043,7 @@ func (s *Server) handleUpdateNeonAuthAllowLocalhostRequest(args [2]string, argsE
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -36237,8 +36264,8 @@ func (s *Server) handleUpdateNeonAuthAllowLocalhostRequest(args [2]string, argsE
 
 // handleUpdateNeonAuthConfigRequest handles updateNeonAuthConfig operation.
 //
-// Updates the auth configuration for the branch.
-// Currently supports updating the application name used in auth emails.
+// Updates the auth configuration for the branch. Currently supports updating the application name used
+// in auth emails.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/config
 func (s *Server) handleUpdateNeonAuthConfigRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -36274,7 +36301,7 @@ func (s *Server) handleUpdateNeonAuthConfigRequest(args [2]string, argsEscaped b
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -36496,8 +36523,7 @@ func (s *Server) handleUpdateNeonAuthConfigRequest(args [2]string, argsEscaped b
 // handleUpdateNeonAuthEmailAndPasswordConfigRequest handles updateNeonAuthEmailAndPasswordConfig operation.
 //
 // Updates the email and password authentication configuration for the specified branch's Neon Auth
-// integration.
-// Only the fields provided in the request body are updated.
+// integration. Only the fields provided in the request body are updated.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/email_and_password
 func (s *Server) handleUpdateNeonAuthEmailAndPasswordConfigRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -36533,7 +36559,7 @@ func (s *Server) handleUpdateNeonAuthEmailAndPasswordConfigRequest(args [2]strin
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -36754,9 +36780,8 @@ func (s *Server) handleUpdateNeonAuthEmailAndPasswordConfigRequest(args [2]strin
 
 // handleUpdateNeonAuthEmailProviderRequest handles updateNeonAuthEmailProvider operation.
 //
-// Updates the email provider configuration for the specified branch's Neon Auth integration.
-// The email provider handles transactional messages such as verification emails and password reset
-// links.
+// Updates the email provider configuration for the specified branch's Neon Auth integration. The email
+// provider handles transactional messages such as verification emails and password reset links.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/email_provider
 func (s *Server) handleUpdateNeonAuthEmailProviderRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -36792,7 +36817,7 @@ func (s *Server) handleUpdateNeonAuthEmailProviderRequest(args [2]string, argsEs
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -37052,7 +37077,7 @@ func (s *Server) handleUpdateNeonAuthEmailServerRequest(args [1]string, argsEsca
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -37269,8 +37294,8 @@ func (s *Server) handleUpdateNeonAuthEmailServerRequest(args [1]string, argsEsca
 
 // handleUpdateNeonAuthMagicLinkPluginRequest handles updateNeonAuthMagicLinkPlugin operation.
 //
-// Updates the magic link plugin configuration for Neon Auth.
-// The magic link plugin enables passwordless authentication via email magic links.
+// Updates the magic link plugin configuration for Neon Auth. The magic link plugin enables
+// passwordless authentication via email magic links.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/magic-link
 func (s *Server) handleUpdateNeonAuthMagicLinkPluginRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -37306,7 +37331,7 @@ func (s *Server) handleUpdateNeonAuthMagicLinkPluginRequest(args [2]string, args
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -37567,7 +37592,7 @@ func (s *Server) handleUpdateNeonAuthOauthProviderRequest(args [2]string, argsEs
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -37788,8 +37813,8 @@ func (s *Server) handleUpdateNeonAuthOauthProviderRequest(args [2]string, argsEs
 
 // handleUpdateNeonAuthOrganizationPluginRequest handles updateNeonAuthOrganizationPlugin operation.
 //
-// Updates the organization plugin configuration for Neon Auth.
-// The organization plugin enables multi-tenant organization support.
+// Updates the organization plugin configuration for Neon Auth. The organization plugin enables
+// multi-tenant organization support.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/organization
 func (s *Server) handleUpdateNeonAuthOrganizationPluginRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -37825,7 +37850,7 @@ func (s *Server) handleUpdateNeonAuthOrganizationPluginRequest(args [2]string, a
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -38046,12 +38071,11 @@ func (s *Server) handleUpdateNeonAuthOrganizationPluginRequest(args [2]string, a
 
 // handleUpdateNeonAuthPhoneNumberPluginRequest handles updateNeonAuthPhoneNumberPlugin operation.
 //
-// Updates the phone number plugin configuration for Neon Auth.
-// Only the fields provided in the request body are updated; omitted fields retain their current
-// values.
-// The phone number plugin enables phone-based OTP authentication.
-// OTP codes are delivered via the `send.otp` webhook event with `delivery_preference: "sms"`.
-// A webhook must be configured with the `send.otp` event enabled for SMS delivery to work.
+// Updates the phone number plugin configuration for Neon Auth. Only the fields provided in the request
+// body are updated; omitted fields retain their current values. The phone number plugin enables
+// phone-based OTP authentication. OTP codes are delivered via the `send.otp` webhook event with
+// `delivery_preference: "sms"`. A webhook must be configured with the `send.otp` event enabled for SMS
+// delivery to work.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/phone-number
 func (s *Server) handleUpdateNeonAuthPhoneNumberPluginRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -38087,7 +38111,7 @@ func (s *Server) handleUpdateNeonAuthPhoneNumberPluginRequest(args [2]string, ar
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -38308,8 +38332,8 @@ func (s *Server) handleUpdateNeonAuthPhoneNumberPluginRequest(args [2]string, ar
 
 // handleUpdateNeonAuthUserRoleRequest handles updateNeonAuthUserRole operation.
 //
-// Updates the role of a user in the Neon Auth user directory for the specified branch.
-// The role controls the user's level of access within the Neon Auth integration.
+// Updates the role of a user in the Neon Auth user directory for the specified branch. The role
+// controls the user's level of access within the Neon Auth integration.
 //
 // PUT /projects/{project_id}/branches/{branch_id}/auth/users/{auth_user_id}/role
 func (s *Server) handleUpdateNeonAuthUserRoleRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -38345,7 +38369,7 @@ func (s *Server) handleUpdateNeonAuthUserRoleRequest(args [3]string, argsEscaped
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -38570,8 +38594,8 @@ func (s *Server) handleUpdateNeonAuthUserRoleRequest(args [3]string, argsEscaped
 
 // handleUpdateNeonAuthWebhookConfigRequest handles updateNeonAuthWebhookConfig operation.
 //
-// Updates the webhook configuration for the specified branch's Neon Auth integration.
-// Webhooks notify an external endpoint when auth events occur, such as user creation or sign-in.
+// Updates the webhook configuration for the specified branch's Neon Auth integration. Webhooks notify
+// an external endpoint when auth events occur, such as user creation or sign-in.
 //
 // PUT /projects/{project_id}/branches/{branch_id}/auth/webhooks
 func (s *Server) handleUpdateNeonAuthWebhookConfigRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -38607,7 +38631,7 @@ func (s *Server) handleUpdateNeonAuthWebhookConfigRequest(args [2]string, argsEs
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -38828,9 +38852,8 @@ func (s *Server) handleUpdateNeonAuthWebhookConfigRequest(args [2]string, argsEs
 
 // handleUpdateOrganizationMemberRequest handles updateOrganizationMember operation.
 //
-// Updates the role of an existing member in the specified organization.
-// The requested role must be valid for the organization.
-// Only organization admins can call this endpoint.
+// Updates the role of an existing member in the specified organization. The requested role must be
+// valid for the organization. Only organization admins can call this endpoint.
 //
 // PATCH /organizations/{org_id}/members/{member_id}
 func (s *Server) handleUpdateOrganizationMemberRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -38866,7 +38889,7 @@ func (s *Server) handleUpdateOrganizationMemberRequest(args [2]string, argsEscap
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -39087,9 +39110,8 @@ func (s *Server) handleUpdateOrganizationMemberRequest(args [2]string, argsEscap
 
 // handleUpdateProjectRequest handles updateProject operation.
 //
-// Updates the specified project.
-// Configurable properties include the project name, default compute settings, history retention
-// period, and IP allowlist.
+// Updates the specified project. Configurable properties include the project name, default compute
+// settings, history retention period, and IP allowlist.
 //
 // PATCH /projects/{project_id}
 func (s *Server) handleUpdateProjectRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -39125,7 +39147,7 @@ func (s *Server) handleUpdateProjectRequest(args [1]string, argsEscaped bool, w 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -39342,10 +39364,11 @@ func (s *Server) handleUpdateProjectRequest(args [1]string, argsEscaped bool, w 
 
 // handleUpdateProjectBranchRequest handles updateProjectBranch operation.
 //
-// Updates the specified branch.
-// For more information, see [Manage branches](https://neon.com/docs/manage/branches/).
+// Updates the specified branch. For more information, see [Manage branches].
 //
 // PATCH /projects/{project_id}/branches/{branch_id}
+//
+// [Manage branches]: https://neon.com/docs/manage/branches/
 func (s *Server) handleUpdateProjectBranchRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -39379,7 +39402,7 @@ func (s *Server) handleUpdateProjectBranchRequest(args [2]string, argsEscaped bo
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -39600,9 +39623,9 @@ func (s *Server) handleUpdateProjectBranchRequest(args [2]string, argsEscaped bo
 
 // handleUpdateProjectBranchDataAPIRequest handles updateProjectBranchDataAPI operation.
 //
-// Updates the Neon Data API configuration for the specified branch.
-// You can optionally provide settings to update the Data API configuration.
-// The schema cache is always refreshed as part of this operation.
+// Updates the Neon Data API configuration for the specified branch. You can optionally provide
+// settings to update the Data API configuration. The schema cache is always refreshed as part of this
+// operation.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/data-api/{database_name}
 func (s *Server) handleUpdateProjectBranchDataAPIRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -39638,7 +39661,7 @@ func (s *Server) handleUpdateProjectBranchDataAPIRequest(args [3]string, argsEsc
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -39863,10 +39886,11 @@ func (s *Server) handleUpdateProjectBranchDataAPIRequest(args [3]string, argsEsc
 
 // handleUpdateProjectBranchDatabaseRequest handles updateProjectBranchDatabase operation.
 //
-// Updates the specified database in the branch.
-// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
+// Updates the specified database in the branch. For related information, see [Manage databases].
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/databases/{database_name}
+//
+// [Manage databases]: https://neon.com/docs/manage/databases/
 func (s *Server) handleUpdateProjectBranchDatabaseRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -39900,7 +39924,7 @@ func (s *Server) handleUpdateProjectBranchDatabaseRequest(args [3]string, argsEs
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -40125,16 +40149,14 @@ func (s *Server) handleUpdateProjectBranchDatabaseRequest(args [3]string, argsEs
 
 // handleUpdateProjectBranchFunctionRequest handles updateProjectBranchFunction operation.
 //
-// Updates the function's mutable metadata — currently only the display
-// `name`. A string sets the display name; `null` clears it, after which
-// the function's `name` falls back to its slug. Leading and trailing
-// whitespace is trimmed; a whitespace-only name is rejected. Acts only
-// on a function owned by the branch: a slug that is only inherited from
-// an ancestor branch returns 404 — rename it on the branch that owns
-// it. Like every other change on a branch, a rename is isolated per
-// branch: a branch forked before the rename keeps the name it had at
-// fork time.
-// **Note**: This endpoint is currently in Private Beta.
+// Updates the function's mutable metadata — currently only the display `name`. A string sets the
+// display name; `null` clears it, after which the function's `name` falls back to its slug. Leading
+// and trailing whitespace is trimmed; a whitespace-only name is rejected. Acts only on a function
+// owned by the branch: a slug that is only inherited from an ancestor branch returns 404 — rename it
+// on the branch that owns it. Like every other change on a branch, a rename is isolated per branch: a
+// branch forked before the rename keeps the name it had at fork time.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/functions/{slug}
 func (s *Server) handleUpdateProjectBranchFunctionRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -40170,7 +40192,7 @@ func (s *Server) handleUpdateProjectBranchFunctionRequest(args [3]string, argsEs
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -40396,15 +40418,18 @@ func (s *Server) handleUpdateProjectBranchFunctionRequest(args [3]string, argsEs
 // handleUpdateProjectEndpointRequest handles updateProjectEndpoint operation.
 //
 // Updates the specified compute endpoint.
-// An `endpoint_id` has an `ep-` prefix. A `branch_id` has a `br-` prefix.
-// For more information about compute endpoints, see [Manage computes](https://neon.
-// com/docs/manage/endpoints/).
-// If the returned list of operations is not empty, the compute endpoint is not ready to use.
-// The client must wait for the last operation to finish before using the compute endpoint.
-// If the compute endpoint was idle before the update, it becomes active for a short period of time,
-// and the control plane suspends it again after the update.
+//
+// An `endpoint_id` has an `ep-` prefix. A `branch_id` has a `br-` prefix. For more information about
+// compute endpoints, see [Manage computes].
+//
+// If the returned list of operations is not empty, the compute endpoint is not ready to use. The
+// client must wait for the last operation to finish before using the compute endpoint. If the compute
+// endpoint was idle before the update, it becomes active for a short period of time, and the control
+// plane suspends it again after the update.
 //
 // PATCH /projects/{project_id}/endpoints/{endpoint_id}
+//
+// [Manage computes]: https://neon.com/docs/manage/endpoints/
 func (s *Server) handleUpdateProjectEndpointRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -40438,7 +40463,7 @@ func (s *Server) handleUpdateProjectEndpointRequest(args [2]string, argsEscaped 
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
@@ -40660,7 +40685,8 @@ func (s *Server) handleUpdateProjectEndpointRequest(args [2]string, argsEscaped 
 // handleUpdateSnapshotRequest handles updateSnapshot operation.
 //
 // Updates the specified snapshot.
-// **Note**: This endpoint is currently in Beta.
+//
+// Note: This endpoint is currently in Beta.
 //
 // PATCH /projects/{project_id}/snapshots/{snapshot_id}
 func (s *Server) handleUpdateSnapshotRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -40696,7 +40722,7 @@ func (s *Server) handleUpdateSnapshotRequest(args [2]string, argsEscaped bool, w
 		if code != 0 {
 			codeAttr := semconv.HTTPResponseStatusCode(code)
 			attrs = append(attrs, codeAttr)
-			span.SetAttributes(codeAttr)
+			span.SetAttributes(attrs...)
 		}
 		attrOpt := metric.WithAttributes(attrs...)
 
