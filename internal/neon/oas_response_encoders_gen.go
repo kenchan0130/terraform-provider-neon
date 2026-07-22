@@ -19,14 +19,12 @@ func encodeAcceptProjectTransferRequestResponse(response AcceptProjectTransferRe
 	switch response := response.(type) {
 	case *AcceptProjectTransferRequestNoContent:
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
 	case *AcceptProjectTransferRequestSatisfiesPlanError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(406)
-		span.SetStatus(codes.Error, http.StatusText(406))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -44,7 +42,6 @@ func encodeAcceptProjectTransferRequestResponse(response AcceptProjectTransferRe
 func encodeAddBranchNeonAuthOauthProviderResponse(response *NeonAuthOauthProvider, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -57,14 +54,12 @@ func encodeAddBranchNeonAuthOauthProviderResponse(response *NeonAuthOauthProvide
 
 func encodeAddBranchNeonAuthTrustedDomainResponse(response *AddBranchNeonAuthTrustedDomainCreated, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(201)
-	span.SetStatus(codes.Ok, http.StatusText(201))
 
 	return nil
 }
 
 func encodeAddNeonAuthDomainToRedirectURIWhitelistResponse(response *AddNeonAuthDomainToRedirectURIWhitelistCreated, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(201)
-	span.SetStatus(codes.Ok, http.StatusText(201))
 
 	return nil
 }
@@ -72,7 +67,6 @@ func encodeAddNeonAuthDomainToRedirectURIWhitelistResponse(response *AddNeonAuth
 func encodeAddNeonAuthOauthProviderResponse(response *NeonAuthOauthProvider, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -86,7 +80,6 @@ func encodeAddNeonAuthOauthProviderResponse(response *NeonAuthOauthProvider, w h
 func encodeAddProjectJWKSResponse(response *JWKSCreationOperation, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
-	span.SetStatus(codes.Ok, http.StatusText(201))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -99,14 +92,12 @@ func encodeAddProjectJWKSResponse(response *JWKSCreationOperation, w http.Respon
 
 func encodeAssignOrganizationVPCEndpointResponse(response *AssignOrganizationVPCEndpointOK, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	return nil
 }
 
 func encodeAssignProjectVPCEndpointResponse(response *AssignProjectVPCEndpointOK, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	return nil
 }
@@ -114,7 +105,6 @@ func encodeAssignProjectVPCEndpointResponse(response *AssignProjectVPCEndpointOK
 func encodeCountProjectBranchesResponse(response *BranchesCountResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -128,7 +118,6 @@ func encodeCountProjectBranchesResponse(response *BranchesCountResponse, w http.
 func encodeCreateApiKeyResponse(response *ApiKeyCreateResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -142,7 +131,6 @@ func encodeCreateApiKeyResponse(response *ApiKeyCreateResponse, w http.ResponseW
 func encodeCreateBranchNeonAuthNewUserResponse(response *NeonAuthCreateNewUserResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
-	span.SetStatus(codes.Ok, http.StatusText(201))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -156,7 +144,6 @@ func encodeCreateBranchNeonAuthNewUserResponse(response *NeonAuthCreateNewUserRe
 func encodeCreateCredentialResponse(response *CreateCredentialResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
-	span.SetStatus(codes.Ok, http.StatusText(201))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -170,7 +157,6 @@ func encodeCreateCredentialResponse(response *CreateCredentialResponse, w http.R
 func encodeCreateNeonAuthResponse(response *NeonAuthCreateIntegrationResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
-	span.SetStatus(codes.Ok, http.StatusText(201))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -184,7 +170,6 @@ func encodeCreateNeonAuthResponse(response *NeonAuthCreateIntegrationResponse, w
 func encodeCreateNeonAuthIntegrationResponse(response *NeonAuthCreateIntegrationResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
-	span.SetStatus(codes.Ok, http.StatusText(201))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -198,7 +183,6 @@ func encodeCreateNeonAuthIntegrationResponse(response *NeonAuthCreateIntegration
 func encodeCreateNeonAuthNewUserResponse(response *NeonAuthCreateNewUserResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
-	span.SetStatus(codes.Ok, http.StatusText(201))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -212,7 +196,6 @@ func encodeCreateNeonAuthNewUserResponse(response *NeonAuthCreateNewUserResponse
 func encodeCreateNeonAuthProviderSDKKeysResponse(response *NeonAuthCreateIntegrationResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
-	span.SetStatus(codes.Ok, http.StatusText(201))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -226,7 +209,6 @@ func encodeCreateNeonAuthProviderSDKKeysResponse(response *NeonAuthCreateIntegra
 func encodeCreateOrgApiKeyResponse(response *OrgApiKeyCreateResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -240,7 +222,6 @@ func encodeCreateOrgApiKeyResponse(response *OrgApiKeyCreateResponse, w http.Res
 func encodeCreateOrganizationInvitationsResponse(response *OrganizationInvitationsResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -254,7 +235,6 @@ func encodeCreateOrganizationInvitationsResponse(response *OrganizationInvitatio
 func encodeCreateProjectResponse(response *CreatedProject, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
-	span.SetStatus(codes.Ok, http.StatusText(201))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -268,7 +248,6 @@ func encodeCreateProjectResponse(response *CreatedProject, w http.ResponseWriter
 func encodeCreateProjectBranchResponse(response *CreatedBranch, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
-	span.SetStatus(codes.Ok, http.StatusText(201))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -282,7 +261,6 @@ func encodeCreateProjectBranchResponse(response *CreatedBranch, w http.ResponseW
 func encodeCreateProjectBranchAnonymizedResponse(response *CreatedBranch, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
-	span.SetStatus(codes.Ok, http.StatusText(201))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -298,7 +276,6 @@ func encodeCreateProjectBranchBucketResponse(response CreateProjectBranchBucketR
 	case *BucketResponse:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(201)
-		span.SetStatus(codes.Ok, http.StatusText(201))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -311,7 +288,6 @@ func encodeCreateProjectBranchBucketResponse(response CreateProjectBranchBucketR
 	case *GeneralError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(410)
-		span.SetStatus(codes.Error, http.StatusText(410))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -329,7 +305,6 @@ func encodeCreateProjectBranchBucketResponse(response CreateProjectBranchBucketR
 func encodeCreateProjectBranchDataAPIResponse(response *DataAPICreateResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
-	span.SetStatus(codes.Ok, http.StatusText(201))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -343,7 +318,6 @@ func encodeCreateProjectBranchDataAPIResponse(response *DataAPICreateResponse, w
 func encodeCreateProjectBranchDatabaseResponse(response *DatabaseOperations, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
-	span.SetStatus(codes.Ok, http.StatusText(201))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -357,7 +331,6 @@ func encodeCreateProjectBranchDatabaseResponse(response *DatabaseOperations, w h
 func encodeCreateProjectBranchFunctionDeploymentResponse(response *NeonFunctionDeploymentResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
-	span.SetStatus(codes.Ok, http.StatusText(201))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -371,7 +344,6 @@ func encodeCreateProjectBranchFunctionDeploymentResponse(response *NeonFunctionD
 func encodeCreateProjectBranchRoleResponse(response *RoleOperations, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
-	span.SetStatus(codes.Ok, http.StatusText(201))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -385,7 +357,6 @@ func encodeCreateProjectBranchRoleResponse(response *RoleOperations, w http.Resp
 func encodeCreateProjectEndpointResponse(response *EndpointOperations, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
-	span.SetStatus(codes.Ok, http.StatusText(201))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -399,7 +370,6 @@ func encodeCreateProjectEndpointResponse(response *EndpointOperations, w http.Re
 func encodeCreateProjectTransferRequestResponse(response *ProjectTransferRequestResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
-	span.SetStatus(codes.Ok, http.StatusText(201))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -413,7 +383,6 @@ func encodeCreateProjectTransferRequestResponse(response *ProjectTransferRequest
 func encodeCreateSnapshotResponse(response *CreateSnapshotOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -426,49 +395,42 @@ func encodeCreateSnapshotResponse(response *CreateSnapshotOK, w http.ResponseWri
 
 func encodeDeleteBranchNeonAuthOauthProviderResponse(response *DeleteBranchNeonAuthOauthProviderOK, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	return nil
 }
 
 func encodeDeleteBranchNeonAuthTrustedDomainResponse(response *DeleteBranchNeonAuthTrustedDomainOK, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	return nil
 }
 
 func encodeDeleteBranchNeonAuthUserResponse(response *DeleteBranchNeonAuthUserNoContent, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(204)
-	span.SetStatus(codes.Ok, http.StatusText(204))
 
 	return nil
 }
 
 func encodeDeleteNeonAuthDomainFromRedirectURIWhitelistResponse(response *DeleteNeonAuthDomainFromRedirectURIWhitelistOK, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	return nil
 }
 
 func encodeDeleteNeonAuthIntegrationResponse(response *DeleteNeonAuthIntegrationOK, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	return nil
 }
 
 func encodeDeleteNeonAuthOauthProviderResponse(response *DeleteNeonAuthOauthProviderOK, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	return nil
 }
 
 func encodeDeleteNeonAuthUserResponse(response *DeleteNeonAuthUserNoContent, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(204)
-	span.SetStatus(codes.Ok, http.StatusText(204))
 
 	return nil
 }
@@ -476,7 +438,6 @@ func encodeDeleteNeonAuthUserResponse(response *DeleteNeonAuthUserNoContent, w h
 func encodeDeleteOrganizationSpendingLimitResponse(response *EmptyResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -489,7 +450,6 @@ func encodeDeleteOrganizationSpendingLimitResponse(response *EmptyResponse, w ht
 
 func encodeDeleteOrganizationVPCEndpointResponse(response *DeleteOrganizationVPCEndpointOK, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	return nil
 }
@@ -497,7 +457,6 @@ func encodeDeleteOrganizationVPCEndpointResponse(response *DeleteOrganizationVPC
 func encodeDeleteProjectResponse(response *ProjectResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -513,7 +472,6 @@ func encodeDeleteProjectBranchResponse(response DeleteProjectBranchRes, w http.R
 	case *BranchOperations:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -525,7 +483,6 @@ func encodeDeleteProjectBranchResponse(response DeleteProjectBranchRes, w http.R
 
 	case *DeleteProjectBranchNoContent:
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
@@ -538,14 +495,12 @@ func encodeDeleteProjectBranchBucketResponse(response DeleteProjectBranchBucketR
 	switch response := response.(type) {
 	case *DeleteProjectBranchBucketNoContent:
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
 	case *GeneralError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -564,14 +519,12 @@ func encodeDeleteProjectBranchBucketObjectResponse(response DeleteProjectBranchB
 	switch response := response.(type) {
 	case *DeleteProjectBranchBucketObjectNoContent:
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
 	case *GeneralError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -591,7 +544,6 @@ func encodeDeleteProjectBranchBucketObjectsByPrefixResponse(response DeleteProje
 	case *BucketObjectsDeletePrefixResponse:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -604,7 +556,6 @@ func encodeDeleteProjectBranchBucketObjectsByPrefixResponse(response DeleteProje
 	case *GeneralError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -622,7 +573,6 @@ func encodeDeleteProjectBranchBucketObjectsByPrefixResponse(response DeleteProje
 func encodeDeleteProjectBranchDataAPIResponse(response *EmptyResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -638,7 +588,6 @@ func encodeDeleteProjectBranchDatabaseResponse(response DeleteProjectBranchDatab
 	case *DatabaseOperations:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -650,7 +599,6 @@ func encodeDeleteProjectBranchDatabaseResponse(response DeleteProjectBranchDatab
 
 	case *DeleteProjectBranchDatabaseNoContent:
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
@@ -661,7 +609,6 @@ func encodeDeleteProjectBranchDatabaseResponse(response DeleteProjectBranchDatab
 
 func encodeDeleteProjectBranchFunctionResponse(response *DeleteProjectBranchFunctionNoContent, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(204)
-	span.SetStatus(codes.Ok, http.StatusText(204))
 
 	return nil
 }
@@ -671,7 +618,6 @@ func encodeDeleteProjectBranchRoleResponse(response DeleteProjectBranchRoleRes, 
 	case *RoleOperations:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -683,7 +629,6 @@ func encodeDeleteProjectBranchRoleResponse(response DeleteProjectBranchRoleRes, 
 
 	case *DeleteProjectBranchRoleNoContent:
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
@@ -697,7 +642,6 @@ func encodeDeleteProjectEndpointResponse(response DeleteProjectEndpointRes, w ht
 	case *EndpointOperations:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -709,7 +653,6 @@ func encodeDeleteProjectEndpointResponse(response DeleteProjectEndpointRes, w ht
 
 	case *DeleteProjectEndpointNoContent:
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
@@ -721,7 +664,6 @@ func encodeDeleteProjectEndpointResponse(response DeleteProjectEndpointRes, w ht
 func encodeDeleteProjectJWKSResponse(response *JWKS, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -734,7 +676,6 @@ func encodeDeleteProjectJWKSResponse(response *JWKS, w http.ResponseWriter, span
 
 func encodeDeleteProjectVPCEndpointResponse(response *DeleteProjectVPCEndpointOK, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	return nil
 }
@@ -742,7 +683,6 @@ func encodeDeleteProjectVPCEndpointResponse(response *DeleteProjectVPCEndpointOK
 func encodeDeleteSnapshotResponse(response *OperationsResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(202)
-	span.SetStatus(codes.Ok, http.StatusText(202))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -755,7 +695,6 @@ func encodeDeleteSnapshotResponse(response *OperationsResponse, w http.ResponseW
 
 func encodeDisableNeonAuthResponse(response *DisableNeonAuthOK, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	return nil
 }
@@ -763,7 +702,6 @@ func encodeDisableNeonAuthResponse(response *DisableNeonAuthOK, w http.ResponseW
 func encodeFinalizeRestoreBranchResponse(response *OperationsResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -777,7 +715,6 @@ func encodeFinalizeRestoreBranchResponse(response *OperationsResponse, w http.Re
 func encodeGetActiveRegionsResponse(response *ActiveRegionsResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -791,7 +728,6 @@ func encodeGetActiveRegionsResponse(response *ActiveRegionsResponse, w http.Resp
 func encodeGetAnonymizedBranchStatusResponse(response *AnonymizedBranchStatusResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -805,7 +741,6 @@ func encodeGetAnonymizedBranchStatusResponse(response *AnonymizedBranchStatusRes
 func encodeGetAuthDetailsResponse(response *AuthDetailsResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -819,7 +754,6 @@ func encodeGetAuthDetailsResponse(response *AuthDetailsResponse, w http.Response
 func encodeGetAvailablePreloadLibrariesResponse(response *AvailablePreloadLibraries, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -833,7 +767,6 @@ func encodeGetAvailablePreloadLibrariesResponse(response *AvailablePreloadLibrar
 func encodeGetConnectionURIResponse(response *ConnectionURIResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -849,7 +782,6 @@ func encodeGetConsumptionHistoryPerBranchV2Response(response GetConsumptionHisto
 	case *GetConsumptionHistoryPerBranchV2OK:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -862,7 +794,6 @@ func encodeGetConsumptionHistoryPerBranchV2Response(response GetConsumptionHisto
 	case *GetConsumptionHistoryPerBranchV2Forbidden:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(403)
-		span.SetStatus(codes.Error, http.StatusText(403))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -875,7 +806,6 @@ func encodeGetConsumptionHistoryPerBranchV2Response(response GetConsumptionHisto
 	case *GetConsumptionHistoryPerBranchV2NotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -888,7 +818,6 @@ func encodeGetConsumptionHistoryPerBranchV2Response(response GetConsumptionHisto
 	case *GetConsumptionHistoryPerBranchV2NotAcceptable:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(406)
-		span.SetStatus(codes.Error, http.StatusText(406))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -901,7 +830,6 @@ func encodeGetConsumptionHistoryPerBranchV2Response(response GetConsumptionHisto
 	case *GetConsumptionHistoryPerBranchV2TooManyRequests:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
-		span.SetStatus(codes.Error, http.StatusText(429))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -921,7 +849,6 @@ func encodeGetConsumptionHistoryPerProjectResponse(response GetConsumptionHistor
 	case *GetConsumptionHistoryPerProjectOK:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -934,7 +861,6 @@ func encodeGetConsumptionHistoryPerProjectResponse(response GetConsumptionHistor
 	case *GetConsumptionHistoryPerProjectForbidden:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(403)
-		span.SetStatus(codes.Error, http.StatusText(403))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -947,7 +873,6 @@ func encodeGetConsumptionHistoryPerProjectResponse(response GetConsumptionHistor
 	case *GetConsumptionHistoryPerProjectNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -960,7 +885,6 @@ func encodeGetConsumptionHistoryPerProjectResponse(response GetConsumptionHistor
 	case *GetConsumptionHistoryPerProjectNotAcceptable:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(406)
-		span.SetStatus(codes.Error, http.StatusText(406))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -973,7 +897,6 @@ func encodeGetConsumptionHistoryPerProjectResponse(response GetConsumptionHistor
 	case *GetConsumptionHistoryPerProjectTooManyRequests:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
-		span.SetStatus(codes.Error, http.StatusText(429))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -993,7 +916,6 @@ func encodeGetConsumptionHistoryPerProjectV2Response(response GetConsumptionHist
 	case *GetConsumptionHistoryPerProjectV2OK:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1006,7 +928,6 @@ func encodeGetConsumptionHistoryPerProjectV2Response(response GetConsumptionHist
 	case *GetConsumptionHistoryPerProjectV2Forbidden:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(403)
-		span.SetStatus(codes.Error, http.StatusText(403))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1019,7 +940,6 @@ func encodeGetConsumptionHistoryPerProjectV2Response(response GetConsumptionHist
 	case *GetConsumptionHistoryPerProjectV2NotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1032,7 +952,6 @@ func encodeGetConsumptionHistoryPerProjectV2Response(response GetConsumptionHist
 	case *GetConsumptionHistoryPerProjectV2NotAcceptable:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(406)
-		span.SetStatus(codes.Error, http.StatusText(406))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1045,7 +964,6 @@ func encodeGetConsumptionHistoryPerProjectV2Response(response GetConsumptionHist
 	case *GetConsumptionHistoryPerProjectV2TooManyRequests:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(429)
-		span.SetStatus(codes.Error, http.StatusText(429))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1063,7 +981,6 @@ func encodeGetConsumptionHistoryPerProjectV2Response(response GetConsumptionHist
 func encodeGetCurrentUserInfoResponse(response *CurrentUserInfoResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1077,7 +994,6 @@ func encodeGetCurrentUserInfoResponse(response *CurrentUserInfoResponse, w http.
 func encodeGetCurrentUserOrganizationsResponse(response *OrganizationsResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1091,7 +1007,6 @@ func encodeGetCurrentUserOrganizationsResponse(response *OrganizationsResponse, 
 func encodeGetMaskingRulesResponse(response *MaskingRulesResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1105,7 +1020,6 @@ func encodeGetMaskingRulesResponse(response *MaskingRulesResponse, w http.Respon
 func encodeGetNeonAuthResponse(response *NeonAuthIntegration, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1119,7 +1033,6 @@ func encodeGetNeonAuthResponse(response *NeonAuthIntegration, w http.ResponseWri
 func encodeGetNeonAuthAllowLocalhostResponse(response *NeonAuthAllowLocalhostResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1133,7 +1046,6 @@ func encodeGetNeonAuthAllowLocalhostResponse(response *NeonAuthAllowLocalhostRes
 func encodeGetNeonAuthEmailAndPasswordConfigResponse(response *NeonAuthEmailAndPasswordConfig, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1147,7 +1059,6 @@ func encodeGetNeonAuthEmailAndPasswordConfigResponse(response *NeonAuthEmailAndP
 func encodeGetNeonAuthEmailProviderResponse(response *NeonAuthEmailServerConfig, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1161,7 +1072,6 @@ func encodeGetNeonAuthEmailProviderResponse(response *NeonAuthEmailServerConfig,
 func encodeGetNeonAuthEmailServerResponse(response *NeonAuthEmailServerConfig, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1175,7 +1085,6 @@ func encodeGetNeonAuthEmailServerResponse(response *NeonAuthEmailServerConfig, w
 func encodeGetNeonAuthPhoneNumberPluginResponse(response *NeonAuthPhoneNumberConfig, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1189,7 +1098,6 @@ func encodeGetNeonAuthPhoneNumberPluginResponse(response *NeonAuthPhoneNumberCon
 func encodeGetNeonAuthPluginConfigsResponse(response *NeonAuthPluginConfigs, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1203,7 +1111,6 @@ func encodeGetNeonAuthPluginConfigsResponse(response *NeonAuthPluginConfigs, w h
 func encodeGetNeonAuthWebhookConfigResponse(response *NeonAuthWebhookConfig, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1217,7 +1124,6 @@ func encodeGetNeonAuthWebhookConfigResponse(response *NeonAuthWebhookConfig, w h
 func encodeGetOrganizationResponse(response *Organization, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1231,7 +1137,6 @@ func encodeGetOrganizationResponse(response *Organization, w http.ResponseWriter
 func encodeGetOrganizationInvitationsResponse(response *OrganizationInvitationsResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1245,7 +1150,6 @@ func encodeGetOrganizationInvitationsResponse(response *OrganizationInvitationsR
 func encodeGetOrganizationMemberResponse(response *Member, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1259,7 +1163,6 @@ func encodeGetOrganizationMemberResponse(response *Member, w http.ResponseWriter
 func encodeGetOrganizationMembersResponse(response *GetOrganizationMembersOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1273,7 +1176,6 @@ func encodeGetOrganizationMembersResponse(response *GetOrganizationMembersOK, w 
 func encodeGetOrganizationSpendingLimitResponse(response *SpendingLimitResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1287,7 +1189,6 @@ func encodeGetOrganizationSpendingLimitResponse(response *SpendingLimitResponse,
 func encodeGetOrganizationVPCEndpointDetailsResponse(response *VPCEndpointDetails, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1301,7 +1202,6 @@ func encodeGetOrganizationVPCEndpointDetailsResponse(response *VPCEndpointDetail
 func encodeGetProjectResponse(response *ProjectResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1315,7 +1215,6 @@ func encodeGetProjectResponse(response *ProjectResponse, w http.ResponseWriter, 
 func encodeGetProjectAdvisorSecurityIssuesResponse(response *GetProjectAdvisorSecurityIssuesOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1329,7 +1228,6 @@ func encodeGetProjectAdvisorSecurityIssuesResponse(response *GetProjectAdvisorSe
 func encodeGetProjectBranchResponse(response *GetProjectBranchOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1345,7 +1243,6 @@ func encodeGetProjectBranchAiGatewayResponse(response GetProjectBranchAiGatewayR
 	case *BranchAiGateway:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1358,7 +1255,6 @@ func encodeGetProjectBranchAiGatewayResponse(response GetProjectBranchAiGatewayR
 	case *BranchAiGatewayNotEnabled:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1443,7 +1339,6 @@ func encodeGetProjectBranchBucketObjectResponse(response GetProjectBranchBucketO
 			}
 		}
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		writer := w
 		if closer, ok := response.Response.Data.(io.Closer); ok {
@@ -1458,7 +1353,6 @@ func encodeGetProjectBranchBucketObjectResponse(response GetProjectBranchBucketO
 	case *GeneralError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1476,7 +1370,6 @@ func encodeGetProjectBranchBucketObjectResponse(response GetProjectBranchBucketO
 func encodeGetProjectBranchDataAPIResponse(response *DataAPIReponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1490,7 +1383,6 @@ func encodeGetProjectBranchDataAPIResponse(response *DataAPIReponse, w http.Resp
 func encodeGetProjectBranchDatabaseResponse(response *DatabaseResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1504,7 +1396,6 @@ func encodeGetProjectBranchDatabaseResponse(response *DatabaseResponse, w http.R
 func encodeGetProjectBranchFunctionResponse(response *NeonFunctionResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1518,7 +1409,6 @@ func encodeGetProjectBranchFunctionResponse(response *NeonFunctionResponse, w ht
 func encodeGetProjectBranchRoleResponse(response *RoleResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1534,7 +1424,6 @@ func encodeGetProjectBranchRolePasswordResponse(response GetProjectBranchRolePas
 	case *RolePasswordResponse:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1547,7 +1436,6 @@ func encodeGetProjectBranchRolePasswordResponse(response GetProjectBranchRolePas
 	case *GetProjectBranchRolePasswordNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1560,7 +1448,6 @@ func encodeGetProjectBranchRolePasswordResponse(response GetProjectBranchRolePas
 	case *GetProjectBranchRolePasswordPreconditionFailed:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(412)
-		span.SetStatus(codes.Error, http.StatusText(412))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1578,7 +1465,6 @@ func encodeGetProjectBranchRolePasswordResponse(response GetProjectBranchRolePas
 func encodeGetProjectBranchSchemaResponse(response *BranchSchemaResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1592,7 +1478,6 @@ func encodeGetProjectBranchSchemaResponse(response *BranchSchemaResponse, w http
 func encodeGetProjectBranchSchemaComparisonResponse(response *BranchSchemaCompareResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1608,7 +1493,6 @@ func encodeGetProjectBranchStorageResponse(response GetProjectBranchStorageRes, 
 	case *BranchStorage:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1621,7 +1505,6 @@ func encodeGetProjectBranchStorageResponse(response GetProjectBranchStorageRes, 
 	case *BranchStorageNotEnabled:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1639,7 +1522,6 @@ func encodeGetProjectBranchStorageResponse(response GetProjectBranchStorageRes, 
 func encodeGetProjectEndpointResponse(response *EndpointResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1653,7 +1535,6 @@ func encodeGetProjectEndpointResponse(response *EndpointResponse, w http.Respons
 func encodeGetProjectJWKSResponse(response *ProjectJWKSResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1667,7 +1548,6 @@ func encodeGetProjectJWKSResponse(response *ProjectJWKSResponse, w http.Response
 func encodeGetProjectOperationResponse(response *OperationResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1681,7 +1561,6 @@ func encodeGetProjectOperationResponse(response *OperationResponse, w http.Respo
 func encodeGetSnapshotScheduleResponse(response *BackupSchedule, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1695,7 +1574,6 @@ func encodeGetSnapshotScheduleResponse(response *BackupSchedule, w http.Response
 func encodeGrantPermissionToProjectResponse(response *ProjectPermission, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1709,7 +1587,6 @@ func encodeGrantPermissionToProjectResponse(response *ProjectPermission, w http.
 func encodeListApiKeysResponse(response []ApiKeysListResponseItem, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	e.ArrStart()
@@ -1727,7 +1604,6 @@ func encodeListApiKeysResponse(response []ApiKeysListResponseItem, w http.Respon
 func encodeListBranchNeonAuthOauthProvidersResponse(response *ListNeonAuthOauthProvidersResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1741,7 +1617,6 @@ func encodeListBranchNeonAuthOauthProvidersResponse(response *ListNeonAuthOauthP
 func encodeListBranchNeonAuthTrustedDomainsResponse(response *NeonAuthRedirectURIWhitelistResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1755,7 +1630,6 @@ func encodeListBranchNeonAuthTrustedDomainsResponse(response *NeonAuthRedirectUR
 func encodeListCredentialsResponse(response *ListCredentialsResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1769,7 +1643,6 @@ func encodeListCredentialsResponse(response *ListCredentialsResponse, w http.Res
 func encodeListNeonAuthIntegrationsResponse(response *ListNeonAuthIntegrationsResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1783,7 +1656,6 @@ func encodeListNeonAuthIntegrationsResponse(response *ListNeonAuthIntegrationsRe
 func encodeListNeonAuthOauthProvidersResponse(response *ListNeonAuthOauthProvidersResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1797,7 +1669,6 @@ func encodeListNeonAuthOauthProvidersResponse(response *ListNeonAuthOauthProvide
 func encodeListNeonAuthRedirectURIWhitelistDomainsResponse(response *NeonAuthRedirectURIWhitelistResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1811,7 +1682,6 @@ func encodeListNeonAuthRedirectURIWhitelistDomainsResponse(response *NeonAuthRed
 func encodeListOrgApiKeysResponse(response []OrgApiKeysListResponseItem, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	e.ArrStart()
@@ -1829,7 +1699,6 @@ func encodeListOrgApiKeysResponse(response []OrgApiKeysListResponseItem, w http.
 func encodeListOrganizationVPCEndpointsResponse(response *VPCEndpointsResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1843,7 +1712,6 @@ func encodeListOrganizationVPCEndpointsResponse(response *VPCEndpointsResponse, 
 func encodeListOrganizationVPCEndpointsAllRegionsResponse(response *VPCEndpointsWithRegionResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1857,7 +1725,6 @@ func encodeListOrganizationVPCEndpointsAllRegionsResponse(response *VPCEndpoints
 func encodeListProjectBranchBucketObjectsResponse(response *BucketObjectsListResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1871,7 +1738,6 @@ func encodeListProjectBranchBucketObjectsResponse(response *BucketObjectsListRes
 func encodeListProjectBranchBucketsResponse(response *BucketsListResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1885,7 +1751,6 @@ func encodeListProjectBranchBucketsResponse(response *BucketsListResponse, w htt
 func encodeListProjectBranchDatabasesResponse(response *DatabasesResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1899,7 +1764,6 @@ func encodeListProjectBranchDatabasesResponse(response *DatabasesResponse, w htt
 func encodeListProjectBranchEndpointsResponse(response *EndpointsResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1913,7 +1777,6 @@ func encodeListProjectBranchEndpointsResponse(response *EndpointsResponse, w htt
 func encodeListProjectBranchFunctionsResponse(response *ListProjectBranchFunctionsOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1927,7 +1790,6 @@ func encodeListProjectBranchFunctionsResponse(response *ListProjectBranchFunctio
 func encodeListProjectBranchRolesResponse(response *RolesResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1941,7 +1803,6 @@ func encodeListProjectBranchRolesResponse(response *RolesResponse, w http.Respon
 func encodeListProjectBranchesResponse(response *ListProjectBranchesOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1955,7 +1816,6 @@ func encodeListProjectBranchesResponse(response *ListProjectBranchesOK, w http.R
 func encodeListProjectEndpointsResponse(response *EndpointsResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1969,7 +1829,6 @@ func encodeListProjectEndpointsResponse(response *EndpointsResponse, w http.Resp
 func encodeListProjectOperationsResponse(response *ListOperations, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1983,7 +1842,6 @@ func encodeListProjectOperationsResponse(response *ListOperations, w http.Respon
 func encodeListProjectPermissionsResponse(response *ProjectPermissions, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -1997,7 +1855,6 @@ func encodeListProjectPermissionsResponse(response *ProjectPermissions, w http.R
 func encodeListProjectVPCEndpointsResponse(response *VPCEndpointsResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2011,7 +1868,6 @@ func encodeListProjectVPCEndpointsResponse(response *VPCEndpointsResponse, w htt
 func encodeListProjectsResponse(response *ListProjectsOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2025,7 +1881,6 @@ func encodeListProjectsResponse(response *ListProjectsOK, w http.ResponseWriter,
 func encodeListSharedProjectsResponse(response *ListSharedProjectsOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2039,7 +1894,6 @@ func encodeListSharedProjectsResponse(response *ListSharedProjectsOK, w http.Res
 func encodeListSnapshotsResponse(response *ListSnapshotsOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2055,7 +1909,6 @@ func encodePresignProjectBranchBucketObjectResponse(response PresignProjectBranc
 	case *PresignResponse:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -2068,7 +1921,6 @@ func encodePresignProjectBranchBucketObjectResponse(response PresignProjectBranc
 	case *GeneralError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -2086,7 +1938,6 @@ func encodePresignProjectBranchBucketObjectResponse(response PresignProjectBranc
 func encodeRecoverProjectResponse(response *ProjectRecoverResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2100,7 +1951,6 @@ func encodeRecoverProjectResponse(response *ProjectRecoverResponse, w http.Respo
 func encodeRecoverProjectBranchResponse(response *BranchRecoverResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2114,7 +1964,6 @@ func encodeRecoverProjectBranchResponse(response *BranchRecoverResponse, w http.
 func encodeRemoveOrganizationMemberResponse(response *EmptyResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2128,7 +1977,6 @@ func encodeRemoveOrganizationMemberResponse(response *EmptyResponse, w http.Resp
 func encodeResetProjectBranchRolePasswordResponse(response *RoleOperations, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2142,7 +1990,6 @@ func encodeResetProjectBranchRolePasswordResponse(response *RoleOperations, w ht
 func encodeRestartProjectEndpointResponse(response *EndpointOperations, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2156,7 +2003,6 @@ func encodeRestartProjectEndpointResponse(response *EndpointOperations, w http.R
 func encodeRestoreProjectBranchResponse(response *BranchOperations, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2170,7 +2016,6 @@ func encodeRestoreProjectBranchResponse(response *BranchOperations, w http.Respo
 func encodeRestoreSnapshotResponse(response *RestoredSnapshot, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2184,7 +2029,6 @@ func encodeRestoreSnapshotResponse(response *RestoredSnapshot, w http.ResponseWr
 func encodeRevokeApiKeyResponse(response *ApiKeyRevokeResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2199,14 +2043,12 @@ func encodeRevokeCredentialResponse(response RevokeCredentialRes, w http.Respons
 	switch response := response.(type) {
 	case *RevokeCredentialNoContent:
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
 	case *GeneralError:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -2224,7 +2066,6 @@ func encodeRevokeCredentialResponse(response RevokeCredentialRes, w http.Respons
 func encodeRevokeOrgApiKeyResponse(response *OrgApiKeyRevokeResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2238,7 +2079,6 @@ func encodeRevokeOrgApiKeyResponse(response *OrgApiKeyRevokeResponse, w http.Res
 func encodeRevokePermissionFromProjectResponse(response *ProjectPermission, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2252,7 +2092,6 @@ func encodeRevokePermissionFromProjectResponse(response *ProjectPermission, w ht
 func encodeSendNeonAuthTestEmailResponse(response *SendNeonAuthTestEmailResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2266,7 +2105,6 @@ func encodeSendNeonAuthTestEmailResponse(response *SendNeonAuthTestEmailResponse
 func encodeSetDefaultProjectBranchResponse(response *BranchOperations, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2280,7 +2118,6 @@ func encodeSetDefaultProjectBranchResponse(response *BranchOperations, w http.Re
 func encodeSetOrganizationSpendingLimitResponse(response *SpendingLimitResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2294,7 +2131,6 @@ func encodeSetOrganizationSpendingLimitResponse(response *SpendingLimitResponse,
 func encodeSetSnapshotScheduleResponse(response *EmptyResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2308,7 +2144,6 @@ func encodeSetSnapshotScheduleResponse(response *EmptyResponse, w http.ResponseW
 func encodeStartAnonymizationResponse(response *AnonymizedBranchStatusResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2322,7 +2157,6 @@ func encodeStartAnonymizationResponse(response *AnonymizedBranchStatusResponse, 
 func encodeStartProjectEndpointResponse(response *EndpointOperations, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2336,7 +2170,6 @@ func encodeStartProjectEndpointResponse(response *EndpointOperations, w http.Res
 func encodeSuspendProjectEndpointResponse(response *EndpointOperations, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2350,7 +2183,6 @@ func encodeSuspendProjectEndpointResponse(response *EndpointOperations, w http.R
 func encodeTransferNeonAuthProviderProjectResponse(response *NeonAuthTransferAuthProviderProjectResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2366,7 +2198,6 @@ func encodeTransferProjectsFromOrgToOrgResponse(response TransferProjectsFromOrg
 	case *EmptyResponse:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -2379,7 +2210,6 @@ func encodeTransferProjectsFromOrgToOrgResponse(response TransferProjectsFromOrg
 	case *LimitsUnsatisfiedResponse:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(406)
-		span.SetStatus(codes.Error, http.StatusText(406))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -2392,7 +2222,6 @@ func encodeTransferProjectsFromOrgToOrgResponse(response TransferProjectsFromOrg
 	case *ProjectsWithIntegrationResponse:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(422)
-		span.SetStatus(codes.Error, http.StatusText(422))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -2412,7 +2241,6 @@ func encodeTransferProjectsFromUserToOrgResponse(response TransferProjectsFromUs
 	case *EmptyResponse:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -2425,7 +2253,6 @@ func encodeTransferProjectsFromUserToOrgResponse(response TransferProjectsFromUs
 	case *LimitsUnsatisfiedResponse:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(406)
-		span.SetStatus(codes.Error, http.StatusText(406))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -2438,7 +2265,6 @@ func encodeTransferProjectsFromUserToOrgResponse(response TransferProjectsFromUs
 	case *ProjectsWithIntegrationResponse:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(422)
-		span.SetStatus(codes.Error, http.StatusText(422))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -2456,7 +2282,6 @@ func encodeTransferProjectsFromUserToOrgResponse(response TransferProjectsFromUs
 func encodeUpdateBranchNeonAuthOauthProviderResponse(response *NeonAuthOauthProvider, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2470,7 +2295,6 @@ func encodeUpdateBranchNeonAuthOauthProviderResponse(response *NeonAuthOauthProv
 func encodeUpdateMaskingRulesResponse(response *MaskingRulesResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2484,7 +2308,6 @@ func encodeUpdateMaskingRulesResponse(response *MaskingRulesResponse, w http.Res
 func encodeUpdateNeonAuthAllowLocalhostResponse(response *NeonAuthAllowLocalhostResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2498,7 +2321,6 @@ func encodeUpdateNeonAuthAllowLocalhostResponse(response *NeonAuthAllowLocalhost
 func encodeUpdateNeonAuthConfigResponse(response *NeonAuthConfigResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2512,7 +2334,6 @@ func encodeUpdateNeonAuthConfigResponse(response *NeonAuthConfigResponse, w http
 func encodeUpdateNeonAuthEmailAndPasswordConfigResponse(response *NeonAuthEmailAndPasswordConfig, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2526,7 +2347,6 @@ func encodeUpdateNeonAuthEmailAndPasswordConfigResponse(response *NeonAuthEmailA
 func encodeUpdateNeonAuthEmailProviderResponse(response *NeonAuthEmailServerConfig, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2540,7 +2360,6 @@ func encodeUpdateNeonAuthEmailProviderResponse(response *NeonAuthEmailServerConf
 func encodeUpdateNeonAuthEmailServerResponse(response *NeonAuthEmailServerConfig, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2554,7 +2373,6 @@ func encodeUpdateNeonAuthEmailServerResponse(response *NeonAuthEmailServerConfig
 func encodeUpdateNeonAuthMagicLinkPluginResponse(response *NeonAuthMagicLinkConfig, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2568,7 +2386,6 @@ func encodeUpdateNeonAuthMagicLinkPluginResponse(response *NeonAuthMagicLinkConf
 func encodeUpdateNeonAuthOauthProviderResponse(response *NeonAuthOauthProvider, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2582,7 +2399,6 @@ func encodeUpdateNeonAuthOauthProviderResponse(response *NeonAuthOauthProvider, 
 func encodeUpdateNeonAuthOrganizationPluginResponse(response *NeonAuthOrganizationConfig, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2596,7 +2412,6 @@ func encodeUpdateNeonAuthOrganizationPluginResponse(response *NeonAuthOrganizati
 func encodeUpdateNeonAuthPhoneNumberPluginResponse(response *NeonAuthPhoneNumberConfig, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2610,7 +2425,6 @@ func encodeUpdateNeonAuthPhoneNumberPluginResponse(response *NeonAuthPhoneNumber
 func encodeUpdateNeonAuthUserRoleResponse(response *UpdateNeonAuthUserRoleResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2624,7 +2438,6 @@ func encodeUpdateNeonAuthUserRoleResponse(response *UpdateNeonAuthUserRoleRespon
 func encodeUpdateNeonAuthWebhookConfigResponse(response *NeonAuthWebhookConfig, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2638,7 +2451,6 @@ func encodeUpdateNeonAuthWebhookConfigResponse(response *NeonAuthWebhookConfig, 
 func encodeUpdateOrganizationMemberResponse(response *Member, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2652,7 +2464,6 @@ func encodeUpdateOrganizationMemberResponse(response *Member, w http.ResponseWri
 func encodeUpdateProjectResponse(response *UpdateProjectOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2666,7 +2477,6 @@ func encodeUpdateProjectResponse(response *UpdateProjectOK, w http.ResponseWrite
 func encodeUpdateProjectBranchResponse(response *BranchOperations, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2680,7 +2490,6 @@ func encodeUpdateProjectBranchResponse(response *BranchOperations, w http.Respon
 func encodeUpdateProjectBranchDataAPIResponse(response *EmptyResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
-	span.SetStatus(codes.Ok, http.StatusText(201))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2694,7 +2503,6 @@ func encodeUpdateProjectBranchDataAPIResponse(response *EmptyResponse, w http.Re
 func encodeUpdateProjectBranchDatabaseResponse(response *DatabaseOperations, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2708,7 +2516,6 @@ func encodeUpdateProjectBranchDatabaseResponse(response *DatabaseOperations, w h
 func encodeUpdateProjectBranchFunctionResponse(response *NeonFunctionResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2722,7 +2529,6 @@ func encodeUpdateProjectBranchFunctionResponse(response *NeonFunctionResponse, w
 func encodeUpdateProjectEndpointResponse(response *EndpointOperations, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2736,7 +2542,6 @@ func encodeUpdateProjectEndpointResponse(response *EndpointOperations, w http.Re
 func encodeUpdateSnapshotResponse(response *UpdateSnapshotOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -2755,10 +2560,8 @@ func encodeErrorResponse(response *GeneralErrorStatusCode, w http.ResponseWriter
 		code = http.StatusOK
 	}
 	w.WriteHeader(code)
-	if st := http.StatusText(code); code >= http.StatusBadRequest {
-		span.SetStatus(codes.Error, st)
-	} else {
-		span.SetStatus(codes.Ok, st)
+	if code >= http.StatusInternalServerError {
+		span.SetStatus(codes.Error, http.StatusText(code))
 	}
 
 	e := new(jx.Encoder)

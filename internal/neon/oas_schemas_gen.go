@@ -116,9 +116,8 @@ type AddProjectJWKSRequest struct {
 	BranchID OptString `json:"branch_id"`
 	// The name of the required JWT Audience to be used.
 	JwtAudience OptString `json:"jwt_audience"`
-	// DEPRECATED. This field should only be used when using Neon RLS. The roles the JWKS should be
-	// mapped to. By default, the JWKS is mapped to the `authenticator`, `authenticated` and `anonymous`
-	// roles.
+	// DEPRECATED. This field should only be used when using Neon RLS. The roles the JWKS should be mapped
+	// to. By default, the JWKS is mapped to the `authenticator`, `authenticated` and `anonymous` roles.
 	//
 	// Deprecated: schema marks this property as deprecated.
 	RoleNames []string `json:"role_names"`
@@ -408,9 +407,9 @@ func (s *AdvisorIssueMetadata) init() AdvisorIssueMetadata {
 	return m
 }
 
-// A list of IP addresses that are allowed to connect to the compute endpoint.
-// If the list is empty or not set, all IP addresses are allowed.
-// If protected_branches_only is true, the list will be applied only to protected branches.
+// A list of IP addresses that are allowed to connect to the compute endpoint. If the list is empty or
+// not set, all IP addresses are allowed. If protected_branches_only is true, the list will be applied
+// only to protected branches.
 // Ref: #/components/schemas/AllowedIps
 type AllowedIps struct {
 	// A list of IP addresses that are allowed to connect to the endpoint.
@@ -531,8 +530,8 @@ func (s *AnnotationValueData) init() AnnotationValueData {
 type AnonymizationRunMetadata struct {
 	// Timestamp indicating when the latest anonymization attempt started.
 	StartedAt OptDateTime `json:"started_at"`
-	// Timestamp indicating when the latest anonymization attempt completed.
-	// Populated even if the attempt failed.
+	// Timestamp indicating when the latest anonymization attempt completed. Populated even if the attempt
+	// failed.
 	CompletedAt OptDateTime `json:"completed_at"`
 	// UUID of the user who triggered the latest anonymization attempt.
 	TriggeredBy OptUUID `json:"triggered_by"`
@@ -1230,11 +1229,12 @@ func (s *BackupSchedule) SetSchedule(val []BackupScheduleItem) {
 // Ref: #/components/schemas/BackupScheduleItem
 type BackupScheduleItem struct {
 	// How often to take snapshots. Must be one of the following values:
-	// - `hourly`
-	// - `daily`
-	// - `weekly`
-	// - `monthly`
-	// - `yearly`.
+	//
+	//  - `hourly`
+	//  - `daily`
+	//  - `weekly`
+	//  - `monthly`
+	//  - `yearly`
 	Frequency string `json:"frequency"`
 	// The hour of the day to take the snapshot (if applicable).
 	Hour OptInt `json:"hour"`
@@ -1242,8 +1242,8 @@ type BackupScheduleItem struct {
 	Day OptInt `json:"day"`
 	// The month of the year to take the snapshot (if applicable).
 	Month OptInt `json:"month"`
-	// How long to keep a snapshot (in seconds) before it's automatically deleted.
-	// If not set, the snapshot is kept indefinitely.
+	// How long to keep a snapshot (in seconds) before it's automatically deleted. If not set, the snapshot
+	// is kept indefinitely.
 	RetentionSeconds OptInt `json:"retention_seconds"`
 }
 
@@ -1356,9 +1356,8 @@ type BillingAccount struct {
 	// The type of the tax identification number based on the country.
 	TaxIDType   OptString      `json:"tax_id_type"`
 	PlanDetails OptPlanDetails `json:"plan_details"`
-	// Monthly spending cap in cents for V3 paid plans. When set,
-	// notifications are sent at 80% and 100% of this limit. `null`
-	// means no limit is configured.
+	// Monthly spending cap in cents for V3 paid plans. When set, notifications are sent at 80% and 100% of
+	// this limit. `null` means no limit is configured.
 	SpendingLimitCents OptNilInt64 `json:"spending_limit_cents"`
 }
 
@@ -1722,8 +1721,8 @@ func (s *BillingPaymentMethod) UnmarshalText(data []byte) error {
 	}
 }
 
-// Type of subscription to Neon Cloud.
-// Notice that for users without billing account this will be "UNKNOWN".
+// Type of subscription to Neon Cloud. Notice that for users without billing account this will be
+// "UNKNOWN".
 // Ref: #/components/schemas/BillingSubscriptionType
 type BillingSubscriptionType string
 
@@ -1845,18 +1844,15 @@ type Branch struct {
 	ProjectID string `json:"project_id"`
 	// The `branch_id` of the parent branch.
 	ParentID OptString `json:"parent_id"`
-	// The Log Sequence Number (LSN) on the parent branch from which this branch was created.
-	// When restoring a branch using the `POST /projects/{project_id}/branches/{branch_id}/restore`
-	// endpoint,
+	// The Log Sequence Number (LSN) on the parent branch from which this branch was created. When
+	// restoring a branch using the `POST /projects/{project_id}/branches/{branch_id}/restore` endpoint,
 	// this value isn’t finalized until all operations related to the restore have completed
 	// successfully.
 	ParentLsn OptString `json:"parent_lsn"`
-	// The point in time on the parent branch from which this branch was created.
-	// When restoring a branch using the `POST /projects/{project_id}/branches/{branch_id}/restore`
-	// endpoint,
-	// this value isn’t finalized until all operations related to the restore have completed
-	// successfully.
-	// After all the operations completed, this value might stay empty.
+	// The point in time on the parent branch from which this branch was created. When restoring a branch
+	// using the `POST /projects/{project_id}/branches/{branch_id}/restore` endpoint, this value isn’t
+	// finalized until all operations related to the restore have completed successfully. After all the
+	// operations completed, this value might stay empty.
 	ParentTimestamp OptDateTime `json:"parent_timestamp"`
 	// The branch name.
 	Name         string         `json:"name"`
@@ -1868,8 +1864,7 @@ type Branch struct {
 	LogicalSize OptInt64 `json:"logical_size"`
 	// The branch creation source.
 	CreationSource string `json:"creation_source"`
-	// DEPRECATED. Use `default` field.
-	// Whether the branch is the project's primary branch.
+	// DEPRECATED. Use `default` field. Whether the branch is the project's primary branch.
 	//
 	// Deprecated: schema marks this property as deprecated.
 	Primary OptBool `json:"primary"`
@@ -1877,9 +1872,9 @@ type Branch struct {
 	Default bool `json:"default"`
 	// Whether the branch is protected.
 	Protected bool `json:"protected"`
-	// CPU seconds used by all of the branch's compute endpoints, including deleted ones.
-	// This value is reset at the beginning of each billing period.
-	// Examples:
+	// CPU seconds used by all of the branch's compute endpoints, including deleted ones. This value is
+	// reset at the beginning of each billing period. Examples:
+	//
 	// 1. A branch that uses 1 CPU for 1 second is equal to `cpu_used_sec=1`.
 	// 2. A branch that uses 2 CPUs simultaneously for 1 second is equal to `cpu_used_sec=2`.
 	//
@@ -1895,30 +1890,35 @@ type Branch struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	// The time-to-live (TTL) duration originally configured for the branch, in seconds. This read-only
 	// value represents the interval between the time `expires_at` was set and the expiration timestamp
-	// itself. It is preserved to ensure the same TTL duration is reapplied when resetting the branch
-	// from its parent, and only updates when a new `expires_at` value is set.
+	// itself. It is preserved to ensure the same TTL duration is reapplied when resetting the branch from
+	// its parent, and only updates when a new `expires_at` value is set.
+	//
 	// Access to this feature is currently limited to participants in the Early Access Program.
 	TTLIntervalSeconds OptInt `json:"ttl_interval_seconds"`
 	// The timestamp when the branch is scheduled to expire and be automatically deleted. Must be set by
-	// the client following the [RFC 3339, section 5.6](https://tools.ietf.org/html/rfc3339#section-5.6)
-	// format with precision up to seconds (such as 2025-06-09T18:02:16Z). Deletion is performed by a
-	// background job and may not occur exactly at the specified time.
+	// the client following the [RFC 3339, section 5.6] format with precision up to seconds (such as
+	// 2025-06-09T18:02:16Z). Deletion is performed by a background job and may not occur exactly at the
+	// specified time.
+	//
 	// Access to this feature is currently limited to participants in the Early Access Program.
+	//
+	// [RFC 3339, section 5.6]: https://tools.ietf.org/html/rfc3339#section-5.6
 	ExpiresAt OptDateTime `json:"expires_at"`
 	// A timestamp indicating when the branch was last reset.
 	LastResetAt OptDateTime `json:"last_reset_at"`
 	// The resolved user model that contains details of the user/org/integration/api_key used for branch
-	// creation. This field is filled only in listing/get/create/get/update/delete methods, if it is
-	// empty when calling other handlers, it does not mean that it is empty in the system.
+	// creation. This field is filled only in listing/get/create/get/update/delete methods, if it is empty
+	// when calling other handlers, it does not mean that it is empty in the system.
 	CreatedBy OptBranchCreatedBy `json:"created_by"`
 	// The source of initialization for the branch. Valid values are `schema-only` and `parent-data`
 	// (default).
-	// * `schema-only` - creates a new root branch containing only the schema. Use `parent_id` to specify
-	// the source branch. Optionally, you can provide `parent_lsn` or `parent_timestamp` to branch from a
-	// specific point in time or LSN. These fields define which branch to copy the schema from and at
-	// what point—they do not establish a parent-child relationship between the `parent_id` branch and
-	// the new schema-only branch.
-	// * `parent-data` - creates the branch with both schema and data from the parent.
+	//
+	//  - `schema-only` - creates a new root branch containing only the schema. Use `parent_id` to specify
+	//    the source branch. Optionally, you can provide `parent_lsn` or `parent_timestamp` to branch from
+	//    a specific point in time or LSN. These fields define which branch to copy the schema from and at
+	//    what point—they do not establish a parent-child relationship between the `parent_id` branch and
+	//    the new schema-only branch.
+	//  - `parent-data` - creates the branch with both schema and data from the parent.
 	InitSource    OptString              `json:"init_source"`
 	RestoreStatus OptBranchRestoreStatus `json:"restore_status"`
 	// ID of the snapshot that was the restore source for this branch.
@@ -2242,12 +2242,10 @@ func (s *Branch) SetRecovery(val OptBranchRecoveryInfo) {
 
 // Ref: #/components/schemas/BranchAiGateway
 type BranchAiGateway struct {
-	// Always `true` in 200 responses. Present for forward compatibility,
-	// mirroring BranchStorage.enabled.
+	// Always `true` in 200 responses. Present for forward compatibility, mirroring BranchStorage.enabled.
 	Enabled bool `json:"enabled"`
-	// The AI-gateway endpoint root for this branch — an OpenAI-compatible
-	// base URL. No dialect path is included; clients append the route
-	// (e.g. `/ai-gateway/openai/v1/responses`) themselves.
+	// The AI-gateway endpoint root for this branch — an OpenAI-compatible base URL. No dialect path is
+	// included; clients append the route (e.g. `/ai-gateway/openai/v1/responses`) themselves.
 	BaseURL url.URL `json:"base_url"`
 }
 
@@ -2278,9 +2276,10 @@ type BranchAiGatewayNotEnabled struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
 	// Machine-readable reason why the AI gateway is unavailable:
-	// - `ai_gateway_unavailable`: the project's region/cell has no AI gateway configured.
-	// - `branch_not_found`: the project or branch does not exist, or the caller does not
-	// have access to it.
+	//
+	//  - `ai_gateway_unavailable`: the project's region/cell has no AI gateway configured.
+	//  - `branch_not_found`: the project or branch does not exist, or the caller does not have access to
+	//    it.
 	Reason BranchAiGatewayNotEnabledReason `json:"reason"`
 }
 
@@ -2317,9 +2316,10 @@ func (s *BranchAiGatewayNotEnabled) SetReason(val BranchAiGatewayNotEnabledReaso
 func (*BranchAiGatewayNotEnabled) getProjectBranchAiGatewayRes() {}
 
 // Machine-readable reason why the AI gateway is unavailable:
-// - `ai_gateway_unavailable`: the project's region/cell has no AI gateway configured.
-// - `branch_not_found`: the project or branch does not exist, or the caller does not
-// have access to it.
+//
+//   - `ai_gateway_unavailable`: the project's region/cell has no AI gateway configured.
+//   - `branch_not_found`: the project or branch does not exist, or the caller does not have access to
+//     it.
 type BranchAiGatewayNotEnabledReason string
 
 const (
@@ -2368,8 +2368,7 @@ type BranchAnonymizedCreateRequest struct {
 	BranchCreate    OptBranchCreateRequest `json:"branch_create"`
 	// List of masking rules to apply to the branch.
 	MaskingRules []MaskingRule `json:"masking_rules"`
-	// If true, automatically start anonymization after the branch is created.
-	// Defaults to false.
+	// If true, automatically start anonymization after the branch is created. Defaults to false.
 	StartAnonymization OptBool `json:"start_anonymization"`
 }
 
@@ -2449,8 +2448,8 @@ type BranchCreateRequestBranch struct {
 	// LSN.
 	ParentLsn OptString `json:"parent_lsn"`
 	// A timestamp identifying a point in time on the parent branch. The branch will be created with data
-	// starting from this point in time.
-	// The timestamp must be provided in ISO 8601 format; for example: `2024-02-26T12:00:00Z`.
+	// starting from this point in time. The timestamp must be provided in ISO 8601 format; for example:
+	// `2024-02-26T12:00:00Z`.
 	ParentTimestamp OptDateTime `json:"parent_timestamp"`
 	// Whether the branch is protected.
 	Protected OptBool `json:"protected"`
@@ -2458,18 +2457,22 @@ type BranchCreateRequestBranch struct {
 	Archived OptBool `json:"archived"`
 	// The source of initialization for the branch. Valid values are `schema-only` and `parent-data`
 	// (default).
-	// * `schema-only` - creates a new root branch containing only the schema. Use `parent_id` to specify
-	// the source branch. Optionally, you can provide `parent_lsn` or `parent_timestamp` to branch from a
-	// specific point in time or LSN. These fields define which branch to copy the schema from and at
-	// what point—they do not establish a parent-child relationship between the `parent_id` branch and
-	// the new schema-only branch.
-	// * `parent-data` - creates the branch with both schema and data from the parent.
+	//
+	//  - `schema-only` - creates a new root branch containing only the schema. Use `parent_id` to specify
+	//    the source branch. Optionally, you can provide `parent_lsn` or `parent_timestamp` to branch from
+	//    a specific point in time or LSN. These fields define which branch to copy the schema from and at
+	//    what point—they do not establish a parent-child relationship between the `parent_id` branch and
+	//    the new schema-only branch.
+	//  - `parent-data` - creates the branch with both schema and data from the parent.
 	InitSource OptString `json:"init_source"`
 	// The timestamp when the branch is scheduled to expire and be automatically deleted. Must be set by
-	// the client following the [RFC 3339, section 5.6](https://tools.ietf.org/html/rfc3339#section-5.6)
-	// format with precision up to seconds (such as 2025-06-09T18:02:16Z). Deletion is performed by a
-	// background job and may not occur exactly at the specified time.
+	// the client following the [RFC 3339, section 5.6] format with precision up to seconds (such as
+	// 2025-06-09T18:02:16Z). Deletion is performed by a background job and may not occur exactly at the
+	// specified time.
+	//
 	// Access to this feature is currently limited to participants in the Early Access Program.
+	//
+	// [RFC 3339, section 5.6]: https://tools.ietf.org/html/rfc3339#section-5.6
 	ExpiresAt OptDateTime `json:"expires_at"`
 }
 
@@ -2557,15 +2560,15 @@ func (s *BranchCreateRequestBranch) SetExpiresAt(val OptDateTime) {
 type BranchCreateRequestEndpointOptions struct {
 	Type     EndpointType            `json:"type"`
 	Settings OptEndpointSettingsData `json:"settings"`
-	// The minimum number of Compute Units. The minimum value is `0.25`.
-	// See [Compute size and Autoscaling configuration](https://neon.
-	// com/docs/manage/endpoints#compute-size-and-autoscaling-configuration)
-	// for more information.
+	// The minimum number of Compute Units. The minimum value is `0.25`. See
+	// [Compute size and Autoscaling configuration] for more information.
+	//
+	// [Compute size and Autoscaling configuration]: https://neon.com/docs/manage/endpoints#compute-size-and-autoscaling-configuration
 	AutoscalingLimitMinCu OptComputeUnit `json:"autoscaling_limit_min_cu"`
-	// The maximum number of Compute Units.
-	// See [Compute size and Autoscaling configuration](https://neon.
-	// com/docs/manage/endpoints#compute-size-and-autoscaling-configuration)
-	// for more information.
+	// The maximum number of Compute Units. See [Compute size and Autoscaling configuration] for more
+	// information.
+	//
+	// [Compute size and Autoscaling configuration]: https://neon.com/docs/manage/endpoints#compute-size-and-autoscaling-configuration
 	AutoscalingLimitMaxCu OptComputeUnit           `json:"autoscaling_limit_max_cu"`
 	Provisioner           OptProvisioner           `json:"provisioner"`
 	SuspendTimeoutSeconds OptSuspendTimeoutSeconds `json:"suspend_timeout_seconds"`
@@ -2632,8 +2635,8 @@ func (s *BranchCreateRequestEndpointOptions) SetSuspendTimeoutSeconds(val OptSus
 }
 
 // The resolved user model that contains details of the user/org/integration/api_key used for branch
-// creation. This field is filled only in listing/get/create/get/update/delete methods, if it is
-// empty when calling other handlers, it does not mean that it is empty in the system.
+// creation. This field is filled only in listing/get/create/get/update/delete methods, if it is empty
+// when calling other handlers, it does not mean that it is empty in the system.
 type BranchCreatedBy struct {
 	// The name of the user.
 	Name OptString `json:"name"`
@@ -2717,8 +2720,9 @@ func (s *BranchRecoverResponse) SetEndpoints(val []Endpoint) {
 	s.Endpoints = val
 }
 
-// Recovery information for a deleted branch. Only present when listing deleted branches
-// with `include_deleted=true`.
+// Recovery information for a deleted branch. Only present when listing deleted branches with
+// `include_deleted=true`.
+//
 // This is part of the Branch Recovery feature, which is in preview and not available to all users.
 // Ref: #/components/schemas/BranchRecoveryInfo
 type BranchRecoveryInfo struct {
@@ -2804,20 +2808,20 @@ func (s *BranchRecoveryInfoDeletionMethod) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/BranchRestoreRequest
 type BranchRestoreRequest struct {
-	// The `branch_id` of the restore source branch.
-	// If `source_timestamp` and `source_lsn` are omitted, the branch will be restored to head.
-	// If `source_branch_id` is equal to the branch's id, `source_timestamp` or `source_lsn` is required.
+	// The `branch_id` of the restore source branch. If `source_timestamp` and `source_lsn` are omitted,
+	// the branch will be restored to head. If `source_branch_id` is equal to the branch's id,
+	// `source_timestamp` or `source_lsn` is required.
 	SourceBranchID string `json:"source_branch_id"`
 	// A Log Sequence Number (LSN) on the source branch. The branch will be restored with data from this
 	// LSN.
 	SourceLsn OptString `json:"source_lsn"`
-	// A timestamp identifying a point in time on the source branch. The branch will be restored with
-	// data starting from this point in time.
-	// The timestamp must be provided in ISO 8601 format; for example: `2024-02-26T12:00:00Z`.
+	// A timestamp identifying a point in time on the source branch. The branch will be restored with data
+	// starting from this point in time. The timestamp must be provided in ISO 8601 format; for example:
+	// `2024-02-26T12:00:00Z`.
 	SourceTimestamp OptDateTime `json:"source_timestamp"`
-	// If not empty, the previous state of the branch will be saved to a branch with this name.
-	// If the branch has children or the `source_branch_id` is equal to the branch id, this field is
-	// required. All existing child branches will be moved to the newly created branch under the name
+	// If not empty, the previous state of the branch will be saved to a branch with this name. If the
+	// branch has children or the `source_branch_id` is equal to the branch id, this field is required. All
+	// existing child branches will be moved to the newly created branch under the name
 	// `preserve_under_name`.
 	PreserveUnderName OptString `json:"preserve_under_name"`
 }
@@ -3140,24 +3144,19 @@ type BranchState string
 
 // Ref: #/components/schemas/BranchStorage
 type BranchStorage struct {
-	// Always `true` in 200 responses. Present for forward compatibility: a
-	// future version may add intermediate states; callers should treat `true`
-	// as "storage is usable for this branch right now.".
+	// Always `true` in 200 responses. Present for forward compatibility: a future version may add
+	// intermediate states; callers should treat `true` as "storage is usable for this branch right now.".
 	Enabled bool `json:"enabled"`
 	// The S3-compatible endpoint URL for this branch.
 	S3Endpoint url.URL `json:"s3_endpoint"`
-	// The AWS region for this branch's storage. The platform normalizes
-	// the us-east-1 convention server-side: a non-empty region string is
-	// always returned in 200 responses (e.g. `"us-east-1"` for the S3
-	// default region).
+	// The AWS region for this branch's storage. The platform normalizes the us-east-1 convention
+	// server-side: a non-empty region string is always returned in 200 responses (e.g. `"us-east-1"` for
+	// the S3 default region).
 	Region string `json:"region"`
-	// Whether the S3 client must use path-style addressing
-	// (bucket-in-path rather than virtual-hosted subdomain).
-	// Always true: the wildcard TLS cert covers one level of subdomain
-	// (*.storage.<suffix>), so the branch ID occupies that label and the
-	// bucket name must travel in the request path, not as a further
-	// subdomain. Callers must set the S3 SDK's ForcePathStyle (or
-	// equivalent) to true.
+	// Whether the S3 client must use path-style addressing (bucket-in-path rather than virtual-hosted
+	// subdomain). Always true: the wildcard TLS cert covers one level of subdomain (*.storage.), so the
+	// branch ID occupies that label and the bucket name must travel in the request path, not as a further
+	// subdomain. Callers must set the S3 SDK's ForcePathStyle (or equivalent) to true.
 	ForcePathStyle bool `json:"force_path_style"`
 }
 
@@ -3208,11 +3207,12 @@ type BranchStorageNotEnabled struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
 	// Machine-readable reason why storage is unavailable:
-	// - `org_not_entitled`: the org's `PlatformBranchableStorage` feature flag is off.
-	// - `region_unavailable`: the project's region has no storage admin service wired.
-	// - `branch_directory_missing`: the branch is not registered in the storage service.
-	// - `branch_not_found`: the project or branch does not exist, or the caller does not
-	// have access to it.
+	//
+	//  - `org_not_entitled`: the org's `PlatformBranchableStorage` feature flag is off.
+	//  - `region_unavailable`: the project's region has no storage admin service wired.
+	//  - `branch_directory_missing`: the branch is not registered in the storage service.
+	//  - `branch_not_found`: the project or branch does not exist, or the caller does not have access to
+	//    it.
 	Reason BranchStorageNotEnabledReason `json:"reason"`
 }
 
@@ -3249,11 +3249,12 @@ func (s *BranchStorageNotEnabled) SetReason(val BranchStorageNotEnabledReason) {
 func (*BranchStorageNotEnabled) getProjectBranchStorageRes() {}
 
 // Machine-readable reason why storage is unavailable:
-// - `org_not_entitled`: the org's `PlatformBranchableStorage` feature flag is off.
-// - `region_unavailable`: the project's region has no storage admin service wired.
-// - `branch_directory_missing`: the branch is not registered in the storage service.
-// - `branch_not_found`: the project or branch does not exist, or the caller does not
-// have access to it.
+//
+//   - `org_not_entitled`: the org's `PlatformBranchableStorage` feature flag is off.
+//   - `region_unavailable`: the project's region has no storage admin service wired.
+//   - `branch_directory_missing`: the branch is not registered in the storage service.
+//   - `branch_not_found`: the project or branch does not exist, or the caller does not have access to
+//     it.
 type BranchStorageNotEnabledReason string
 
 const (
@@ -3328,11 +3329,13 @@ type BranchUpdateRequestBranch struct {
 	Name      OptString `json:"name"`
 	Protected OptBool   `json:"protected"`
 	// The timestamp when the branch is scheduled to expire and be automatically deleted. Must be set by
-	// the client following the [RFC 3339, section 5.6](https://tools.ietf.org/html/rfc3339#section-5.6)
-	// format with precision up to seconds (such as 2025-06-09T18:02:16Z). Deletion is performed by a
-	// background job and may not occur exactly at the specified time. If this field is set to null, the
-	// expiration timestamp is removed.
+	// the client following the [RFC 3339, section 5.6] format with precision up to seconds (such as
+	// 2025-06-09T18:02:16Z). Deletion is performed by a background job and may not occur exactly at the
+	// specified time. If this field is set to null, the expiration timestamp is removed.
+	//
 	// Access to this feature is currently limited to participants in the Early Access Program.
+	//
+	// [RFC 3339, section 5.6]: https://tools.ietf.org/html/rfc3339#section-5.6
 	ExpiresAt OptNilDateTime `json:"expires_at"`
 }
 
@@ -3386,9 +3389,8 @@ type Bucket struct {
 	// The bucket name (unique within a branch).
 	Name        string            `json:"name"`
 	AccessLevel BucketAccessLevel `json:"access_level"`
-	// When the bucket was created. For a bucket inherited from an
-	// ancestor branch this is the ancestor's creation time (the branch
-	// fork never re-creates the bucket).
+	// When the bucket was created. For a bucket inherited from an ancestor branch this is the ancestor's
+	// creation time (the branch fork never re-creates the bucket).
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -3423,9 +3425,11 @@ func (s *Bucket) SetCreatedAt(val time.Time) {
 }
 
 // Controls anonymous access to objects in the bucket.
-// - `private`: all reads and writes require authenticated requests (default).
-// - `public_read`: anonymous `GetObject`/`HeadObject` requests succeed; listing,
-// writes, and deletes still require authenticated requests.
+//
+//   - `private`: all reads and writes require authenticated requests (default).
+//   - `public_read`: anonymous `GetObject`/`HeadObject` requests succeed; listing, writes, and deletes
+//     still require authenticated requests.
+//
 // Ref: #/components/schemas/BucketAccessLevel
 type BucketAccessLevel string
 
@@ -3472,8 +3476,8 @@ func (s *BucketAccessLevel) UnmarshalText(data []byte) error {
 type BucketCreateRequest struct {
 	// The bucket name.
 	Name string `json:"name"`
-	// Access level for the bucket. Defaults to `private`. Set to `public_read`
-	// to allow anonymous `GetObject`/`HeadObject` on objects in this bucket.
+	// Access level for the bucket. Defaults to `private`. Set to `public_read` to allow anonymous
+	// `GetObject`/`HeadObject` on objects in this bucket.
 	AccessLevel OptBucketCreateRequestAccessLevel `json:"access_level"`
 }
 
@@ -3497,8 +3501,8 @@ func (s *BucketCreateRequest) SetAccessLevel(val OptBucketCreateRequestAccessLev
 	s.AccessLevel = val
 }
 
-// Access level for the bucket. Defaults to `private`. Set to `public_read`
-// to allow anonymous `GetObject`/`HeadObject` on objects in this bucket.
+// Access level for the bucket. Defaults to `private`. Set to `public_read` to allow anonymous
+// `GetObject`/`HeadObject` on objects in this bucket.
 type BucketCreateRequestAccessLevel string
 
 const (
@@ -3594,8 +3598,8 @@ func (s *BucketObject) SetEtag(val string) {
 
 // Ref: #/components/schemas/BucketObjectsDeletePrefixResponse
 type BucketObjectsDeletePrefixResponse struct {
-	// The number of objects soft-deleted under the prefix. 0 when no live
-	// object matched the prefix on this branch.
+	// The number of objects soft-deleted under the prefix. 0 when no live object matched the prefix on
+	// this branch.
 	Deleted int64 `json:"deleted"`
 }
 
@@ -3613,15 +3617,14 @@ func (*BucketObjectsDeletePrefixResponse) deleteProjectBranchBucketObjectsByPref
 
 // Ref: #/components/schemas/BucketObjectsListResponse
 type BucketObjectsListResponse struct {
-	// Common prefixes (folder names) collapsed under the requested
-	// `delimiter`. Empty when no `delimiter` was supplied.
+	// Common prefixes (folder names) collapsed under the requested `delimiter`. Empty when no `delimiter`
+	// was supplied.
 	Folders []string `json:"folders"`
 	// Objects whose keys did not collapse into a folder.
 	Objects []BucketObject `json:"objects"`
 	// The prefix that was applied to this listing (echoed back).
 	Prefix string `json:"prefix"`
-	// Pagination cursor to pass as `cursor` on the next request. Empty
-	// when the listing is not truncated.
+	// Pagination cursor to pass as `cursor` on the next request. Empty when the listing is not truncated.
 	NextCursor OptString `json:"next_cursor"`
 	// True when more results exist beyond this page.
 	IsTruncated bool `json:"is_truncated"`
@@ -3713,12 +3716,12 @@ type ComputeUnit float64
 
 // Ref: #/components/schemas/ConnectionDetails
 type ConnectionDetails struct {
-	// The connection URI is defined as specified here: [Connection URIs](https://www.postgresql.
-	// org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS)
-	// The connection URI can be used to connect to a Postgres database with psql or defined in a
-	// DATABASE_URL environment variable.
-	// When creating a branch from a parent with more than one role or database, the response body does
-	// not include a connection URI.
+	// The connection URI is defined as specified here: [Connection URIs] The connection URI can be used to
+	// connect to a Postgres database with psql or defined in a DATABASE_URL environment variable. When
+	// creating a branch from a parent with more than one role or database, the response body does not
+	// include a connection URI.
+	//
+	// [Connection URIs]: https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS
 	ConnectionURI        string               `json:"connection_uri"`
 	ConnectionParameters ConnectionParameters `json:"connection_parameters"`
 }
@@ -4099,8 +4102,8 @@ type ConsumptionHistoryPerTimeframe struct {
 	TimeframeEnd time.Time `json:"timeframe_end"`
 	// Seconds. The amount of time the compute endpoints have been active.
 	ActiveTimeSeconds uint64 `json:"active_time_seconds"`
-	// Seconds. The number of CPU seconds used by compute endpoints, including compute endpoints that
-	// have been deleted.
+	// Seconds. The number of CPU seconds used by compute endpoints, including compute endpoints that have
+	// been deleted.
 	ComputeTimeSeconds uint64 `json:"compute_time_seconds"`
 	// Bytes. The amount of written data for all branches.
 	WrittenDataBytes uint64 `json:"written_data_bytes"`
@@ -4328,10 +4331,9 @@ type CreateCredentialRequest struct {
 	// Free-form customer label for the credential.
 	Name   OptString         `json:"name"`
 	Scopes []CredentialScope `json:"scopes"`
-	// Principal type for the credential. Only `user` is customer-managed
-	// and accepted here. `function` and `system` credentials are
-	// platform-internal (e.g. function-serve auto-mint, presign signer)
-	// and are never issued through the customer-facing API.
+	// Principal type for the credential. Only `user` is customer-managed and accepted here. `function` and
+	// `system` credentials are platform-internal (e.g. function-serve auto-mint, presign signer) and are
+	// never issued through the customer-facing API.
 	PrincipalType CreateCredentialRequestPrincipalType `json:"principal_type"`
 }
 
@@ -4365,10 +4367,9 @@ func (s *CreateCredentialRequest) SetPrincipalType(val CreateCredentialRequestPr
 	s.PrincipalType = val
 }
 
-// Principal type for the credential. Only `user` is customer-managed
-// and accepted here. `function` and `system` credentials are
-// platform-internal (e.g. function-serve auto-mint, presign signer)
-// and are never issued through the customer-facing API.
+// Principal type for the credential. Only `user` is customer-managed and accepted here. `function` and
+// `system` credentials are platform-internal (e.g. function-serve auto-mint, presign signer) and are
+// never issued through the customer-facing API.
 type CreateCredentialRequestPrincipalType string
 
 const (
@@ -4559,8 +4560,8 @@ type CreateProjectBranchReqBranch struct {
 	// LSN.
 	ParentLsn OptString `json:"parent_lsn"`
 	// A timestamp identifying a point in time on the parent branch. The branch will be created with data
-	// starting from this point in time.
-	// The timestamp must be provided in ISO 8601 format; for example: `2024-02-26T12:00:00Z`.
+	// starting from this point in time. The timestamp must be provided in ISO 8601 format; for example:
+	// `2024-02-26T12:00:00Z`.
 	ParentTimestamp OptDateTime `json:"parent_timestamp"`
 	// Whether the branch is protected.
 	Protected OptBool `json:"protected"`
@@ -4568,18 +4569,22 @@ type CreateProjectBranchReqBranch struct {
 	Archived OptBool `json:"archived"`
 	// The source of initialization for the branch. Valid values are `schema-only` and `parent-data`
 	// (default).
-	// * `schema-only` - creates a new root branch containing only the schema. Use `parent_id` to specify
-	// the source branch. Optionally, you can provide `parent_lsn` or `parent_timestamp` to branch from a
-	// specific point in time or LSN. These fields define which branch to copy the schema from and at
-	// what point—they do not establish a parent-child relationship between the `parent_id` branch and
-	// the new schema-only branch.
-	// * `parent-data` - creates the branch with both schema and data from the parent.
+	//
+	//  - `schema-only` - creates a new root branch containing only the schema. Use `parent_id` to specify
+	//    the source branch. Optionally, you can provide `parent_lsn` or `parent_timestamp` to branch from
+	//    a specific point in time or LSN. These fields define which branch to copy the schema from and at
+	//    what point—they do not establish a parent-child relationship between the `parent_id` branch and
+	//    the new schema-only branch.
+	//  - `parent-data` - creates the branch with both schema and data from the parent.
 	InitSource OptString `json:"init_source"`
 	// The timestamp when the branch is scheduled to expire and be automatically deleted. Must be set by
-	// the client following the [RFC 3339, section 5.6](https://tools.ietf.org/html/rfc3339#section-5.6)
-	// format with precision up to seconds (such as 2025-06-09T18:02:16Z). Deletion is performed by a
-	// background job and may not occur exactly at the specified time.
+	// the client following the [RFC 3339, section 5.6] format with precision up to seconds (such as
+	// 2025-06-09T18:02:16Z). Deletion is performed by a background job and may not occur exactly at the
+	// specified time.
+	//
 	// Access to this feature is currently limited to participants in the Early Access Program.
+	//
+	// [RFC 3339, section 5.6]: https://tools.ietf.org/html/rfc3339#section-5.6
 	ExpiresAt OptDateTime `json:"expires_at"`
 }
 
@@ -4664,8 +4669,8 @@ func (s *CreateProjectBranchReqBranch) SetExpiresAt(val OptDateTime) {
 }
 
 type CreateProjectTransferRequestReq struct {
-	// Specifies the validity duration of the transfer request in seconds. If not provided,
-	// the request will expire after 24 hours (86,400 seconds).
+	// Specifies the validity duration of the transfer request in seconds. If not provided, the request
+	// will expire after 24 hours (86,400 seconds).
 	TTLSeconds OptInt64 `json:"ttl_seconds"`
 }
 
@@ -4869,8 +4874,8 @@ type CredentialMeta struct {
 	CreatedAt     time.Time         `json:"created_at"`
 	LastUsedAt    OptDateTime       `json:"last_used_at"`
 	RevokedAt     OptDateTime       `json:"revoked_at"`
-	// When the credential expires; absent means never expires. The
-	// verifier refuses to authenticate after `expires_at <= now()`.
+	// When the credential expires; absent means never expires. The verifier refuses to authenticate after
+	// `expires_at <= now()`.
 	ExpiresAt OptDateTime `json:"expires_at"`
 }
 
@@ -4984,9 +4989,8 @@ func (s *CredentialMeta) SetExpiresAt(val OptDateTime) {
 	s.ExpiresAt = val
 }
 
-// A single capability a credential may exercise. A credential is granted
-// a set of these; it may only perform actions explicitly listed in its
-// scopes.
+// A single capability a credential may exercise. A credential is granted a set of these; it may only
+// perform actions explicitly listed in its scopes.
 // Ref: #/components/schemas/CredentialScope
 type CredentialScope string
 
@@ -5122,8 +5126,7 @@ type CurrentUserInfoResponse struct {
 	LastName      string `json:"last_name"`
 	ProjectsLimit int64  `json:"projects_limit"`
 	BranchesLimit int64  `json:"branches_limit"`
-	// The maximum autoscaling limit in Compute Units.
-	// A value of 0 indicates no limit is configured.
+	// The maximum autoscaling limit in Compute Units. A value of 0 indicates no limit is configured.
 	MaxAutoscalingLimit float64  `json:"max_autoscaling_limit"`
 	ComputeSecondsLimit OptInt64 `json:"compute_seconds_limit"`
 	Plan                string   `json:"plan"`
@@ -5269,11 +5272,11 @@ func (s *CurrentUserInfoResponse) SetPlan(val string) {
 	s.Plan = val
 }
 
-// To paginate the response, issue an initial request with `limit` value. Then, add the value
-// returned in the response `.pagination.next` attribute into the request under the `cursor` query
-// parameter to the subsequent request to retrieve next page in pagination. The contents on cursor
-// `next` are opaque, clients are not expected to make any assumptions on the format of the data
-// inside the cursor.
+// To paginate the response, issue an initial request with `limit` value. Then, add the value returned
+// in the response `.pagination.next` attribute into the request under the `cursor` query parameter to
+// the subsequent request to retrieve next page in pagination. The contents on cursor `next` are
+// opaque, clients are not expected to make any assumptions on the format of the data inside the
+// cursor.
 // Ref: #/components/schemas/CursorPagination
 type CursorPagination struct {
 	Next      OptString `json:"next"`
@@ -5320,9 +5323,8 @@ type DataAPICreateRequest struct {
 	JwksURL OptURI `json:"jwks_url"`
 	// The name of the authentication provider (e.g., Clerk, Stytch, Auth0).
 	ProviderName OptString `json:"provider_name"`
-	// WARNING - using this setting will only reject tokens with a
-	// different audience claim. Tokens without audience claim will still
-	// be accepted.
+	// WARNING - using this setting will only reject tokens with a different audience claim. Tokens without
+	// audience claim will still be accepted.
 	JwtAudience OptString `json:"jwt_audience"`
 	// Grant all permissions to the tables in the public schema to authenticated users.
 	AddDefaultGrants OptBool `json:"add_default_grants"`
@@ -5883,14 +5885,15 @@ type DefaultEndpointSettings struct {
 	//
 	// Deprecated: schema marks this property as deprecated.
 	PgbouncerSettings OptPgbouncerSettingsData `json:"pgbouncer_settings"`
-	// The minimum number of Compute Units. The minimum value is `0.25`.
-	// See [Compute size and Autoscaling configuration](https://neon.
-	// com/docs/manage/endpoints#compute-size-and-autoscaling-configuration)
-	// for more information.
+	// The minimum number of Compute Units. The minimum value is `0.25`. See
+	// [Compute size and Autoscaling configuration] for more information.
+	//
+	// [Compute size and Autoscaling configuration]: https://neon.com/docs/manage/endpoints#compute-size-and-autoscaling-configuration
 	AutoscalingLimitMinCu OptComputeUnit `json:"autoscaling_limit_min_cu"`
-	// The maximum number of Compute Units. See [Compute size and Autoscaling configuration](https://neon.
-	// com/docs/manage/endpoints#compute-size-and-autoscaling-configuration)
-	// for more information.
+	// The maximum number of Compute Units. See [Compute size and Autoscaling configuration] for more
+	// information.
+	//
+	// [Compute size and Autoscaling configuration]: https://neon.com/docs/manage/endpoints#compute-size-and-autoscaling-configuration
 	AutoscalingLimitMaxCu OptComputeUnit           `json:"autoscaling_limit_max_cu"`
 	SuspendTimeoutSeconds OptSuspendTimeoutSeconds `json:"suspend_timeout_seconds"`
 }
@@ -6095,11 +6098,11 @@ type Endpoint struct {
 	CurrentState EndpointState        `json:"current_state"`
 	PendingState OptEndpointState     `json:"pending_state"`
 	Settings     EndpointSettingsData `json:"settings"`
-	// DEPRECATED. Whether to enable connection pooling for the compute endpoint.
-	// The recommended way to enable connection pooling is to append `-pooler` to the endpoint ID in the
-	// connection string.
-	// See [How to use connection pooling](https://neon.
-	// com/docs/connect/connection-pooling#how-to-use-connection-pooling).
+	// DEPRECATED. Whether to enable connection pooling for the compute endpoint. The recommended way to
+	// enable connection pooling is to append `-pooler` to the endpoint ID in the connection string. See
+	// [How to use connection pooling].
+	//
+	// [How to use connection pooling]: https://neon.com/docs/connect/connection-pooling#how-to-use-connection-pooling
 	//
 	// Deprecated: schema marks this property as deprecated.
 	PoolerEnabled bool `json:"pooler_enabled"`
@@ -6108,10 +6111,8 @@ type Endpoint struct {
 	//
 	// Deprecated: schema marks this property as deprecated.
 	PoolerMode EndpointPoolerMode `json:"pooler_mode"`
-	// Whether to restrict connections to the compute endpoint.
-	// Enabling this option schedules a suspend compute operation.
-	// A disabled compute endpoint cannot be enabled by a connection or
-	// console action.
+	// Whether to restrict connections to the compute endpoint. Enabling this option schedules a suspend
+	// compute operation. A disabled compute endpoint cannot be enabled by a connection or console action.
 	Disabled bool `json:"disabled"`
 	// Whether to permit passwordless access to the compute endpoint.
 	PasswordlessAccess bool `json:"passwordless_access"`
@@ -6417,22 +6418,22 @@ type EndpointCreateRequestEndpoint struct {
 	RegionID OptString               `json:"region_id"`
 	Type     EndpointType            `json:"type"`
 	Settings OptEndpointSettingsData `json:"settings"`
-	// The minimum number of Compute Units. The minimum value is `0.25`.
-	// See [Compute size and Autoscaling configuration](https://neon.
-	// com/docs/manage/endpoints#compute-size-and-autoscaling-configuration)
-	// for more information.
+	// The minimum number of Compute Units. The minimum value is `0.25`. See
+	// [Compute size and Autoscaling configuration] for more information.
+	//
+	// [Compute size and Autoscaling configuration]: https://neon.com/docs/manage/endpoints#compute-size-and-autoscaling-configuration
 	AutoscalingLimitMinCu OptComputeUnit `json:"autoscaling_limit_min_cu"`
-	// The maximum number of Compute Units.
-	// See [Compute size and Autoscaling configuration](https://neon.
-	// com/docs/manage/endpoints#compute-size-and-autoscaling-configuration)
-	// for more information.
+	// The maximum number of Compute Units. See [Compute size and Autoscaling configuration] for more
+	// information.
+	//
+	// [Compute size and Autoscaling configuration]: https://neon.com/docs/manage/endpoints#compute-size-and-autoscaling-configuration
 	AutoscalingLimitMaxCu OptComputeUnit `json:"autoscaling_limit_max_cu"`
 	Provisioner           OptProvisioner `json:"provisioner"`
-	// DEPRECATED. Whether to enable connection pooling for the compute endpoint.
-	// The recommended way to enable connection pooling is to append `-pooler` to the endpoint ID in the
-	// connection string.
-	// See [How to use connection pooling](https://neon.
-	// com/docs/connect/connection-pooling#how-to-use-connection-pooling).
+	// DEPRECATED. Whether to enable connection pooling for the compute endpoint. The recommended way to
+	// enable connection pooling is to append `-pooler` to the endpoint ID in the connection string. See
+	// [How to use connection pooling].
+	//
+	// [How to use connection pooling]: https://neon.com/docs/connect/connection-pooling#how-to-use-connection-pooling
 	//
 	// Deprecated: schema marks this property as deprecated.
 	PoolerEnabled OptBool `json:"pooler_enabled"`
@@ -6441,11 +6442,9 @@ type EndpointCreateRequestEndpoint struct {
 	//
 	// Deprecated: schema marks this property as deprecated.
 	PoolerMode OptEndpointPoolerMode `json:"pooler_mode"`
-	// Whether to restrict connections to the compute endpoint.
-	// Enabling this option schedules a suspend compute operation.
-	// A disabled compute endpoint cannot be enabled by a connection or
-	// console action. However, the compute endpoint is periodically
-	// enabled by check_availability operations.
+	// Whether to restrict connections to the compute endpoint. Enabling this option schedules a suspend
+	// compute operation. A disabled compute endpoint cannot be enabled by a connection or console action.
+	// However, the compute endpoint is periodically enabled by check_availability operations.
 	Disabled OptBool `json:"disabled"`
 	// NOT YET IMPLEMENTED. Whether to permit passwordless access to the compute endpoint.
 	PasswordlessAccess    OptBool                  `json:"passwordless_access"`
@@ -6818,28 +6817,28 @@ func (s *EndpointUpdateRequest) SetEndpoint(val EndpointUpdateRequestEndpoint) {
 }
 
 type EndpointUpdateRequestEndpoint struct {
-	// DEPRECATED: This field will be removed in a future release.
-	// The destination branch ID. The destination branch must not have an existing read-write endpoint.
+	// DEPRECATED: This field will be removed in a future release. The destination branch ID. The
+	// destination branch must not have an existing read-write endpoint.
 	//
 	// Deprecated: schema marks this property as deprecated.
 	BranchID OptString `json:"branch_id"`
-	// The minimum number of Compute Units. The minimum value is `0.25`.
-	// See [Compute size and Autoscaling configuration](https://neon.
-	// com/docs/manage/endpoints#compute-size-and-autoscaling-configuration)
-	// for more information.
+	// The minimum number of Compute Units. The minimum value is `0.25`. See
+	// [Compute size and Autoscaling configuration] for more information.
+	//
+	// [Compute size and Autoscaling configuration]: https://neon.com/docs/manage/endpoints#compute-size-and-autoscaling-configuration
 	AutoscalingLimitMinCu OptComputeUnit `json:"autoscaling_limit_min_cu"`
-	// The maximum number of Compute Units.
-	// See [Compute size and Autoscaling configuration](https://neon.
-	// com/docs/manage/endpoints#compute-size-and-autoscaling-configuration)
-	// for more information.
+	// The maximum number of Compute Units. See [Compute size and Autoscaling configuration] for more
+	// information.
+	//
+	// [Compute size and Autoscaling configuration]: https://neon.com/docs/manage/endpoints#compute-size-and-autoscaling-configuration
 	AutoscalingLimitMaxCu OptComputeUnit          `json:"autoscaling_limit_max_cu"`
 	Provisioner           OptProvisioner          `json:"provisioner"`
 	Settings              OptEndpointSettingsData `json:"settings"`
-	// DEPRECATED. Whether to enable connection pooling for the compute endpoint.
-	// The recommended way to enable connection pooling is to append `-pooler` to the endpoint ID in the
-	// connection string.
-	// See [How to use connection pooling](https://neon.
-	// com/docs/connect/connection-pooling#how-to-use-connection-pooling).
+	// DEPRECATED. Whether to enable connection pooling for the compute endpoint. The recommended way to
+	// enable connection pooling is to append `-pooler` to the endpoint ID in the connection string. See
+	// [How to use connection pooling].
+	//
+	// [How to use connection pooling]: https://neon.com/docs/connect/connection-pooling#how-to-use-connection-pooling
 	//
 	// Deprecated: schema marks this property as deprecated.
 	PoolerEnabled OptBool `json:"pooler_enabled"`
@@ -6848,11 +6847,9 @@ type EndpointUpdateRequestEndpoint struct {
 	//
 	// Deprecated: schema marks this property as deprecated.
 	PoolerMode OptEndpointPoolerMode `json:"pooler_mode"`
-	// Whether to restrict connections to the compute endpoint.
-	// Enabling this option schedules a suspend compute operation.
-	// A disabled compute endpoint cannot be enabled by a connection or
-	// console action. However, the compute endpoint is periodically
-	// enabled by check_availability operations.
+	// Whether to restrict connections to the compute endpoint. Enabling this option schedules a suspend
+	// compute operation. A disabled compute endpoint cannot be enabled by a connection or console action.
+	// However, the compute endpoint is periodically enabled by check_availability operations.
 	Disabled OptBool `json:"disabled"`
 	// NOT YET IMPLEMENTED. Whether to permit passwordless access to the compute endpoint.
 	PasswordlessAccess    OptBool                  `json:"passwordless_access"`
@@ -6989,8 +6986,8 @@ func (s *EndpointsResponse) SetEndpoints(val []Endpoint) {
 type ErrorCode string
 
 type FinalizeRestoreBranchReq struct {
-	// Used to rename the existing branch when it is replaced. if omitted, a default name is generated
-	// and used.
+	// Used to rename the existing branch when it is replaced. if omitted, a default name is generated and
+	// used.
 	Name OptString `json:"name"`
 }
 
@@ -7006,18 +7003,16 @@ func (s *FinalizeRestoreBranchReq) SetName(val OptString) {
 
 // Ref: #/components/schemas/FunctionDeployRequest
 type FunctionDeployRequestMultipart struct {
-	// Optional ZIP archive of the function source code. Omit to reuse the
-	// latest version's bundle (a config-only change). Required for the
-	// first deployment of a function.
+	// Optional ZIP archive of the function source code. Omit to reuse the latest version's bundle (a
+	// config-only change). Required for the first deployment of a function.
 	Zip     OptMultipartFile                         `json:"zip"`
 	Runtime OptFunctionDeployRequestMultipartRuntime `json:"runtime"`
-	// Optional JSON object (a string-to-string map) of environment
-	// variables for the deployment, e.g. {"KEY":"VALUE"}. Carried as a
-	// JSON-encoded string because multipart form data does not support
-	// typed object parts.
-	// Values are write-only: they are encrypted at rest, and responses
-	// carry only the variable names (the `environment` array), never the
-	// values.
+	// Optional JSON object (a string-to-string map) of environment variables for the deployment, e.g.
+	// {"KEY":"VALUE"}. Carried as a JSON-encoded string because multipart form data does not support typed
+	// object parts.
+	//
+	// Values are write-only: they are encrypted at rest, and responses carry only the variable names (the
+	// `environment` array), never the values.
 	Environment OptString `json:"environment"`
 }
 
@@ -7087,9 +7082,9 @@ func (s *FunctionDeployRequestMultipartRuntime) UnmarshalText(data []byte) error
 
 // Ref: #/components/schemas/GeneralError
 type GeneralError struct {
-	// Unique identifier for the request, useful for debugging.
-	// You can set this value manually by including an `X-Request-ID` header in the request. If not
-	// provided, the value will be generated automatically.
+	// Unique identifier for the request, useful for debugging. You can set this value manually by
+	// including an `X-Request-ID` header in the request. If not provided, the value will be generated
+	// automatically.
 	RequestID OptString `json:"request_id"`
 	Code      ErrorCode `json:"code"`
 	// Error message.
@@ -7862,9 +7857,10 @@ func (*LimitsUnsatisfiedResponse) transferProjectsFromUserToOrgRes() {}
 
 type LimitsUnsatisfiedResponseLimitsItem struct {
 	// Identifier of the unsatisfied limit. Possible values are:
-	// - subscription_type
-	// - projects_count
-	// - project_region.
+	//
+	//  - subscription_type
+	//  - projects_count
+	//  - project_region
 	Name     string `json:"name"`
 	Expected string `json:"expected"`
 	Actual   string `json:"actual"`
@@ -8096,8 +8092,8 @@ func (s *ListProjectBranchesSortBy) UnmarshalText(data []byte) error {
 // Merged schema.
 type ListProjectsOK struct {
 	Projects []ProjectListItem `json:"projects"`
-	// A list of project IDs indicating which projects are known to exist, but whose details could not
-	// be fetched within the requested (or implicit) time limit.
+	// A list of project IDs indicating which projects are known to exist, but whose details could not be
+	// fetched within the requested (or implicit) time limit.
 	UnavailableProjectIds []string                   `json:"unavailable_project_ids"`
 	Pagination            OptPagination              `json:"pagination"`
 	Applications          ListProjectsOKApplications `json:"applications"`
@@ -8179,8 +8175,8 @@ func (s *ListProjectsOKIntegrations) init() ListProjectsOKIntegrations {
 // Merged schema.
 type ListSharedProjectsOK struct {
 	Projects []ProjectListItem `json:"projects"`
-	// A list of project IDs indicating which projects are known to exist, but whose details could not
-	// be fetched within the requested (or implicit) time limit.
+	// A list of project IDs indicating which projects are known to exist, but whose details could not be
+	// fetched within the requested (or implicit) time limit.
 	UnavailableProjectIds []string      `json:"unavailable_project_ids"`
 	Pagination            OptPagination `json:"pagination"`
 }
@@ -8230,14 +8226,12 @@ func (s *ListSnapshotsOK) SetSnapshots(val []Snapshot) {
 }
 
 // A maintenance window is a time period during which Neon may perform maintenance on the project's
-// infrastructure.
-// During this time, the project's compute endpoints may be unavailable and existing connections can
-// be
-// interrupted.
+// infrastructure. During this time, the project's compute endpoints may be unavailable and existing
+// connections can be interrupted.
 // Ref: #/components/schemas/MaintenanceWindow
 type MaintenanceWindow struct {
-	// A list of weekdays when the maintenance window is active.
-	// Encoded as ints, where 1 - Monday, and 7 - Sunday.
+	// A list of weekdays when the maintenance window is active. Encoded as ints, where 1 - Monday, and 7 -
+	// Sunday.
 	Weekdays []int `json:"weekdays"`
 	// Start time of the maintenance window, in the format of "HH:MM". Uses UTC.
 	StartTime string `json:"start_time"`
@@ -8285,9 +8279,9 @@ type MaskingRule struct {
 	TableName string `json:"table_name"`
 	// The name of the column to be masked.
 	ColumnName string `json:"column_name"`
-	// The PostgreSQL Anonymizer masking function to apply.
-	// Can be a predefined function (e.g., 'anon.random_string(10)', 'anon.fake_email()')
-	// or a custom function definition (e.g., 'anon.hash(column_name)').
+	// The PostgreSQL Anonymizer masking function to apply. Can be a predefined function (e.g.,
+	// 'anon.random_string(10)', 'anon.fake_email()') or a custom function definition (e.g.,
+	// 'anon.hash(column_name)').
 	MaskingFunction OptString `json:"masking_function"`
 	// A literal value to set on the column when masking.
 	MaskingValue OptString `json:"masking_value"`
@@ -8371,8 +8365,8 @@ func (s *MaskingRulesResponse) SetMaskingRules(val []MaskingRule) {
 
 // Ref: #/components/schemas/MaskingRulesUpdateRequest
 type MaskingRulesUpdateRequest struct {
-	// List of masking rules to apply to the branch.
-	// This will replace all existing masking rules for the branch.
+	// List of masking rules to apply to the branch. This will replace all existing masking rules for the
+	// branch.
 	MaskingRules []MaskingRule `json:"masking_rules"`
 }
 
@@ -8445,8 +8439,7 @@ func (s *Member) SetJoinedAt(val OptDateTime) {
 	s.JoinedAt = val
 }
 
-// The role of the organization member. Some role values may not be
-// available for all organizations.
+// The role of the organization member. Some role values may not be available for all organizations.
 // Ref: #/components/schemas/MemberRole
 type MemberRole string
 
@@ -8515,9 +8508,8 @@ type MemberUserInfo struct {
 	Email string `json:"email"`
 	// Whether the member has MFA (TOTP) enabled.
 	HasMfa OptBool `json:"has_mfa"`
-	// Timestamp of when the user account was deactivated.
-	// Absent for active users. When present, the UI should render a
-	// "Deactivated" badge inline next to the member.
+	// Timestamp of when the user account was deactivated. Absent for active users. When present, the UI
+	// should render a "Deactivated" badge inline next to the member.
 	DeactivatedAt OptDateTime `json:"deactivated_at"`
 }
 
@@ -9175,7 +9167,8 @@ func (s *NeonAuthEmailServerConfig) SetOneOf(val NeonAuthEmailServerConfigSum) {
 
 // NeonAuthEmailServerConfigSum represents sum type.
 type NeonAuthEmailServerConfigSum struct {
-	Type                NeonAuthEmailServerConfigSumType // switch on this field
+	// Type selects the active sum variant, switch on this field.
+	Type                NeonAuthEmailServerConfigSumType
 	StandardEmailServer StandardEmailServer
 	SharedEmailServer   SharedEmailServer
 }
@@ -9242,8 +9235,10 @@ func NewSharedEmailServerNeonAuthEmailServerConfigSum(v SharedEmailServer) NeonA
 }
 
 // The email verification method to use.
-// - `link`: Sends a verification link via email
-// - `otp`: Sends a one-time password (OTP) via email.
+//
+//   - `link`: Sends a verification link via email
+//   - `otp`: Sends a one-time password (OTP) via email
+//
 // Ref: #/components/schemas/NeonAuthEmailVerificationMethod
 type NeonAuthEmailVerificationMethod string
 
@@ -10368,13 +10363,11 @@ type NeonFunction struct {
 	// onto it. Empty string when the function has no servable invoke host (e.g. a deployment without an
 	// invocation front-door).
 	InvocationURL string `json:"invocation_url"`
-	// The most recent deployment, regardless of build status. It may
-	// still be building or it may have failed. Omitted until the first
-	// deployment is created.
+	// The most recent deployment, regardless of build status. It may still be building or it may have
+	// failed. Omitted until the first deployment is created.
 	CurrentDeployment OptNeonFunctionDeployment `json:"current_deployment"`
-	// The most recent deployment whose build completed successfully.
-	// This is the deployment that serves invocations. Omitted until a
-	// deployment succeeds.
+	// The most recent deployment whose build completed successfully. This is the deployment that serves
+	// invocations. Omitted until a deployment succeeds.
 	ActiveDeployment OptNeonFunctionDeployment `json:"active_deployment"`
 	CreatedAt        string                    `json:"created_at"`
 }
@@ -10458,13 +10451,11 @@ type NeonFunctionDeployment struct {
 	MemoryMib int32                        `json:"memory_mib"`
 	Runtime   string                       `json:"runtime"`
 	CreatedAt string                       `json:"created_at"`
-	// The NAMES of the deployment's environment variables, sorted.
-	// Values are encrypted at rest and are never returned — they are
-	// write-only. To change a value, deploy the variable with the new
-	// value; to remove a variable, deploy it with an empty value.
+	// The NAMES of the deployment's environment variables, sorted. Values are encrypted at rest and are
+	// never returned — they are write-only. To change a value, deploy the variable with the new value;
+	// to remove a variable, deploy it with an empty value.
 	Environment []string `json:"environment"`
-	// Human-readable reason the deployment build failed. Present only
-	// when `status` is `failed`.
+	// Human-readable reason the deployment build failed. Present only when `status` is `failed`.
 	Error OptString `json:"error"`
 }
 
@@ -10626,10 +10617,8 @@ func (s *NeonFunctionResponse) SetFunction(val NeonFunction) {
 
 // Ref: #/components/schemas/NeonFunctionUpdateRequest
 type NeonFunctionUpdateRequest struct {
-	// New display name for the function. `null` clears the display
-	// name; the function's `name` then falls back to its slug. Leading
-	// and trailing whitespace is trimmed; a whitespace-only name is
-	// rejected.
+	// New display name for the function. `null` clears the display name; the function's `name` then falls
+	// back to its slug. Leading and trailing whitespace is trimmed; a whitespace-only name is rejected.
 	Name NilString `json:"name"`
 }
 
@@ -10896,6 +10885,8 @@ const (
 	OperationActionTenantIgnore                  OperationAction = "tenant_ignore"
 	OperationActionTenantAttach                  OperationAction = "tenant_attach"
 	OperationActionTenantDetach                  OperationAction = "tenant_detach"
+	OperationActionTenantDetachSafekeepers       OperationAction = "tenant_detach_safekeepers"
+	OperationActionTenantAttachSafekeepers       OperationAction = "tenant_attach_safekeepers"
 	OperationActionTenantReattach                OperationAction = "tenant_reattach"
 	OperationActionReplaceSafekeeper             OperationAction = "replace_safekeeper"
 	OperationActionDisableMaintenance            OperationAction = "disable_maintenance"
@@ -10934,6 +10925,8 @@ func (OperationAction) AllValues() []OperationAction {
 		OperationActionTenantIgnore,
 		OperationActionTenantAttach,
 		OperationActionTenantDetach,
+		OperationActionTenantDetachSafekeepers,
+		OperationActionTenantAttachSafekeepers,
 		OperationActionTenantReattach,
 		OperationActionReplaceSafekeeper,
 		OperationActionDisableMaintenance,
@@ -10984,6 +10977,10 @@ func (s OperationAction) MarshalText() ([]byte, error) {
 	case OperationActionTenantAttach:
 		return []byte(s), nil
 	case OperationActionTenantDetach:
+		return []byte(s), nil
+	case OperationActionTenantDetachSafekeepers:
+		return []byte(s), nil
+	case OperationActionTenantAttachSafekeepers:
 		return []byte(s), nil
 	case OperationActionTenantReattach:
 		return []byte(s), nil
@@ -11070,6 +11067,12 @@ func (s *OperationAction) UnmarshalText(data []byte) error {
 		return nil
 	case OperationActionTenantDetach:
 		*s = OperationActionTenantDetach
+		return nil
+	case OperationActionTenantDetachSafekeepers:
+		*s = OperationActionTenantDetachSafekeepers
+		return nil
+	case OperationActionTenantAttachSafekeepers:
+		*s = OperationActionTenantAttachSafekeepers
 		return nil
 	case OperationActionTenantReattach:
 		*s = OperationActionTenantReattach
@@ -13644,6 +13647,11 @@ func (o *OptNilDataAPISettings) SetToNull() {
 	o.Value = v
 }
 
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilDataAPISettings) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
 // Get returns value and boolean that denotes whether value was set.
 func (o OptNilDataAPISettings) Get() (v DataAPISettings, ok bool) {
 	if o.Null {
@@ -13705,6 +13713,11 @@ func (o *OptNilDateTime) SetToNull() {
 	o.Null = true
 	var v time.Time
 	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilDateTime) IsEmpty() bool {
+	return !o.Set && !o.Null
 }
 
 // Get returns value and boolean that denotes whether value was set.
@@ -13770,6 +13783,11 @@ func (o *OptNilInt64) SetToNull() {
 	o.Value = v
 }
 
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilInt64) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
 // Get returns value and boolean that denotes whether value was set.
 func (o OptNilInt64) Get() (v int64, ok bool) {
 	if o.Null {
@@ -13833,6 +13851,11 @@ func (o *OptNilProjectPermissionLevel) SetToNull() {
 	o.Value = v
 }
 
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilProjectPermissionLevel) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
 // Get returns value and boolean that denotes whether value was set.
 func (o OptNilProjectPermissionLevel) Get() (v ProjectPermissionLevel, ok bool) {
 	if o.Null {
@@ -13894,6 +13917,11 @@ func (o *OptNilStringArray) SetToNull() {
 	o.Null = true
 	var v []string
 	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilStringArray) IsEmpty() bool {
+	return !o.Set && !o.Null
 }
 
 // Get returns value and boolean that denotes whether value was set.
@@ -15230,8 +15258,8 @@ type Organization struct {
 	Plan   string `json:"plan"`
 	// A timestamp indicting when the organization was created.
 	CreatedAt time.Time `json:"created_at"`
-	// Organizations created via the Console or the API are managed by `console`.
-	// Organizations created by other methods can't be deleted via the Console or the API.
+	// Organizations created via the Console or the API are managed by `console`. Organizations created by
+	// other methods can't be deleted via the Console or the API.
 	ManagedBy string `json:"managed_by"`
 	// A timestamp indicating when the organization was updated.
 	UpdatedAt time.Time `json:"updated_at"`
@@ -15417,8 +15445,8 @@ func (s *OrganizationsResponse) SetOrganizations(val []Organization) {
 	s.Organizations = val
 }
 
-// Cursor based pagination is used. The user must pass the cursor as is to the backend.
-// For more information about cursor based pagination, see
+// Cursor based pagination is used. The user must pass the cursor as is to the backend. For more
+// information about cursor based pagination, see
 // https://learn.microsoft.com/en-us/ef/core/querying/pagination#keyset-pagination.
 // Ref: #/components/schemas/Pagination
 type Pagination struct {
@@ -15708,20 +15736,19 @@ func (s *PreloadLibraries) SetEnabledLibraries(val []string) {
 	s.EnabledLibraries = val
 }
 
-// Options for the presigned URL. The `operation` selects upload (`PUT`)
-// or download (`GET`); the remaining fields are optional.
+// Options for the presigned URL. The `operation` selects upload (`PUT`) or download (`GET`); the
+// remaining fields are optional.
 // Ref: #/components/schemas/PresignRequest
 type PresignRequest struct {
-	// The transfer direction. `upload` returns a presigned `PUT` URL;
-	// `download` returns a presigned `GET` URL.
+	// The transfer direction. `upload` returns a presigned `PUT` URL; `download` returns a presigned `GET`
+	// URL.
 	Operation PresignRequestOperation `json:"operation"`
-	// The `Content-Type` to bind into the signed request. Only meaningful
-	// for `upload`: when set, the caller MUST send the same `Content-Type`
-	// header on the `PUT`, and the value is echoed back in the response
-	// `headers`. Ignored for `download`.
+	// The `Content-Type` to bind into the signed request. Only meaningful for `upload`: when set, the
+	// caller MUST send the same `Content-Type` header on the `PUT`, and the value is echoed back in the
+	// response `headers`. Ignored for `download`.
 	ContentType OptString `json:"content_type"`
-	// How long the presigned URL stays valid, in seconds. Defaults to 900
-	// (15 minutes); capped at 604800 (7 days).
+	// How long the presigned URL stays valid, in seconds. Defaults to 900 (15 minutes); capped at 604800
+	// (7 days).
 	ExpiresInSeconds OptInt64 `json:"expires_in_seconds"`
 }
 
@@ -15755,8 +15782,8 @@ func (s *PresignRequest) SetExpiresInSeconds(val OptInt64) {
 	s.ExpiresInSeconds = val
 }
 
-// The transfer direction. `upload` returns a presigned `PUT` URL;
-// `download` returns a presigned `GET` URL.
+// The transfer direction. `upload` returns a presigned `PUT` URL; `download` returns a presigned `GET`
+// URL.
 type PresignRequestOperation string
 
 const (
@@ -15800,14 +15827,12 @@ func (s *PresignRequestOperation) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/PresignResponse
 type PresignResponse struct {
-	// The presigned URL. Transfer the object bytes by issuing
-	// `method url` with the returned `headers`.
+	// The presigned URL. Transfer the object bytes by issuing `method url` with the returned `headers`.
 	URL string `json:"url"`
-	// The HTTP method to use against `url`: `PUT` for an upload,
-	// `GET` for a download.
+	// The HTTP method to use against `url`: `PUT` for an upload, `GET` for a download.
 	Method string `json:"method"`
-	// Headers the caller MUST send verbatim on the request (e.g.
-	// `Content-Type` when it was signed on an upload). May be empty.
+	// Headers the caller MUST send verbatim on the request (e.g. `Content-Type` when it was signed on an
+	// upload). May be empty.
 	Headers PresignResponseHeaders `json:"headers"`
 	// When the presigned URL stops being valid.
 	ExpiresAt time.Time `json:"expires_at"`
@@ -15855,8 +15880,8 @@ func (s *PresignResponse) SetExpiresAt(val time.Time) {
 
 func (*PresignResponse) presignProjectBranchBucketObjectRes() {}
 
-// Headers the caller MUST send verbatim on the request (e.g.
-// `Content-Type` when it was signed on an upload). May be empty.
+// Headers the caller MUST send verbatim on the request (e.g. `Content-Type` when it was signed on an
+// upload). May be empty.
 type PresignResponseHeaders map[string]string
 
 func (s *PresignResponseHeaders) init() PresignResponseHeaders {
@@ -15870,28 +15895,25 @@ func (s *PresignResponseHeaders) init() PresignResponseHeaders {
 
 // Ref: #/components/schemas/Project
 type Project struct {
-	// Bytes-Hour. Project consumed that much storage hourly during the billing period. The value has
-	// some lag.
-	// The value is reset at the beginning of each billing period.
+	// Bytes-Hour. Project consumed that much storage hourly during the billing period. The value has some
+	// lag. The value is reset at the beginning of each billing period.
 	DataStorageBytesHour int64 `json:"data_storage_bytes_hour"`
 	// Bytes. Egress traffic from the Neon cloud to the client for given project over the billing period.
 	// Includes deleted endpoints. The value has some lag. The value is reset at the beginning of each
 	// billing period.
 	DataTransferBytes int64 `json:"data_transfer_bytes"`
-	// Bytes. Amount of WAL that travelled through storage for given project across all branches.
-	// The value has some lag. The value is reset at the beginning of each billing period.
+	// Bytes. Amount of WAL that travelled through storage for given project across all branches. The value
+	// has some lag. The value is reset at the beginning of each billing period.
 	WrittenDataBytes int64 `json:"written_data_bytes"`
 	// Seconds. The number of CPU seconds used by the project's compute endpoints, including compute
-	// endpoints that have been deleted.
-	// The value has some lag. The value is reset at the beginning of each billing period.
-	// Examples:
+	// endpoints that have been deleted. The value has some lag. The value is reset at the beginning of
+	// each billing period. Examples:
+	//
 	// 1. An endpoint that uses 1 CPU for 1 second is equal to `compute_time=1`.
 	// 2. An endpoint that uses 2 CPUs simultaneously for 1 second is equal to `compute_time=2`.
 	ComputeTimeSeconds int64 `json:"compute_time_seconds"`
 	// Seconds. Control plane observed endpoints of this project being active this amount of wall-clock
-	// time.
-	// The value has some lag.
-	// The value is reset at the beginning of each billing period.
+	// time. The value has some lag. The value is reset at the beginning of each billing period.
 	ActiveTimeSeconds int64 `json:"active_time_seconds"`
 	// DEPRECATED, use compute_time instead.
 	//
@@ -15909,8 +15931,8 @@ type Project struct {
 	DefaultEndpointSettings OptDefaultEndpointSettings `json:"default_endpoint_settings"`
 	Settings                OptProjectSettingsData     `json:"settings"`
 	PgVersion               PgVersion                  `json:"pg_version"`
-	// The proxy host for the project. This value combines the `region_id`, the `platform_id`, and the
-	// Neon domain (`neon.tech`).
+	// The proxy host for the project. This value combines the `region_id`, the `platform_id`, and the Neon
+	// domain (`neon.tech`).
 	ProxyHost string `json:"proxy_host"`
 	// The logical size limit for a branch. The value is in MiB.
 	BranchLogicalSizeLimit int64 `json:"branch_logical_size_limit"`
@@ -15930,28 +15952,28 @@ type Project struct {
 	CreatedAt time.Time `json:"created_at"`
 	// A timestamp indicating when the project was last updated.
 	UpdatedAt time.Time `json:"updated_at"`
-	// The current space occupied by the project in storage, in bytes. Synthetic storage size combines
-	// the logical data size and Write-Ahead Log (WAL) size for all branches in a project.
+	// The current space occupied by the project in storage, in bytes. Synthetic storage size combines the
+	// logical data size and Write-Ahead Log (WAL) size for all branches in a project.
 	SyntheticStorageSize OptInt64 `json:"synthetic_storage_size"`
-	// A date-time indicating when Neon Cloud started measuring consumption for current consumption
-	// period.
+	// A date-time indicating when Neon Cloud started measuring consumption for current consumption period.
 	ConsumptionPeriodStart time.Time `json:"consumption_period_start"`
 	// A date-time indicating when Neon Cloud plans to stop measuring consumption for current consumption
 	// period.
 	ConsumptionPeriodEnd time.Time `json:"consumption_period_end"`
-	// DEPRECATED. Use `consumption_period_end` from the getProject endpoint instead.
-	// A timestamp indicating when the project quota resets.
+	// DEPRECATED. Use `consumption_period_end` from the getProject endpoint instead. A timestamp
+	// indicating when the project quota resets.
 	//
 	// Deprecated: schema marks this property as deprecated.
 	QuotaResetAt OptDateTime         `json:"quota_reset_at"`
 	OwnerID      string              `json:"owner_id"`
 	Owner        OptProjectOwnerData `json:"owner"`
 	// The most recent time when any endpoint of this project was active.
+	//
 	// Omitted when observed no activity for endpoints of this project.
 	ComputeLastActiveAt OptDateTime `json:"compute_last_active_at"`
 	OrgID               OptString   `json:"org_id"`
-	// A timestamp indicating when project update begins. If set, computes might experience a brief
-	// restart around this time.
+	// A timestamp indicating when project update begins. If set, computes might experience a brief restart
+	// around this time.
 	MaintenanceScheduledFor OptDateTime `json:"maintenance_scheduled_for"`
 	// A timestamp indicating when HIPAA was enabled for this project.
 	HipaaEnabledAt             OptDateTime                  `json:"hipaa_enabled_at"`
@@ -16368,30 +16390,35 @@ type ProjectCreateRequestProject struct {
 	Name   OptString                            `json:"name"`
 	Branch OptProjectCreateRequestProjectBranch `json:"branch"`
 	// DEPRECATED, use default_endpoint_settings.autoscaling_limit_min_cu instead.
-	// The minimum number of Compute Units. The minimum value is `0.25`.
-	// See [Compute size and Autoscaling configuration](https://neon.
-	// com/docs/manage/endpoints#compute-size-and-autoscaling-configuration)
-	// for more information.
+	//
+	// The minimum number of Compute Units. The minimum value is `0.25`. See
+	// [Compute size and Autoscaling configuration] for more information.
+	//
+	// [Compute size and Autoscaling configuration]: https://neon.com/docs/manage/endpoints#compute-size-and-autoscaling-configuration
 	AutoscalingLimitMinCu OptComputeUnit `json:"autoscaling_limit_min_cu"`
 	// DEPRECATED, use default_endpoint_settings.autoscaling_limit_max_cu instead.
-	// The maximum number of Compute Units. See [Compute size and Autoscaling configuration](https://neon.
-	// com/docs/manage/endpoints#compute-size-and-autoscaling-configuration)
-	// for more information.
+	//
+	// The maximum number of Compute Units. See [Compute size and Autoscaling configuration] for more
+	// information.
+	//
+	// [Compute size and Autoscaling configuration]: https://neon.com/docs/manage/endpoints#compute-size-and-autoscaling-configuration
 	AutoscalingLimitMaxCu OptComputeUnit `json:"autoscaling_limit_max_cu"`
 	Provisioner           OptProvisioner `json:"provisioner"`
-	// The region identifier. Refer to our [Regions](https://neon.com/docs/introduction/regions)
-	// documentation for supported regions. Values are specified in this format: `aws-us-east-1`.
+	// The region identifier. Refer to our [Regions] documentation for supported regions. Values are
+	// specified in this format: `aws-us-east-1`.
+	//
+	// [Regions]: https://neon.com/docs/introduction/regions
 	RegionID                OptString                  `json:"region_id"`
 	DefaultEndpointSettings OptDefaultEndpointSettings `json:"default_endpoint_settings"`
 	PgVersion               OptPgVersion               `json:"pg_version"`
 	// Whether or not passwords are stored for roles in the Neon project. Storing passwords facilitates
 	// access to Neon features that require authorization.
 	StorePasswords OptBool `json:"store_passwords"`
-	// The number of seconds to retain the shared history for all branches in this project.
-	// The default is 1 day (86400 seconds).
+	// The number of seconds to retain the shared history for all branches in this project. The default is
+	// 1 day (86400 seconds).
 	HistoryRetentionSeconds OptInt32 `json:"history_retention_seconds"`
-	// Organization id in case the project created belongs to an organization.
-	// If not present, project is owned by a user and not by org.
+	// Organization id in case the project created belongs to an organization. If not present, project is
+	// owned by a user and not by org.
 	OrgID OptString `json:"org_id"`
 }
 
@@ -16597,8 +16624,8 @@ type ProjectListItem struct {
 	DefaultEndpointSettings OptDefaultEndpointSettings `json:"default_endpoint_settings"`
 	Settings                OptProjectSettingsData     `json:"settings"`
 	PgVersion               PgVersion                  `json:"pg_version"`
-	// The proxy host for the project. This value combines the `region_id`, the `platform_id`, and the
-	// Neon domain (`neon.tech`).
+	// The proxy host for the project. This value combines the `region_id`, the `platform_id`, and the Neon
+	// domain (`neon.tech`).
 	ProxyHost string `json:"proxy_host"`
 	// The logical size limit for a branch. The value is in MiB.
 	BranchLogicalSizeLimit int64 `json:"branch_logical_size_limit"`
@@ -16622,23 +16649,22 @@ type ProjectListItem struct {
 	CreatedAt time.Time `json:"created_at"`
 	// A timestamp indicating when the project was last updated.
 	UpdatedAt time.Time `json:"updated_at"`
-	// The current space occupied by the project in storage, in bytes. Synthetic storage size combines
-	// the logical data size and Write-Ahead Log (WAL) size for all branches in a project.
+	// The current space occupied by the project in storage, in bytes. Synthetic storage size combines the
+	// logical data size and Write-Ahead Log (WAL) size for all branches in a project.
 	SyntheticStorageSize OptInt64 `json:"synthetic_storage_size"`
-	// DEPRECATED. Use `consumption_period_end` from the getProject endpoint instead.
-	// A timestamp indicating when the project quota resets.
+	// DEPRECATED. Use `consumption_period_end` from the getProject endpoint instead. A timestamp
+	// indicating when the project quota resets.
 	//
 	// Deprecated: schema marks this property as deprecated.
 	QuotaResetAt OptDateTime `json:"quota_reset_at"`
 	OwnerID      string      `json:"owner_id"`
 	// The most recent time when any endpoint of this project was active.
+	//
 	// Omitted when observed no activity for endpoints of this project.
 	ComputeLastActiveAt OptDateTime `json:"compute_last_active_at"`
-	// Organization id if the project belongs to an organization.
-	// Permissions for the project will be given to organization members as defined by the organization
-	// admins.
-	// The permissions of the project do not depend on the user that created the project if a project
-	// belongs to an organization.
+	// Organization id if the project belongs to an organization. Permissions for the project will be given
+	// to organization members as defined by the organization admins. The permissions of the project do not
+	// depend on the user that created the project if a project belongs to an organization.
 	OrgID OptString `json:"org_id"`
 	// Organization name if the project belongs to an organization.
 	OrgName OptString `json:"org_name"`
@@ -17039,36 +17065,35 @@ func (s *ProjectPermission) SetRevokedAt(val OptDateTime) {
 	s.RevokedAt = val
 }
 
-// The caller's effective permission for a project when
-// per-project permissions are enabled. Values correspond to viewer,
-// editor, and admin/manage project access levels. Omitted for personal
-// projects, flag-off organizations, and non-user subjects.
+// The caller's effective permission for a project when per-project permissions are enabled. `VIEWER`
+// grants read access, `EDITOR` adds update access, and `ADMIN` grants full management. Omitted for
+// personal projects, flag-off organizations, and non-user subjects.
 // Ref: #/components/schemas/ProjectPermissionLevel
 type ProjectPermissionLevel string
 
 const (
-	ProjectPermissionLevelCANVIEW   ProjectPermissionLevel = "CAN_VIEW"
-	ProjectPermissionLevelCANEDIT   ProjectPermissionLevel = "CAN_EDIT"
-	ProjectPermissionLevelCANMANAGE ProjectPermissionLevel = "CAN_MANAGE"
+	ProjectPermissionLevelVIEWER ProjectPermissionLevel = "VIEWER"
+	ProjectPermissionLevelEDITOR ProjectPermissionLevel = "EDITOR"
+	ProjectPermissionLevelADMIN  ProjectPermissionLevel = "ADMIN"
 )
 
 // AllValues returns all ProjectPermissionLevel values.
 func (ProjectPermissionLevel) AllValues() []ProjectPermissionLevel {
 	return []ProjectPermissionLevel{
-		ProjectPermissionLevelCANVIEW,
-		ProjectPermissionLevelCANEDIT,
-		ProjectPermissionLevelCANMANAGE,
+		ProjectPermissionLevelVIEWER,
+		ProjectPermissionLevelEDITOR,
+		ProjectPermissionLevelADMIN,
 	}
 }
 
 // MarshalText implements encoding.TextMarshaler.
 func (s ProjectPermissionLevel) MarshalText() ([]byte, error) {
 	switch s {
-	case ProjectPermissionLevelCANVIEW:
+	case ProjectPermissionLevelVIEWER:
 		return []byte(s), nil
-	case ProjectPermissionLevelCANEDIT:
+	case ProjectPermissionLevelEDITOR:
 		return []byte(s), nil
-	case ProjectPermissionLevelCANMANAGE:
+	case ProjectPermissionLevelADMIN:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -17078,14 +17103,14 @@ func (s ProjectPermissionLevel) MarshalText() ([]byte, error) {
 // UnmarshalText implements encoding.TextUnmarshaler.
 func (s *ProjectPermissionLevel) UnmarshalText(data []byte) error {
 	switch ProjectPermissionLevel(data) {
-	case ProjectPermissionLevelCANVIEW:
-		*s = ProjectPermissionLevelCANVIEW
+	case ProjectPermissionLevelVIEWER:
+		*s = ProjectPermissionLevelVIEWER
 		return nil
-	case ProjectPermissionLevelCANEDIT:
-		*s = ProjectPermissionLevelCANEDIT
+	case ProjectPermissionLevelEDITOR:
+		*s = ProjectPermissionLevelEDITOR
 		return nil
-	case ProjectPermissionLevelCANMANAGE:
-		*s = ProjectPermissionLevelCANMANAGE
+	case ProjectPermissionLevelADMIN:
+		*s = ProjectPermissionLevelADMIN
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -17107,17 +17132,20 @@ func (s *ProjectPermissions) SetProjectPermissions(val []ProjectPermission) {
 	s.ProjectPermissions = val
 }
 
-// Per-project consumption quotas. If a quota is exceeded, all active computes
-// are automatically suspended and cannot be started via API calls or incoming connections.
-// The exception is `logical_size_bytes`, which is enforced per branch.
-// If a branch exceeds its `logical_size_bytes` quota, computes can still be started,
-// but write operations will fail—allowing data to be deleted to free up space.
-// Computes on other branches are not affected.
+// Per-project consumption quotas. If a quota is exceeded, all active computes are automatically
+// suspended and cannot be started via API calls or incoming connections.
+//
+// The exception is `logical_size_bytes`, which is enforced per branch. If a branch exceeds its
+// `logical_size_bytes` quota, computes can still be started, but write operations will fail—allowing
+// data to be deleted to free up space. Computes on other branches are not affected.
+//
 // Setting `logical_size_bytes` overrides any lower value set by the `neon.max_cluster_size` Postgres
 // setting.
-// Quotas are enforced using per-project consumption metrics with the same names.
-// These metrics reset at the start of each billing period. `logical_size_bytes`
-// is also an exception—it reflects the total data stored in a branch and does not reset.
+//
+// Quotas are enforced using per-project consumption metrics with the same names. These metrics reset
+// at the start of each billing period. `logical_size_bytes` is also an exception—it reflects the
+// total data stored in a branch and does not reset.
+//
 // A zero or empty quota value means “unlimited.”.
 // Ref: #/components/schemas/ProjectQuota
 type ProjectQuota struct {
@@ -17130,9 +17158,11 @@ type ProjectQuota struct {
 	// Total amount of data transferred from all of a project's branches using the proxy.
 	DataTransferBytes OptInt64 `json:"data_transfer_bytes"`
 	// Limit on the logical size of every project's branch.
-	// If a branch exceeds its `logical_size_bytes` quota, computes can still be started,
-	// but write operations will fail—allowing data to be deleted to free up space.
-	// Computes on other branches are not affected.
+	//
+	// If a branch exceeds its `logical_size_bytes` quota, computes can still be started, but write
+	// operations will fail—allowing data to be deleted to free up space. Computes on other branches are
+	// not affected.
+	//
 	// Setting `logical_size_bytes` overrides any lower value set by the `neon.max_cluster_size` Postgres
 	// setting.
 	LogicalSizeBytes OptInt64 `json:"logical_size_bytes"`
@@ -17234,17 +17264,15 @@ func (s *ProjectResponse) SetProject(val Project) {
 type ProjectSettingsData struct {
 	Quota      OptProjectQuota `json:"quota"`
 	AllowedIps OptAllowedIps   `json:"allowed_ips"`
-	// Sets wal_level=logical for all compute endpoints in this project.
-	// All active endpoints will be suspended.
-	// Once enabled, logical replication cannot be disabled.
+	// Sets wal_level=logical for all compute endpoints in this project. All active endpoints will be
+	// suspended. Once enabled, logical replication cannot be disabled.
 	EnableLogicalReplication OptBool              `json:"enable_logical_replication"`
 	MaintenanceWindow        OptMaintenanceWindow `json:"maintenance_window"`
-	// When set, connections from the public internet
-	// are disallowed. This supersedes the AllowedIPs list.
+	// When set, connections from the public internet are disallowed. This supersedes the AllowedIPs list.
 	// This parameter is under active development and its semantics may change in the future.
 	BlockPublicConnections OptBool `json:"block_public_connections"`
-	// When set, connections using VPC endpoints are disallowed.
-	// This parameter is under active development and its semantics may change in the future.
+	// When set, connections using VPC endpoints are disallowed. This parameter is under active development
+	// and its semantics may change in the future.
 	BlockVpcConnections OptBool                 `json:"block_vpc_connections"`
 	AuditLogLevel       OptProjectAuditLogLevel `json:"audit_log_level"`
 	Hipaa               OptBool                 `json:"hipaa"`
@@ -17413,8 +17441,8 @@ type ProjectUpdateRequestProject struct {
 	// The project name.
 	Name                    OptString                  `json:"name"`
 	DefaultEndpointSettings OptDefaultEndpointSettings `json:"default_endpoint_settings"`
-	// The number of seconds to retain the shared history for all branches in this project.
-	// The default is 1 day (604800 seconds).
+	// The number of seconds to retain the shared history for all branches in this project. The default is
+	// 1 day (604800 seconds).
 	HistoryRetentionSeconds OptInt32 `json:"history_retention_seconds"`
 }
 
@@ -17568,16 +17596,13 @@ func (s *RegionResponse) SetGeoLong(val string) {
 }
 
 type RestoreSnapshotReq struct {
-	// A name for the newly restored branch.
-	// If omitted, a default name will be generated.
+	// A name for the newly restored branch. If omitted, a default name will be generated.
 	Name OptString `json:"name"`
-	// The ID of the branch to restore the snapshot into.
-	// If not specified, the branch from which the snapshot was originally
-	// created (`snapshot.source_branch_id`) will be used.
+	// The ID of the branch to restore the snapshot into. If not specified, the branch from which the
+	// snapshot was originally created (`snapshot.source_branch_id`) will be used.
 	TargetBranchID OptString `json:"target_branch_id"`
-	// Set to `true` to finalize the restore operation immediately.
-	// This will complete the restore and move any associated computes to the new branch,
-	// similar to the `finalizeRestoreBranch` operation.
+	// Set to `true` to finalize the restore operation immediately. This will complete the restore and move
+	// any associated computes to the new branch, similar to the `finalizeRestoreBranch` operation.
 	// Defaults to `false` to allow previewing the restored snapshot data first.
 	FinalizeRestore OptBool `json:"finalize_restore"`
 }
@@ -18009,11 +18034,14 @@ type Snapshot struct {
 	ExpiresAt      OptString `json:"expires_at"`
 	Manual         OptBool   `json:"manual"`
 	// Full logical size of the snapshot in bytes at the time it was taken.
+	//
 	// When absent, the logical size has not been calculated yet and the snapshot is not being charged.
+	//
 	// When present, a value of 0 means the snapshot is not being charged.
 	FullSize OptInt64 `json:"full_size"`
-	// Incremental storage size in bytes since the previous scheduled snapshot, when the snapshot is
-	// billed on incremental (diff) usage.
+	// Incremental storage size in bytes since the previous scheduled snapshot, when the snapshot is billed
+	// on incremental (diff) usage.
+	//
 	// When absent, either the incremental size has not been calculated yet and the snapshot is not being
 	// charged, or the snapshot is charged at full logical size (in that case `full_size` is set).
 	DiffSize OptInt64 `json:"diff_size"`
@@ -18137,9 +18165,9 @@ func (s *SnapshotUpdateRequest) SetSnapshot(val SnapshotUpdateRequestSnapshot) {
 type SnapshotUpdateRequestSnapshot struct {
 	Name OptString `json:"name"`
 	// The date and time when the snapshot will expire.
-	// Omit to leave the current expiration unchanged. Send `null` to
-	// clear the expiration so the snapshot never expires. A future
-	// timestamp sets the absolute expiration.
+	//
+	// Omit to leave the current expiration unchanged. Send `null` to clear the expiration so the snapshot
+	// never expires. A future timestamp sets the absolute expiration.
 	ExpiresAt OptNilDateTime `json:"expires_at"`
 }
 
@@ -18206,8 +18234,7 @@ func (s *SortOrderParam) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/SpendingLimitResponse
 type SpendingLimitResponse struct {
-	// Monthly spending cap in cents. `null` indicates that no limit
-	// is currently configured.
+	// Monthly spending cap in cents. `null` indicates that no limit is currently configured.
 	SpendingLimitCents NilInt64 `json:"spending_limit_cents"`
 }
 
@@ -18223,13 +18250,11 @@ func (s *SpendingLimitResponse) SetSpendingLimitCents(val NilInt64) {
 
 // Ref: #/components/schemas/SpendingLimitUpdateRequest
 type SpendingLimitUpdateRequest struct {
-	// Monthly spending cap in cents. Must be positive. To remove a
-	// previously configured limit, send a DELETE request to the
-	// spending_limit endpoint — `0` and `null` are rejected here.
-	// The cap is alert-only: notifications fire at 80% and 100%, but
-	// computes are not suspended. Setting a cap below the period's
-	// already-accrued spend is permitted and will trigger the
-	// over-limit notification on the next worker run.
+	// Monthly spending cap in cents. Must be positive. To remove a previously configured limit, send a
+	// DELETE request to the spending_limit endpoint — `0` and `null` are rejected here. The cap is
+	// alert-only: notifications fire at 80% and 100%, but computes are not suspended. Setting a cap below
+	// the period's already-accrued spend is permitted and will trigger the over-limit notification on the
+	// next worker run.
 	SpendingLimitCents int64 `json:"spending_limit_cents"`
 }
 
@@ -18505,14 +18530,13 @@ type VPCEndpointDetails struct {
 	VpcEndpointID string `json:"vpc_endpoint_id"`
 	// A descriptive label for the VPC endpoint.
 	Label string `json:"label"`
-	// The current state of the VPC endpoint. Possible values are
-	// `new` (just configured, pending acceptance) or `accepted`
-	// (VPC connection was accepted by Neon).
+	// The current state of the VPC endpoint. Possible values are `new` (just configured, pending
+	// acceptance) or `accepted` (VPC connection was accepted by Neon).
 	State string `json:"state"`
 	// The number of projects that are restricted to use this VPC endpoint.
 	NumRestrictedProjects int `json:"num_restricted_projects"`
-	// A list of example projects that are restricted to use this VPC endpoint.
-	// There are at most 3 projects in the list, even if more projects are restricted.
+	// A list of example projects that are restricted to use this VPC endpoint. There are at most 3
+	// projects in the list, even if more projects are restricted.
 	ExampleRestrictedProjects []string `json:"example_restricted_projects"`
 }
 

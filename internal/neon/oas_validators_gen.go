@@ -6979,6 +6979,10 @@ func (s OperationAction) Validate() error {
 		return nil
 	case "tenant_detach":
 		return nil
+	case "tenant_detach_safekeepers":
+		return nil
+	case "tenant_attach_safekeepers":
+		return nil
 	case "tenant_reattach":
 		return nil
 	case "replace_safekeeper":
@@ -7651,7 +7655,7 @@ func (s PgVersion) Validate() error {
 		MinSet:        true,
 		Min:           14,
 		MaxSet:        true,
-		Max:           18,
+		Max:           19,
 		MinExclusive:  false,
 		MaxExclusive:  false,
 		MultipleOfSet: false,
@@ -8556,11 +8560,11 @@ func (s *ProjectPermission) Validate() error {
 
 func (s ProjectPermissionLevel) Validate() error {
 	switch s {
-	case "CAN_VIEW":
+	case "VIEWER":
 		return nil
-	case "CAN_EDIT":
+	case "EDITOR":
 		return nil
-	case "CAN_MANAGE":
+	case "ADMIN":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)

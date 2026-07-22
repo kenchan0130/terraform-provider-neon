@@ -26548,6 +26548,10 @@ func (s *OperationAction) Decode(d *jx.Decoder) error {
 		*s = OperationActionTenantAttach
 	case OperationActionTenantDetach:
 		*s = OperationActionTenantDetach
+	case OperationActionTenantDetachSafekeepers:
+		*s = OperationActionTenantDetachSafekeepers
+	case OperationActionTenantAttachSafekeepers:
+		*s = OperationActionTenantAttachSafekeepers
 	case OperationActionTenantReattach:
 		*s = OperationActionTenantReattach
 	case OperationActionReplaceSafekeeper:
@@ -34179,12 +34183,12 @@ func (s *ProjectPermissionLevel) Decode(d *jx.Decoder) error {
 	}
 	// Try to use constant string.
 	switch ProjectPermissionLevel(v) {
-	case ProjectPermissionLevelCANVIEW:
-		*s = ProjectPermissionLevelCANVIEW
-	case ProjectPermissionLevelCANEDIT:
-		*s = ProjectPermissionLevelCANEDIT
-	case ProjectPermissionLevelCANMANAGE:
-		*s = ProjectPermissionLevelCANMANAGE
+	case ProjectPermissionLevelVIEWER:
+		*s = ProjectPermissionLevelVIEWER
+	case ProjectPermissionLevelEDITOR:
+		*s = ProjectPermissionLevelEDITOR
+	case ProjectPermissionLevelADMIN:
+		*s = ProjectPermissionLevelADMIN
 	default:
 		*s = ProjectPermissionLevel(v)
 	}
