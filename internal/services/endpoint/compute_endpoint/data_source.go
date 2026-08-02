@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type endpointDataSource struct {
@@ -181,7 +182,7 @@ func (d *endpointDataSource) Read(ctx context.Context, req datasource.ReadReques
 		EndpointID: data.ID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read endpoint", err.Error())
+		resp.Diagnostics.AddError("Failed to read endpoint", neonerror.Detail(err))
 		return
 	}
 

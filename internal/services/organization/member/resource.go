@@ -138,7 +138,7 @@ func (r *organizationMemberRoleResource) Read(ctx context.Context, req resource.
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Failed to read organization member", err.Error())
+		resp.Diagnostics.AddError("Failed to read organization member", neonerror.Detail(err))
 		return
 	}
 
@@ -175,7 +175,7 @@ func (r *organizationMemberRoleResource) createOrUpdate(ctx context.Context, dat
 		MemberID: memberUUID,
 	})
 	if err != nil {
-		diagnostics.AddError("Failed to update organization member role", err.Error())
+		diagnostics.AddError("Failed to update organization member role", neonerror.Detail(err))
 		return
 	}
 

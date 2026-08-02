@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/action/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 var (
@@ -104,7 +105,7 @@ func (a *restoreBranchAction) Invoke(ctx context.Context, req action.InvokeReque
 	if !data.SourceTimestamp.IsNull() && !data.SourceTimestamp.IsUnknown() {
 		t, err := time.Parse(time.RFC3339, data.SourceTimestamp.ValueString())
 		if err != nil {
-			resp.Diagnostics.AddError("Invalid source_timestamp", fmt.Sprintf("Failed to parse timestamp: %s", err.Error()))
+			resp.Diagnostics.AddError("Invalid source_timestamp", fmt.Sprintf("Failed to parse timestamp: %s", neonerror.Detail(err)))
 			return
 		}
 		request.SourceTimestamp = neon.NewOptDateTime(t)
@@ -119,6 +120,6 @@ func (a *restoreBranchAction) Invoke(ctx context.Context, req action.InvokeReque
 		BranchID:  data.BranchID,
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to restore branch", err.Error())
+		resp.Diagnostics.AddError("Failed to restore branch", neonerror.Detail(err))
 	}
 }

@@ -161,7 +161,7 @@ func (r *neonAuthOauthProviderResource) Create(ctx context.Context, req resource
 		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to add NeonAuth OAuth provider", err.Error())
+		resp.Diagnostics.AddError("Failed to add NeonAuth OAuth provider", neonerror.Detail(err))
 		return
 	}
 
@@ -185,7 +185,7 @@ func (r *neonAuthOauthProviderResource) Read(ctx context.Context, req resource.R
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Failed to list NeonAuth OAuth providers", err.Error())
+		resp.Diagnostics.AddError("Failed to list NeonAuth OAuth providers", neonerror.Detail(err))
 		return
 	}
 
@@ -235,7 +235,7 @@ func (r *neonAuthOauthProviderResource) Update(ctx context.Context, req resource
 		OAuthProviderID: neon.NeonAuthOauthProviderId(state.ID.ValueString()),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to update NeonAuth OAuth provider", err.Error())
+		resp.Diagnostics.AddError("Failed to update NeonAuth OAuth provider", neonerror.Detail(err))
 		return
 	}
 
@@ -256,7 +256,7 @@ func (r *neonAuthOauthProviderResource) Delete(ctx context.Context, req resource
 		OAuthProviderID: neon.NeonAuthOauthProviderId(data.ID.ValueString()),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to delete NeonAuth OAuth provider", err.Error())
+		resp.Diagnostics.AddError("Failed to delete NeonAuth OAuth provider", neonerror.Detail(err))
 		return
 	}
 }

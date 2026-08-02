@@ -169,7 +169,7 @@ func (r *jwksResource) Create(ctx context.Context, req resource.CreateRequest, r
 		ProjectID: data.ProjectID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to create JWKS", err.Error())
+		resp.Diagnostics.AddError("Failed to create JWKS", neonerror.Detail(err))
 		return
 	}
 
@@ -192,7 +192,7 @@ func (r *jwksResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Failed to read JWKS", err.Error())
+		resp.Diagnostics.AddError("Failed to read JWKS", neonerror.Detail(err))
 		return
 	}
 
@@ -223,7 +223,7 @@ func (r *jwksResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		JwksID:    data.ID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to delete JWKS", err.Error())
+		resp.Diagnostics.AddError("Failed to delete JWKS", neonerror.Detail(err))
 		return
 	}
 }

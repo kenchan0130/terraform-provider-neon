@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/action"
 	"github.com/hashicorp/terraform-plugin-framework/action/schema"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 var (
@@ -82,6 +83,6 @@ func (a *rolePasswordResetAction) Invoke(ctx context.Context, req action.InvokeR
 		RoleName:  data.RoleName,
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to reset role password", err.Error())
+		resp.Diagnostics.AddError("Failed to reset role password", neonerror.Detail(err))
 	}
 }

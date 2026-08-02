@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type organizationMembersDataSource struct {
@@ -146,7 +147,7 @@ func (d *organizationMembersDataSource) Read(ctx context.Context, req datasource
 
 		result, err := d.client.GetOrganizationMembers(ctx, params)
 		if err != nil {
-			resp.Diagnostics.AddError("Failed to read organization members", err.Error())
+			resp.Diagnostics.AddError("Failed to read organization members", neonerror.Detail(err))
 			return
 		}
 

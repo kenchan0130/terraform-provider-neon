@@ -103,7 +103,7 @@ func (r *neonAuthTrustedDomainResource) Create(ctx context.Context, req resource
 
 	domainURL, err := url.Parse(data.Domain.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Invalid domain URL", err.Error())
+		resp.Diagnostics.AddError("Invalid domain URL", neonerror.Detail(err))
 		return
 	}
 
@@ -113,7 +113,7 @@ func (r *neonAuthTrustedDomainResource) Create(ctx context.Context, req resource
 		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read NeonAuth integration", err.Error())
+		resp.Diagnostics.AddError("Failed to read NeonAuth integration", neonerror.Detail(err))
 		return
 	}
 
@@ -127,7 +127,7 @@ func (r *neonAuthTrustedDomainResource) Create(ctx context.Context, req resource
 		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to add NeonAuth trusted domain", err.Error())
+		resp.Diagnostics.AddError("Failed to add NeonAuth trusted domain", neonerror.Detail(err))
 		return
 	}
 
@@ -152,7 +152,7 @@ func (r *neonAuthTrustedDomainResource) Read(ctx context.Context, req resource.R
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Failed to list NeonAuth trusted domains", err.Error())
+		resp.Diagnostics.AddError("Failed to list NeonAuth trusted domains", neonerror.Detail(err))
 		return
 	}
 
@@ -183,7 +183,7 @@ func (r *neonAuthTrustedDomainResource) Delete(ctx context.Context, req resource
 
 	domainURL, err := url.Parse(data.Domain.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Invalid domain URL", err.Error())
+		resp.Diagnostics.AddError("Invalid domain URL", neonerror.Detail(err))
 		return
 	}
 
@@ -199,7 +199,7 @@ func (r *neonAuthTrustedDomainResource) Delete(ctx context.Context, req resource
 		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to delete NeonAuth trusted domain", err.Error())
+		resp.Diagnostics.AddError("Failed to delete NeonAuth trusted domain", neonerror.Detail(err))
 		return
 	}
 }

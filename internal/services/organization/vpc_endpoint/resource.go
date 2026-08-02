@@ -149,7 +149,7 @@ func (r *vpcEndpointResource) Read(ctx context.Context, req resource.ReadRequest
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Failed to read VPC endpoint details", err.Error())
+		resp.Diagnostics.AddError("Failed to read VPC endpoint details", neonerror.Detail(err))
 		return
 	}
 
@@ -183,7 +183,7 @@ func (r *vpcEndpointResource) createOrUpdate(ctx context.Context, data *vpcEndpo
 		VpcEndpointID: data.VpcEndpointID.ValueString(),
 	})
 	if err != nil {
-		diagnostics.AddError(fmt.Sprintf("Failed to %s VPC endpoint", operation), err.Error())
+		diagnostics.AddError(fmt.Sprintf("Failed to %s VPC endpoint", operation), neonerror.Detail(err))
 		return
 	}
 
@@ -203,7 +203,7 @@ func (r *vpcEndpointResource) Delete(ctx context.Context, req resource.DeleteReq
 		VpcEndpointID: data.VpcEndpointID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to delete VPC endpoint", err.Error())
+		resp.Diagnostics.AddError("Failed to delete VPC endpoint", neonerror.Detail(err))
 		return
 	}
 }
@@ -230,7 +230,7 @@ func (r *vpcEndpointResource) readIntoModel(ctx context.Context, data *vpcEndpoi
 		VpcEndpointID: data.VpcEndpointID.ValueString(),
 	})
 	if err != nil {
-		diags.AddError("Failed to read VPC endpoint details", err.Error())
+		diags.AddError("Failed to read VPC endpoint details", neonerror.Detail(err))
 		return
 	}
 

@@ -151,7 +151,7 @@ func (r *roleResource) Create(ctx context.Context, req resource.CreateRequest, r
 		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to create role", err.Error())
+		resp.Diagnostics.AddError("Failed to create role", neonerror.Detail(err))
 		return
 	}
 
@@ -176,7 +176,7 @@ func (r *roleResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Failed to read role", err.Error())
+		resp.Diagnostics.AddError("Failed to read role", neonerror.Detail(err))
 		return
 	}
 
@@ -204,7 +204,7 @@ func (r *roleResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		RoleName:  data.Name.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to delete role", err.Error())
+		resp.Diagnostics.AddError("Failed to delete role", neonerror.Detail(err))
 		return
 	}
 }

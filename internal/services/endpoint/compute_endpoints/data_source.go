@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type endpointsDataSource struct {
@@ -154,7 +155,7 @@ func (d *endpointsDataSource) Read(ctx context.Context, req datasource.ReadReque
 		ProjectID: data.ProjectID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to list endpoints", err.Error())
+		resp.Diagnostics.AddError("Failed to list endpoints", neonerror.Detail(err))
 		return
 	}
 

@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/action/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 var (
@@ -116,6 +117,6 @@ func (a *restoreSnapshotAction) Invoke(ctx context.Context, req action.InvokeReq
 		SnapshotID: data.SnapshotID,
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to restore snapshot", err.Error())
+		resp.Diagnostics.AddError("Failed to restore snapshot", neonerror.Detail(err))
 	}
 }

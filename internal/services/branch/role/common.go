@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type roleModel struct {
@@ -28,7 +29,7 @@ func fetchRole(ctx context.Context, client *neon.Client, data *roleModel) diag.D
 		RoleName:  data.Name.ValueString(),
 	})
 	if err != nil {
-		diags.AddError("Failed to read role", err.Error())
+		diags.AddError("Failed to read role", neonerror.Detail(err))
 		return diags
 	}
 

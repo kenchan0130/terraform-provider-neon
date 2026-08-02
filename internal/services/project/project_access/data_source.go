@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type projectAccessDataSource struct {
@@ -82,7 +83,7 @@ func (d *projectAccessDataSource) Read(ctx context.Context, req datasource.ReadR
 		ProjectID: data.ProjectID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to list project permissions", err.Error())
+		resp.Diagnostics.AddError("Failed to list project permissions", neonerror.Detail(err))
 		return
 	}
 

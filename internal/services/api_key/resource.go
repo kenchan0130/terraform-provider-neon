@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 var (
@@ -103,7 +104,7 @@ func (r *apiKeyResource) Create(ctx context.Context, req resource.CreateRequest,
 		KeyName: data.Name.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to create API key", err.Error())
+		resp.Diagnostics.AddError("Failed to create API key", neonerror.Detail(err))
 		return
 	}
 
@@ -126,7 +127,7 @@ func (r *apiKeyResource) Read(ctx context.Context, req resource.ReadRequest, res
 	// so we list all keys and find the matching one.
 	items, err := r.client.ListApiKeys(ctx)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to list API keys", err.Error())
+		resp.Diagnostics.AddError("Failed to list API keys", neonerror.Detail(err))
 		return
 	}
 
@@ -160,7 +161,7 @@ func (r *apiKeyResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		KeyID: data.ID.ValueInt64(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to revoke API key", err.Error())
+		resp.Diagnostics.AddError("Failed to revoke API key", neonerror.Detail(err))
 		return
 	}
 }

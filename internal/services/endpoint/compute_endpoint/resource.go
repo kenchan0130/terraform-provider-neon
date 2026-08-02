@@ -365,7 +365,7 @@ func (r *endpointResource) Create(ctx context.Context, req resource.CreateReques
 		ProjectID: data.ProjectID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to create endpoint", err.Error())
+		resp.Diagnostics.AddError("Failed to create endpoint", neonerror.Detail(err))
 		return
 	}
 
@@ -392,7 +392,7 @@ func (r *endpointResource) Read(ctx context.Context, req resource.ReadRequest, r
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Failed to read endpoint", err.Error())
+		resp.Diagnostics.AddError("Failed to read endpoint", neonerror.Detail(err))
 		return
 	}
 
@@ -433,7 +433,7 @@ func (r *endpointResource) Update(ctx context.Context, req resource.UpdateReques
 		EndpointID: state.ID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to update endpoint", err.Error())
+		resp.Diagnostics.AddError("Failed to update endpoint", neonerror.Detail(err))
 		return
 	}
 
@@ -456,7 +456,7 @@ func (r *endpointResource) Delete(ctx context.Context, req resource.DeleteReques
 		EndpointID: data.ID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to delete endpoint", err.Error())
+		resp.Diagnostics.AddError("Failed to delete endpoint", neonerror.Detail(err))
 		return
 	}
 }

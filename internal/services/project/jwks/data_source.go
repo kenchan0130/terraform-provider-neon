@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type jwksDataSource struct {
@@ -108,7 +109,7 @@ func (d *jwksDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		ProjectID: data.ProjectID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read JWKS", err.Error())
+		resp.Diagnostics.AddError("Failed to read JWKS", neonerror.Detail(err))
 		return
 	}
 

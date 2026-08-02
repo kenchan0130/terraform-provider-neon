@@ -533,28 +533,40 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	project := buildProjectCreateFields(&data)
-
-	if !data.DefaultEndpointSettings.IsNull() && !data.DefaultEndpointSettings.IsUnknown() {
-		des := buildDefaultEndpointSettingsRequest(ctx, data.DefaultEndpointSettings, &resp.Diagnostics)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-		project.DefaultEndpointSettings = neon.NewOptDefaultEndpointSettings(des)
+	var config projectResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
 
-	if !data.Settings.IsNull() && !data.Settings.IsUnknown() {
-		settings := buildProjectSettingsRequest(ctx, data.Settings, &resp.Diagnostics)
+	project := buildProjectCreateFields(&data)
+
+	if !data.DefaultEndpointSettings.IsNull() && !data.DefaultEndpointSettings.IsUnknown() &&
+		!config.DefaultEndpointSettings.IsNull() && !config.DefaultEndpointSettings.IsUnknown() {
+		des, included := buildDefaultEndpointSettingsRequest(ctx, data.DefaultEndpointSettings, config.DefaultEndpointSettings, &resp.Diagnostics)
 		if resp.Diagnostics.HasError() {
 			return
 		}
-		project.Settings = neon.NewOptProjectSettingsData(settings)
+		if included {
+			project.DefaultEndpointSettings = neon.NewOptDefaultEndpointSettings(des)
+		}
+	}
+
+	if !data.Settings.IsNull() && !data.Settings.IsUnknown() &&
+		!config.Settings.IsNull() && !config.Settings.IsUnknown() {
+		settings, included := buildProjectSettingsRequest(ctx, data.Settings, config.Settings, &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		if included {
+			project.Settings = neon.NewOptProjectSettingsData(settings)
+		}
 	}
 
 	apiReq := &neon.ProjectCreateRequest{Project: project}
 	result, err := r.client.CreateProject(ctx, apiReq)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to create project", err.Error())
+		resp.Diagnostics.AddError("Failed to create project", neonerror.Detail(err))
 		return
 	}
 
@@ -606,7 +618,7 @@ func (r *projectResource) Read(ctx context.Context, req resource.ReadRequest, re
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Failed to read project", err.Error())
+		resp.Diagnostics.AddError("Failed to read project", neonerror.Detail(err))
 		return
 	}
 
@@ -630,38 +642,30 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
+	// The plan carries the resolved value for every attribute (including ones the
+	// server computes), so it cannot tell us whether an attribute was actually
+	// configured by the practitioner. Only the config can: an unconfigured
+	// Optional+Computed attribute is null in config even though it is known in
+	// plan. Gate what we send in the PATCH on config, but take the value to send
+	// from the plan.
+	var config projectResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	apiReq := &neon.ProjectUpdateRequest{
-		Project: neon.ProjectUpdateRequestProject{},
+		Project: buildProjectUpdateFields(ctx, &data, &config, &resp.Diagnostics),
 	}
-
-	if !data.Name.IsNull() && !data.Name.IsUnknown() {
-		apiReq.Project.Name = neon.NewOptString(data.Name.ValueString())
-	}
-	if !data.HistoryRetentionSeconds.IsNull() && !data.HistoryRetentionSeconds.IsUnknown() {
-		apiReq.Project.HistoryRetentionSeconds = neon.NewOptInt32(data.HistoryRetentionSeconds.ValueInt32())
-	}
-
-	if !data.DefaultEndpointSettings.IsNull() && !data.DefaultEndpointSettings.IsUnknown() {
-		des := buildDefaultEndpointSettingsRequest(ctx, data.DefaultEndpointSettings, &resp.Diagnostics)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-		apiReq.Project.DefaultEndpointSettings = neon.NewOptDefaultEndpointSettings(des)
-	}
-
-	if !data.Settings.IsNull() && !data.Settings.IsUnknown() {
-		settings := buildProjectSettingsRequest(ctx, data.Settings, &resp.Diagnostics)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-		apiReq.Project.Settings = neon.NewOptProjectSettingsData(settings)
+	if resp.Diagnostics.HasError() {
+		return
 	}
 
 	result, err := r.client.UpdateProject(ctx, apiReq, neon.UpdateProjectParams{
 		ProjectID: state.ID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to update project", err.Error())
+		resp.Diagnostics.AddError("Failed to update project", neonerror.Detail(err))
 		return
 	}
 
@@ -670,6 +674,40 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+// buildProjectUpdateFields builds the PATCH request body for Update, gating each
+// field on the corresponding config value being known and non-null (see the
+// comment in Update) and taking the value to send from plan.
+func buildProjectUpdateFields(ctx context.Context, plan, config *projectResourceModel, diags *diag.Diagnostics) neon.ProjectUpdateRequestProject {
+	p := neon.ProjectUpdateRequestProject{}
+
+	if !plan.Name.IsNull() && !plan.Name.IsUnknown() &&
+		!config.Name.IsNull() && !config.Name.IsUnknown() {
+		p.Name = neon.NewOptString(plan.Name.ValueString())
+	}
+	if !plan.HistoryRetentionSeconds.IsNull() && !plan.HistoryRetentionSeconds.IsUnknown() &&
+		!config.HistoryRetentionSeconds.IsNull() && !config.HistoryRetentionSeconds.IsUnknown() {
+		p.HistoryRetentionSeconds = neon.NewOptInt32(plan.HistoryRetentionSeconds.ValueInt32())
+	}
+
+	if !plan.DefaultEndpointSettings.IsNull() && !plan.DefaultEndpointSettings.IsUnknown() &&
+		!config.DefaultEndpointSettings.IsNull() && !config.DefaultEndpointSettings.IsUnknown() {
+		des, included := buildDefaultEndpointSettingsRequest(ctx, plan.DefaultEndpointSettings, config.DefaultEndpointSettings, diags)
+		if included {
+			p.DefaultEndpointSettings = neon.NewOptDefaultEndpointSettings(des)
+		}
+	}
+
+	if !plan.Settings.IsNull() && !plan.Settings.IsUnknown() &&
+		!config.Settings.IsNull() && !config.Settings.IsUnknown() {
+		settings, included := buildProjectSettingsRequest(ctx, plan.Settings, config.Settings, diags)
+		if included {
+			p.Settings = neon.NewOptProjectSettingsData(settings)
+		}
+	}
+
+	return p
 }
 
 func (r *projectResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -686,7 +724,7 @@ func (r *projectResource) Delete(ctx context.Context, req resource.DeleteRequest
 		if neonerror.IsNotFound(err) {
 			return
 		}
-		resp.Diagnostics.AddError("Failed to delete project", err.Error())
+		resp.Diagnostics.AddError("Failed to delete project", neonerror.Detail(err))
 		return
 	}
 }
@@ -695,117 +733,201 @@ func (r *projectResource) ImportState(ctx context.Context, req resource.ImportSt
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func buildDefaultEndpointSettingsRequest(ctx context.Context, obj basetypes.ObjectValue, diags *diag.Diagnostics) neon.DefaultEndpointSettings {
-	var m defaultEndpointSettingsModel
+// decodeObjectIfKnown decodes obj into T when it is known and non-null. When obj is
+// null or unknown, decoding is skipped and the zero value of T is returned, whose
+// tfsdk fields are all null (the zero value of a types.* value is its null state).
+// This lets callers treat "not configured" and "explicitly configured" uniformly
+// without ever calling ObjectValue.As on a null/unknown object, which strict typed
+// decoding rejects.
+func decodeObjectIfKnown[T any](ctx context.Context, obj basetypes.ObjectValue, diags *diag.Diagnostics) T {
+	var m T
+	if obj.IsNull() || obj.IsUnknown() {
+		return m
+	}
 	diags.Append(obj.As(ctx, &m, basetypes.ObjectAsOptions{})...)
+	return m
+}
+
+// buildDefaultEndpointSettingsRequest builds the API request payload for
+// default_endpoint_settings. Each leaf is included only when the corresponding
+// leaf in cfg (the practitioner's configuration) is known and non-null; the value
+// sent is always taken from plan. This ensures server-sourced values that merely
+// flow through the plan (because the attribute is Optional+Computed) are never
+// echoed back to the API. The returned bool reports whether any leaf was included;
+// callers must not attach the object to the request when it is false.
+func buildDefaultEndpointSettingsRequest(ctx context.Context, plan, cfg basetypes.ObjectValue, diags *diag.Diagnostics) (neon.DefaultEndpointSettings, bool) {
+	pm := decodeObjectIfKnown[defaultEndpointSettingsModel](ctx, plan, diags)
+	cm := decodeObjectIfKnown[defaultEndpointSettingsModel](ctx, cfg, diags)
 	if diags.HasError() {
-		return neon.DefaultEndpointSettings{}
+		return neon.DefaultEndpointSettings{}, false
 	}
 
 	des := neon.DefaultEndpointSettings{}
-	if !m.AutoscalingLimitMinCu.IsNull() && !m.AutoscalingLimitMinCu.IsUnknown() {
-		des.AutoscalingLimitMinCu = neon.NewOptComputeUnit(neon.ComputeUnit(m.AutoscalingLimitMinCu.ValueFloat64()))
+	included := false
+	if !cm.AutoscalingLimitMinCu.IsNull() && !cm.AutoscalingLimitMinCu.IsUnknown() {
+		des.AutoscalingLimitMinCu = neon.NewOptComputeUnit(neon.ComputeUnit(pm.AutoscalingLimitMinCu.ValueFloat64()))
+		included = true
 	}
-	if !m.AutoscalingLimitMaxCu.IsNull() && !m.AutoscalingLimitMaxCu.IsUnknown() {
-		des.AutoscalingLimitMaxCu = neon.NewOptComputeUnit(neon.ComputeUnit(m.AutoscalingLimitMaxCu.ValueFloat64()))
+	if !cm.AutoscalingLimitMaxCu.IsNull() && !cm.AutoscalingLimitMaxCu.IsUnknown() {
+		des.AutoscalingLimitMaxCu = neon.NewOptComputeUnit(neon.ComputeUnit(pm.AutoscalingLimitMaxCu.ValueFloat64()))
+		included = true
 	}
-	if !m.SuspendTimeoutSeconds.IsNull() && !m.SuspendTimeoutSeconds.IsUnknown() {
-		des.SuspendTimeoutSeconds = neon.NewOptSuspendTimeoutSeconds(neon.SuspendTimeoutSeconds(m.SuspendTimeoutSeconds.ValueInt64()))
+	if !cm.SuspendTimeoutSeconds.IsNull() && !cm.SuspendTimeoutSeconds.IsUnknown() {
+		des.SuspendTimeoutSeconds = neon.NewOptSuspendTimeoutSeconds(neon.SuspendTimeoutSeconds(pm.SuspendTimeoutSeconds.ValueInt64()))
+		included = true
 	}
-	if !m.PgSettings.IsNull() && !m.PgSettings.IsUnknown() {
+	if !cm.PgSettings.IsNull() && !cm.PgSettings.IsUnknown() {
 		pgSettings := make(map[string]string)
-		diags.Append(m.PgSettings.ElementsAs(ctx, &pgSettings, false)...)
-		if !diags.HasError() {
-			des.PgSettings = neon.NewOptPgSettingsData(neon.PgSettingsData(pgSettings))
+		diags.Append(pm.PgSettings.ElementsAs(ctx, &pgSettings, false)...)
+		if diags.HasError() {
+			return neon.DefaultEndpointSettings{}, false
 		}
+		des.PgSettings = neon.NewOptPgSettingsData(neon.PgSettingsData(pgSettings))
+		included = true
 	}
-	return des
+	return des, included
 }
 
-func buildProjectSettingsRequest(ctx context.Context, obj basetypes.ObjectValue, diags *diag.Diagnostics) neon.ProjectSettingsData {
-	var m projectSettingsModel
-	diags.Append(obj.As(ctx, &m, basetypes.ObjectAsOptions{})...)
+// buildProjectSettingsRequest builds the API request payload for settings, gating
+// every leaf (including leaves inside nested objects) on the corresponding leaf in
+// cfg being known and non-null, and taking values from plan. See
+// buildDefaultEndpointSettingsRequest for the rationale. The returned bool reports
+// whether any leaf was included.
+func buildProjectSettingsRequest(ctx context.Context, plan, cfg basetypes.ObjectValue, diags *diag.Diagnostics) (neon.ProjectSettingsData, bool) {
+	pm := decodeObjectIfKnown[projectSettingsModel](ctx, plan, diags)
+	cm := decodeObjectIfKnown[projectSettingsModel](ctx, cfg, diags)
 	if diags.HasError() {
-		return neon.ProjectSettingsData{}
+		return neon.ProjectSettingsData{}, false
 	}
 
 	settings := neon.ProjectSettingsData{}
-	buildProjectSettingsBoolFields(&m, &settings)
-	buildProjectQuotaRequest(ctx, &m, &settings, diags)
-	buildProjectAllowedIpsRequest(ctx, &m, &settings, diags)
-	buildProjectMaintenanceWindowRequest(ctx, &m, &settings, diags)
-	buildProjectPreloadLibrariesRequest(ctx, &m, &settings, diags)
+	included := buildProjectSettingsBoolFields(&pm, &cm, &settings)
+	included = buildProjectQuotaRequest(ctx, &pm, &cm, &settings, diags) || included
+	included = buildProjectAllowedIpsRequest(ctx, &pm, &cm, &settings, diags) || included
+	included = buildProjectMaintenanceWindowRequest(ctx, &pm, &cm, &settings, diags) || included
+	included = buildProjectPreloadLibrariesRequest(ctx, &pm, &cm, &settings, diags) || included
+	if diags.HasError() {
+		return neon.ProjectSettingsData{}, false
+	}
 
-	return settings
+	return settings, included
 }
 
-func buildProjectSettingsBoolFields(m *projectSettingsModel, settings *neon.ProjectSettingsData) {
-	if !m.EnableLogicalReplication.IsNull() && !m.EnableLogicalReplication.IsUnknown() {
-		settings.EnableLogicalReplication = neon.NewOptBool(m.EnableLogicalReplication.ValueBool())
+func buildProjectSettingsBoolFields(pm, cm *projectSettingsModel, settings *neon.ProjectSettingsData) bool {
+	included := false
+	if !cm.EnableLogicalReplication.IsNull() && !cm.EnableLogicalReplication.IsUnknown() {
+		settings.EnableLogicalReplication = neon.NewOptBool(pm.EnableLogicalReplication.ValueBool())
+		included = true
 	}
-	if !m.BlockPublicConnections.IsNull() && !m.BlockPublicConnections.IsUnknown() {
-		settings.BlockPublicConnections = neon.NewOptBool(m.BlockPublicConnections.ValueBool())
+	if !cm.BlockPublicConnections.IsNull() && !cm.BlockPublicConnections.IsUnknown() {
+		settings.BlockPublicConnections = neon.NewOptBool(pm.BlockPublicConnections.ValueBool())
+		included = true
 	}
-	if !m.BlockVpcConnections.IsNull() && !m.BlockVpcConnections.IsUnknown() {
-		settings.BlockVpcConnections = neon.NewOptBool(m.BlockVpcConnections.ValueBool())
+	if !cm.BlockVpcConnections.IsNull() && !cm.BlockVpcConnections.IsUnknown() {
+		settings.BlockVpcConnections = neon.NewOptBool(pm.BlockVpcConnections.ValueBool())
+		included = true
 	}
-	if !m.AuditLogLevel.IsNull() && !m.AuditLogLevel.IsUnknown() {
-		settings.AuditLogLevel = neon.NewOptProjectAuditLogLevel(neon.ProjectAuditLogLevel(m.AuditLogLevel.ValueString()))
+	if !cm.AuditLogLevel.IsNull() && !cm.AuditLogLevel.IsUnknown() {
+		settings.AuditLogLevel = neon.NewOptProjectAuditLogLevel(neon.ProjectAuditLogLevel(pm.AuditLogLevel.ValueString()))
+		included = true
 	}
-	if !m.Hipaa.IsNull() && !m.Hipaa.IsUnknown() {
-		settings.Hipaa = neon.NewOptBool(m.Hipaa.ValueBool())
+	if !cm.Hipaa.IsNull() && !cm.Hipaa.IsUnknown() {
+		settings.Hipaa = neon.NewOptBool(pm.Hipaa.ValueBool())
+		included = true
 	}
+	return included
 }
 
-func buildProjectQuotaRequest(ctx context.Context, m *projectSettingsModel, settings *neon.ProjectSettingsData, diags *diag.Diagnostics) {
-	if m.Quota.IsNull() || m.Quota.IsUnknown() {
-		return
+func buildProjectQuotaRequest(ctx context.Context, pm, cm *projectSettingsModel, settings *neon.ProjectSettingsData, diags *diag.Diagnostics) bool {
+	if cm.Quota.IsNull() || cm.Quota.IsUnknown() {
+		return false
 	}
-	var qm projectQuotaModel
-	diags.Append(m.Quota.As(ctx, &qm, basetypes.ObjectAsOptions{})...)
+	cqm := decodeObjectIfKnown[projectQuotaModel](ctx, cm.Quota, diags)
+	pqm := decodeObjectIfKnown[projectQuotaModel](ctx, pm.Quota, diags)
+	if diags.HasError() {
+		return false
+	}
+
 	quota := neon.ProjectQuota{}
-	if !qm.ActiveTimeSeconds.IsNull() && !qm.ActiveTimeSeconds.IsUnknown() {
-		quota.ActiveTimeSeconds = neon.NewOptInt64(qm.ActiveTimeSeconds.ValueInt64())
+	included := false
+	if !cqm.ActiveTimeSeconds.IsNull() && !cqm.ActiveTimeSeconds.IsUnknown() {
+		quota.ActiveTimeSeconds = neon.NewOptInt64(pqm.ActiveTimeSeconds.ValueInt64())
+		included = true
 	}
-	if !qm.ComputeTimeSeconds.IsNull() && !qm.ComputeTimeSeconds.IsUnknown() {
-		quota.ComputeTimeSeconds = neon.NewOptInt64(qm.ComputeTimeSeconds.ValueInt64())
+	if !cqm.ComputeTimeSeconds.IsNull() && !cqm.ComputeTimeSeconds.IsUnknown() {
+		quota.ComputeTimeSeconds = neon.NewOptInt64(pqm.ComputeTimeSeconds.ValueInt64())
+		included = true
 	}
-	if !qm.WrittenDataBytes.IsNull() && !qm.WrittenDataBytes.IsUnknown() {
-		quota.WrittenDataBytes = neon.NewOptInt64(qm.WrittenDataBytes.ValueInt64())
+	if !cqm.WrittenDataBytes.IsNull() && !cqm.WrittenDataBytes.IsUnknown() {
+		quota.WrittenDataBytes = neon.NewOptInt64(pqm.WrittenDataBytes.ValueInt64())
+		included = true
 	}
-	if !qm.DataTransferBytes.IsNull() && !qm.DataTransferBytes.IsUnknown() {
-		quota.DataTransferBytes = neon.NewOptInt64(qm.DataTransferBytes.ValueInt64())
+	if !cqm.DataTransferBytes.IsNull() && !cqm.DataTransferBytes.IsUnknown() {
+		quota.DataTransferBytes = neon.NewOptInt64(pqm.DataTransferBytes.ValueInt64())
+		included = true
 	}
-	if !qm.LogicalSizeBytes.IsNull() && !qm.LogicalSizeBytes.IsUnknown() {
-		quota.LogicalSizeBytes = neon.NewOptInt64(qm.LogicalSizeBytes.ValueInt64())
+	if !cqm.LogicalSizeBytes.IsNull() && !cqm.LogicalSizeBytes.IsUnknown() {
+		quota.LogicalSizeBytes = neon.NewOptInt64(pqm.LogicalSizeBytes.ValueInt64())
+		included = true
+	}
+	if !included {
+		// Empty nested objects are dangerous to send (see allowed_ips), and
+		// pointless here since nothing was configured; skip attaching.
+		return false
 	}
 	settings.Quota = neon.NewOptProjectQuota(quota)
+	return true
 }
 
-func buildProjectAllowedIpsRequest(ctx context.Context, m *projectSettingsModel, settings *neon.ProjectSettingsData, diags *diag.Diagnostics) {
-	if m.AllowedIps.IsNull() || m.AllowedIps.IsUnknown() {
-		return
+func buildProjectAllowedIpsRequest(ctx context.Context, pm, cm *projectSettingsModel, settings *neon.ProjectSettingsData, diags *diag.Diagnostics) bool {
+	if cm.AllowedIps.IsNull() || cm.AllowedIps.IsUnknown() {
+		return false
 	}
-	var aim allowedIpsModel
-	diags.Append(m.AllowedIps.As(ctx, &aim, basetypes.ObjectAsOptions{})...)
+	caim := decodeObjectIfKnown[allowedIpsModel](ctx, cm.AllowedIps, diags)
+	paim := decodeObjectIfKnown[allowedIpsModel](ctx, pm.AllowedIps, diags)
+	if diags.HasError() {
+		return false
+	}
+
 	allowedIps := neon.AllowedIps{}
-	if !aim.Ips.IsNull() && !aim.Ips.IsUnknown() {
+	included := false
+	if !caim.Ips.IsNull() && !caim.Ips.IsUnknown() {
 		var ips []string
-		diags.Append(aim.Ips.ElementsAs(ctx, &ips, false)...)
+		diags.Append(paim.Ips.ElementsAs(ctx, &ips, false)...)
+		if diags.HasError() {
+			return false
+		}
 		allowedIps.Ips = ips
+		included = true
 	}
-	if !aim.ProtectedBranchesOnly.IsNull() && !aim.ProtectedBranchesOnly.IsUnknown() {
-		allowedIps.ProtectedBranchesOnly = neon.NewOptBool(aim.ProtectedBranchesOnly.ValueBool())
+	if !caim.ProtectedBranchesOnly.IsNull() && !caim.ProtectedBranchesOnly.IsUnknown() {
+		allowedIps.ProtectedBranchesOnly = neon.NewOptBool(paim.ProtectedBranchesOnly.ValueBool())
+		included = true
+	}
+	if !included {
+		// An empty allowed_ips object can mean "allow all IPs" server-side;
+		// never send it unless at least one leaf was actually configured.
+		return false
 	}
 	settings.AllowedIps = neon.NewOptAllowedIps(allowedIps)
+	return true
 }
 
-func buildProjectMaintenanceWindowRequest(ctx context.Context, m *projectSettingsModel, settings *neon.ProjectSettingsData, diags *diag.Diagnostics) {
-	if m.MaintenanceWindow.IsNull() || m.MaintenanceWindow.IsUnknown() {
-		return
+func buildProjectMaintenanceWindowRequest(ctx context.Context, pm, cm *projectSettingsModel, settings *neon.ProjectSettingsData, diags *diag.Diagnostics) bool {
+	// All maintenance_window children are Required in the schema, so the
+	// object-level gate on cfg is sufficient: if it is configured at all,
+	// every child is necessarily known and non-null.
+	if cm.MaintenanceWindow.IsNull() || cm.MaintenanceWindow.IsUnknown() {
+		return false
+	}
+	if pm.MaintenanceWindow.IsNull() || pm.MaintenanceWindow.IsUnknown() {
+		return false
 	}
 	var mwm maintenanceWindowModel
-	diags.Append(m.MaintenanceWindow.As(ctx, &mwm, basetypes.ObjectAsOptions{})...)
+	diags.Append(pm.MaintenanceWindow.As(ctx, &mwm, basetypes.ObjectAsOptions{})...)
+	if diags.HasError() {
+		return false
+	}
 	mw := neon.MaintenanceWindow{
 		StartTime: mwm.StartTime.ValueString(),
 		EndTime:   mwm.EndTime.ValueString(),
@@ -813,27 +935,45 @@ func buildProjectMaintenanceWindowRequest(ctx context.Context, m *projectSetting
 	if !mwm.Weekdays.IsNull() && !mwm.Weekdays.IsUnknown() {
 		var weekdays []int
 		diags.Append(mwm.Weekdays.ElementsAs(ctx, &weekdays, false)...)
+		if diags.HasError() {
+			return false
+		}
 		mw.Weekdays = weekdays
 	}
 	settings.MaintenanceWindow = neon.NewOptMaintenanceWindow(mw)
+	return true
 }
 
-func buildProjectPreloadLibrariesRequest(ctx context.Context, m *projectSettingsModel, settings *neon.ProjectSettingsData, diags *diag.Diagnostics) {
-	if m.PreloadLibraries.IsNull() || m.PreloadLibraries.IsUnknown() {
-		return
+func buildProjectPreloadLibrariesRequest(ctx context.Context, pm, cm *projectSettingsModel, settings *neon.ProjectSettingsData, diags *diag.Diagnostics) bool {
+	if cm.PreloadLibraries.IsNull() || cm.PreloadLibraries.IsUnknown() {
+		return false
 	}
-	var plm preloadLibrariesModel
-	diags.Append(m.PreloadLibraries.As(ctx, &plm, basetypes.ObjectAsOptions{})...)
+	cplm := decodeObjectIfKnown[preloadLibrariesModel](ctx, cm.PreloadLibraries, diags)
+	pplm := decodeObjectIfKnown[preloadLibrariesModel](ctx, pm.PreloadLibraries, diags)
+	if diags.HasError() {
+		return false
+	}
+
 	pl := neon.PreloadLibraries{}
-	if !plm.UseDefaults.IsNull() && !plm.UseDefaults.IsUnknown() {
-		pl.UseDefaults = neon.NewOptBool(plm.UseDefaults.ValueBool())
+	included := false
+	if !cplm.UseDefaults.IsNull() && !cplm.UseDefaults.IsUnknown() {
+		pl.UseDefaults = neon.NewOptBool(pplm.UseDefaults.ValueBool())
+		included = true
 	}
-	if !plm.EnabledLibraries.IsNull() && !plm.EnabledLibraries.IsUnknown() {
+	if !cplm.EnabledLibraries.IsNull() && !cplm.EnabledLibraries.IsUnknown() {
 		var libs []string
-		diags.Append(plm.EnabledLibraries.ElementsAs(ctx, &libs, false)...)
+		diags.Append(pplm.EnabledLibraries.ElementsAs(ctx, &libs, false)...)
+		if diags.HasError() {
+			return false
+		}
 		pl.EnabledLibraries = libs
+		included = true
+	}
+	if !included {
+		return false
 	}
 	settings.PreloadLibraries = neon.NewOptPreloadLibraries(pl)
+	return true
 }
 
 func mapProjectToModel(ctx context.Context, p *neon.Project, data *projectResourceModel, diags *diag.Diagnostics) {

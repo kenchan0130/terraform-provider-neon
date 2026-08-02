@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type connectionURIModel struct {
@@ -41,7 +42,7 @@ func fetchConnectionURI(ctx context.Context, client *neon.Client, data *connecti
 
 	result, err := client.GetConnectionURI(ctx, params)
 	if err != nil {
-		diags.AddError("Failed to read connection URI", err.Error())
+		diags.AddError("Failed to read connection URI", neonerror.Detail(err))
 		return diags
 	}
 

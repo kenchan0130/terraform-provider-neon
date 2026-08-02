@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type organizationInvitationsDataSource struct {
@@ -109,7 +110,7 @@ func (d *organizationInvitationsDataSource) Read(ctx context.Context, req dataso
 		OrgID: data.OrgID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read organization invitations", err.Error())
+		resp.Diagnostics.AddError("Failed to read organization invitations", neonerror.Detail(err))
 		return
 	}
 

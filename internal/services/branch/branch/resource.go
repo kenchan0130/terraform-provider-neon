@@ -310,7 +310,7 @@ func (r *branchResource) Create(ctx context.Context, req resource.CreateRequest,
 		ProjectID: data.ProjectID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to create branch", err.Error())
+		resp.Diagnostics.AddError("Failed to create branch", neonerror.Detail(err))
 		return
 	}
 
@@ -334,7 +334,7 @@ func buildBranchCreateRequest(data *branchResourceModel) (neon.CreateProjectBran
 	if !data.ParentTimestamp.IsNull() && !data.ParentTimestamp.IsUnknown() {
 		t, err := time.Parse(time.RFC3339, data.ParentTimestamp.ValueString())
 		if err != nil {
-			diags.AddError("Invalid parent_timestamp format", fmt.Sprintf("Expected RFC 3339 format: %s", err.Error()))
+			diags.AddError("Invalid parent_timestamp format", fmt.Sprintf("Expected RFC 3339 format: %s", neonerror.Detail(err)))
 			return branchReq, diags
 		}
 		branchReq.ParentTimestamp = neon.NewOptDateTime(t)
@@ -351,7 +351,7 @@ func buildBranchCreateRequest(data *branchResourceModel) (neon.CreateProjectBran
 	if !data.ExpiresAt.IsNull() && !data.ExpiresAt.IsUnknown() {
 		t, err := time.Parse(time.RFC3339, data.ExpiresAt.ValueString())
 		if err != nil {
-			diags.AddError("Invalid expires_at format", fmt.Sprintf("Expected RFC 3339 format: %s", err.Error()))
+			diags.AddError("Invalid expires_at format", fmt.Sprintf("Expected RFC 3339 format: %s", neonerror.Detail(err)))
 			return branchReq, diags
 		}
 		branchReq.ExpiresAt = neon.NewOptDateTime(t)
@@ -376,7 +376,7 @@ func (r *branchResource) Read(ctx context.Context, req resource.ReadRequest, res
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Failed to read branch", err.Error())
+		resp.Diagnostics.AddError("Failed to read branch", neonerror.Detail(err))
 		return
 	}
 
@@ -412,7 +412,7 @@ func (r *branchResource) Update(ctx context.Context, req resource.UpdateRequest,
 	} else if !data.ExpiresAt.IsUnknown() {
 		t, err := time.Parse(time.RFC3339, data.ExpiresAt.ValueString())
 		if err != nil {
-			resp.Diagnostics.AddError("Invalid expires_at format", fmt.Sprintf("Expected RFC 3339 format: %s", err.Error()))
+			resp.Diagnostics.AddError("Invalid expires_at format", fmt.Sprintf("Expected RFC 3339 format: %s", neonerror.Detail(err)))
 			return
 		}
 		apiReq.Branch.ExpiresAt = neon.OptNilDateTime{Value: t, Set: true}
@@ -423,7 +423,7 @@ func (r *branchResource) Update(ctx context.Context, req resource.UpdateRequest,
 		BranchID:  state.ID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to update branch", err.Error())
+		resp.Diagnostics.AddError("Failed to update branch", neonerror.Detail(err))
 		return
 	}
 
@@ -443,7 +443,7 @@ func (r *branchResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		BranchID:  data.ID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to delete branch", err.Error())
+		resp.Diagnostics.AddError("Failed to delete branch", neonerror.Detail(err))
 		return
 	}
 }

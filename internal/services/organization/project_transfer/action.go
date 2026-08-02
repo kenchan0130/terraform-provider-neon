@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/action/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 var (
@@ -92,7 +93,7 @@ func (a *projectTransferAction) Invoke(ctx context.Context, req action.InvokeReq
 		SourceOrgID: data.SourceOrgID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to transfer projects", err.Error())
+		resp.Diagnostics.AddError("Failed to transfer projects", neonerror.Detail(err))
 		return
 	}
 

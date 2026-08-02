@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type maskingRulesDataSource struct {
@@ -105,7 +106,7 @@ func (d *maskingRulesDataSource) Read(ctx context.Context, req datasource.ReadRe
 		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read masking rules", err.Error())
+		resp.Diagnostics.AddError("Failed to read masking rules", neonerror.Detail(err))
 		return
 	}
 
