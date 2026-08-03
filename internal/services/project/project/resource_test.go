@@ -278,14 +278,6 @@ resource "neon_project" "test" {
 }
 `),
 				Check: testutil.CheckResourceAttr("neon_project.test", "name", "my-project"),
-				// maintenance_window's schema children are Required inside an
-				// Optional+Computed object using UseStateForUnknown; that
-				// pre-existing combination (unrelated to this fix, and the
-				// schema is out of scope here) makes the framework report a
-				// spurious post-apply diff whenever maintenance_window is
-				// populated but unconfigured. The PATCH-body assertions below
-				// are what actually exercise the fix.
-				ExpectNonEmptyPlan: true,
 			},
 			{
 				Config: testutil.TestConfig(`
@@ -293,8 +285,7 @@ resource "neon_project" "test" {
   name = "my-project-renamed"
 }
 `),
-				Check:              testutil.CheckResourceAttr("neon_project.test", "name", "my-project-renamed"),
-				ExpectNonEmptyPlan: true,
+				Check: testutil.CheckResourceAttr("neon_project.test", "name", "my-project-renamed"),
 			},
 		},
 	})
@@ -381,11 +372,6 @@ resource "neon_project" "test" {
 }
 `),
 				Check: testutil.CheckResourceAttr("neon_project.test", "settings.enable_logical_replication", "false"),
-				// See the comment in TestProjectResource_UpdateDoesNotEchoServerSettings:
-				// an unconfigured, server-populated maintenance_window causes a
-				// spurious post-apply diff due to a pre-existing schema
-				// limitation that is out of scope for this fix.
-				ExpectNonEmptyPlan: true,
 			},
 			{
 				Config: testutil.TestConfig(`
@@ -396,8 +382,7 @@ resource "neon_project" "test" {
   }
 }
 `),
-				Check:              testutil.CheckResourceAttr("neon_project.test", "settings.enable_logical_replication", "true"),
-				ExpectNonEmptyPlan: true,
+				Check: testutil.CheckResourceAttr("neon_project.test", "settings.enable_logical_replication", "true"),
 			},
 		},
 	})
@@ -412,6 +397,91 @@ resource "neon_project" "test" {
 	if strings.Contains(body, `"maintenance_window"`) {
 		t.Errorf("PATCH body unexpectedly contains unconfigured leaf maintenance_window: %s", body)
 	}
+}
+
+// TestProjectResource_ServerMaintenanceWindowConvergesCleanly is a regression
+// test for the perpetual no-op diff bug: when the API populates
+// maintenance_window (e.g. server-assigned default) but the practitioner never
+// configures it, applying and re-planning with the exact same config must
+// produce an empty plan. Before maintenance_window's children were changed from
+// Required to Optional+Computed, Terraform core's proposed-new-state took the
+// Required children from config (null), which never matched the
+// UseStateForUnknown-restored prior state at the "settings" path, so
+// planmodifiers.UnknownOnResourceChange perpetually marked updated_at unknown.
+// resource.UnitTest already fails any step whose post-apply plan is non-empty
+// (unless ExpectNonEmptyPlan is set), so simply not setting it here is the
+// assertion.
+func TestProjectResource_ServerMaintenanceWindowConvergesCleanly(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/projects",
+		testutil.JSONResponder(201, `{
+			"project": `+projectJSONWithMaintenanceWindow+`,
+			"connection_uris": [],
+			"roles": [],
+			"databases": [],
+			"operations": [],
+			"branch": `+branchMinJSON+`,
+			"endpoints": []
+		}`),
+	)
+
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id",
+		testutil.JSONResponder(200, `{"project": `+projectJSONWithMaintenanceWindow+`}`),
+	)
+
+	transport.RegisterResponder(http.MethodDelete,
+		"https://neon.example.com/api/v2/projects/test-project-id",
+		testutil.JSONResponder(200, `{"project": `+projectJSONWithMaintenanceWindow+`}`),
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_project" "test" {
+  name = "my-project"
+}
+`),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testutil.CheckResourceAttr("neon_project.test", "name", "my-project"),
+					testutil.CheckResourceAttr("neon_project.test", "settings.maintenance_window.start_time", "01:00"),
+				),
+			},
+		},
+	})
+}
+
+// TestProjectResource_MaintenanceWindowPartialConfigFailsValidation verifies the
+// AlsoRequires validators: configuring only one maintenance_window child without
+// its siblings must fail validation rather than silently sending a partial
+// object (weekdays/start_time/end_time are all required together by the API).
+func TestProjectResource_MaintenanceWindowPartialConfigFailsValidation(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_project" "test" {
+  name = "my-project"
+  settings = {
+    maintenance_window = {
+      start_time = "01:00"
+    }
+  }
+}
+`),
+				ExpectError: regexp.MustCompile(`(?s)weekdays.*end_time|end_time.*weekdays`),
+			},
+		},
+	})
 }
 
 // TestProjectResource_UpdateAPIErrorMessage verifies that the API's error message

@@ -81,11 +81,11 @@ Optional:
 <a id="nestedatt--settings--maintenance_window"></a>
 ### Nested Schema for `settings.maintenance_window`
 
-Required:
+Optional:
 
-- `end_time` (String) End time of the maintenance window in HH:MM format (UTC).
-- `start_time` (String) Start time of the maintenance window in HH:MM format (UTC).
-- `weekdays` (List of Number) A list of weekdays when the maintenance window is active (1=Monday, 7=Sunday).
+- `end_time` (String) End time of the maintenance window in HH:MM format (UTC). Required together with weekdays and start_time.
+- `start_time` (String) Start time of the maintenance window in HH:MM format (UTC). Required together with weekdays and end_time.
+- `weekdays` (List of Number) A list of weekdays when the maintenance window is active (1=Monday, 7=Sunday). Required together with start_time and end_time.
 
 
 <a id="nestedatt--settings--preload_libraries"></a>

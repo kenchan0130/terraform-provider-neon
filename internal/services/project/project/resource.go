@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -19,6 +21,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
@@ -418,18 +421,56 @@ func projectMaintenanceWindowSchema() schema.SingleNestedAttribute {
 			objectplanmodifier.UseStateForUnknown(),
 		},
 		Attributes: map[string]schema.Attribute{
+			// These three attributes must be Optional+Computed, not Required:
+			// Required children inside an Optional+Computed parent that uses
+			// UseStateForUnknown cause a perpetual post-apply diff whenever the
+			// server populates maintenance_window but the practitioner never
+			// configured it (Terraform core takes Required children from
+			// config, i.e. null, when building the proposed new state, which
+			// then never matches the UseStateForUnknown-restored prior state).
+			// AlsoRequires below preserves all-or-nothing configuration.
 			"weekdays": schema.ListAttribute{
-				Description: "A list of weekdays when the maintenance window is active (1=Monday, 7=Sunday).",
-				Required:    true,
+				Description: "A list of weekdays when the maintenance window is active (1=Monday, 7=Sunday). Required together with start_time and end_time.",
+				Optional:    true,
+				Computed:    true,
 				ElementType: types.Int64Type,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.List{
+					listvalidator.AlsoRequires(
+						path.MatchRelative().AtParent().AtName("start_time"),
+						path.MatchRelative().AtParent().AtName("end_time"),
+					),
+				},
 			},
 			"start_time": schema.StringAttribute{
-				Description: "Start time of the maintenance window in HH:MM format (UTC).",
-				Required:    true,
+				Description: "Start time of the maintenance window in HH:MM format (UTC). Required together with weekdays and end_time.",
+				Optional:    true,
+				Computed:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.AlsoRequires(
+						path.MatchRelative().AtParent().AtName("weekdays"),
+						path.MatchRelative().AtParent().AtName("end_time"),
+					),
+				},
 			},
 			"end_time": schema.StringAttribute{
-				Description: "End time of the maintenance window in HH:MM format (UTC).",
-				Required:    true,
+				Description: "End time of the maintenance window in HH:MM format (UTC). Required together with weekdays and start_time.",
+				Optional:    true,
+				Computed:    true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.AlsoRequires(
+						path.MatchRelative().AtParent().AtName("weekdays"),
+						path.MatchRelative().AtParent().AtName("start_time"),
+					),
+				},
 			},
 		},
 	}
@@ -914,9 +955,12 @@ func buildProjectAllowedIpsRequest(ctx context.Context, pm, cm *projectSettingsM
 }
 
 func buildProjectMaintenanceWindowRequest(ctx context.Context, pm, cm *projectSettingsModel, settings *neon.ProjectSettingsData, diags *diag.Diagnostics) bool {
-	// All maintenance_window children are Required in the schema, so the
-	// object-level gate on cfg is sufficient: if it is configured at all,
-	// every child is necessarily known and non-null.
+	// maintenance_window's children are Optional+Computed (not Required; see
+	// the schema comment for why), but the AlsoRequires validators on each
+	// child guarantee all-or-nothing configuration: if the object is
+	// configured in config at all, every child is necessarily known and
+	// non-null there too. We still defensively check the plan-side values
+	// before reading them, since they're a separate value from cfg.
 	if cm.MaintenanceWindow.IsNull() || cm.MaintenanceWindow.IsUnknown() {
 		return false
 	}
@@ -928,18 +972,21 @@ func buildProjectMaintenanceWindowRequest(ctx context.Context, pm, cm *projectSe
 	if diags.HasError() {
 		return false
 	}
+	if mwm.StartTime.IsNull() || mwm.StartTime.IsUnknown() ||
+		mwm.EndTime.IsNull() || mwm.EndTime.IsUnknown() ||
+		mwm.Weekdays.IsNull() || mwm.Weekdays.IsUnknown() {
+		return false
+	}
 	mw := neon.MaintenanceWindow{
 		StartTime: mwm.StartTime.ValueString(),
 		EndTime:   mwm.EndTime.ValueString(),
 	}
-	if !mwm.Weekdays.IsNull() && !mwm.Weekdays.IsUnknown() {
-		var weekdays []int
-		diags.Append(mwm.Weekdays.ElementsAs(ctx, &weekdays, false)...)
-		if diags.HasError() {
-			return false
-		}
-		mw.Weekdays = weekdays
+	var weekdays []int
+	diags.Append(mwm.Weekdays.ElementsAs(ctx, &weekdays, false)...)
+	if diags.HasError() {
+		return false
 	}
+	mw.Weekdays = weekdays
 	settings.MaintenanceWindow = neon.NewOptMaintenanceWindow(mw)
 	return true
 }
