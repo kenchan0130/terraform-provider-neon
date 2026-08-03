@@ -14,9 +14,10 @@ import (
 // SecurityHandler is handler for security parameters.
 type SecurityHandler interface {
 	// HandleBearerAuth handles BearerAuth security.
-	// The Neon API requires an API key to authorize your requests, which you can enter below.
-	// Refer to our documentation to find out how to generate and use [API keys](https://neon.
-	// com/docs/manage/api-keys).
+	// The Neon API requires an API key to authorize your requests, which you can enter below. Refer to our
+	// documentation to find out how to generate and use [API keys].
+	//
+	// [API keys]: https://neon.com/docs/manage/api-keys
 	HandleBearerAuth(ctx context.Context, operationName OperationName, t BearerAuth) (context.Context, error)
 	// HandleCookieAuth handles CookieAuth security.
 	HandleCookieAuth(ctx context.Context, operationName OperationName, t CookieAuth) (context.Context, error)
@@ -152,9 +153,12 @@ var operationRolesBearerAuth = map[string][]string{
 	ListProjectBranchDatabasesOperation:                   []string{},
 	ListProjectBranchEndpointsOperation:                   []string{},
 	ListProjectBranchFunctionsOperation:                   []string{},
+	ListProjectBranchLogFieldValuesOperation:              []string{},
+	ListProjectBranchLogFieldsOperation:                   []string{},
 	ListProjectBranchRolesOperation:                       []string{},
 	ListProjectBranchesOperation:                          []string{},
 	ListProjectEndpointsOperation:                         []string{},
+	ListProjectMembersOperation:                           []string{},
 	ListProjectOperationsOperation:                        []string{},
 	ListProjectPermissionsOperation:                       []string{},
 	ListProjectVPCEndpointsOperation:                      []string{},
@@ -162,9 +166,11 @@ var operationRolesBearerAuth = map[string][]string{
 	ListSharedProjectsOperation:                           []string{},
 	ListSnapshotsOperation:                                []string{},
 	PresignProjectBranchBucketObjectOperation:             []string{},
+	QueryProjectBranchLogsOperation:                       []string{},
 	RecoverProjectOperation:                               []string{},
 	RecoverProjectBranchOperation:                         []string{},
 	RemoveOrganizationMemberOperation:                     []string{},
+	RemoveProjectMemberRoleOperation:                      []string{},
 	ResetProjectBranchRolePasswordOperation:               []string{},
 	RestartProjectEndpointOperation:                       []string{},
 	RestoreProjectBranchOperation:                         []string{},
@@ -176,6 +182,7 @@ var operationRolesBearerAuth = map[string][]string{
 	SendNeonAuthTestEmailOperation:                        []string{},
 	SetDefaultProjectBranchOperation:                      []string{},
 	SetOrganizationSpendingLimitOperation:                 []string{},
+	SetProjectMemberRoleOperation:                         []string{},
 	SetSnapshotScheduleOperation:                          []string{},
 	StartAnonymizationOperation:                           []string{},
 	StartProjectEndpointOperation:                         []string{},
@@ -340,9 +347,12 @@ var operationRolesCookieAuth = map[string][]string{
 	ListProjectBranchDatabasesOperation:                   []string{},
 	ListProjectBranchEndpointsOperation:                   []string{},
 	ListProjectBranchFunctionsOperation:                   []string{},
+	ListProjectBranchLogFieldValuesOperation:              []string{},
+	ListProjectBranchLogFieldsOperation:                   []string{},
 	ListProjectBranchRolesOperation:                       []string{},
 	ListProjectBranchesOperation:                          []string{},
 	ListProjectEndpointsOperation:                         []string{},
+	ListProjectMembersOperation:                           []string{},
 	ListProjectOperationsOperation:                        []string{},
 	ListProjectPermissionsOperation:                       []string{},
 	ListProjectVPCEndpointsOperation:                      []string{},
@@ -350,9 +360,11 @@ var operationRolesCookieAuth = map[string][]string{
 	ListSharedProjectsOperation:                           []string{},
 	ListSnapshotsOperation:                                []string{},
 	PresignProjectBranchBucketObjectOperation:             []string{},
+	QueryProjectBranchLogsOperation:                       []string{},
 	RecoverProjectOperation:                               []string{},
 	RecoverProjectBranchOperation:                         []string{},
 	RemoveOrganizationMemberOperation:                     []string{},
+	RemoveProjectMemberRoleOperation:                      []string{},
 	ResetProjectBranchRolePasswordOperation:               []string{},
 	RestartProjectEndpointOperation:                       []string{},
 	RestoreProjectBranchOperation:                         []string{},
@@ -364,6 +376,7 @@ var operationRolesCookieAuth = map[string][]string{
 	SendNeonAuthTestEmailOperation:                        []string{},
 	SetDefaultProjectBranchOperation:                      []string{},
 	SetOrganizationSpendingLimitOperation:                 []string{},
+	SetProjectMemberRoleOperation:                         []string{},
 	SetSnapshotScheduleOperation:                          []string{},
 	StartAnonymizationOperation:                           []string{},
 	StartProjectEndpointOperation:                         []string{},
@@ -528,9 +541,12 @@ var operationRolesTokenCookieAuth = map[string][]string{
 	ListProjectBranchDatabasesOperation:                   []string{},
 	ListProjectBranchEndpointsOperation:                   []string{},
 	ListProjectBranchFunctionsOperation:                   []string{},
+	ListProjectBranchLogFieldValuesOperation:              []string{},
+	ListProjectBranchLogFieldsOperation:                   []string{},
 	ListProjectBranchRolesOperation:                       []string{},
 	ListProjectBranchesOperation:                          []string{},
 	ListProjectEndpointsOperation:                         []string{},
+	ListProjectMembersOperation:                           []string{},
 	ListProjectOperationsOperation:                        []string{},
 	ListProjectPermissionsOperation:                       []string{},
 	ListProjectVPCEndpointsOperation:                      []string{},
@@ -538,9 +554,11 @@ var operationRolesTokenCookieAuth = map[string][]string{
 	ListSharedProjectsOperation:                           []string{},
 	ListSnapshotsOperation:                                []string{},
 	PresignProjectBranchBucketObjectOperation:             []string{},
+	QueryProjectBranchLogsOperation:                       []string{},
 	RecoverProjectOperation:                               []string{},
 	RecoverProjectBranchOperation:                         []string{},
 	RemoveOrganizationMemberOperation:                     []string{},
+	RemoveProjectMemberRoleOperation:                      []string{},
 	ResetProjectBranchRolePasswordOperation:               []string{},
 	RestartProjectEndpointOperation:                       []string{},
 	RestoreProjectBranchOperation:                         []string{},
@@ -552,6 +570,7 @@ var operationRolesTokenCookieAuth = map[string][]string{
 	SendNeonAuthTestEmailOperation:                        []string{},
 	SetDefaultProjectBranchOperation:                      []string{},
 	SetOrganizationSpendingLimitOperation:                 []string{},
+	SetProjectMemberRoleOperation:                         []string{},
 	SetSnapshotScheduleOperation:                          []string{},
 	StartAnonymizationOperation:                           []string{},
 	StartProjectEndpointOperation:                         []string{},
@@ -669,9 +688,10 @@ func (s *Server) securityTokenCookieAuth(ctx context.Context, operationName Oper
 // SecuritySource is provider of security values (tokens, passwords, etc.).
 type SecuritySource interface {
 	// BearerAuth provides BearerAuth security value.
-	// The Neon API requires an API key to authorize your requests, which you can enter below.
-	// Refer to our documentation to find out how to generate and use [API keys](https://neon.
-	// com/docs/manage/api-keys).
+	// The Neon API requires an API key to authorize your requests, which you can enter below. Refer to our
+	// documentation to find out how to generate and use [API keys].
+	//
+	// [API keys]: https://neon.com/docs/manage/api-keys
 	BearerAuth(ctx context.Context, operationName OperationName) (BearerAuth, error)
 	// CookieAuth provides CookieAuth security value.
 	CookieAuth(ctx context.Context, operationName OperationName) (CookieAuth, error)

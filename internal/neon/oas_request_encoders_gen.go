@@ -574,6 +574,20 @@ func encodePresignProjectBranchBucketObjectRequest(
 	return nil
 }
 
+func encodeQueryProjectBranchLogsRequest(
+	req *ProjectBranchLogsQueryRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeRestoreProjectBranchRequest(
 	req *BranchRestoreRequest,
 	r *http.Request,
@@ -624,6 +638,20 @@ func encodeSendNeonAuthTestEmailRequest(
 
 func encodeSetOrganizationSpendingLimitRequest(
 	req *SpendingLimitUpdateRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeSetProjectMemberRoleRequest(
+	req *SetProjectMemberRoleRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

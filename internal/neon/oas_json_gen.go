@@ -26548,6 +26548,10 @@ func (s *OperationAction) Decode(d *jx.Decoder) error {
 		*s = OperationActionTenantAttach
 	case OperationActionTenantDetach:
 		*s = OperationActionTenantDetach
+	case OperationActionTenantDetachSafekeepers:
+		*s = OperationActionTenantDetachSafekeepers
+	case OperationActionTenantAttachSafekeepers:
+		*s = OperationActionTenantAttachSafekeepers
 	case OperationActionTenantReattach:
 		*s = OperationActionTenantReattach
 	case OperationActionReplaceSafekeeper:
@@ -26590,6 +26594,8 @@ func (s *OperationAction) Decode(d *jx.Decoder) error {
 		*s = OperationActionMarkMigrationPrepared
 	case OperationActionUpdateCatalog:
 		*s = OperationActionUpdateCatalog
+	case OperationActionEpcSync:
+		*s = OperationActionEpcSync
 	default:
 		*s = OperationAction(v)
 	}
@@ -28953,6 +28959,138 @@ func (s *OptProjectAuditLogLevel) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes ProjectBranchLogDuration as json.
+func (o OptProjectBranchLogDuration) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes ProjectBranchLogDuration from json.
+func (o *OptProjectBranchLogDuration) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptProjectBranchLogDuration to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptProjectBranchLogDuration) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptProjectBranchLogDuration) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ProjectBranchLogSeverity as json.
+func (o OptProjectBranchLogSeverity) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes ProjectBranchLogSeverity from json.
+func (o *OptProjectBranchLogSeverity) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptProjectBranchLogSeverity to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptProjectBranchLogSeverity) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptProjectBranchLogSeverity) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ProjectBranchLogSource as json.
+func (o OptProjectBranchLogSource) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes ProjectBranchLogSource from json.
+func (o *OptProjectBranchLogSource) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptProjectBranchLogSource to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptProjectBranchLogSource) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptProjectBranchLogSource) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ProjectBranchLogsQueryRequestSortOrder as json.
+func (o OptProjectBranchLogsQueryRequestSortOrder) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes ProjectBranchLogsQueryRequestSortOrder from json.
+func (o *OptProjectBranchLogsQueryRequestSortOrder) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptProjectBranchLogsQueryRequestSortOrder to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptProjectBranchLogsQueryRequestSortOrder) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptProjectBranchLogsQueryRequestSortOrder) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes ProjectCreateRequestProjectBranch as json.
 func (o OptProjectCreateRequestProjectBranch) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -28982,6 +29120,39 @@ func (s OptProjectCreateRequestProjectBranch) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptProjectCreateRequestProjectBranch) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ProjectMemberGrantSource as json.
+func (o OptProjectMemberGrantSource) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes ProjectMemberGrantSource from json.
+func (o *OptProjectMemberGrantSource) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptProjectMemberGrantSource to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptProjectMemberGrantSource) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptProjectMemberGrantSource) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -29019,6 +29190,39 @@ func (s *OptProjectOwnerData) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes ProjectPermissionLevel as json.
+func (o OptProjectPermissionLevel) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes ProjectPermissionLevel from json.
+func (o *OptProjectPermissionLevel) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptProjectPermissionLevel to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptProjectPermissionLevel) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptProjectPermissionLevel) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes ProjectQuota as json.
 func (o OptProjectQuota) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -29048,6 +29252,39 @@ func (s OptProjectQuota) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptProjectQuota) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ProjectRole as json.
+func (o OptProjectRole) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes ProjectRole from json.
+func (o *OptProjectRole) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptProjectRole to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptProjectRole) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptProjectRole) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -32734,6 +32971,1503 @@ func (s *ProjectAuditLogLevel) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes ProjectBranchLogDuration as json.
+func (s ProjectBranchLogDuration) Encode(e *jx.Encoder) {
+	unwrapped := string(s)
+
+	e.Str(unwrapped)
+}
+
+// Decode decodes ProjectBranchLogDuration from json.
+func (s *ProjectBranchLogDuration) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ProjectBranchLogDuration to nil")
+	}
+	var unwrapped string
+	if err := func() error {
+		v, err := d.Str()
+		unwrapped = string(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = ProjectBranchLogDuration(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ProjectBranchLogDuration) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ProjectBranchLogDuration) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *ProjectBranchLogFieldValuesResponse) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ProjectBranchLogFieldValuesResponse) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("values")
+		e.ArrStart()
+		for _, elem := range s.Values {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("is_truncated")
+		e.Bool(s.IsTruncated)
+	}
+}
+
+var jsonFieldsNameOfProjectBranchLogFieldValuesResponse = [2]string{
+	0: "values",
+	1: "is_truncated",
+}
+
+// Decode decodes ProjectBranchLogFieldValuesResponse from json.
+func (s *ProjectBranchLogFieldValuesResponse) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ProjectBranchLogFieldValuesResponse to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "values":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				s.Values = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Values = append(s.Values, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"values\"")
+			}
+		case "is_truncated":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Bool()
+				s.IsTruncated = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_truncated\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ProjectBranchLogFieldValuesResponse")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfProjectBranchLogFieldValuesResponse) {
+					name = jsonFieldsNameOfProjectBranchLogFieldValuesResponse[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ProjectBranchLogFieldValuesResponse) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ProjectBranchLogFieldValuesResponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *ProjectBranchLogFieldsResponse) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ProjectBranchLogFieldsResponse) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("fields")
+		e.ArrStart()
+		for _, elem := range s.Fields {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfProjectBranchLogFieldsResponse = [1]string{
+	0: "fields",
+}
+
+// Decode decodes ProjectBranchLogFieldsResponse from json.
+func (s *ProjectBranchLogFieldsResponse) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ProjectBranchLogFieldsResponse to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "fields":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				s.Fields = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Fields = append(s.Fields, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"fields\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ProjectBranchLogFieldsResponse")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfProjectBranchLogFieldsResponse) {
+					name = jsonFieldsNameOfProjectBranchLogFieldsResponse[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ProjectBranchLogFieldsResponse) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ProjectBranchLogFieldsResponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *ProjectBranchLogRecord) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ProjectBranchLogRecord) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("timestamp")
+		json.EncodeDateTime(e, s.Timestamp)
+	}
+	{
+		e.FieldStart("message")
+		e.Str(s.Message)
+	}
+	{
+		if s.Source.Set {
+			e.FieldStart("source")
+			s.Source.Encode(e)
+		}
+	}
+	{
+		if s.EntityID.Set {
+			e.FieldStart("entity_id")
+			s.EntityID.Encode(e)
+		}
+	}
+	{
+		if s.ServiceName.Set {
+			e.FieldStart("service_name")
+			s.ServiceName.Encode(e)
+		}
+	}
+	{
+		if s.ScopeName.Set {
+			e.FieldStart("scope_name")
+			s.ScopeName.Encode(e)
+		}
+	}
+	{
+		if s.SeverityNumber.Set {
+			e.FieldStart("severity_number")
+			s.SeverityNumber.Encode(e)
+		}
+	}
+	{
+		if s.SeverityText.Set {
+			e.FieldStart("severity_text")
+			s.SeverityText.Encode(e)
+		}
+	}
+	{
+		if s.TraceID.Set {
+			e.FieldStart("trace_id")
+			s.TraceID.Encode(e)
+		}
+	}
+	{
+		if s.SpanID.Set {
+			e.FieldStart("span_id")
+			s.SpanID.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("attributes")
+		s.Attributes.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfProjectBranchLogRecord = [11]string{
+	0:  "timestamp",
+	1:  "message",
+	2:  "source",
+	3:  "entity_id",
+	4:  "service_name",
+	5:  "scope_name",
+	6:  "severity_number",
+	7:  "severity_text",
+	8:  "trace_id",
+	9:  "span_id",
+	10: "attributes",
+}
+
+// Decode decodes ProjectBranchLogRecord from json.
+func (s *ProjectBranchLogRecord) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ProjectBranchLogRecord to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "timestamp":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := json.DecodeDateTime(d)
+				s.Timestamp = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"timestamp\"")
+			}
+		case "message":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Message = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"message\"")
+			}
+		case "source":
+			if err := func() error {
+				s.Source.Reset()
+				if err := s.Source.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"source\"")
+			}
+		case "entity_id":
+			if err := func() error {
+				s.EntityID.Reset()
+				if err := s.EntityID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"entity_id\"")
+			}
+		case "service_name":
+			if err := func() error {
+				s.ServiceName.Reset()
+				if err := s.ServiceName.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"service_name\"")
+			}
+		case "scope_name":
+			if err := func() error {
+				s.ScopeName.Reset()
+				if err := s.ScopeName.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"scope_name\"")
+			}
+		case "severity_number":
+			if err := func() error {
+				s.SeverityNumber.Reset()
+				if err := s.SeverityNumber.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"severity_number\"")
+			}
+		case "severity_text":
+			if err := func() error {
+				s.SeverityText.Reset()
+				if err := s.SeverityText.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"severity_text\"")
+			}
+		case "trace_id":
+			if err := func() error {
+				s.TraceID.Reset()
+				if err := s.TraceID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"trace_id\"")
+			}
+		case "span_id":
+			if err := func() error {
+				s.SpanID.Reset()
+				if err := s.SpanID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"span_id\"")
+			}
+		case "attributes":
+			requiredBitSet[1] |= 1 << 2
+			if err := func() error {
+				if err := s.Attributes.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"attributes\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ProjectBranchLogRecord")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b00000011,
+		0b00000100,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfProjectBranchLogRecord) {
+					name = jsonFieldsNameOfProjectBranchLogRecord[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ProjectBranchLogRecord) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ProjectBranchLogRecord) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s ProjectBranchLogRecordAttributes) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s ProjectBranchLogRecordAttributes) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes ProjectBranchLogRecordAttributes from json.
+func (s *ProjectBranchLogRecordAttributes) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ProjectBranchLogRecordAttributes to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ProjectBranchLogRecordAttributes")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ProjectBranchLogRecordAttributes) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ProjectBranchLogRecordAttributes) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ProjectBranchLogSeverity as json.
+func (s ProjectBranchLogSeverity) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes ProjectBranchLogSeverity from json.
+func (s *ProjectBranchLogSeverity) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ProjectBranchLogSeverity to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch ProjectBranchLogSeverity(v) {
+	case ProjectBranchLogSeverityTrace:
+		*s = ProjectBranchLogSeverityTrace
+	case ProjectBranchLogSeverityDebug:
+		*s = ProjectBranchLogSeverityDebug
+	case ProjectBranchLogSeverityInfo:
+		*s = ProjectBranchLogSeverityInfo
+	case ProjectBranchLogSeverityWarn:
+		*s = ProjectBranchLogSeverityWarn
+	case ProjectBranchLogSeverityError:
+		*s = ProjectBranchLogSeverityError
+	case ProjectBranchLogSeverityFatal:
+		*s = ProjectBranchLogSeverityFatal
+	default:
+		*s = ProjectBranchLogSeverity(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ProjectBranchLogSeverity) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ProjectBranchLogSeverity) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ProjectBranchLogSource as json.
+func (s ProjectBranchLogSource) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes ProjectBranchLogSource from json.
+func (s *ProjectBranchLogSource) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ProjectBranchLogSource to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch ProjectBranchLogSource(v) {
+	case ProjectBranchLogSourceFunction:
+		*s = ProjectBranchLogSourceFunction
+	case ProjectBranchLogSourceStorage:
+		*s = ProjectBranchLogSourceStorage
+	case ProjectBranchLogSourcePgEndpoint:
+		*s = ProjectBranchLogSourcePgEndpoint
+	default:
+		*s = ProjectBranchLogSource(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ProjectBranchLogSource) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ProjectBranchLogSource) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *ProjectBranchLogsInvalidQuery) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ProjectBranchLogsInvalidQuery) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("code")
+		e.Str(s.Code)
+	}
+	{
+		e.FieldStart("message")
+		e.Str(s.Message)
+	}
+	{
+		e.FieldStart("reason")
+		s.Reason.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfProjectBranchLogsInvalidQuery = [3]string{
+	0: "code",
+	1: "message",
+	2: "reason",
+}
+
+// Decode decodes ProjectBranchLogsInvalidQuery from json.
+func (s *ProjectBranchLogsInvalidQuery) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ProjectBranchLogsInvalidQuery to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "code":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Code = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"code\"")
+			}
+		case "message":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Message = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"message\"")
+			}
+		case "reason":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.Reason.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"reason\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ProjectBranchLogsInvalidQuery")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfProjectBranchLogsInvalidQuery) {
+					name = jsonFieldsNameOfProjectBranchLogsInvalidQuery[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ProjectBranchLogsInvalidQuery) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ProjectBranchLogsInvalidQuery) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ProjectBranchLogsInvalidQueryReason as json.
+func (s ProjectBranchLogsInvalidQueryReason) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes ProjectBranchLogsInvalidQueryReason from json.
+func (s *ProjectBranchLogsInvalidQueryReason) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ProjectBranchLogsInvalidQueryReason to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch ProjectBranchLogsInvalidQueryReason(v) {
+	case ProjectBranchLogsInvalidQueryReasonTimeRangeTooLarge:
+		*s = ProjectBranchLogsInvalidQueryReasonTimeRangeTooLarge
+	case ProjectBranchLogsInvalidQueryReasonInvalidTimeRange:
+		*s = ProjectBranchLogsInvalidQueryReasonInvalidTimeRange
+	case ProjectBranchLogsInvalidQueryReasonConflictingTimeRange:
+		*s = ProjectBranchLogsInvalidQueryReasonConflictingTimeRange
+	case ProjectBranchLogsInvalidQueryReasonInvalidCursor:
+		*s = ProjectBranchLogsInvalidQueryReasonInvalidCursor
+	case ProjectBranchLogsInvalidQueryReasonUnknownField:
+		*s = ProjectBranchLogsInvalidQueryReasonUnknownField
+	case ProjectBranchLogsInvalidQueryReasonInvalidLogql:
+		*s = ProjectBranchLogsInvalidQueryReasonInvalidLogql
+	case ProjectBranchLogsInvalidQueryReasonConflictingFilters:
+		*s = ProjectBranchLogsInvalidQueryReasonConflictingFilters
+	default:
+		*s = ProjectBranchLogsInvalidQueryReason(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ProjectBranchLogsInvalidQueryReason) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ProjectBranchLogsInvalidQueryReason) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *ProjectBranchLogsNotAvailable) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ProjectBranchLogsNotAvailable) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("code")
+		e.Str(s.Code)
+	}
+	{
+		e.FieldStart("message")
+		e.Str(s.Message)
+	}
+	{
+		e.FieldStart("reason")
+		s.Reason.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfProjectBranchLogsNotAvailable = [3]string{
+	0: "code",
+	1: "message",
+	2: "reason",
+}
+
+// Decode decodes ProjectBranchLogsNotAvailable from json.
+func (s *ProjectBranchLogsNotAvailable) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ProjectBranchLogsNotAvailable to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "code":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Code = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"code\"")
+			}
+		case "message":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Message = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"message\"")
+			}
+		case "reason":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.Reason.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"reason\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ProjectBranchLogsNotAvailable")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfProjectBranchLogsNotAvailable) {
+					name = jsonFieldsNameOfProjectBranchLogsNotAvailable[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ProjectBranchLogsNotAvailable) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ProjectBranchLogsNotAvailable) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ProjectBranchLogsNotAvailableReason as json.
+func (s ProjectBranchLogsNotAvailableReason) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes ProjectBranchLogsNotAvailableReason from json.
+func (s *ProjectBranchLogsNotAvailableReason) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ProjectBranchLogsNotAvailableReason to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch ProjectBranchLogsNotAvailableReason(v) {
+	case ProjectBranchLogsNotAvailableReasonBranchNotFound:
+		*s = ProjectBranchLogsNotAvailableReasonBranchNotFound
+	case ProjectBranchLogsNotAvailableReasonTelemetryNotEnabled:
+		*s = ProjectBranchLogsNotAvailableReasonTelemetryNotEnabled
+	default:
+		*s = ProjectBranchLogsNotAvailableReason(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ProjectBranchLogsNotAvailableReason) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ProjectBranchLogsNotAvailableReason) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *ProjectBranchLogsQueryRequest) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ProjectBranchLogsQueryRequest) encodeFields(e *jx.Encoder) {
+	{
+		if s.Since.Set {
+			e.FieldStart("since")
+			s.Since.Encode(e)
+		}
+	}
+	{
+		if s.StartTime.Set {
+			e.FieldStart("start_time")
+			s.StartTime.Encode(e, json.EncodeDateTime)
+		}
+	}
+	{
+		if s.EndTime.Set {
+			e.FieldStart("end_time")
+			s.EndTime.Encode(e, json.EncodeDateTime)
+		}
+	}
+	{
+		if s.Limit.Set {
+			e.FieldStart("limit")
+			s.Limit.Encode(e)
+		}
+	}
+	{
+		if s.Cursor.Set {
+			e.FieldStart("cursor")
+			s.Cursor.Encode(e)
+		}
+	}
+	{
+		if s.SortOrder.Set {
+			e.FieldStart("sort_order")
+			s.SortOrder.Encode(e)
+		}
+	}
+	{
+		if s.Source.Set {
+			e.FieldStart("source")
+			s.Source.Encode(e)
+		}
+	}
+	{
+		if s.ServiceName.Set {
+			e.FieldStart("service_name")
+			s.ServiceName.Encode(e)
+		}
+	}
+	{
+		if s.ScopeName.Set {
+			e.FieldStart("scope_name")
+			s.ScopeName.Encode(e)
+		}
+	}
+	{
+		if s.MinimumSeverity.Set {
+			e.FieldStart("minimum_severity")
+			s.MinimumSeverity.Encode(e)
+		}
+	}
+	{
+		if s.SeverityText.Set {
+			e.FieldStart("severity_text")
+			s.SeverityText.Encode(e)
+		}
+	}
+	{
+		if s.BodyContains.Set {
+			e.FieldStart("body_contains")
+			s.BodyContains.Encode(e)
+		}
+	}
+	{
+		if s.TraceID.Set {
+			e.FieldStart("trace_id")
+			s.TraceID.Encode(e)
+		}
+	}
+	{
+		if s.Logql.Set {
+			e.FieldStart("logql")
+			s.Logql.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfProjectBranchLogsQueryRequest = [14]string{
+	0:  "since",
+	1:  "start_time",
+	2:  "end_time",
+	3:  "limit",
+	4:  "cursor",
+	5:  "sort_order",
+	6:  "source",
+	7:  "service_name",
+	8:  "scope_name",
+	9:  "minimum_severity",
+	10: "severity_text",
+	11: "body_contains",
+	12: "trace_id",
+	13: "logql",
+}
+
+// Decode decodes ProjectBranchLogsQueryRequest from json.
+func (s *ProjectBranchLogsQueryRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ProjectBranchLogsQueryRequest to nil")
+	}
+	s.setDefaults()
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "since":
+			if err := func() error {
+				s.Since.Reset()
+				if err := s.Since.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"since\"")
+			}
+		case "start_time":
+			if err := func() error {
+				s.StartTime.Reset()
+				if err := s.StartTime.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"start_time\"")
+			}
+		case "end_time":
+			if err := func() error {
+				s.EndTime.Reset()
+				if err := s.EndTime.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"end_time\"")
+			}
+		case "limit":
+			if err := func() error {
+				s.Limit.Reset()
+				if err := s.Limit.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"limit\"")
+			}
+		case "cursor":
+			if err := func() error {
+				s.Cursor.Reset()
+				if err := s.Cursor.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"cursor\"")
+			}
+		case "sort_order":
+			if err := func() error {
+				s.SortOrder.Reset()
+				if err := s.SortOrder.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"sort_order\"")
+			}
+		case "source":
+			if err := func() error {
+				s.Source.Reset()
+				if err := s.Source.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"source\"")
+			}
+		case "service_name":
+			if err := func() error {
+				s.ServiceName.Reset()
+				if err := s.ServiceName.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"service_name\"")
+			}
+		case "scope_name":
+			if err := func() error {
+				s.ScopeName.Reset()
+				if err := s.ScopeName.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"scope_name\"")
+			}
+		case "minimum_severity":
+			if err := func() error {
+				s.MinimumSeverity.Reset()
+				if err := s.MinimumSeverity.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"minimum_severity\"")
+			}
+		case "severity_text":
+			if err := func() error {
+				s.SeverityText.Reset()
+				if err := s.SeverityText.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"severity_text\"")
+			}
+		case "body_contains":
+			if err := func() error {
+				s.BodyContains.Reset()
+				if err := s.BodyContains.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"body_contains\"")
+			}
+		case "trace_id":
+			if err := func() error {
+				s.TraceID.Reset()
+				if err := s.TraceID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"trace_id\"")
+			}
+		case "logql":
+			if err := func() error {
+				s.Logql.Reset()
+				if err := s.Logql.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"logql\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ProjectBranchLogsQueryRequest")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ProjectBranchLogsQueryRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ProjectBranchLogsQueryRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ProjectBranchLogsQueryRequestSortOrder as json.
+func (s ProjectBranchLogsQueryRequestSortOrder) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes ProjectBranchLogsQueryRequestSortOrder from json.
+func (s *ProjectBranchLogsQueryRequestSortOrder) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ProjectBranchLogsQueryRequestSortOrder to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch ProjectBranchLogsQueryRequestSortOrder(v) {
+	case ProjectBranchLogsQueryRequestSortOrderAsc:
+		*s = ProjectBranchLogsQueryRequestSortOrderAsc
+	case ProjectBranchLogsQueryRequestSortOrderDesc:
+		*s = ProjectBranchLogsQueryRequestSortOrderDesc
+	default:
+		*s = ProjectBranchLogsQueryRequestSortOrder(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ProjectBranchLogsQueryRequestSortOrder) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ProjectBranchLogsQueryRequestSortOrder) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *ProjectBranchLogsQueryResponse) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ProjectBranchLogsQueryResponse) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("logs")
+		e.ArrStart()
+		for _, elem := range s.Logs {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		if s.NextCursor.Set {
+			e.FieldStart("next_cursor")
+			s.NextCursor.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("is_truncated")
+		e.Bool(s.IsTruncated)
+	}
+}
+
+var jsonFieldsNameOfProjectBranchLogsQueryResponse = [3]string{
+	0: "logs",
+	1: "next_cursor",
+	2: "is_truncated",
+}
+
+// Decode decodes ProjectBranchLogsQueryResponse from json.
+func (s *ProjectBranchLogsQueryResponse) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ProjectBranchLogsQueryResponse to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "logs":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				s.Logs = make([]ProjectBranchLogRecord, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem ProjectBranchLogRecord
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Logs = append(s.Logs, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"logs\"")
+			}
+		case "next_cursor":
+			if err := func() error {
+				s.NextCursor.Reset()
+				if err := s.NextCursor.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"next_cursor\"")
+			}
+		case "is_truncated":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Bool()
+				s.IsTruncated = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_truncated\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ProjectBranchLogsQueryResponse")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000101,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfProjectBranchLogsQueryResponse) {
+					name = jsonFieldsNameOfProjectBranchLogsQueryResponse[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ProjectBranchLogsQueryResponse) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ProjectBranchLogsQueryResponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode implements json.Marshaler.
 func (s *ProjectCreateRequest) Encode(e *jx.Encoder) {
 	e.ObjStart()
@@ -33872,6 +35606,749 @@ func (s *ProjectListItem) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *ProjectMember) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ProjectMember) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("member_id")
+		json.EncodeUUID(e, s.MemberID)
+	}
+	{
+		e.FieldStart("user_id")
+		json.EncodeUUID(e, s.UserID)
+	}
+	{
+		if s.Email.Set {
+			e.FieldStart("email")
+			s.Email.Encode(e)
+		}
+	}
+	{
+		if s.Name.Set {
+			e.FieldStart("name")
+			s.Name.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("org_role")
+		s.OrgRole.Encode(e)
+	}
+	{
+		if s.ProjectRole.Set {
+			e.FieldStart("project_role")
+			s.ProjectRole.Encode(e)
+		}
+	}
+	{
+		if s.OrgDefaultProjectPermission.Set {
+			e.FieldStart("org_default_project_permission")
+			s.OrgDefaultProjectPermission.Encode(e)
+		}
+	}
+	{
+		if s.ExplicitProjectPermission.Set {
+			e.FieldStart("explicit_project_permission")
+			s.ExplicitProjectPermission.Encode(e)
+		}
+	}
+	{
+		if s.EffectiveProjectPermission.Set {
+			e.FieldStart("effective_project_permission")
+			s.EffectiveProjectPermission.Encode(e)
+		}
+	}
+	{
+		if s.GrantSource.Set {
+			e.FieldStart("grant_source")
+			s.GrantSource.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfProjectMember = [10]string{
+	0: "member_id",
+	1: "user_id",
+	2: "email",
+	3: "name",
+	4: "org_role",
+	5: "project_role",
+	6: "org_default_project_permission",
+	7: "explicit_project_permission",
+	8: "effective_project_permission",
+	9: "grant_source",
+}
+
+// Decode decodes ProjectMember from json.
+func (s *ProjectMember) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ProjectMember to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "member_id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.MemberID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"member_id\"")
+			}
+		case "user_id":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.UserID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"user_id\"")
+			}
+		case "email":
+			if err := func() error {
+				s.Email.Reset()
+				if err := s.Email.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"email\"")
+			}
+		case "name":
+			if err := func() error {
+				s.Name.Reset()
+				if err := s.Name.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "org_role":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				if err := s.OrgRole.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"org_role\"")
+			}
+		case "project_role":
+			if err := func() error {
+				s.ProjectRole.Reset()
+				if err := s.ProjectRole.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"project_role\"")
+			}
+		case "org_default_project_permission":
+			if err := func() error {
+				s.OrgDefaultProjectPermission.Reset()
+				if err := s.OrgDefaultProjectPermission.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"org_default_project_permission\"")
+			}
+		case "explicit_project_permission":
+			if err := func() error {
+				s.ExplicitProjectPermission.Reset()
+				if err := s.ExplicitProjectPermission.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"explicit_project_permission\"")
+			}
+		case "effective_project_permission":
+			if err := func() error {
+				s.EffectiveProjectPermission.Reset()
+				if err := s.EffectiveProjectPermission.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"effective_project_permission\"")
+			}
+		case "grant_source":
+			if err := func() error {
+				s.GrantSource.Reset()
+				if err := s.GrantSource.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"grant_source\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ProjectMember")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b00010011,
+		0b00000000,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfProjectMember) {
+					name = jsonFieldsNameOfProjectMember[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ProjectMember) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ProjectMember) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ProjectMemberGrantSource as json.
+func (s ProjectMemberGrantSource) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes ProjectMemberGrantSource from json.
+func (s *ProjectMemberGrantSource) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ProjectMemberGrantSource to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch ProjectMemberGrantSource(v) {
+	case ProjectMemberGrantSourceExplicit:
+		*s = ProjectMemberGrantSourceExplicit
+	case ProjectMemberGrantSourceOrgRoleDefault:
+		*s = ProjectMemberGrantSourceOrgRoleDefault
+	case ProjectMemberGrantSourceOrgAdminOverride:
+		*s = ProjectMemberGrantSourceOrgAdminOverride
+	case ProjectMemberGrantSourceUnassigned:
+		*s = ProjectMemberGrantSourceUnassigned
+	default:
+		*s = ProjectMemberGrantSource(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ProjectMemberGrantSource) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ProjectMemberGrantSource) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ProjectMemberOrgRole as json.
+func (s ProjectMemberOrgRole) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes ProjectMemberOrgRole from json.
+func (s *ProjectMemberOrgRole) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ProjectMemberOrgRole to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch ProjectMemberOrgRole(v) {
+	case ProjectMemberOrgRoleAdmin:
+		*s = ProjectMemberOrgRoleAdmin
+	case ProjectMemberOrgRoleMember:
+		*s = ProjectMemberOrgRoleMember
+	case ProjectMemberOrgRoleEditor:
+		*s = ProjectMemberOrgRoleEditor
+	case ProjectMemberOrgRoleViewer:
+		*s = ProjectMemberOrgRoleViewer
+	case ProjectMemberOrgRoleCollaborator:
+		*s = ProjectMemberOrgRoleCollaborator
+	default:
+		*s = ProjectMemberOrgRole(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ProjectMemberOrgRole) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ProjectMemberOrgRole) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *ProjectMemberRoleResponse) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ProjectMemberRoleResponse) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("project_id")
+		e.Str(s.ProjectID)
+	}
+	{
+		e.FieldStart("member_id")
+		json.EncodeUUID(e, s.MemberID)
+	}
+	{
+		e.FieldStart("user_id")
+		json.EncodeUUID(e, s.UserID)
+	}
+	{
+		if s.Email.Set {
+			e.FieldStart("email")
+			s.Email.Encode(e)
+		}
+	}
+	{
+		if s.Name.Set {
+			e.FieldStart("name")
+			s.Name.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("org_role")
+		s.OrgRole.Encode(e)
+	}
+	{
+		if s.ProjectRole.Set {
+			e.FieldStart("project_role")
+			s.ProjectRole.Encode(e)
+		}
+	}
+	{
+		if s.OrgDefaultProjectPermission.Set {
+			e.FieldStart("org_default_project_permission")
+			s.OrgDefaultProjectPermission.Encode(e)
+		}
+	}
+	{
+		if s.ExplicitProjectPermission.Set {
+			e.FieldStart("explicit_project_permission")
+			s.ExplicitProjectPermission.Encode(e)
+		}
+	}
+	{
+		if s.EffectiveProjectPermission.Set {
+			e.FieldStart("effective_project_permission")
+			s.EffectiveProjectPermission.Encode(e)
+		}
+	}
+	{
+		if s.CredentialRotationRecommended.Set {
+			e.FieldStart("credential_rotation_recommended")
+			s.CredentialRotationRecommended.Encode(e)
+		}
+	}
+	{
+		if s.OrgAPIKeyRotationRecommended.Set {
+			e.FieldStart("org_api_key_rotation_recommended")
+			s.OrgAPIKeyRotationRecommended.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfProjectMemberRoleResponse = [12]string{
+	0:  "project_id",
+	1:  "member_id",
+	2:  "user_id",
+	3:  "email",
+	4:  "name",
+	5:  "org_role",
+	6:  "project_role",
+	7:  "org_default_project_permission",
+	8:  "explicit_project_permission",
+	9:  "effective_project_permission",
+	10: "credential_rotation_recommended",
+	11: "org_api_key_rotation_recommended",
+}
+
+// Decode decodes ProjectMemberRoleResponse from json.
+func (s *ProjectMemberRoleResponse) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ProjectMemberRoleResponse to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "project_id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.ProjectID = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"project_id\"")
+			}
+		case "member_id":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.MemberID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"member_id\"")
+			}
+		case "user_id":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.UserID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"user_id\"")
+			}
+		case "email":
+			if err := func() error {
+				s.Email.Reset()
+				if err := s.Email.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"email\"")
+			}
+		case "name":
+			if err := func() error {
+				s.Name.Reset()
+				if err := s.Name.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "org_role":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				if err := s.OrgRole.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"org_role\"")
+			}
+		case "project_role":
+			if err := func() error {
+				s.ProjectRole.Reset()
+				if err := s.ProjectRole.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"project_role\"")
+			}
+		case "org_default_project_permission":
+			if err := func() error {
+				s.OrgDefaultProjectPermission.Reset()
+				if err := s.OrgDefaultProjectPermission.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"org_default_project_permission\"")
+			}
+		case "explicit_project_permission":
+			if err := func() error {
+				s.ExplicitProjectPermission.Reset()
+				if err := s.ExplicitProjectPermission.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"explicit_project_permission\"")
+			}
+		case "effective_project_permission":
+			if err := func() error {
+				s.EffectiveProjectPermission.Reset()
+				if err := s.EffectiveProjectPermission.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"effective_project_permission\"")
+			}
+		case "credential_rotation_recommended":
+			if err := func() error {
+				s.CredentialRotationRecommended.Reset()
+				if err := s.CredentialRotationRecommended.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"credential_rotation_recommended\"")
+			}
+		case "org_api_key_rotation_recommended":
+			if err := func() error {
+				s.OrgAPIKeyRotationRecommended.Reset()
+				if err := s.OrgAPIKeyRotationRecommended.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"org_api_key_rotation_recommended\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ProjectMemberRoleResponse")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b00100111,
+		0b00000000,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfProjectMemberRoleResponse) {
+					name = jsonFieldsNameOfProjectMemberRoleResponse[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ProjectMemberRoleResponse) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ProjectMemberRoleResponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *ProjectMembers) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ProjectMembers) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("project_members")
+		e.ArrStart()
+		for _, elem := range s.ProjectMembers {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		if s.Pagination.Set {
+			e.FieldStart("pagination")
+			s.Pagination.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfProjectMembers = [2]string{
+	0: "project_members",
+	1: "pagination",
+}
+
+// Decode decodes ProjectMembers from json.
+func (s *ProjectMembers) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ProjectMembers to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "project_members":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				s.ProjectMembers = make([]ProjectMember, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem ProjectMember
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.ProjectMembers = append(s.ProjectMembers, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"project_members\"")
+			}
+		case "pagination":
+			if err := func() error {
+				s.Pagination.Reset()
+				if err := s.Pagination.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pagination\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ProjectMembers")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfProjectMembers) {
+					name = jsonFieldsNameOfProjectMembers[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ProjectMembers) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ProjectMembers) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *ProjectOwnerData) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -34179,12 +36656,12 @@ func (s *ProjectPermissionLevel) Decode(d *jx.Decoder) error {
 	}
 	// Try to use constant string.
 	switch ProjectPermissionLevel(v) {
-	case ProjectPermissionLevelCANVIEW:
-		*s = ProjectPermissionLevelCANVIEW
-	case ProjectPermissionLevelCANEDIT:
-		*s = ProjectPermissionLevelCANEDIT
-	case ProjectPermissionLevelCANMANAGE:
-		*s = ProjectPermissionLevelCANMANAGE
+	case ProjectPermissionLevelVIEWER:
+		*s = ProjectPermissionLevelVIEWER
+	case ProjectPermissionLevelEDITOR:
+		*s = ProjectPermissionLevelEDITOR
+	case ProjectPermissionLevelADMIN:
+		*s = ProjectPermissionLevelADMIN
 	default:
 		*s = ProjectPermissionLevel(v)
 	}
@@ -34653,6 +37130,48 @@ func (s *ProjectResponse) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *ProjectResponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes ProjectRole as json.
+func (s ProjectRole) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes ProjectRole from json.
+func (s *ProjectRole) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ProjectRole to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch ProjectRole(v) {
+	case ProjectRoleViewer:
+		*s = ProjectRoleViewer
+	case ProjectRoleEditor:
+		*s = ProjectRoleEditor
+	case ProjectRoleAdmin:
+		*s = ProjectRoleAdmin
+	default:
+		*s = ProjectRole(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s ProjectRole) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ProjectRole) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -37010,6 +39529,100 @@ func (s *SendNeonAuthTestEmailResponse) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *SendNeonAuthTestEmailResponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *SetProjectMemberRoleRequest) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *SetProjectMemberRoleRequest) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("role")
+		s.Role.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfSetProjectMemberRoleRequest = [1]string{
+	0: "role",
+}
+
+// Decode decodes SetProjectMemberRoleRequest from json.
+func (s *SetProjectMemberRoleRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode SetProjectMemberRoleRequest to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "role":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Role.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"role\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode SetProjectMemberRoleRequest")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfSetProjectMemberRoleRequest) {
+					name = jsonFieldsNameOfSetProjectMemberRoleRequest[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *SetProjectMemberRoleRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *SetProjectMemberRoleRequest) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

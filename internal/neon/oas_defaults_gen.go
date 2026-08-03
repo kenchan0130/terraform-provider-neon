@@ -151,6 +151,18 @@ func (s *Project) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *ProjectBranchLogsQueryRequest) setDefaults() {
+	{
+		val := int(100)
+		s.Limit.SetTo(val)
+	}
+	{
+		val := ProjectBranchLogsQueryRequestSortOrder("desc")
+		s.SortOrder.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *ProjectCreateRequestProject) setDefaults() {
 	{
 		val := int(17)
