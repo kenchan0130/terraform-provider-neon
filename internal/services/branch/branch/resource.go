@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonwait"
 )
 
 var (
@@ -316,6 +317,16 @@ func (r *branchResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	r.mapBranchToModel(&result.Branch, &data)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// The Create API call already succeeded, so state has been saved above.
+	// A wait failure must be reported as a diagnostic, not a return before
+	// state.Set, to avoid orphaning the created branch outside Terraform.
+	if err := neonwait.WaitForOperations(ctx, r.client, data.ProjectID.ValueString(), result.Operations, neonwait.DefaultInterval); err != nil {
+		resp.Diagnostics.AddError("Branch created but operations did not complete", neonerror.Detail(err))
+	}
 }
 
 func buildBranchCreateRequest(data *branchResourceModel) (neon.CreateProjectBranchReqBranch, diag.Diagnostics) {
@@ -429,6 +440,17 @@ func (r *branchResource) Update(ctx context.Context, req resource.UpdateRequest,
 
 	r.mapBranchToModel(&result.Branch, &data)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// The Update API call already succeeded, so the new state has been
+	// saved above. A wait failure must be reported as a diagnostic, not a
+	// return before state.Set, to avoid leaving state inconsistent with
+	// what the API accepted.
+	if err := neonwait.WaitForOperations(ctx, r.client, state.ProjectID.ValueString(), result.Operations, neonwait.DefaultInterval); err != nil {
+		resp.Diagnostics.AddError("Branch updated but operations did not complete", neonerror.Detail(err))
+	}
 }
 
 func (r *branchResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -438,13 +460,20 @@ func (r *branchResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	_, err := r.client.DeleteProjectBranch(ctx, neon.DeleteProjectBranchParams{
+	result, err := r.client.DeleteProjectBranch(ctx, neon.DeleteProjectBranchParams{
 		ProjectID: data.ProjectID.ValueString(),
 		BranchID:  data.ID.ValueString(),
 	})
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to delete branch", neonerror.Detail(err))
 		return
+	}
+
+	if ops, ok := result.(*neon.BranchOperations); ok {
+		if err := neonwait.WaitForOperations(ctx, r.client, data.ProjectID.ValueString(), ops.Operations, neonwait.DefaultInterval); err != nil {
+			resp.Diagnostics.AddError("Branch deleted but operations did not complete", neonerror.Detail(err))
+			return
+		}
 	}
 }
 

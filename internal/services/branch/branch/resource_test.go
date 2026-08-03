@@ -305,6 +305,93 @@ resource "neon_branch" "test" {
 	})
 }
 
+// TestBranchResource_Create_WaitsForOperations verifies that Create polls
+// the operations endpoint until the operation returned alongside the branch
+// reaches a terminal state before returning, so that dependent resources
+// (e.g. an endpoint on the same branch, in the same apply) don't race the
+// branch's own provisioning and hit 423 Locked.
+func TestBranchResource_Create_WaitsForOperations(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	const operationID = "04fd6a4e-7f36-4606-a0ba-43dbddccc543"
+	const operationRunningJSON = `{
+		"id": "` + operationID + `",
+		"project_id": "test-project-id",
+		"branch_id": "br-test-001",
+		"action": "create_branch",
+		"status": "running",
+		"failures_count": 0,
+		"created_at": "2025-01-01T00:00:00Z",
+		"updated_at": "2025-01-01T00:00:00Z",
+		"total_duration_ms": 0
+	}`
+	const operationFinishedJSON = `{
+		"id": "` + operationID + `",
+		"project_id": "test-project-id",
+		"branch_id": "br-test-001",
+		"action": "create_branch",
+		"status": "finished",
+		"failures_count": 0,
+		"created_at": "2025-01-01T00:00:00Z",
+		"updated_at": "2025-01-01T00:00:01Z",
+		"total_duration_ms": 100
+	}`
+
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/projects/test-project-id/branches",
+		testutil.JSONResponder(201, `{
+			"branch": `+branchJSON+`,
+			"endpoints": [],
+			"operations": [`+operationRunningJSON+`],
+			"roles": [],
+			"databases": [],
+			"connection_uris": []
+		}`),
+	)
+
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id/branches/br-test-001",
+		testutil.JSONResponder(200, `{"branch": `+branchJSON+`, "annotation": {"object": {"type": "branch", "id": "br-test-001"}, "value": {}}}`),
+	)
+
+	transport.RegisterResponder(http.MethodDelete,
+		"https://neon.example.com/api/v2/projects/test-project-id/branches/br-test-001",
+		testutil.JSONResponder(200, `{"branch": `+branchJSON+`, "operations": []}`),
+	)
+
+	operationCallCount := 0
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id/operations/"+operationID,
+		func(req *http.Request) (*http.Response, error) {
+			operationCallCount++
+			if operationCallCount == 1 {
+				return testutil.JSONResponder(200, `{"operation": `+operationRunningJSON+`}`)(req)
+			}
+			return testutil.JSONResponder(200, `{"operation": `+operationFinishedJSON+`}`)(req)
+		},
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_branch" "test" {
+  project_id = "test-project-id"
+  name       = "dev-branch"
+}
+`),
+				Check: testutil.CheckResourceAttr("neon_branch.test", "id", "br-test-001"),
+			},
+		},
+	})
+
+	if operationCallCount < 2 {
+		t.Errorf("expected the operations endpoint to be polled at least twice (running, then finished), got %d calls", operationCallCount)
+	}
+}
+
 func TestBranchResource_APIError(t *testing.T) {
 	transport := httpmock.NewMockTransport()
 	httpClient := &http.Client{Transport: transport}
