@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -75,9 +76,19 @@ func fastTestConfig() neonretry.Config {
 }
 
 func TestNewHTTPClient_RetriesLocked(t *testing.T) {
+	const wantBody = `{"name":"test-endpoint","branch_id":"br-test-001","type":"read_write"}`
+
 	requestCount := 0
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	var seenBodies []string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requestCount++
+
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Errorf("failed to read request body on attempt %d: %v", requestCount, err)
+		}
+		seenBodies = append(seenBodies, string(body))
+
 		if requestCount <= 2 {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusLocked)
@@ -90,7 +101,7 @@ func TestNewHTTPClient_RetriesLocked(t *testing.T) {
 
 	client := neonretry.NewHTTPClient(nil, fastTestConfig(), nil)
 
-	resp, err := client.Get(server.URL)
+	resp, err := client.Post(server.URL, "application/json", strings.NewReader(wantBody))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -101,6 +112,15 @@ func TestNewHTTPClient_RetriesLocked(t *testing.T) {
 	}
 	if requestCount != 3 {
 		t.Fatalf("got %d requests, want 3", requestCount)
+	}
+
+	if len(seenBodies) != 3 {
+		t.Fatalf("got %d recorded bodies, want 3", len(seenBodies))
+	}
+	for i, body := range seenBodies {
+		if body != wantBody {
+			t.Fatalf("attempt %d: got body %q, want %q", i+1, body, wantBody)
+		}
 	}
 }
 

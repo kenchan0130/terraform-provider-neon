@@ -1,8 +1,10 @@
 package compute_endpoint_test
 
 import (
+	"io"
 	"net/http"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -237,10 +239,30 @@ func TestAccComputeEndpointResource_Retry423OnCreate(t *testing.T) {
 	httpClient := &http.Client{Transport: transport}
 
 	createCallCount := 0
+	var seenBodies []string
 	transport.RegisterResponder(http.MethodPost,
 		"https://neon.example.com/api/v2/projects/test-project-id/endpoints",
 		func(req *http.Request) (*http.Response, error) {
 			createCallCount++
+
+			body, err := io.ReadAll(req.Body)
+			if err != nil {
+				t.Fatalf("failed to read request body on attempt %d: %v", createCallCount, err)
+			}
+			seenBodies = append(seenBodies, string(body))
+			// Restore the body so it can still be decoded by the mocked
+			// response path below (httpmock doesn't need it, but keep the
+			// request well-formed for parity with a real transport).
+			req.Body = io.NopCloser(strings.NewReader(string(body)))
+
+			if len(body) == 0 {
+				t.Fatalf("attempt %d: request body was empty", createCallCount)
+			}
+			if !strings.Contains(string(body), `"branch_id":"br-test-001"`) ||
+				!strings.Contains(string(body), `"type":"read_write"`) {
+				t.Fatalf("attempt %d: request body missing expected fields: %s", createCallCount, body)
+			}
+
 			if createCallCount == 1 {
 				return testutil.JSONResponder(423, `{"code":"locked","message":"project is locked"}`)(req)
 			}
@@ -280,6 +302,16 @@ resource "neon_endpoint" "test" {
 			},
 		},
 	})
+
+	if createCallCount != 2 {
+		t.Fatalf("got %d create attempts, want 2", createCallCount)
+	}
+	if len(seenBodies) != 2 {
+		t.Fatalf("got %d recorded bodies, want 2", len(seenBodies))
+	}
+	if seenBodies[0] != seenBodies[1] {
+		t.Fatalf("retried POST body differs from original:\nattempt 1: %s\nattempt 2: %s", seenBodies[0], seenBodies[1])
+	}
 }
 
 func TestEndpointResource_APIError(t *testing.T) {
