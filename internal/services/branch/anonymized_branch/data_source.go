@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type anonymizedBranchDataSource struct {
@@ -134,7 +135,7 @@ func (d *anonymizedBranchDataSource) Read(ctx context.Context, req datasource.Re
 		BranchID:  branchID,
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read branch", err.Error())
+		resp.Diagnostics.AddError("Failed to read branch", neonerror.Detail(err))
 		return
 	}
 
@@ -150,7 +151,7 @@ func (d *anonymizedBranchDataSource) Read(ctx context.Context, req datasource.Re
 		BranchID:  branchID,
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read masking rules", err.Error())
+		resp.Diagnostics.AddError("Failed to read masking rules", neonerror.Detail(err))
 		return
 	}
 
@@ -171,7 +172,7 @@ func (d *anonymizedBranchDataSource) Read(ctx context.Context, req datasource.Re
 		BranchID:  branchID,
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read anonymized branch status", err.Error())
+		resp.Diagnostics.AddError("Failed to read anonymized branch status", neonerror.Detail(err))
 		return
 	}
 

@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type branchDataSource struct {
@@ -182,7 +183,7 @@ func (d *branchDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		BranchID:  data.ID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read branch", err.Error())
+		resp.Diagnostics.AddError("Failed to read branch", neonerror.Detail(err))
 		return
 	}
 

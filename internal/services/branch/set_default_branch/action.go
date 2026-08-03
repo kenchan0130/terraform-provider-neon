@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/action"
 	"github.com/hashicorp/terraform-plugin-framework/action/schema"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 var (
@@ -76,6 +77,6 @@ func (a *setDefaultBranchAction) Invoke(ctx context.Context, req action.InvokeRe
 		BranchID:  data.BranchID,
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to set default branch", err.Error())
+		resp.Diagnostics.AddError("Failed to set default branch", neonerror.Detail(err))
 	}
 }

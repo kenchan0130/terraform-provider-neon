@@ -153,7 +153,7 @@ func (r *neonAuthResource) Create(ctx context.Context, req resource.CreateReques
 		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to create NeonAuth integration", err.Error())
+		resp.Diagnostics.AddError("Failed to create NeonAuth integration", neonerror.Detail(err))
 		return
 	}
 
@@ -187,7 +187,7 @@ func (r *neonAuthResource) Create(ctx context.Context, req resource.CreateReques
 		data.CreatedAt = types.StringNull()
 
 		resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-		resp.Diagnostics.AddError("Failed to read NeonAuth integration after create", err.Error())
+		resp.Diagnostics.AddError("Failed to read NeonAuth integration after create", neonerror.Detail(err))
 		return
 	}
 
@@ -211,7 +211,7 @@ func (r *neonAuthResource) Read(ctx context.Context, req resource.ReadRequest, r
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Failed to read NeonAuth integration", err.Error())
+		resp.Diagnostics.AddError("Failed to read NeonAuth integration", neonerror.Detail(err))
 		return
 	}
 
@@ -238,7 +238,7 @@ func (r *neonAuthResource) Delete(ctx context.Context, req resource.DeleteReques
 		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to disable NeonAuth integration", err.Error())
+		resp.Diagnostics.AddError("Failed to disable NeonAuth integration", neonerror.Detail(err))
 		return
 	}
 }

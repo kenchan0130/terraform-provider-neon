@@ -107,7 +107,7 @@ func (r *projectAccessResource) Create(ctx context.Context, req resource.CreateR
 		ProjectID: data.ProjectID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to grant project permission", err.Error())
+		resp.Diagnostics.AddError("Failed to grant project permission", neonerror.Detail(err))
 		return
 	}
 
@@ -133,7 +133,7 @@ func (r *projectAccessResource) Read(ctx context.Context, req resource.ReadReque
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Failed to list project permissions", err.Error())
+		resp.Diagnostics.AddError("Failed to list project permissions", neonerror.Detail(err))
 		return
 	}
 
@@ -169,7 +169,7 @@ func (r *projectAccessResource) Delete(ctx context.Context, req resource.DeleteR
 		PermissionID: data.PermissionID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to revoke project permission", err.Error())
+		resp.Diagnostics.AddError("Failed to revoke project permission", neonerror.Detail(err))
 		return
 	}
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type projectDataSource struct {
@@ -108,7 +109,7 @@ func (d *projectDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 					"maintenance_window": schema.SingleNestedAttribute{
 						Computed: true,
 						Attributes: map[string]schema.Attribute{
-							"weekdays":   schema.ListAttribute{Computed: true, ElementType: types.Int64Type},
+							"weekdays":   schema.SetAttribute{Computed: true, ElementType: types.Int64Type},
 							"start_time": schema.StringAttribute{Computed: true},
 							"end_time":   schema.StringAttribute{Computed: true},
 						},
@@ -166,7 +167,7 @@ func (d *projectDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		ProjectID: data.ID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read project", err.Error())
+		resp.Diagnostics.AddError("Failed to read project", neonerror.Detail(err))
 		return
 	}
 

@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type databaseDataSource struct {
@@ -99,7 +100,7 @@ func (d *databaseDataSource) Read(ctx context.Context, req datasource.ReadReques
 		DatabaseName: data.Name.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read database", err.Error())
+		resp.Diagnostics.AddError("Failed to read database", neonerror.Detail(err))
 		return
 	}
 

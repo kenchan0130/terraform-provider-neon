@@ -81,7 +81,7 @@ Read-Only:
 
 - `end_time` (String)
 - `start_time` (String)
-- `weekdays` (List of Number)
+- `weekdays` (Set of Number)
 
 
 <a id="nestedatt--settings--preload_libraries"></a>

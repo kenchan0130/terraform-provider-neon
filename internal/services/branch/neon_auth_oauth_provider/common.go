@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type oauthProviderModel struct {
@@ -26,7 +27,7 @@ func fetchOauthProvider(ctx context.Context, client *neon.Client, data *oauthPro
 		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
-		diags.AddError("Failed to list NeonAuth OAuth providers", err.Error())
+		diags.AddError("Failed to list NeonAuth OAuth providers", neonerror.Detail(err))
 		return diags
 	}
 

@@ -136,7 +136,7 @@ func (r *databaseResource) Create(ctx context.Context, req resource.CreateReques
 		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to create database", err.Error())
+		resp.Diagnostics.AddError("Failed to create database", neonerror.Detail(err))
 		return
 	}
 
@@ -161,7 +161,7 @@ func (r *databaseResource) Read(ctx context.Context, req resource.ReadRequest, r
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Failed to read database", err.Error())
+		resp.Diagnostics.AddError("Failed to read database", neonerror.Detail(err))
 		return
 	}
 
@@ -194,7 +194,7 @@ func (r *databaseResource) Update(ctx context.Context, req resource.UpdateReques
 		DatabaseName: state.Name.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to update database", err.Error())
+		resp.Diagnostics.AddError("Failed to update database", neonerror.Detail(err))
 		return
 	}
 
@@ -215,7 +215,7 @@ func (r *databaseResource) Delete(ctx context.Context, req resource.DeleteReques
 		DatabaseName: data.Name.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to delete database", err.Error())
+		resp.Diagnostics.AddError("Failed to delete database", neonerror.Detail(err))
 		return
 	}
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type snapshotDataSource struct {
@@ -106,7 +107,7 @@ func (d *snapshotDataSource) Read(ctx context.Context, req datasource.ReadReques
 		ProjectID: data.ProjectID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to list snapshots", err.Error())
+		resp.Diagnostics.AddError("Failed to list snapshots", neonerror.Detail(err))
 		return
 	}
 

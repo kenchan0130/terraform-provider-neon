@@ -175,7 +175,7 @@ func (r *snapshotScheduleResource) Read(ctx context.Context, req resource.ReadRe
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Failed to read snapshot schedule", err.Error())
+		resp.Diagnostics.AddError("Failed to read snapshot schedule", neonerror.Detail(err))
 		return
 	}
 
@@ -218,7 +218,7 @@ func (r *snapshotScheduleResource) createOrUpdate(ctx context.Context, data *sna
 		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
-		diagnostics.AddError(fmt.Sprintf("Failed to %s snapshot schedule", operation), err.Error())
+		diagnostics.AddError(fmt.Sprintf("Failed to %s snapshot schedule", operation), neonerror.Detail(err))
 		return
 	}
 
@@ -228,7 +228,7 @@ func (r *snapshotScheduleResource) createOrUpdate(ctx context.Context, data *sna
 		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
-		diagnostics.AddError(fmt.Sprintf("Failed to read snapshot schedule after %s", operation), err.Error())
+		diagnostics.AddError(fmt.Sprintf("Failed to read snapshot schedule after %s", operation), neonerror.Detail(err))
 		return
 	}
 
@@ -249,7 +249,7 @@ func (r *snapshotScheduleResource) Delete(ctx context.Context, req resource.Dele
 		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to delete snapshot schedule", err.Error())
+		resp.Diagnostics.AddError("Failed to delete snapshot schedule", neonerror.Detail(err))
 		return
 	}
 }

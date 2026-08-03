@@ -96,7 +96,7 @@ func (r *vpcEndpointRestrictionResource) Create(ctx context.Context, req resourc
 		VpcEndpointID: data.VpcEndpointID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to assign VPC endpoint restriction", err.Error())
+		resp.Diagnostics.AddError("Failed to assign VPC endpoint restriction", neonerror.Detail(err))
 		return
 	}
 
@@ -118,7 +118,7 @@ func (r *vpcEndpointRestrictionResource) Read(ctx context.Context, req resource.
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Failed to list VPC endpoint restrictions", err.Error())
+		resp.Diagnostics.AddError("Failed to list VPC endpoint restrictions", neonerror.Detail(err))
 		return
 	}
 
@@ -147,7 +147,7 @@ func (r *vpcEndpointRestrictionResource) Update(ctx context.Context, req resourc
 		VpcEndpointID: plan.VpcEndpointID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to update VPC endpoint restriction", err.Error())
+		resp.Diagnostics.AddError("Failed to update VPC endpoint restriction", neonerror.Detail(err))
 		return
 	}
 
@@ -166,7 +166,7 @@ func (r *vpcEndpointRestrictionResource) Delete(ctx context.Context, req resourc
 		VpcEndpointID: data.VpcEndpointID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to delete VPC endpoint restriction", err.Error())
+		resp.Diagnostics.AddError("Failed to delete VPC endpoint restriction", neonerror.Detail(err))
 		return
 	}
 }

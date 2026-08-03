@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type branchesDataSource struct {
@@ -154,7 +155,7 @@ func (d *branchesDataSource) Read(ctx context.Context, req datasource.ReadReques
 
 		result, err := d.client.ListProjectBranches(ctx, params)
 		if err != nil {
-			resp.Diagnostics.AddError("Failed to list branches", err.Error())
+			resp.Diagnostics.AddError("Failed to list branches", neonerror.Detail(err))
 			return
 		}
 

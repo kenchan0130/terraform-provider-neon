@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type activeRegionsDataSource struct {
@@ -96,7 +97,7 @@ func (d *activeRegionsDataSource) Read(ctx context.Context, req datasource.ReadR
 
 	result, err := d.client.GetActiveRegions(ctx, neon.GetActiveRegionsParams{})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read active regions", err.Error())
+		resp.Diagnostics.AddError("Failed to read active regions", neonerror.Detail(err))
 		return
 	}
 

@@ -172,7 +172,7 @@ func (r *snapshotResource) Create(ctx context.Context, req resource.CreateReques
 
 	result, err := r.client.CreateSnapshot(ctx, params)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to create snapshot", err.Error())
+		resp.Diagnostics.AddError("Failed to create snapshot", neonerror.Detail(err))
 		return
 	}
 
@@ -195,7 +195,7 @@ func (r *snapshotResource) Read(ctx context.Context, req resource.ReadRequest, r
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Failed to list snapshots", err.Error())
+		resp.Diagnostics.AddError("Failed to list snapshots", neonerror.Detail(err))
 		return
 	}
 
@@ -232,7 +232,7 @@ func (r *snapshotResource) Update(ctx context.Context, req resource.UpdateReques
 	} else if !plan.ExpiresAt.IsUnknown() {
 		t, err := time.Parse(time.RFC3339, plan.ExpiresAt.ValueString())
 		if err != nil {
-			resp.Diagnostics.AddError("Invalid expires_at format", fmt.Sprintf("Expected RFC 3339 format: %s", err.Error()))
+			resp.Diagnostics.AddError("Invalid expires_at format", fmt.Sprintf("Expected RFC 3339 format: %s", neonerror.Detail(err)))
 			return
 		}
 		updateReq.Snapshot.ExpiresAt = neon.OptNilDateTime{Value: t, Set: true}
@@ -243,7 +243,7 @@ func (r *snapshotResource) Update(ctx context.Context, req resource.UpdateReques
 		SnapshotID: state.ID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to update snapshot", err.Error())
+		resp.Diagnostics.AddError("Failed to update snapshot", neonerror.Detail(err))
 		return
 	}
 
@@ -263,7 +263,7 @@ func (r *snapshotResource) Delete(ctx context.Context, req resource.DeleteReques
 		SnapshotID: data.ID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to delete snapshot", err.Error())
+		resp.Diagnostics.AddError("Failed to delete snapshot", neonerror.Detail(err))
 		return
 	}
 }

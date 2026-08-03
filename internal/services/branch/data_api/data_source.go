@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type branchDataAPIDataSource struct {
@@ -88,7 +89,7 @@ func (d *branchDataAPIDataSource) Read(ctx context.Context, req datasource.ReadR
 		DatabaseName: data.DatabaseName.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read branch data API", err.Error())
+		resp.Diagnostics.AddError("Failed to read branch data API", neonerror.Detail(err))
 		return
 	}
 

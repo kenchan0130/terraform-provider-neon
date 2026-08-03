@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type vpcEndpointDataSource struct {
@@ -99,7 +100,7 @@ func (d *vpcEndpointDataSource) Read(ctx context.Context, req datasource.ReadReq
 		VpcEndpointID: data.VpcEndpointID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read VPC endpoint details", err.Error())
+		resp.Diagnostics.AddError("Failed to read VPC endpoint details", neonerror.Detail(err))
 		return
 	}
 

@@ -225,7 +225,7 @@ func (r *anonymizedBranchResource) Create(ctx context.Context, req resource.Crea
 		ProjectID: data.ProjectID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to create anonymized branch", err.Error())
+		resp.Diagnostics.AddError("Failed to create anonymized branch", neonerror.Detail(err))
 		return
 	}
 
@@ -289,7 +289,7 @@ func (r *anonymizedBranchResource) readState(ctx context.Context, data *anonymiz
 		BranchID:  branchID,
 	})
 	if err != nil {
-		diagsPtr.AddError("Failed to read branch", err.Error())
+		diagsPtr.AddError("Failed to read branch", neonerror.Detail(err))
 		return
 	}
 
@@ -305,7 +305,7 @@ func (r *anonymizedBranchResource) readState(ctx context.Context, data *anonymiz
 		BranchID:  branchID,
 	})
 	if err != nil {
-		diagsPtr.AddError("Failed to read masking rules", err.Error())
+		diagsPtr.AddError("Failed to read masking rules", neonerror.Detail(err))
 		return
 	}
 
@@ -326,7 +326,7 @@ func (r *anonymizedBranchResource) readState(ctx context.Context, data *anonymiz
 		BranchID:  branchID,
 	})
 	if err != nil {
-		diagsPtr.AddError("Failed to read anonymized branch status", err.Error())
+		diagsPtr.AddError("Failed to read anonymized branch status", neonerror.Detail(err))
 		return
 	}
 
@@ -390,7 +390,7 @@ func (r *anonymizedBranchResource) Update(ctx context.Context, req resource.Upda
 			BranchID:  branchID,
 		})
 		if err != nil {
-			resp.Diagnostics.AddError("Failed to update branch name", err.Error())
+			resp.Diagnostics.AddError("Failed to update branch name", neonerror.Detail(err))
 			return
 		}
 	}
@@ -414,7 +414,7 @@ func (r *anonymizedBranchResource) Update(ctx context.Context, req resource.Upda
 			BranchID:  branchID,
 		})
 		if err != nil {
-			resp.Diagnostics.AddError("Failed to update masking rules", err.Error())
+			resp.Diagnostics.AddError("Failed to update masking rules", neonerror.Detail(err))
 			return
 		}
 	}
@@ -426,7 +426,7 @@ func (r *anonymizedBranchResource) Update(ctx context.Context, req resource.Upda
 			BranchID:  branchID,
 		})
 		if err != nil {
-			resp.Diagnostics.AddError("Failed to start anonymization", err.Error())
+			resp.Diagnostics.AddError("Failed to start anonymization", neonerror.Detail(err))
 			return
 		}
 	}
@@ -448,7 +448,7 @@ func (r *anonymizedBranchResource) Delete(ctx context.Context, req resource.Dele
 		BranchID:  data.ID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to delete anonymized branch", err.Error())
+		resp.Diagnostics.AddError("Failed to delete anonymized branch", neonerror.Detail(err))
 		return
 	}
 }

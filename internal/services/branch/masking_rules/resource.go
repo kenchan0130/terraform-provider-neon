@@ -164,7 +164,7 @@ func (r *maskingRulesResource) Read(ctx context.Context, req resource.ReadReques
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Failed to read masking rules", err.Error())
+		resp.Diagnostics.AddError("Failed to read masking rules", neonerror.Detail(err))
 		return
 	}
 
@@ -210,7 +210,7 @@ func (r *maskingRulesResource) createOrUpdate(ctx context.Context, data *masking
 		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
-		diagnostics.AddError(fmt.Sprintf("Failed to %s masking rules", operation), err.Error())
+		diagnostics.AddError(fmt.Sprintf("Failed to %s masking rules", operation), neonerror.Detail(err))
 		return
 	}
 
@@ -231,7 +231,7 @@ func (r *maskingRulesResource) Delete(ctx context.Context, req resource.DeleteRe
 		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to delete masking rules", err.Error())
+		resp.Diagnostics.AddError("Failed to delete masking rules", neonerror.Detail(err))
 		return
 	}
 }

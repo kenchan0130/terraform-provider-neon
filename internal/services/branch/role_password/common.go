@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type rolePasswordModel struct {
@@ -25,7 +26,7 @@ func fetchRolePassword(ctx context.Context, client *neon.Client, data *rolePassw
 		RoleName:  data.RoleName.ValueString(),
 	})
 	if err != nil {
-		diags.AddError("Failed to get role password", err.Error())
+		diags.AddError("Failed to get role password", neonerror.Detail(err))
 		return diags
 	}
 

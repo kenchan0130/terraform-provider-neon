@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type neonAuthDataSource struct {
@@ -103,7 +104,7 @@ func (d *neonAuthDataSource) Read(ctx context.Context, req datasource.ReadReques
 		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read NeonAuth integration", err.Error())
+		resp.Diagnostics.AddError("Failed to read NeonAuth integration", neonerror.Detail(err))
 		return
 	}
 

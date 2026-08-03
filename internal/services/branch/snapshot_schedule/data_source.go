@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 )
 
 type snapshotScheduleDataSource struct {
@@ -102,7 +103,7 @@ func (d *snapshotScheduleDataSource) Read(ctx context.Context, req datasource.Re
 		BranchID:  data.BranchID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read snapshot schedule", err.Error())
+		resp.Diagnostics.AddError("Failed to read snapshot schedule", neonerror.Detail(err))
 		return
 	}
 

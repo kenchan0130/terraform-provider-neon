@@ -127,7 +127,7 @@ func (r *organizationApiKeyResource) Create(ctx context.Context, req resource.Cr
 		OrgID: data.OrgID.ValueString(),
 	})
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to create organization API key", err.Error())
+		resp.Diagnostics.AddError("Failed to create organization API key", neonerror.Detail(err))
 		return
 	}
 
@@ -158,7 +158,7 @@ func (r *organizationApiKeyResource) Read(ctx context.Context, req resource.Read
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("Failed to list organization API keys", err.Error())
+		resp.Diagnostics.AddError("Failed to list organization API keys", neonerror.Detail(err))
 		return
 	}
 
@@ -199,7 +199,7 @@ func (r *organizationApiKeyResource) Delete(ctx context.Context, req resource.De
 		if neonerror.IsNotFound(err) {
 			return
 		}
-		resp.Diagnostics.AddError("Failed to revoke organization API key", err.Error())
+		resp.Diagnostics.AddError("Failed to revoke organization API key", neonerror.Detail(err))
 		return
 	}
 }
