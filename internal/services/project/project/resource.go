@@ -197,7 +197,7 @@ func projectSchemaAttributes() map[string]schema.Attribute {
 			},
 		},
 		"history_retention_seconds": schema.Int32Attribute{
-			Description: "The number of seconds to retain the shared history for all branches.",
+			Description: "The number of seconds to retain the shared history for all branches. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value.",
 			Optional:    true,
 			Computed:    true,
 			PlanModifiers: []planmodifier.Int32{
@@ -252,7 +252,7 @@ func projectSchemaAttributes() map[string]schema.Attribute {
 
 func defaultEndpointSettingsSchema() schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{
-		Description: "Default endpoint settings for the project.",
+		Description: "Default endpoint settings for the project. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value.",
 		Optional:    true,
 		Computed:    true,
 		PlanModifiers: []planmodifier.Object{
@@ -324,7 +324,7 @@ func projectSettingsSchemaAttributes() map[string]schema.Attribute {
 
 func projectQuotaSchema() schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{
-		Description: "Per-project consumption quota.",
+		Description: "Per-project consumption quota. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value.",
 		Optional:    true,
 		Computed:    true,
 		PlanModifiers: []planmodifier.Object{
@@ -377,7 +377,7 @@ func projectQuotaSchema() schema.SingleNestedAttribute {
 
 func projectAllowedIpsSchema() schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{
-		Description: "A list of IP addresses that are allowed to connect to the endpoint.",
+		Description: "A list of IP addresses that are allowed to connect to the endpoint. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value.",
 		Optional:    true,
 		Computed:    true,
 		PlanModifiers: []planmodifier.Object{
@@ -407,7 +407,7 @@ func projectAllowedIpsSchema() schema.SingleNestedAttribute {
 
 func projectEnableLogicalReplicationSchema() schema.BoolAttribute {
 	return schema.BoolAttribute{
-		Description: "Sets wal_level=logical for all compute endpoints in this project.",
+		Description: "Sets wal_level=logical for all compute endpoints in this project. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value.",
 		Optional:    true,
 		Computed:    true,
 		PlanModifiers: []planmodifier.Bool{
@@ -482,7 +482,7 @@ func projectMaintenanceWindowSchema() schema.SingleNestedAttribute {
 
 func projectBlockPublicConnectionsSchema() schema.BoolAttribute {
 	return schema.BoolAttribute{
-		Description: "When set, connections from the public internet are disallowed.",
+		Description: "When set, connections from the public internet are disallowed. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value.",
 		Optional:    true,
 		Computed:    true,
 		PlanModifiers: []planmodifier.Bool{
@@ -493,7 +493,7 @@ func projectBlockPublicConnectionsSchema() schema.BoolAttribute {
 
 func projectBlockVpcConnectionsSchema() schema.BoolAttribute {
 	return schema.BoolAttribute{
-		Description: "When set, connections using VPC endpoints are disallowed.",
+		Description: "When set, connections using VPC endpoints are disallowed. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value.",
 		Optional:    true,
 		Computed:    true,
 		PlanModifiers: []planmodifier.Bool{
@@ -504,7 +504,7 @@ func projectBlockVpcConnectionsSchema() schema.BoolAttribute {
 
 func projectAuditLogLevelSchema() schema.StringAttribute {
 	return schema.StringAttribute{
-		Description: "The audit log level. One of: base, extended, full.",
+		Description: "The audit log level. One of: base, extended, full. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value.",
 		Optional:    true,
 		Computed:    true,
 		PlanModifiers: []planmodifier.String{
@@ -515,7 +515,7 @@ func projectAuditLogLevelSchema() schema.StringAttribute {
 
 func projectHipaaSchema() schema.BoolAttribute {
 	return schema.BoolAttribute{
-		Description: "Whether HIPAA compliance is enabled for the project.",
+		Description: "Whether HIPAA compliance is enabled for the project. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value.",
 		Optional:    true,
 		Computed:    true,
 		PlanModifiers: []planmodifier.Bool{
@@ -526,7 +526,7 @@ func projectHipaaSchema() schema.BoolAttribute {
 
 func projectPreloadLibrariesSchema() schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{
-		Description: "Configuration for preloaded Postgres libraries.",
+		Description: "Configuration for preloaded Postgres libraries. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value.",
 		Optional:    true,
 		Computed:    true,
 		PlanModifiers: []planmodifier.Object{

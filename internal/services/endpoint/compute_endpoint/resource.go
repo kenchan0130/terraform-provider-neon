@@ -188,7 +188,7 @@ func endpointResourceSchemaConfigurableAttributes() map[string]schema.Attribute 
 
 func endpointSettingsResourceSchema() schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{
-		Description: "Endpoint settings.",
+		Description: "Endpoint settings. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value.",
 		Optional:    true,
 		Computed:    true,
 		PlanModifiers: []planmodifier.Object{
