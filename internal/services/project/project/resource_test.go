@@ -2,14 +2,17 @@ package project_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
+	"reflect"
 	"regexp"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/jarcoal/httpmock"
 	"github.com/kenchan0130/terraform-provider-neon/internal/testutil"
 )
@@ -181,6 +184,24 @@ func mergePatchIntoProject(t *testing.T, base string, patchBody []byte) string {
 	return string(out)
 }
 
+// diffJSONBodies compares a captured request body against an expected JSON
+// document structurally (decoded, not by string/substring matching), so that any
+// unexpected extra field - not just the ones explicitly checked for - fails the
+// comparison. Field order and whitespace are irrelevant.
+func diffJSONBodies(gotBody []byte, wantJSON string) error {
+	var got, want any
+	if err := json.Unmarshal(gotBody, &got); err != nil {
+		return fmt.Errorf("failed to unmarshal captured request body: %w (body: %s)", err, gotBody)
+	}
+	if err := json.Unmarshal([]byte(wantJSON), &want); err != nil {
+		return fmt.Errorf("failed to unmarshal expected request body: %w", err)
+	}
+	if !reflect.DeepEqual(got, want) {
+		return fmt.Errorf("request body mismatch:\n got:  %s\n want: %s", gotBody, wantJSON)
+	}
+	return nil
+}
+
 func mergeRawObjectInto(t *testing.T, project map[string]any, key string, raw json.RawMessage) {
 	t.Helper()
 
@@ -293,14 +314,10 @@ resource "neon_project" "test" {
 	if capturedPatchBody == nil {
 		t.Fatal("expected a PATCH request to be made")
 	}
-	body := string(capturedPatchBody)
-	for _, forbidden := range []string{`"settings"`, `"maintenance_window"`, `"default_endpoint_settings"`} {
-		if strings.Contains(body, forbidden) {
-			t.Errorf("PATCH body unexpectedly contains %s: %s", forbidden, body)
-		}
-	}
-	if !strings.Contains(body, "my-project-renamed") {
-		t.Errorf("PATCH body does not contain the new name: %s", body)
+	// Exact-body comparison (not substring matching): any echoed field, not
+	// just the ones the old bug specifically triggered on, must fail this.
+	if err := diffJSONBodies(capturedPatchBody, `{"project":{"name":"my-project-renamed"}}`); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -390,12 +407,14 @@ resource "neon_project" "test" {
 	if capturedPatchBody == nil {
 		t.Fatal("expected a PATCH request to be made")
 	}
-	body := string(capturedPatchBody)
-	if !strings.Contains(body, `"enable_logical_replication":true`) {
-		t.Errorf("PATCH body does not contain the configured leaf: %s", body)
-	}
-	if strings.Contains(body, `"maintenance_window"`) {
-		t.Errorf("PATCH body unexpectedly contains unconfigured leaf maintenance_window: %s", body)
+	// Exact-body comparison: proves the PATCH contains exactly the configured
+	// leaf and nothing else (not just that it doesn't contain the specific
+	// field this test happens to be watching for). "name" is included because
+	// it too is configured throughout both steps - unconfigured/never-changing
+	// server-populated fields (like maintenance_window here) are what must be
+	// omitted, not everything that happens to be unchanged.
+	if err := diffJSONBodies(capturedPatchBody, `{"project":{"name":"my-project","settings":{"enable_logical_replication":true}}}`); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -479,6 +498,189 @@ resource "neon_project" "test" {
 }
 `),
 				ExpectError: regexp.MustCompile(`(?s)weekdays.*end_time|end_time.*weekdays`),
+			},
+		},
+	})
+}
+
+// TestProjectResource_MaintenanceWindowConfiguredRoundTrip is the finding-2
+// regression test end-to-end: create a project with maintenance_window fully
+// configured, then apply an unrelated update (name only, with the settings
+// block removed from config - the same "configured, then no longer part of
+// this config" shape as TestProjectResource_UpdateDoesNotEchoServerSettings)
+// and prove maintenance_window is omitted from that PATCH, then reconfigure
+// maintenance_window with new values and prove it IS sent, taken from plan.
+func TestProjectResource_MaintenanceWindowConfiguredRoundTrip(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	currentProject := projectJSONWithMaintenanceWindow
+	var patchBodies [][]byte
+
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/projects",
+		testutil.JSONResponder(201, `{
+			"project": `+projectJSONWithMaintenanceWindow+`,
+			"connection_uris": [],
+			"roles": [],
+			"databases": [],
+			"operations": [],
+			"branch": `+branchMinJSON+`,
+			"endpoints": []
+		}`),
+	)
+
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id",
+		func(_ *http.Request) (*http.Response, error) {
+			resp := httpmock.NewStringResponse(200, `{"project": `+currentProject+`}`)
+			resp.Header.Set("Content-Type", "application/json")
+			return resp, nil
+		},
+	)
+
+	transport.RegisterResponder(http.MethodDelete,
+		"https://neon.example.com/api/v2/projects/test-project-id",
+		testutil.JSONResponder(200, `{"project": `+currentProject+`}`),
+	)
+
+	transport.RegisterResponder(http.MethodPatch,
+		"https://neon.example.com/api/v2/projects/test-project-id",
+		func(req *http.Request) (*http.Response, error) {
+			body, err := io.ReadAll(req.Body)
+			if err != nil {
+				return nil, err
+			}
+			patchBodies = append(patchBodies, body)
+
+			currentProject = mergePatchIntoProject(t, currentProject, body)
+			resp := httpmock.NewStringResponse(200, `{"project": `+currentProject+`, "operations": []}`)
+			resp.Header.Set("Content-Type", "application/json")
+			return resp, nil
+		},
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				// Create with maintenance_window fully configured (weekdays,
+				// start_time, end_time all set, matching projectJSONWithMaintenanceWindow).
+				Config: testutil.TestConfig(`
+resource "neon_project" "test" {
+  name = "my-project"
+  settings = {
+    maintenance_window = {
+      weekdays   = [1]
+      start_time = "01:00"
+      end_time   = "02:00"
+    }
+  }
+}
+`),
+				Check: testutil.CheckResourceAttr("neon_project.test", "settings.maintenance_window.start_time", "01:00"),
+			},
+			{
+				// settings is no longer part of this config at all - the same
+				// "configured, then removed from config" shape the core fix
+				// covers - so maintenance_window must be omitted from the PATCH.
+				Config: testutil.TestConfig(`
+resource "neon_project" "test" {
+  name = "my-project-renamed"
+}
+`),
+				Check: func(_ *terraform.State) error {
+					if len(patchBodies) != 1 {
+						return fmt.Errorf("expected exactly 1 PATCH call by this step, got %d", len(patchBodies))
+					}
+					return diffJSONBodies(patchBodies[0], `{"project":{"name":"my-project-renamed"}}`)
+				},
+			},
+			{
+				// maintenance_window is reconfigured with new values - it must
+				// be sent, taken from plan.
+				Config: testutil.TestConfig(`
+resource "neon_project" "test" {
+  name = "my-project-renamed"
+  settings = {
+    maintenance_window = {
+      weekdays   = [3]
+      start_time = "03:00"
+      end_time   = "04:00"
+    }
+  }
+}
+`),
+				Check: func(_ *terraform.State) error {
+					if len(patchBodies) != 2 {
+						return fmt.Errorf("expected exactly 2 PATCH calls by this step, got %d", len(patchBodies))
+					}
+					// "name" is included because it too is still configured
+					// (unchanged from the previous step) - see the comment in
+					// TestProjectResource_UpdateSendsConfiguredSettings.
+					return diffJSONBodies(patchBodies[1], `{"project":{"name":"my-project-renamed","settings":{"maintenance_window":{"weekdays":[3],"start_time":"03:00","end_time":"04:00"}}}}`)
+				},
+			},
+		},
+	})
+}
+
+// TestProjectResource_ReadNotFoundRemovesFromState verifies that a project
+// deleted out-of-band (GET returns 404) is removed from state on refresh
+// rather than surfacing as an error, so `terraform refresh`/plan can recover
+// by re-creating it instead of failing forever.
+func TestProjectResource_ReadNotFoundRemovesFromState(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/projects",
+		testutil.JSONResponder(201, `{
+			"project": `+projectJSON+`,
+			"connection_uris": [],
+			"roles": [],
+			"databases": [],
+			"operations": [],
+			"branch": `+branchMinJSON+`,
+			"endpoints": []
+		}`),
+	)
+
+	callCount := 0
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id",
+		func(req *http.Request) (*http.Response, error) {
+			callCount++
+			if callCount <= 1 {
+				return testutil.JSONResponder(200, `{"project": `+projectJSON+`}`)(req)
+			}
+			// The project was deleted outside of Terraform.
+			return testutil.JSONResponder(404, `{"code":"PROJECT_NOT_FOUND","message":"project not found"}`)(req)
+		},
+	)
+
+	transport.RegisterResponder(http.MethodDelete,
+		"https://neon.example.com/api/v2/projects/test-project-id",
+		testutil.JSONResponder(200, `{"project": `+projectJSON+`}`),
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_project" "test" {
+  name = "my-project"
+}
+`),
+			},
+			{
+				Config: testutil.TestConfig(`
+resource "neon_project" "test" {
+  name = "my-project"
+}
+`),
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})

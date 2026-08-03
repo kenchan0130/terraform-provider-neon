@@ -65,7 +65,7 @@ Optional:
 - `block_vpc_connections` (Boolean) When set, connections using VPC endpoints are disallowed.
 - `enable_logical_replication` (Boolean) Sets wal_level=logical for all compute endpoints in this project.
 - `hipaa` (Boolean) Whether HIPAA compliance is enabled for the project.
-- `maintenance_window` (Attributes) The maintenance window configuration. (see [below for nested schema](#nestedatt--settings--maintenance_window))
+- `maintenance_window` (Attributes) The maintenance window configuration. Once set, removing this attribute from configuration does not restore the previous default; it keeps the current window. (see [below for nested schema](#nestedatt--settings--maintenance_window))
 - `preload_libraries` (Attributes) Configuration for preloaded Postgres libraries. (see [below for nested schema](#nestedatt--settings--preload_libraries))
 - `quota` (Attributes) Per-project consumption quota. (see [below for nested schema](#nestedatt--settings--quota))
 
@@ -85,7 +85,7 @@ Optional:
 
 - `end_time` (String) End time of the maintenance window in HH:MM format (UTC). Required together with weekdays and start_time.
 - `start_time` (String) Start time of the maintenance window in HH:MM format (UTC). Required together with weekdays and end_time.
-- `weekdays` (List of Number) A list of weekdays when the maintenance window is active (1=Monday, 7=Sunday). Required together with start_time and end_time.
+- `weekdays` (Set of Number) A set of weekdays when the maintenance window is active (1=Monday, 7=Sunday). Required together with start_time and end_time.
 
 
 <a id="nestedatt--settings--preload_libraries"></a>

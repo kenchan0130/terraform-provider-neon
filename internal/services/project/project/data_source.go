@@ -109,7 +109,7 @@ func (d *projectDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 					"maintenance_window": schema.SingleNestedAttribute{
 						Computed: true,
 						Attributes: map[string]schema.Attribute{
-							"weekdays":   schema.ListAttribute{Computed: true, ElementType: types.Int64Type},
+							"weekdays":   schema.SetAttribute{Computed: true, ElementType: types.Int64Type},
 							"start_time": schema.StringAttribute{Computed: true},
 							"end_time":   schema.StringAttribute{Computed: true},
 						},

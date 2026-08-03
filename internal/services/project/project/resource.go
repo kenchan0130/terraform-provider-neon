@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -20,6 +20,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -55,7 +56,10 @@ var allowedIpsAttrTypes = map[string]attr.Type{
 }
 
 var maintenanceWindowAttrTypes = map[string]attr.Type{
-	"weekdays":   types.ListType{ElemType: types.Int64Type},
+	// weekdays is membership (which weekdays are active), not an ordered
+	// sequence, and the API may normalize/reorder it; a Set (not a List)
+	// avoids treating a server-side reorder as a value change.
+	"weekdays":   types.SetType{ElemType: types.Int64Type},
 	"start_time": types.StringType,
 	"end_time":   types.StringType,
 }
@@ -132,7 +136,7 @@ type allowedIpsModel struct {
 }
 
 type maintenanceWindowModel struct {
-	Weekdays  types.List   `tfsdk:"weekdays"`
+	Weekdays  types.Set    `tfsdk:"weekdays"`
 	StartTime types.String `tfsdk:"start_time"`
 	EndTime   types.String `tfsdk:"end_time"`
 }
@@ -414,7 +418,7 @@ func projectEnableLogicalReplicationSchema() schema.BoolAttribute {
 
 func projectMaintenanceWindowSchema() schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{
-		Description: "The maintenance window configuration.",
+		Description: "The maintenance window configuration. Once set, removing this attribute from configuration does not restore the previous default; it keeps the current window.",
 		Optional:    true,
 		Computed:    true,
 		PlanModifiers: []planmodifier.Object{
@@ -429,16 +433,16 @@ func projectMaintenanceWindowSchema() schema.SingleNestedAttribute {
 			// config, i.e. null, when building the proposed new state, which
 			// then never matches the UseStateForUnknown-restored prior state).
 			// AlsoRequires below preserves all-or-nothing configuration.
-			"weekdays": schema.ListAttribute{
-				Description: "A list of weekdays when the maintenance window is active (1=Monday, 7=Sunday). Required together with start_time and end_time.",
+			"weekdays": schema.SetAttribute{
+				Description: "A set of weekdays when the maintenance window is active (1=Monday, 7=Sunday). Required together with start_time and end_time.",
 				Optional:    true,
 				Computed:    true,
 				ElementType: types.Int64Type,
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
 				},
-				Validators: []validator.List{
-					listvalidator.AlsoRequires(
+				Validators: []validator.Set{
+					setvalidator.AlsoRequires(
 						path.MatchRelative().AtParent().AtName("start_time"),
 						path.MatchRelative().AtParent().AtName("end_time"),
 					),
@@ -582,8 +586,14 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 
 	project := buildProjectCreateFields(&data)
 
+	// Object-level inclusion is gated on config alone (see the comment on
+	// objectIncluded): only a null config object proves the practitioner
+	// never configured it. An unknown config object still counts as
+	// configured - it means the practitioner wrote an expression Terraform
+	// couldn't resolve until now; by the time Create/Update run, config is
+	// always fully resolved.
 	if !data.DefaultEndpointSettings.IsNull() && !data.DefaultEndpointSettings.IsUnknown() &&
-		!config.DefaultEndpointSettings.IsNull() && !config.DefaultEndpointSettings.IsUnknown() {
+		objectIncluded(config.DefaultEndpointSettings) {
 		des, included := buildDefaultEndpointSettingsRequest(ctx, data.DefaultEndpointSettings, config.DefaultEndpointSettings, &resp.Diagnostics)
 		if resp.Diagnostics.HasError() {
 			return
@@ -594,7 +604,7 @@ func (r *projectResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	if !data.Settings.IsNull() && !data.Settings.IsUnknown() &&
-		!config.Settings.IsNull() && !config.Settings.IsUnknown() {
+		objectIncluded(config.Settings) {
 		settings, included := buildProjectSettingsRequest(ctx, data.Settings, config.Settings, &resp.Diagnostics)
 		if resp.Diagnostics.HasError() {
 			return
@@ -718,22 +728,22 @@ func (r *projectResource) Update(ctx context.Context, req resource.UpdateRequest
 }
 
 // buildProjectUpdateFields builds the PATCH request body for Update, gating each
-// field on the corresponding config value being known and non-null (see the
-// comment in Update) and taking the value to send from plan.
+// field on the corresponding config value being non-null (see the comment in
+// Update and objectIncluded/leafIncluded below) and taking the value to send
+// from plan.
 func buildProjectUpdateFields(ctx context.Context, plan, config *projectResourceModel, diags *diag.Diagnostics) neon.ProjectUpdateRequestProject {
 	p := neon.ProjectUpdateRequestProject{}
 
-	if !plan.Name.IsNull() && !plan.Name.IsUnknown() &&
-		!config.Name.IsNull() && !config.Name.IsUnknown() {
+	if !plan.Name.IsNull() && !plan.Name.IsUnknown() && !config.Name.IsNull() {
 		p.Name = neon.NewOptString(plan.Name.ValueString())
 	}
 	if !plan.HistoryRetentionSeconds.IsNull() && !plan.HistoryRetentionSeconds.IsUnknown() &&
-		!config.HistoryRetentionSeconds.IsNull() && !config.HistoryRetentionSeconds.IsUnknown() {
+		!config.HistoryRetentionSeconds.IsNull() {
 		p.HistoryRetentionSeconds = neon.NewOptInt32(plan.HistoryRetentionSeconds.ValueInt32())
 	}
 
 	if !plan.DefaultEndpointSettings.IsNull() && !plan.DefaultEndpointSettings.IsUnknown() &&
-		!config.DefaultEndpointSettings.IsNull() && !config.DefaultEndpointSettings.IsUnknown() {
+		objectIncluded(config.DefaultEndpointSettings) {
 		des, included := buildDefaultEndpointSettingsRequest(ctx, plan.DefaultEndpointSettings, config.DefaultEndpointSettings, diags)
 		if included {
 			p.DefaultEndpointSettings = neon.NewOptDefaultEndpointSettings(des)
@@ -741,7 +751,7 @@ func buildProjectUpdateFields(ctx context.Context, plan, config *projectResource
 	}
 
 	if !plan.Settings.IsNull() && !plan.Settings.IsUnknown() &&
-		!config.Settings.IsNull() && !config.Settings.IsUnknown() {
+		objectIncluded(config.Settings) {
 		settings, included := buildProjectSettingsRequest(ctx, plan.Settings, config.Settings, diags)
 		if included {
 			p.Settings = neon.NewOptProjectSettingsData(settings)
@@ -789,35 +799,59 @@ func decodeObjectIfKnown[T any](ctx context.Context, obj basetypes.ObjectValue, 
 	return m
 }
 
+// objectIncluded reports whether an Optional+Computed nested object should be
+// treated as configured by the practitioner, based on its config value alone.
+// Only a null config object proves absence. An unknown config object still
+// counts as configured: it means the practitioner wrote an expression
+// Terraform couldn't resolve at plan time (e.g. referencing another
+// resource's not-yet-known attribute), not that nothing was written. By the
+// time Create/Update actually run (both only execute during apply), config
+// is always fully resolved, so it is safe - and correct - to include the
+// field and take every leaf from plan in that case.
+func objectIncluded(cfg basetypes.ObjectValue) bool {
+	return !cfg.IsNull()
+}
+
+// leafIncluded reports whether a single leaf should be included in the request.
+// cfgUnknown is true when the *enclosing* object's config value was unknown (see
+// objectIncluded) - in that case every leaf is conservatively treated as
+// configured, since an unknown object can't be decoded into individual leaves to
+// check. Otherwise, only a null leaf proves the practitioner didn't set it; an
+// unknown leaf still counts as configured.
+func leafIncluded(cfgUnknown bool, leaf attr.Value) bool {
+	return cfgUnknown || !leaf.IsNull()
+}
+
 // buildDefaultEndpointSettingsRequest builds the API request payload for
-// default_endpoint_settings. Each leaf is included only when the corresponding
-// leaf in cfg (the practitioner's configuration) is known and non-null; the value
-// sent is always taken from plan. This ensures server-sourced values that merely
-// flow through the plan (because the attribute is Optional+Computed) are never
-// echoed back to the API. The returned bool reports whether any leaf was included;
-// callers must not attach the object to the request when it is false.
+// default_endpoint_settings. Each leaf is included when the corresponding leaf in
+// cfg is configured (see leafIncluded); the value sent is always taken from plan.
+// This ensures server-sourced values that merely flow through the plan (because
+// the attribute is Optional+Computed) are never echoed back to the API. The
+// returned bool reports whether any leaf was included; callers must not attach
+// the object to the request when it is false.
 func buildDefaultEndpointSettingsRequest(ctx context.Context, plan, cfg basetypes.ObjectValue, diags *diag.Diagnostics) (neon.DefaultEndpointSettings, bool) {
 	pm := decodeObjectIfKnown[defaultEndpointSettingsModel](ctx, plan, diags)
 	cm := decodeObjectIfKnown[defaultEndpointSettingsModel](ctx, cfg, diags)
 	if diags.HasError() {
 		return neon.DefaultEndpointSettings{}, false
 	}
+	cfgUnknown := cfg.IsUnknown()
 
 	des := neon.DefaultEndpointSettings{}
 	included := false
-	if !cm.AutoscalingLimitMinCu.IsNull() && !cm.AutoscalingLimitMinCu.IsUnknown() {
+	if leafIncluded(cfgUnknown, cm.AutoscalingLimitMinCu) {
 		des.AutoscalingLimitMinCu = neon.NewOptComputeUnit(neon.ComputeUnit(pm.AutoscalingLimitMinCu.ValueFloat64()))
 		included = true
 	}
-	if !cm.AutoscalingLimitMaxCu.IsNull() && !cm.AutoscalingLimitMaxCu.IsUnknown() {
+	if leafIncluded(cfgUnknown, cm.AutoscalingLimitMaxCu) {
 		des.AutoscalingLimitMaxCu = neon.NewOptComputeUnit(neon.ComputeUnit(pm.AutoscalingLimitMaxCu.ValueFloat64()))
 		included = true
 	}
-	if !cm.SuspendTimeoutSeconds.IsNull() && !cm.SuspendTimeoutSeconds.IsUnknown() {
+	if leafIncluded(cfgUnknown, cm.SuspendTimeoutSeconds) {
 		des.SuspendTimeoutSeconds = neon.NewOptSuspendTimeoutSeconds(neon.SuspendTimeoutSeconds(pm.SuspendTimeoutSeconds.ValueInt64()))
 		included = true
 	}
-	if !cm.PgSettings.IsNull() && !cm.PgSettings.IsUnknown() {
+	if leafIncluded(cfgUnknown, cm.PgSettings) {
 		pgSettings := make(map[string]string)
 		diags.Append(pm.PgSettings.ElementsAs(ctx, &pgSettings, false)...)
 		if diags.HasError() {
@@ -831,22 +865,23 @@ func buildDefaultEndpointSettingsRequest(ctx context.Context, plan, cfg basetype
 
 // buildProjectSettingsRequest builds the API request payload for settings, gating
 // every leaf (including leaves inside nested objects) on the corresponding leaf in
-// cfg being known and non-null, and taking values from plan. See
-// buildDefaultEndpointSettingsRequest for the rationale. The returned bool reports
-// whether any leaf was included.
+// cfg being configured, and taking values from plan. See
+// buildDefaultEndpointSettingsRequest and leafIncluded for the rationale. The
+// returned bool reports whether any leaf was included.
 func buildProjectSettingsRequest(ctx context.Context, plan, cfg basetypes.ObjectValue, diags *diag.Diagnostics) (neon.ProjectSettingsData, bool) {
 	pm := decodeObjectIfKnown[projectSettingsModel](ctx, plan, diags)
 	cm := decodeObjectIfKnown[projectSettingsModel](ctx, cfg, diags)
 	if diags.HasError() {
 		return neon.ProjectSettingsData{}, false
 	}
+	cfgUnknown := cfg.IsUnknown()
 
 	settings := neon.ProjectSettingsData{}
-	included := buildProjectSettingsBoolFields(&pm, &cm, &settings)
-	included = buildProjectQuotaRequest(ctx, &pm, &cm, &settings, diags) || included
-	included = buildProjectAllowedIpsRequest(ctx, &pm, &cm, &settings, diags) || included
-	included = buildProjectMaintenanceWindowRequest(ctx, &pm, &cm, &settings, diags) || included
-	included = buildProjectPreloadLibrariesRequest(ctx, &pm, &cm, &settings, diags) || included
+	included := buildProjectSettingsBoolFields(cfgUnknown, &pm, &cm, &settings)
+	included = buildProjectQuotaRequest(ctx, cfgUnknown, &pm, &cm, &settings, diags) || included
+	included = buildProjectAllowedIpsRequest(ctx, cfgUnknown, &pm, &cm, &settings, diags) || included
+	included = buildProjectMaintenanceWindowRequest(ctx, cfgUnknown, &pm, &cm, &settings, diags) || included
+	included = buildProjectPreloadLibrariesRequest(ctx, cfgUnknown, &pm, &cm, &settings, diags) || included
 	if diags.HasError() {
 		return neon.ProjectSettingsData{}, false
 	}
@@ -854,33 +889,33 @@ func buildProjectSettingsRequest(ctx context.Context, plan, cfg basetypes.Object
 	return settings, included
 }
 
-func buildProjectSettingsBoolFields(pm, cm *projectSettingsModel, settings *neon.ProjectSettingsData) bool {
+func buildProjectSettingsBoolFields(parentCfgUnknown bool, pm, cm *projectSettingsModel, settings *neon.ProjectSettingsData) bool {
 	included := false
-	if !cm.EnableLogicalReplication.IsNull() && !cm.EnableLogicalReplication.IsUnknown() {
+	if leafIncluded(parentCfgUnknown, cm.EnableLogicalReplication) {
 		settings.EnableLogicalReplication = neon.NewOptBool(pm.EnableLogicalReplication.ValueBool())
 		included = true
 	}
-	if !cm.BlockPublicConnections.IsNull() && !cm.BlockPublicConnections.IsUnknown() {
+	if leafIncluded(parentCfgUnknown, cm.BlockPublicConnections) {
 		settings.BlockPublicConnections = neon.NewOptBool(pm.BlockPublicConnections.ValueBool())
 		included = true
 	}
-	if !cm.BlockVpcConnections.IsNull() && !cm.BlockVpcConnections.IsUnknown() {
+	if leafIncluded(parentCfgUnknown, cm.BlockVpcConnections) {
 		settings.BlockVpcConnections = neon.NewOptBool(pm.BlockVpcConnections.ValueBool())
 		included = true
 	}
-	if !cm.AuditLogLevel.IsNull() && !cm.AuditLogLevel.IsUnknown() {
+	if leafIncluded(parentCfgUnknown, cm.AuditLogLevel) {
 		settings.AuditLogLevel = neon.NewOptProjectAuditLogLevel(neon.ProjectAuditLogLevel(pm.AuditLogLevel.ValueString()))
 		included = true
 	}
-	if !cm.Hipaa.IsNull() && !cm.Hipaa.IsUnknown() {
+	if leafIncluded(parentCfgUnknown, cm.Hipaa) {
 		settings.Hipaa = neon.NewOptBool(pm.Hipaa.ValueBool())
 		included = true
 	}
 	return included
 }
 
-func buildProjectQuotaRequest(ctx context.Context, pm, cm *projectSettingsModel, settings *neon.ProjectSettingsData, diags *diag.Diagnostics) bool {
-	if cm.Quota.IsNull() || cm.Quota.IsUnknown() {
+func buildProjectQuotaRequest(ctx context.Context, parentCfgUnknown bool, pm, cm *projectSettingsModel, settings *neon.ProjectSettingsData, diags *diag.Diagnostics) bool {
+	if !parentCfgUnknown && cm.Quota.IsNull() {
 		return false
 	}
 	cqm := decodeObjectIfKnown[projectQuotaModel](ctx, cm.Quota, diags)
@@ -888,26 +923,27 @@ func buildProjectQuotaRequest(ctx context.Context, pm, cm *projectSettingsModel,
 	if diags.HasError() {
 		return false
 	}
+	quotaCfgUnknown := parentCfgUnknown || cm.Quota.IsUnknown()
 
 	quota := neon.ProjectQuota{}
 	included := false
-	if !cqm.ActiveTimeSeconds.IsNull() && !cqm.ActiveTimeSeconds.IsUnknown() {
+	if leafIncluded(quotaCfgUnknown, cqm.ActiveTimeSeconds) {
 		quota.ActiveTimeSeconds = neon.NewOptInt64(pqm.ActiveTimeSeconds.ValueInt64())
 		included = true
 	}
-	if !cqm.ComputeTimeSeconds.IsNull() && !cqm.ComputeTimeSeconds.IsUnknown() {
+	if leafIncluded(quotaCfgUnknown, cqm.ComputeTimeSeconds) {
 		quota.ComputeTimeSeconds = neon.NewOptInt64(pqm.ComputeTimeSeconds.ValueInt64())
 		included = true
 	}
-	if !cqm.WrittenDataBytes.IsNull() && !cqm.WrittenDataBytes.IsUnknown() {
+	if leafIncluded(quotaCfgUnknown, cqm.WrittenDataBytes) {
 		quota.WrittenDataBytes = neon.NewOptInt64(pqm.WrittenDataBytes.ValueInt64())
 		included = true
 	}
-	if !cqm.DataTransferBytes.IsNull() && !cqm.DataTransferBytes.IsUnknown() {
+	if leafIncluded(quotaCfgUnknown, cqm.DataTransferBytes) {
 		quota.DataTransferBytes = neon.NewOptInt64(pqm.DataTransferBytes.ValueInt64())
 		included = true
 	}
-	if !cqm.LogicalSizeBytes.IsNull() && !cqm.LogicalSizeBytes.IsUnknown() {
+	if leafIncluded(quotaCfgUnknown, cqm.LogicalSizeBytes) {
 		quota.LogicalSizeBytes = neon.NewOptInt64(pqm.LogicalSizeBytes.ValueInt64())
 		included = true
 	}
@@ -920,8 +956,8 @@ func buildProjectQuotaRequest(ctx context.Context, pm, cm *projectSettingsModel,
 	return true
 }
 
-func buildProjectAllowedIpsRequest(ctx context.Context, pm, cm *projectSettingsModel, settings *neon.ProjectSettingsData, diags *diag.Diagnostics) bool {
-	if cm.AllowedIps.IsNull() || cm.AllowedIps.IsUnknown() {
+func buildProjectAllowedIpsRequest(ctx context.Context, parentCfgUnknown bool, pm, cm *projectSettingsModel, settings *neon.ProjectSettingsData, diags *diag.Diagnostics) bool {
+	if !parentCfgUnknown && cm.AllowedIps.IsNull() {
 		return false
 	}
 	caim := decodeObjectIfKnown[allowedIpsModel](ctx, cm.AllowedIps, diags)
@@ -929,10 +965,11 @@ func buildProjectAllowedIpsRequest(ctx context.Context, pm, cm *projectSettingsM
 	if diags.HasError() {
 		return false
 	}
+	aiCfgUnknown := parentCfgUnknown || cm.AllowedIps.IsUnknown()
 
 	allowedIps := neon.AllowedIps{}
 	included := false
-	if !caim.Ips.IsNull() && !caim.Ips.IsUnknown() {
+	if leafIncluded(aiCfgUnknown, caim.Ips) {
 		var ips []string
 		diags.Append(paim.Ips.ElementsAs(ctx, &ips, false)...)
 		if diags.HasError() {
@@ -941,7 +978,7 @@ func buildProjectAllowedIpsRequest(ctx context.Context, pm, cm *projectSettingsM
 		allowedIps.Ips = ips
 		included = true
 	}
-	if !caim.ProtectedBranchesOnly.IsNull() && !caim.ProtectedBranchesOnly.IsUnknown() {
+	if leafIncluded(aiCfgUnknown, caim.ProtectedBranchesOnly) {
 		allowedIps.ProtectedBranchesOnly = neon.NewOptBool(paim.ProtectedBranchesOnly.ValueBool())
 		included = true
 	}
@@ -954,45 +991,55 @@ func buildProjectAllowedIpsRequest(ctx context.Context, pm, cm *projectSettingsM
 	return true
 }
 
-func buildProjectMaintenanceWindowRequest(ctx context.Context, pm, cm *projectSettingsModel, settings *neon.ProjectSettingsData, diags *diag.Diagnostics) bool {
-	// maintenance_window's children are Optional+Computed (not Required; see
-	// the schema comment for why), but the AlsoRequires validators on each
-	// child guarantee all-or-nothing configuration: if the object is
-	// configured in config at all, every child is necessarily known and
-	// non-null there too. We still defensively check the plan-side values
-	// before reading them, since they're a separate value from cfg.
-	if cm.MaintenanceWindow.IsNull() || cm.MaintenanceWindow.IsUnknown() {
+// buildProjectMaintenanceWindowRequest gates each child leaf individually,
+// exactly like the other nested objects, instead of gating on the object alone.
+// The AlsoRequires validators guarantee that once any child is configured, all
+// three are - but they do NOT reject an entirely empty maintenance_window = {}
+// (AlsoRequires only fires when the attribute it's attached to is itself
+// non-null). An empty object must still result in included=false: gating only
+// at the object level would attach all three PLAN children - which, for an
+// unconfigured maintenance_window, are the server-owned values restored via
+// UseStateForUnknown - recreating the exact "echo the forbidden field back"
+// bug this whole change exists to fix.
+func buildProjectMaintenanceWindowRequest(ctx context.Context, parentCfgUnknown bool, pm, cm *projectSettingsModel, settings *neon.ProjectSettingsData, diags *diag.Diagnostics) bool {
+	if !parentCfgUnknown && cm.MaintenanceWindow.IsNull() {
 		return false
 	}
-	if pm.MaintenanceWindow.IsNull() || pm.MaintenanceWindow.IsUnknown() {
-		return false
-	}
-	var mwm maintenanceWindowModel
-	diags.Append(pm.MaintenanceWindow.As(ctx, &mwm, basetypes.ObjectAsOptions{})...)
+	cmwm := decodeObjectIfKnown[maintenanceWindowModel](ctx, cm.MaintenanceWindow, diags)
+	pmwm := decodeObjectIfKnown[maintenanceWindowModel](ctx, pm.MaintenanceWindow, diags)
 	if diags.HasError() {
 		return false
 	}
-	if mwm.StartTime.IsNull() || mwm.StartTime.IsUnknown() ||
-		mwm.EndTime.IsNull() || mwm.EndTime.IsUnknown() ||
-		mwm.Weekdays.IsNull() || mwm.Weekdays.IsUnknown() {
+	mwCfgUnknown := parentCfgUnknown || cm.MaintenanceWindow.IsUnknown()
+
+	mw := neon.MaintenanceWindow{}
+	included := false
+	if leafIncluded(mwCfgUnknown, cmwm.StartTime) {
+		mw.StartTime = pmwm.StartTime.ValueString()
+		included = true
+	}
+	if leafIncluded(mwCfgUnknown, cmwm.EndTime) {
+		mw.EndTime = pmwm.EndTime.ValueString()
+		included = true
+	}
+	if leafIncluded(mwCfgUnknown, cmwm.Weekdays) {
+		var weekdays []int
+		diags.Append(pmwm.Weekdays.ElementsAs(ctx, &weekdays, false)...)
+		if diags.HasError() {
+			return false
+		}
+		mw.Weekdays = weekdays
+		included = true
+	}
+	if !included {
 		return false
 	}
-	mw := neon.MaintenanceWindow{
-		StartTime: mwm.StartTime.ValueString(),
-		EndTime:   mwm.EndTime.ValueString(),
-	}
-	var weekdays []int
-	diags.Append(mwm.Weekdays.ElementsAs(ctx, &weekdays, false)...)
-	if diags.HasError() {
-		return false
-	}
-	mw.Weekdays = weekdays
 	settings.MaintenanceWindow = neon.NewOptMaintenanceWindow(mw)
 	return true
 }
 
-func buildProjectPreloadLibrariesRequest(ctx context.Context, pm, cm *projectSettingsModel, settings *neon.ProjectSettingsData, diags *diag.Diagnostics) bool {
-	if cm.PreloadLibraries.IsNull() || cm.PreloadLibraries.IsUnknown() {
+func buildProjectPreloadLibrariesRequest(ctx context.Context, parentCfgUnknown bool, pm, cm *projectSettingsModel, settings *neon.ProjectSettingsData, diags *diag.Diagnostics) bool {
+	if !parentCfgUnknown && cm.PreloadLibraries.IsNull() {
 		return false
 	}
 	cplm := decodeObjectIfKnown[preloadLibrariesModel](ctx, cm.PreloadLibraries, diags)
@@ -1000,14 +1047,15 @@ func buildProjectPreloadLibrariesRequest(ctx context.Context, pm, cm *projectSet
 	if diags.HasError() {
 		return false
 	}
+	plCfgUnknown := parentCfgUnknown || cm.PreloadLibraries.IsUnknown()
 
 	pl := neon.PreloadLibraries{}
 	included := false
-	if !cplm.UseDefaults.IsNull() && !cplm.UseDefaults.IsUnknown() {
+	if leafIncluded(plCfgUnknown, cplm.UseDefaults) {
 		pl.UseDefaults = neon.NewOptBool(pplm.UseDefaults.ValueBool())
 		included = true
 	}
-	if !cplm.EnabledLibraries.IsNull() && !cplm.EnabledLibraries.IsUnknown() {
+	if leafIncluded(plCfgUnknown, cplm.EnabledLibraries) {
 		var libs []string
 		diags.Append(pplm.EnabledLibraries.ElementsAs(ctx, &libs, false)...)
 		if diags.HasError() {
@@ -1197,16 +1245,16 @@ func mapProjectMaintenanceWindowToModel(ctx context.Context, s *neon.ProjectSett
 	mwm := maintenanceWindowModel{
 		StartTime: types.StringValue(mw.StartTime),
 		EndTime:   types.StringValue(mw.EndTime),
-		Weekdays:  types.ListNull(types.Int64Type),
+		Weekdays:  types.SetNull(types.Int64Type),
 	}
 	if mw.Weekdays != nil {
 		wdValues := make([]attr.Value, len(mw.Weekdays))
 		for i, wd := range mw.Weekdays {
 			wdValues[i] = types.Int64Value(int64(wd))
 		}
-		listVal, d := types.ListValue(types.Int64Type, wdValues)
+		setVal, d := types.SetValue(types.Int64Type, wdValues)
 		diags.Append(d...)
-		mwm.Weekdays = listVal
+		mwm.Weekdays = setVal
 	}
 	obj, d := types.ObjectValueFrom(ctx, maintenanceWindowAttrTypes, mwm)
 	diags.Append(d...)
