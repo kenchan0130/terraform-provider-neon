@@ -65,8 +65,20 @@ type GetProjectBranchStorageRes interface {
 	getProjectBranchStorageRes()
 }
 
+type ListProjectBranchLogFieldValuesRes interface {
+	listProjectBranchLogFieldValuesRes()
+}
+
+type ListProjectBranchLogFieldsRes interface {
+	listProjectBranchLogFieldsRes()
+}
+
 type PresignProjectBranchBucketObjectRes interface {
 	presignProjectBranchBucketObjectRes()
+}
+
+type QueryProjectBranchLogsRes interface {
+	queryProjectBranchLogsRes()
 }
 
 type RevokeCredentialRes interface {

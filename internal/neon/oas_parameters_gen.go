@@ -759,8 +759,7 @@ func decodeAddProjectJWKSParams(args [1]string, argsEscaped bool, r *http.Reques
 type AssignOrganizationVPCEndpointParams struct {
 	// The Neon organization ID.
 	OrgID string
-	// The Neon region ID.
-	// Azure regions are currently not supported.
+	// The Neon region ID. Azure regions are currently not supported.
 	RegionID string
 	// The VPC endpoint ID.
 	VpcEndpointID string
@@ -3155,16 +3154,16 @@ func decodeCreateProjectTransferRequestParams(args [1]string, argsEscaped bool, 
 
 // CreateSnapshotParams is parameters of createSnapshot operation.
 type CreateSnapshotParams struct {
-	// The target Log Sequence Number (LSN) to take the snapshot from.
-	// Must fall within the restore window. Cannot be used with `timestamp`.
+	// The target Log Sequence Number (LSN) to take the snapshot from. Must fall within the restore window.
+	// Cannot be used with `timestamp`.
 	Lsn OptString `json:",omitempty,omitzero"`
-	// The target timestamp for the snapshot. Must fall within the restore window.
-	// Use ISO 8601 format (e.g. 2025-08-05T22:00:00Z). Cannot be used with `lsn`.
+	// The target timestamp for the snapshot. Must fall within the restore window. Use ISO 8601 format
+	// (e.g. 2025-08-05T22:00:00Z). Cannot be used with `lsn`.
 	Timestamp OptString `json:",omitempty,omitzero"`
 	// A name for the snapshot.
 	Name OptString `json:",omitempty,omitzero"`
-	// The time at which the snapshot will be automatically deleted.
-	// Use ISO 8601 format (e.g. 2025-08-05T22:00:00Z).
+	// The time at which the snapshot will be automatically deleted. Use ISO 8601 format (e.g.
+	// 2025-08-05T22:00:00Z).
 	ExpiresAt OptString `json:",omitempty,omitzero"`
 	// The Neon project ID.
 	ProjectID string
@@ -4733,8 +4732,7 @@ func decodeDeleteOrganizationSpendingLimitParams(args [1]string, argsEscaped boo
 type DeleteOrganizationVPCEndpointParams struct {
 	// The Neon organization ID.
 	OrgID string
-	// The Neon region ID.
-	// Azure regions are currently not supported.
+	// The Neon region ID. Azure regions are currently not supported.
 	RegionID string
 	// The VPC endpoint ID.
 	VpcEndpointID string
@@ -5012,10 +5010,11 @@ func decodeDeleteProjectParams(args [1]string, argsEscaped bool, r *http.Request
 
 // DeleteProjectBranchParams is parameters of deleteProjectBranch operation.
 type DeleteProjectBranchParams struct {
-	// If true, the branch is permanently deleted immediately without a recovery window.
-	// If false (default), the branch can be recovered within 7 days via the recover endpoint.
-	// This parameter is part of the Branch Recovery feature, which is in preview and not available to
-	// all users.
+	// If true, the branch is permanently deleted immediately without a recovery window. If false
+	// (default), the branch can be recovered within 7 days via the recover endpoint.
+	//
+	// This parameter is part of the Branch Recovery feature, which is in preview and not available to all
+	// users.
 	HardDelete OptBool `json:",omitempty,omitzero"`
 	// The Neon project ID.
 	ProjectID string
@@ -5473,8 +5472,8 @@ type DeleteProjectBranchBucketObjectParams struct {
 	BranchID string
 	// The bucket name.
 	BucketName string
-	// The object key. Keys may contain `/`; the `/` characters of nested
-	// keys must be percent-encoded (`%2F`) in the path segment.
+	// The object key. Keys may contain `/`; the `/` characters of nested keys must be percent-encoded
+	// (`%2F`) in the path segment.
 	ObjectKey string
 }
 
@@ -5776,9 +5775,8 @@ func decodeDeleteProjectBranchBucketObjectParams(args [4]string, argsEscaped boo
 
 // DeleteProjectBranchBucketObjectsByPrefixParams is parameters of deleteProjectBranchBucketObjectsByPrefix operation.
 type DeleteProjectBranchBucketObjectsByPrefixParams struct {
-	// The key prefix (folder) to delete. Must be non-empty and end with
-	// `/`. Every object on this branch whose key starts with this prefix
-	// is soft-deleted.
+	// The key prefix (folder) to delete. Must be non-empty and end with `/`. Every object on this branch
+	// whose key starts with this prefix is soft-deleted.
 	Prefix string
 	// The Neon project ID.
 	ProjectID string
@@ -7874,8 +7872,8 @@ func decodeFinalizeRestoreBranchParams(args [2]string, argsEscaped bool, r *http
 
 // GetActiveRegionsParams is parameters of getActiveRegions operation.
 type GetActiveRegionsParams struct {
-	// Organization ID. When provided, returns only regions available to this organization.
-	// Recommended for accurate region availability.
+	// Organization ID. When provided, returns only regions available to this organization. Recommended for
+	// accurate region availability.
 	OrgID OptString `json:",omitempty,omitzero"`
 }
 
@@ -8601,60 +8599,68 @@ func decodeGetConnectionURIParams(args [1]string, argsEscaped bool, r *http.Requ
 
 // GetConsumptionHistoryPerBranchV2Params is parameters of getConsumptionHistoryPerBranchV2 operation.
 type GetConsumptionHistoryPerBranchV2Params struct {
-	// Cursor from the previous response (`pagination.cursor`). Pass it to fetch the next page
-	// of branches. Pages are ordered by project ID, then branch ID.
+	// Cursor from the previous response (`pagination.cursor`). Pass it to fetch the next page of branches.
+	// Pages are ordered by project ID, then branch ID.
 	Cursor OptString `json:",omitempty,omitzero"`
 	// Maximum number of branches per page. Allowed range: 1 to 1000. Default: 100.
 	Limit OptInt `json:",omitempty,omitzero"`
 	// Project IDs to include (required, 1 to 100). Returns metrics for branches in these projects.
+	//
 	// Pass multiple IDs as repeated query parameters or a comma-separated list:
-	// - `project_ids=cold-poetry-09157238&project_ids=quiet-snow-71788278`
-	// - `project_ids=cold-poetry-09157238,quiet-snow-71788278`.
+	//
+	//  - `project_ids=cold-poetry-09157238&project_ids=quiet-snow-71788278`
+	//  - `project_ids=cold-poetry-09157238,quiet-snow-71788278`
 	ProjectIds []string `json:",omitempty"`
-	// Optional branch IDs to filter the response (up to 100). If omitted, all branches in the
-	// listed projects are included.
+	// Optional branch IDs to filter the response (up to 100). If omitted, all branches in the listed
+	// projects are included.
+	//
 	// Pass multiple IDs as repeated query parameters or a comma-separated list:
-	// - `branch_ids=br-aged-salad-637688&branch_ids=br-sweet-breeze-497520`
-	// - `branch_ids=br-aged-salad-637688,br-sweet-breeze-497520`.
+	//
+	//  - `branch_ids=br-aged-salad-637688&branch_ids=br-sweet-breeze-497520`
+	//  - `branch_ids=br-aged-salad-637688,br-sweet-breeze-497520`
 	BranchIds []string `json:",omitempty"`
-	// Specify the start `date-time` for the consumption period.
-	// The `date-time` value is rounded according to the specified `granularity`.
-	// For example, `2024-03-15T15:30:00Z` for `daily` granularity will be rounded to
-	// `2024-03-15T00:00:00Z`.
-	// The specified `date-time` value must respect the specified `granularity`:
-	// - For `hourly`, consumption metrics are limited to the last 168 hours.
-	// - For `daily`, consumption metrics are limited to the last 60 days.
-	// - For `monthly`, consumption metrics are limited to the last year.
-	// Branch-level metrics are returned from when the account first ingests branch-level
-	// consumption data. Periods before that time contain no branch metrics.
+	// Specify the start `date-time` for the consumption period. The `date-time` value is rounded according
+	// to the specified `granularity`. For example, `2024-03-15T15:30:00Z` for `daily` granularity will be
+	// rounded to `2024-03-15T00:00:00Z`. The specified `date-time` value must respect the specified
+	// `granularity`:
+	//
+	//  - For `hourly`, consumption metrics are limited to the last 168 hours.
+	//  - For `daily`, consumption metrics are limited to the last 60 days.
+	//  - For `monthly`, consumption metrics are limited to the last year.
+	//
+	// Branch-level metrics are returned from when the account first ingests branch-level consumption data.
+	// Periods before that time contain no branch metrics.
 	From time.Time
-	// Specify the end `date-time` for the consumption period.
-	// The `date-time` value is rounded according to the specified `granularity`.
-	// For example, `2024-03-15T15:30:00Z` for `daily` granularity will be rounded to
-	// `2024-03-15T00:00:00Z`.
-	// The specified `date-time` value must respect the specified `granularity`:
-	// - For `hourly`, consumption metrics are limited to the last 168 hours.
-	// - For `daily`, consumption metrics are limited to the last 60 days.
-	// - For `monthly`, consumption metrics are limited to the last year.
+	// Specify the end `date-time` for the consumption period. The `date-time` value is rounded according
+	// to the specified `granularity`. For example, `2024-03-15T15:30:00Z` for `daily` granularity will be
+	// rounded to `2024-03-15T00:00:00Z`. The specified `date-time` value must respect the specified
+	// `granularity`:
+	//
+	//  - For `hourly`, consumption metrics are limited to the last 168 hours.
+	//  - For `daily`, consumption metrics are limited to the last 60 days.
+	//  - For `monthly`, consumption metrics are limited to the last year.
 	To time.Time
-	// Specify the granularity of consumption metrics.
-	// Hourly, daily, and monthly metrics are available for the last 168 hours, 60 days,
-	// and 1 year, respectively.
+	// Specify the granularity of consumption metrics. Hourly, daily, and monthly metrics are available for
+	// the last 168 hours, 60 days, and 1 year, respectively.
 	Granularity ConsumptionHistoryGranularity
 	// Organization ID. Metrics are returned for projects in this organization.
 	OrgID string
 	// Required. List the metrics to return. Only these values are supported:
-	// - `compute_unit_seconds`
-	// - `root_branch_bytes_month`
-	// - `child_branch_bytes_month`
-	// - `instant_restore_bytes_month`
-	// - `public_network_transfer_bytes`
-	// - `private_network_transfer_bytes`
-	// Not supported on this endpoint: `extra_branches_month`, `snapshot_storage_bytes_month`.
-	// Use `GET /consumption_history/v2/projects` for those.
+	//
+	//  - `compute_unit_seconds`
+	//  - `root_branch_bytes_month`
+	//  - `child_branch_bytes_month`
+	//  - `instant_restore_bytes_month`
+	//  - `public_network_transfer_bytes`
+	//  - `private_network_transfer_bytes`
+	//
+	// Not supported on this endpoint: `extra_branches_month`, `snapshot_storage_bytes_month`. Use
+	// `GET /consumption_history/v2/projects` for those.
+	//
 	// Pass multiple values as repeated query parameters or a comma-separated list:
-	// - `metrics=compute_unit_seconds&metrics=public_network_transfer_bytes`
-	// - `metrics=compute_unit_seconds,public_network_transfer_bytes`.
+	//
+	//  - `metrics=compute_unit_seconds&metrics=public_network_transfer_bytes`
+	//  - `metrics=compute_unit_seconds,public_network_transfer_bytes`
 	Metrics ConsumptionHistoryQueryMetrics
 }
 
@@ -8855,6 +8861,7 @@ func decodeGetConsumptionHistoryPerBranchV2Params(args [0]string, argsEscaped bo
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.ProjectIds = nil
 				return d.DecodeArray(func(d uri.Decoder) error {
 					var paramsDotProjectIdsVal string
 					if err := func() error {
@@ -8945,6 +8952,7 @@ func decodeGetConsumptionHistoryPerBranchV2Params(args [0]string, argsEscaped bo
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.BranchIds = nil
 				return d.DecodeArray(func(d uri.Decoder) error {
 					var paramsDotBranchIdsVal string
 					if err := func() error {
@@ -9207,6 +9215,7 @@ func decodeGetConsumptionHistoryPerBranchV2Params(args [0]string, argsEscaped bo
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
 				var paramsDotMetricsVal []string
 				if err := func() error {
+					paramsDotMetricsVal = nil
 					return d.DecodeArray(func(d uri.Decoder) error {
 						var paramsDotMetricsValVal string
 						if err := func() error {
@@ -9256,64 +9265,66 @@ type GetConsumptionHistoryPerProjectParams struct {
 	Cursor OptString `json:",omitempty,omitzero"`
 	// Specify a value from 1 to 100 to limit number of projects in the response.
 	Limit OptInt `json:",omitempty,omitzero"`
-	// Specify a list of project IDs to filter the response.
-	// If omitted, the response will contain all projects.
-	// A list of project IDs can be specified as an array of parameter values or as a comma-separated
-	// list in a single parameter value.
-	// - As an array of parameter values:
-	// `project_ids=cold-poetry-09157238%20&project_ids=quiet-snow-71788278`
-	// - As a comma-separated list in a single parameter value: `project_ids=cold-poetry-09157238,
-	// quiet-snow-71788278`.
+	// Specify a list of project IDs to filter the response. If omitted, the response will contain all
+	// projects. A list of project IDs can be specified as an array of parameter values or as a
+	// comma-separated list in a single parameter value.
+	//
+	//  - As an array of parameter values:
+	//    `project_ids=cold-poetry-09157238%20&project_ids=quiet-snow-71788278`
+	//  - As a comma-separated list in a single parameter value:
+	//    `project_ids=cold-poetry-09157238,quiet-snow-71788278`
 	ProjectIds []string `json:",omitempty"`
-	// Specify the start `date-time` for the consumption period.
-	// The `date-time` value is rounded according to the specified `granularity`.
-	// For example, `2024-03-15T15:30:00Z` for `daily` granularity will be rounded to
-	// `2024-03-15T00:00:00Z`.
-	// The specified `date-time` value must respect the specified `granularity`:
-	// - For `hourly`, consumption metrics are limited to the last 168 hours.
-	// - For `daily`, consumption metrics are limited to the last 60 days.
-	// - For `monthly`, consumption metrics are limited to the last year.
+	// Specify the start `date-time` for the consumption period. The `date-time` value is rounded according
+	// to the specified `granularity`. For example, `2024-03-15T15:30:00Z` for `daily` granularity will be
+	// rounded to `2024-03-15T00:00:00Z`. The specified `date-time` value must respect the specified
+	// `granularity`:
+	//
+	//  - For `hourly`, consumption metrics are limited to the last 168 hours.
+	//  - For `daily`, consumption metrics are limited to the last 60 days.
+	//  - For `monthly`, consumption metrics are limited to the last year.
+	//
 	// The consumption history is available starting from `March 1, 2024, at 00:00:00 UTC`.
 	From time.Time
-	// Specify the end `date-time` for the consumption period.
-	// The `date-time` value is rounded according to the specified granularity.
-	// For example, `2024-03-15T15:30:00Z` for `daily` granularity will be rounded to
-	// `2024-03-15T00:00:00Z`.
-	// The specified `date-time` value must respect the specified `granularity`:
-	// - For `hourly`, consumption metrics are limited to the last 168 hours.
-	// - For `daily`, consumption metrics are limited to the last 60 days.
-	// - For `monthly`, consumption metrics are limited to the last year.
+	// Specify the end `date-time` for the consumption period. The `date-time` value is rounded according
+	// to the specified granularity. For example, `2024-03-15T15:30:00Z` for `daily` granularity will be
+	// rounded to `2024-03-15T00:00:00Z`. The specified `date-time` value must respect the specified
+	// `granularity`:
+	//
+	//  - For `hourly`, consumption metrics are limited to the last 168 hours.
+	//  - For `daily`, consumption metrics are limited to the last 60 days.
+	//  - For `monthly`, consumption metrics are limited to the last year.
 	To time.Time
-	// Specify the granularity of consumption metrics.
-	// Hourly, daily, and monthly metrics are available for the last 168 hours, 60 days,
-	// and 1 year, respectively.
+	// Specify the granularity of consumption metrics. Hourly, daily, and monthly metrics are available for
+	// the last 168 hours, 60 days, and 1 year, respectively.
 	Granularity ConsumptionHistoryGranularity
-	// Specify the organization for which the project consumption metrics should be returned.
-	// If this parameter is not provided, the endpoint will return the metrics for the
-	// authenticated user's projects.
+	// Specify the organization for which the project consumption metrics should be returned. If this
+	// parameter is not provided, the endpoint will return the metrics for the authenticated user's
+	// projects.
 	OrgID OptString `json:",omitempty,omitzero"`
-	// The field is deprecated. Please use `metrics` instead.
-	// If `metrics` is specified, this field is ignored.
-	// Include metrics utilized in previous pricing models.
-	// - **data_storage_bytes_hour**: The sum of the maximum observed storage values for each hour,
-	// which never decreases.
+	// The field is deprecated. Please use `metrics` instead. If `metrics` is specified, this field is
+	// ignored. Include metrics utilized in previous pricing models.
+	//
+	//  - data_storage_bytes_hour: The sum of the maximum observed storage values for each hour, which
+	//    never decreases.
 	//
 	// Deprecated: schema marks this parameter as deprecated.
 	IncludeV1Metrics OptBool `json:",omitempty,omitzero"`
-	// Specify a list of metrics to include in the response.
-	// If omitted, active_time, compute_time, written_data, synthetic_storage_size are returned.
-	// Possible values:
-	// - `active_time_seconds`
-	// - `compute_time_seconds`
-	// - `written_data_bytes`
-	// - `synthetic_storage_size_bytes`
-	// - `data_storage_bytes_hour`
-	// - `logical_size_bytes`
-	// - `logical_size_bytes_hour`
-	// A list of metrics can be specified as an array of parameter values or as a comma-separated list in
-	// a single parameter value.
-	// - As an array of parameter values: `metrics=cpu_seconds&metrics=ram_bytes`
-	// - As a comma-separated list in a single parameter value: `metrics=cpu_seconds,ram_bytes`.
+	// Specify a list of metrics to include in the response. If omitted, active_time, compute_time,
+	// written_data, synthetic_storage_size are returned. Possible values:
+	//
+	//  - `active_time_seconds`
+	//  - `compute_time_seconds`
+	//  - `written_data_bytes`
+	//  - `synthetic_storage_size_bytes`
+	//  - `data_storage_bytes_hour`
+	//  - `logical_size_bytes`
+	//  - `logical_size_bytes_hour`
+	//
+	// A list of metrics can be specified as an array of parameter values or as a comma-separated list in a
+	// single parameter value.
+	//
+	//  - As an array of parameter values: `metrics=cpu_seconds&metrics=ram_bytes`
+	//  - As a comma-separated list in a single parameter value: `metrics=cpu_seconds,ram_bytes`
 	Metrics ConsumptionHistoryQueryMetrics
 }
 
@@ -9520,6 +9531,7 @@ func decodeGetConsumptionHistoryPerProjectParams(args [0]string, argsEscaped boo
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.ProjectIds = nil
 				return d.DecodeArray(func(d uri.Decoder) error {
 					var paramsDotProjectIdsVal string
 					if err := func() error {
@@ -9835,6 +9847,7 @@ func decodeGetConsumptionHistoryPerProjectParams(args [0]string, argsEscaped boo
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
 				var paramsDotMetricsVal []string
 				if err := func() error {
+					paramsDotMetricsVal = nil
 					return d.DecodeArray(func(d uri.Decoder) error {
 						var paramsDotMetricsValVal string
 						if err := func() error {
@@ -9878,56 +9891,60 @@ func decodeGetConsumptionHistoryPerProjectParams(args [0]string, argsEscaped boo
 
 // GetConsumptionHistoryPerProjectV2Params is parameters of getConsumptionHistoryPerProjectV2 operation.
 type GetConsumptionHistoryPerProjectV2Params struct {
-	// Cursor from the previous response (`pagination.cursor`). Pass it to fetch the next page
-	// of projects. Pages are ordered by project creation order (newest first).
+	// Cursor from the previous response (`pagination.cursor`). Pass it to fetch the next page of projects.
+	// Pages are ordered by project creation order (newest first).
 	Cursor OptString `json:",omitempty,omitzero"`
 	// Maximum number of projects per page. Allowed range: 1 to 100. Default: 10.
 	Limit OptInt `json:",omitempty,omitzero"`
-	// Optional project IDs to filter the response (up to 100). If omitted, projects in the
-	// organization are included across pages (use `cursor` and `limit`).
+	// Optional project IDs to filter the response (up to 100). If omitted, projects in the organization
+	// are included across pages (use `cursor` and `limit`).
+	//
 	// Pass multiple IDs as repeated query parameters or a comma-separated list:
-	// - `project_ids=cold-poetry-09157238&project_ids=quiet-snow-71788278`
-	// - `project_ids=cold-poetry-09157238,quiet-snow-71788278`.
+	//
+	//  - `project_ids=cold-poetry-09157238&project_ids=quiet-snow-71788278`
+	//  - `project_ids=cold-poetry-09157238,quiet-snow-71788278`
 	ProjectIds []string `json:",omitempty"`
-	// Specify the start `date-time` for the consumption period.
-	// The `date-time` value is rounded according to the specified `granularity`.
-	// For example, `2024-03-15T15:30:00Z` for `daily` granularity will be rounded to
-	// `2024-03-15T00:00:00Z`.
-	// The specified `date-time` value must respect the specified `granularity`:
-	// - For `hourly`, consumption metrics are limited to the last 168 hours.
-	// - For `daily`, consumption metrics are limited to the last 60 days.
-	// - For `monthly`, consumption metrics are limited to the last year.
-	// The earliest allowed `from` value is `March 1, 2024, at 00:00:00 UTC`.
-	// Metrics are returned from when the account upgraded to an eligible plan, which may be
-	// later than that date.
+	// Specify the start `date-time` for the consumption period. The `date-time` value is rounded according
+	// to the specified `granularity`. For example, `2024-03-15T15:30:00Z` for `daily` granularity will be
+	// rounded to `2024-03-15T00:00:00Z`. The specified `date-time` value must respect the specified
+	// `granularity`:
+	//
+	//  - For `hourly`, consumption metrics are limited to the last 168 hours.
+	//  - For `daily`, consumption metrics are limited to the last 60 days.
+	//  - For `monthly`, consumption metrics are limited to the last year.
+	//
+	// The earliest allowed `from` value is `March 1, 2024, at 00:00:00 UTC`. Metrics are returned from
+	// when the account upgraded to an eligible plan, which may be later than that date.
 	From time.Time
-	// Specify the end `date-time` for the consumption period.
-	// The `date-time` value is rounded according to the specified `granularity`.
-	// For example, `2024-03-15T15:30:00Z` for `daily` granularity will be rounded to
-	// `2024-03-15T00:00:00Z`.
-	// The specified `date-time` value must respect the specified `granularity`:
-	// - For `hourly`, consumption metrics are limited to the last 168 hours.
-	// - For `daily`, consumption metrics are limited to the last 60 days.
-	// - For `monthly`, consumption metrics are limited to the last year.
+	// Specify the end `date-time` for the consumption period. The `date-time` value is rounded according
+	// to the specified `granularity`. For example, `2024-03-15T15:30:00Z` for `daily` granularity will be
+	// rounded to `2024-03-15T00:00:00Z`. The specified `date-time` value must respect the specified
+	// `granularity`:
+	//
+	//  - For `hourly`, consumption metrics are limited to the last 168 hours.
+	//  - For `daily`, consumption metrics are limited to the last 60 days.
+	//  - For `monthly`, consumption metrics are limited to the last year.
 	To time.Time
-	// Specify the granularity of consumption metrics.
-	// Hourly, daily, and monthly metrics are available for the last 168 hours, 60 days,
-	// and 1 year, respectively.
+	// Specify the granularity of consumption metrics. Hourly, daily, and monthly metrics are available for
+	// the last 168 hours, 60 days, and 1 year, respectively.
 	Granularity ConsumptionHistoryGranularity
 	// Organization ID. Metrics are returned for projects in this organization.
 	OrgID string
 	// Required. List the metrics to return. Supported values:
-	// - `compute_unit_seconds`
-	// - `root_branch_bytes_month`
-	// - `child_branch_bytes_month`
-	// - `instant_restore_bytes_month`
-	// - `public_network_transfer_bytes`
-	// - `private_network_transfer_bytes`
-	// - `extra_branches_month`
-	// - `snapshot_storage_bytes_month`
+	//
+	//  - `compute_unit_seconds`
+	//  - `root_branch_bytes_month`
+	//  - `child_branch_bytes_month`
+	//  - `instant_restore_bytes_month`
+	//  - `public_network_transfer_bytes`
+	//  - `private_network_transfer_bytes`
+	//  - `extra_branches_month`
+	//  - `snapshot_storage_bytes_month`
+	//
 	// Pass multiple values as repeated query parameters or a comma-separated list:
-	// - `metrics=compute_unit_seconds&metrics=extra_branches_month`
-	// - `metrics=compute_unit_seconds,extra_branches_month`.
+	//
+	//  - `metrics=compute_unit_seconds&metrics=extra_branches_month`
+	//  - `metrics=compute_unit_seconds,extra_branches_month`
 	Metrics ConsumptionHistoryQueryMetrics
 }
 
@@ -10121,6 +10138,7 @@ func decodeGetConsumptionHistoryPerProjectV2Params(args [0]string, argsEscaped b
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				params.ProjectIds = nil
 				return d.DecodeArray(func(d uri.Decoder) error {
 					var paramsDotProjectIdsVal string
 					if err := func() error {
@@ -10383,6 +10401,7 @@ func decodeGetConsumptionHistoryPerProjectV2Params(args [0]string, argsEscaped b
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
 				var paramsDotMetricsVal []string
 				if err := func() error {
+					paramsDotMetricsVal = nil
 					return d.DecodeArray(func(d uri.Decoder) error {
 						var paramsDotMetricsValVal string
 						if err := func() error {
@@ -12108,8 +12127,8 @@ func decodeGetOrganizationMemberParams(args [2]string, argsEscaped bool, r *http
 type GetOrganizationMembersParams struct {
 	// Sort the members by the specified field. Defaults to `joined_at`.
 	SortBy OptGetOrganizationMembersSortBy `json:",omitempty,omitzero"`
-	// A cursor to use in pagination. A cursor defines your place in the data list. Include `response.
-	// pagination.next` in subsequent API calls to fetch next page of the list.
+	// A cursor to use in pagination. A cursor defines your place in the data list. Include
+	// `response.pagination.next` in subsequent API calls to fetch next page of the list.
 	Cursor OptString `json:",omitempty,omitzero"`
 	// Defines the sorting order of entities.
 	SortOrder OptSortOrderParam `json:",omitempty,omitzero"`
@@ -12555,8 +12574,7 @@ func decodeGetOrganizationSpendingLimitParams(args [1]string, argsEscaped bool, 
 type GetOrganizationVPCEndpointDetailsParams struct {
 	// The Neon organization ID.
 	OrgID string
-	// The Neon region ID.
-	// Azure regions are currently not supported.
+	// The Neon region ID. Azure regions are currently not supported.
 	RegionID string
 	// The VPC endpoint ID.
 	VpcEndpointID string
@@ -13512,8 +13530,8 @@ type GetProjectBranchBucketObjectParams struct {
 	BranchID string
 	// The bucket name.
 	BucketName string
-	// The object key. Keys may contain `/`; the `/` characters of nested
-	// keys must be percent-encoded (`%2F`) in the path segment.
+	// The object key. Keys may contain `/`; the `/` characters of nested keys must be percent-encoded
+	// (`%2F`) in the path segment.
 	ObjectKey string
 }
 
@@ -14916,8 +14934,9 @@ type GetProjectBranchSchemaParams struct {
 	// The point in time for which the schema is retrieved.
 	Timestamp OptDateTime `json:",omitempty,omitzero"`
 	// The format of the schema to retrieve. Possible values:
-	// - `sql` (default)
-	// - `json`.
+	//
+	//  - `sql` (default)
+	//  - `json`
 	Format OptString `json:",omitempty,omitzero"`
 }
 
@@ -17605,11 +17624,11 @@ func decodeListOrganizationVPCEndpointsAllRegionsParams(args [1]string, argsEsca
 type ListProjectBranchBucketObjectsParams struct {
 	// Only list objects whose key starts with this prefix.
 	Prefix OptString `json:",omitempty,omitzero"`
-	// Collapse keys sharing a common prefix up to the first occurrence of
-	// this delimiter (typically `/`) into the `folders` array.
+	// Collapse keys sharing a common prefix up to the first occurrence of this delimiter (typically `/`)
+	// into the `folders` array.
 	Delimiter OptString `json:",omitempty,omitzero"`
-	// Opaque pagination cursor returned as `next_cursor` by a previous
-	// call. Resume listing after the last item of the previous page.
+	// Opaque pagination cursor returned as `next_cursor` by a previous call. Resume listing after the last
+	// item of the previous page.
 	Cursor OptString `json:",omitempty,omitzero"`
 	// Maximum number of items (objects + folders) to return.
 	Limit OptInt32 `json:",omitempty,omitzero"`
@@ -18558,8 +18577,8 @@ func decodeListProjectBranchEndpointsParams(args [2]string, argsEscaped bool, r 
 
 // ListProjectBranchFunctionsParams is parameters of listProjectBranchFunctions operation.
 type ListProjectBranchFunctionsParams struct {
-	// A cursor to use in pagination. A cursor defines your place in the data list. Include `response.
-	// pagination.next` in subsequent API calls to fetch next page of the list.
+	// A cursor to use in pagination. A cursor defines your place in the data list. Include
+	// `response.pagination.next` in subsequent API calls to fetch next page of the list.
 	Cursor OptString `json:",omitempty,omitzero"`
 	// Specify a value from 1 to 1000 to limit number of functions in the response.
 	Limit OptInt `json:",omitempty,omitzero"`
@@ -18714,6 +18733,731 @@ func decodeListProjectBranchFunctionsParams(args [2]string, argsEscaped bool, r 
 			Err:  err,
 		}
 	}
+	// Decode path: project_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "project_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProjectID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.ProjectID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "project_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: branch_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "branch_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BranchID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.BranchID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "branch_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ListProjectBranchLogFieldValuesParams is parameters of listProjectBranchLogFieldValues operation.
+type ListProjectBranchLogFieldValuesParams struct {
+	// Length of the lookup window, ending at `end_time` or at the current time when `end_time` is omitted.
+	// Mutually exclusive with `start_time`. Defaults to six hours.
+	Since OptProjectBranchLogDuration `json:",omitempty,omitzero"`
+	// Inclusive beginning of the lookup window. Mutually exclusive with `since`.
+	StartTime OptDateTime `json:",omitempty,omitzero"`
+	// Exclusive end of the lookup window. Defaults to the current time.
+	EndTime OptDateTime `json:",omitempty,omitzero"`
+	// Only consider records emitted by this Neon service.
+	Source OptProjectBranchLogSource `json:",omitempty,omitzero"`
+	// Maximum number of distinct values to return. The response sets `is_truncated` when this bound, or
+	// the server's own scan cap, cut the list short.
+	Limit OptInt `json:",omitempty,omitzero"`
+	// The Neon project ID.
+	ProjectID string
+	// The Neon branch ID.
+	BranchID string
+	// The log field whose distinct values should be returned. Must be one of the names returned by the log
+	// fields endpoint for this branch.
+	FieldName string
+}
+
+func unpackListProjectBranchLogFieldValuesParams(packed middleware.Parameters) (params ListProjectBranchLogFieldValuesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "since",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Since = v.(OptProjectBranchLogDuration)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "start_time",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.StartTime = v.(OptDateTime)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "end_time",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.EndTime = v.(OptDateTime)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "source",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Source = v.(OptProjectBranchLogSource)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "limit",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Limit = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "project_id",
+			In:   "path",
+		}
+		params.ProjectID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "branch_id",
+			In:   "path",
+		}
+		params.BranchID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "field_name",
+			In:   "path",
+		}
+		params.FieldName = packed[key].(string)
+	}
+	return params
+}
+
+func decodeListProjectBranchLogFieldValuesParams(args [3]string, argsEscaped bool, r *http.Request) (params ListProjectBranchLogFieldValuesParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: since.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "since",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotSinceVal ProjectBranchLogDuration
+				if err := func() error {
+					var paramsDotSinceValVal string
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToString(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotSinceValVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					paramsDotSinceVal = ProjectBranchLogDuration(paramsDotSinceValVal)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Since.SetTo(paramsDotSinceVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Since.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "since",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: start_time.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "start_time",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotStartTimeVal time.Time
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToDateTime(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotStartTimeVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.StartTime.SetTo(paramsDotStartTimeVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "start_time",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: end_time.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "end_time",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotEndTimeVal time.Time
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToDateTime(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotEndTimeVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.EndTime.SetTo(paramsDotEndTimeVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "end_time",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: source.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "source",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotSourceVal ProjectBranchLogSource
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotSourceVal = ProjectBranchLogSource(c)
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Source.SetTo(paramsDotSourceVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Source.Get(); ok {
+					if err := func() error {
+						if err := value.Validate(); err != nil {
+							return err
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "source",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: limit.
+	{
+		val := int(100)
+		params.Limit.SetTo(val)
+	}
+	// Decode query: limit.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLimitVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLimitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Limit.SetTo(paramsDotLimitVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Limit.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           1,
+							MaxSet:        true,
+							Max:           1000,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+							Pattern:       nil,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode path: project_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "project_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProjectID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.ProjectID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "project_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: branch_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "branch_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BranchID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.BranchID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "branch_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: field_name.
+	if err := func() error {
+		param := args[2]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[2])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "field_name",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.FieldName = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     1,
+					MinLengthSet:  true,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         nil,
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.FieldName)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "field_name",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ListProjectBranchLogFieldsParams is parameters of listProjectBranchLogFields operation.
+type ListProjectBranchLogFieldsParams struct {
+	// The Neon project ID.
+	ProjectID string
+	// The Neon branch ID.
+	BranchID string
+}
+
+func unpackListProjectBranchLogFieldsParams(packed middleware.Parameters) (params ListProjectBranchLogFieldsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "project_id",
+			In:   "path",
+		}
+		params.ProjectID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "branch_id",
+			In:   "path",
+		}
+		params.BranchID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeListProjectBranchLogFieldsParams(args [2]string, argsEscaped bool, r *http.Request) (params ListProjectBranchLogFieldsParams, _ error) {
 	// Decode path: project_id.
 	if err := func() error {
 		param := args[0]
@@ -19014,17 +19758,18 @@ type ListProjectBranchesParams struct {
 	// Sort the branches by sort_field. If not provided, branches will be sorted by updated_at descending
 	// order.
 	SortBy OptListProjectBranchesSortBy `json:",omitempty,omitzero"`
-	// A cursor to use in pagination. A cursor defines your place in the data list. Include `response.
-	// pagination.next` in subsequent API calls to fetch next page of the list.
+	// A cursor to use in pagination. A cursor defines your place in the data list. Include
+	// `response.pagination.next` in subsequent API calls to fetch next page of the list.
 	Cursor OptString `json:",omitempty,omitzero"`
 	// Defines the sorting order of entities.
 	SortOrder OptSortOrderParam `json:",omitempty,omitzero"`
 	// The maximum number of records to be returned in the response.
 	Limit OptInt `json:",omitempty,omitzero"`
-	// If true, return recoverable deleted branches too (soft-deleted within the recovery window).
-	// If false or not provided, return only active (non-deleted) branches.
-	// This parameter is part of the Branch Recovery feature, which is in preview and not available to
-	// all users.
+	// If true, return recoverable deleted branches too (soft-deleted within the recovery window). If false
+	// or not provided, return only active (non-deleted) branches.
+	//
+	// This parameter is part of the Branch Recovery feature, which is in preview and not available to all
+	// users.
 	IncludeDeleted OptBool `json:",omitempty,omitzero"`
 	// The Neon project ID.
 	ProjectID string
@@ -19567,6 +20312,222 @@ func decodeListProjectEndpointsParams(args [1]string, argsEscaped bool, r *http.
 	return params, nil
 }
 
+// ListProjectMembersParams is parameters of listProjectMembers operation.
+type ListProjectMembersParams struct {
+	// A cursor to use in pagination. A cursor defines your place in the data list. Include
+	// `response.pagination.next` in subsequent API calls to fetch next page of the list.
+	Cursor OptString `json:",omitempty,omitzero"`
+	// The maximum number of members to return in the response.
+	Limit     OptInt `json:",omitempty,omitzero"`
+	ProjectID string
+}
+
+func unpackListProjectMembersParams(packed middleware.Parameters) (params ListProjectMembersParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "cursor",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Cursor = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "limit",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Limit = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "project_id",
+			In:   "path",
+		}
+		params.ProjectID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeListProjectMembersParams(args [1]string, argsEscaped bool, r *http.Request) (params ListProjectMembersParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: cursor.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "cursor",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotCursorVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotCursorVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Cursor.SetTo(paramsDotCursorVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "cursor",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: limit.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLimitVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLimitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Limit.SetTo(paramsDotLimitVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Limit.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           1,
+							MaxSet:        true,
+							Max:           500,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+							Pattern:       nil,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode path: project_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "project_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProjectID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.ProjectID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "project_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // ListProjectOperationsParams is parameters of listProjectOperations operation.
 type ListProjectOperationsParams struct {
 	// Specify the cursor value from the previous response to get the next batch of operations.
@@ -19964,12 +20925,10 @@ type ListProjectsParams struct {
 	Search OptString `json:",omitempty,omitzero"`
 	// Search for projects by `org_id`.
 	OrgID OptString `json:",omitempty,omitzero"`
-	// Specify an explicit timeout in milliseconds to limit response delay.
-	// After timing out, the incomplete list of project data fetched so far will be returned.
-	// Projects still being fetched when the timeout occurred are listed in the "unavailable" attribute
-	// of the response.
-	// If not specified, an implicit implementation defined timeout is chosen with the same behaviour as
-	// above.
+	// Specify an explicit timeout in milliseconds to limit response delay. After timing out, the
+	// incomplete list of project data fetched so far will be returned. Projects still being fetched when
+	// the timeout occurred are listed in the "unavailable" attribute of the response. If not specified, an
+	// implicit implementation defined timeout is chosen with the same behaviour as above.
 	Timeout OptInt `json:",omitempty,omitzero"`
 	// Show only deleted projects within the recovery window.
 	Recoverable OptBool `json:",omitempty,omitzero"`
@@ -20379,12 +21338,10 @@ type ListSharedProjectsParams struct {
 	Limit OptInt `json:",omitempty,omitzero"`
 	// Search query by name or id.
 	Search OptString `json:",omitempty,omitzero"`
-	// Specify an explicit timeout in milliseconds to limit response delay.
-	// After timing out, the incomplete list of project data fetched so far will be returned.
-	// Projects still being fetched when the timeout occurred are listed in the "unavailable" attribute
-	// of the response.
-	// If not specified, an implicit implementation defined timeout is chosen with the same behaviour as
-	// above.
+	// Specify an explicit timeout in milliseconds to limit response delay. After timing out, the
+	// incomplete list of project data fetched so far will be returned. Projects still being fetched when
+	// the timeout occurred are listed in the "unavailable" attribute of the response. If not specified, an
+	// implicit implementation defined timeout is chosen with the same behaviour as above.
 	Timeout OptInt `json:",omitempty,omitzero"`
 }
 
@@ -20746,8 +21703,8 @@ type PresignProjectBranchBucketObjectParams struct {
 	BranchID string
 	// The bucket name.
 	BucketName string
-	// The object key. Keys may contain `/`; the `/` characters of nested
-	// keys must be percent-encoded (`%2F`) in the path segment.
+	// The object key. Keys may contain `/`; the `/` characters of nested keys must be percent-encoded
+	// (`%2F`) in the path segment.
 	ObjectKey string
 }
 
@@ -21040,6 +21997,166 @@ func decodePresignProjectBranchBucketObjectParams(args [4]string, argsEscaped bo
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "object_key",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// QueryProjectBranchLogsParams is parameters of queryProjectBranchLogs operation.
+type QueryProjectBranchLogsParams struct {
+	// The Neon project ID.
+	ProjectID string
+	// The Neon branch ID.
+	BranchID string
+}
+
+func unpackQueryProjectBranchLogsParams(packed middleware.Parameters) (params QueryProjectBranchLogsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "project_id",
+			In:   "path",
+		}
+		params.ProjectID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "branch_id",
+			In:   "path",
+		}
+		params.BranchID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeQueryProjectBranchLogsParams(args [2]string, argsEscaped bool, r *http.Request) (params QueryProjectBranchLogsParams, _ error) {
+	// Decode path: project_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "project_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProjectID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.ProjectID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "project_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: branch_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "branch_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.BranchID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.BranchID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "branch_id",
 			In:   "path",
 			Err:  err,
 		}
@@ -21381,6 +22498,196 @@ func decodeRemoveOrganizationMemberParams(args [2]string, argsEscaped bool, r *h
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "org_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: member_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "member_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.MemberID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "member_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// RemoveProjectMemberRoleParams is parameters of removeProjectMemberRole operation.
+type RemoveProjectMemberRoleParams struct {
+	ConfirmSelfLockout OptBool `json:",omitempty,omitzero"`
+	ProjectID          string
+	MemberID           uuid.UUID
+}
+
+func unpackRemoveProjectMemberRoleParams(packed middleware.Parameters) (params RemoveProjectMemberRoleParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "confirm_self_lockout",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.ConfirmSelfLockout = v.(OptBool)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "project_id",
+			In:   "path",
+		}
+		params.ProjectID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "member_id",
+			In:   "path",
+		}
+		params.MemberID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeRemoveProjectMemberRoleParams(args [2]string, argsEscaped bool, r *http.Request) (params RemoveProjectMemberRoleParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: confirm_self_lockout.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "confirm_self_lockout",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotConfirmSelfLockoutVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotConfirmSelfLockoutVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.ConfirmSelfLockout.SetTo(paramsDotConfirmSelfLockoutVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "confirm_self_lockout",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode path: project_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "project_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProjectID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.ProjectID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "project_id",
 			In:   "path",
 			Err:  err,
 		}
@@ -21969,8 +23276,8 @@ func decodeRestoreProjectBranchParams(args [2]string, argsEscaped bool, r *http.
 
 // RestoreSnapshotParams is parameters of restoreSnapshot operation.
 type RestoreSnapshotParams struct {
-	// DEPRECATED. Use the `name` field in the request body instead.
-	// A name for the newly restored branch. If omitted, a default name will be generated.
+	// DEPRECATED. Use the `name` field in the request body instead. A name for the newly restored branch.
+	// If omitted, a default name will be generated.
 	//
 	// Deprecated: schema marks this parameter as deprecated.
 	Name OptString `json:",omitempty,omitzero"`
@@ -23140,6 +24447,196 @@ func decodeSetOrganizationSpendingLimitParams(args [1]string, argsEscaped bool, 
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "org_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// SetProjectMemberRoleParams is parameters of setProjectMemberRole operation.
+type SetProjectMemberRoleParams struct {
+	ConfirmSelfDemotion OptBool `json:",omitempty,omitzero"`
+	ProjectID           string
+	MemberID            uuid.UUID
+}
+
+func unpackSetProjectMemberRoleParams(packed middleware.Parameters) (params SetProjectMemberRoleParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "confirm_self_demotion",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.ConfirmSelfDemotion = v.(OptBool)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "project_id",
+			In:   "path",
+		}
+		params.ProjectID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "member_id",
+			In:   "path",
+		}
+		params.MemberID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeSetProjectMemberRoleParams(args [2]string, argsEscaped bool, r *http.Request) (params SetProjectMemberRoleParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: confirm_self_demotion.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "confirm_self_demotion",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotConfirmSelfDemotionVal bool
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToBool(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotConfirmSelfDemotionVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.ConfirmSelfDemotion.SetTo(paramsDotConfirmSelfDemotionVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "confirm_self_demotion",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode path: project_id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "project_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ProjectID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     0,
+					MinLengthSet:  false,
+					MaxLength:     0,
+					MaxLengthSet:  false,
+					Email:         false,
+					Hostname:      false,
+					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(params.ProjectID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "project_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: member_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "member_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.MemberID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "member_id",
 			In:   "path",
 			Err:  err,
 		}

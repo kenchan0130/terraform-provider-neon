@@ -4,6 +4,7 @@ package neon
 
 import (
 	"context"
+	"io"
 	"net/url"
 	"strings"
 	"time"
@@ -38,22 +39,22 @@ type Invoker interface {
 	AcceptProjectTransferRequest(ctx context.Context, request OptAcceptProjectTransferRequestReq, params AcceptProjectTransferRequestParams) (AcceptProjectTransferRequestRes, error)
 	// AddBranchNeonAuthOauthProvider invokes addBranchNeonAuthOauthProvider operation.
 	//
-	// Adds an OAuth provider configuration to the specified branch's Neon Auth integration.
-	// After adding, users can authenticate using the configured provider.
+	// Adds an OAuth provider configuration to the specified branch's Neon Auth integration. After adding,
+	// users can authenticate using the configured provider.
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/auth/oauth_providers
 	AddBranchNeonAuthOauthProvider(ctx context.Context, request *NeonAuthAddOAuthProviderRequest, params AddBranchNeonAuthOauthProviderParams) (*NeonAuthOauthProvider, error)
 	// AddBranchNeonAuthTrustedDomain invokes addBranchNeonAuthTrustedDomain operation.
 	//
-	// Adds a domain to the redirect URI whitelist for the specified branch.
-	// Only domains in this list are permitted as redirect targets after authentication.
+	// Adds a domain to the redirect URI whitelist for the specified branch. Only domains in this list are
+	// permitted as redirect targets after authentication.
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/auth/domains
 	AddBranchNeonAuthTrustedDomain(ctx context.Context, request *NeonAuthAddDomainToRedirectURIWhitelistRequest, params AddBranchNeonAuthTrustedDomainParams) error
 	// AddNeonAuthDomainToRedirectURIWhitelist invokes addNeonAuthDomainToRedirectURIWhitelist operation.
 	//
-	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Adds a domain
-	// to the redirect_uri whitelist for the specified project.
+	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Adds a domain to
+	// the redirect_uri whitelist for the specified project.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
@@ -61,8 +62,8 @@ type Invoker interface {
 	AddNeonAuthDomainToRedirectURIWhitelist(ctx context.Context, request *NeonAuthAddDomainToRedirectURIWhitelistRequest, params AddNeonAuthDomainToRedirectURIWhitelistParams) error
 	// AddNeonAuthOauthProvider invokes addNeonAuthOauthProvider operation.
 	//
-	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead.
-	// Adds an OAuth provider to the specified project.
+	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead. Adds an
+	// OAuth provider to the specified project.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
@@ -71,13 +72,18 @@ type Invoker interface {
 	// AddProjectJWKS invokes addProjectJWKS operation.
 	//
 	// Adds a JWKS URL to the specified project for verifying JWTs used as the authentication mechanism.
+	//
 	// The URL must be a valid HTTPS URL that returns a JSON Web Key Set.
+	//
 	// The `provider_name` field allows you to specify which authentication provider you're using (e.g.,
 	// Clerk, Auth0, AWS Cognito).
+	//
 	// The `branch_id` scopes the JWKS URL to specific branches; if not specified, it applies to all
 	// branches.
+	//
 	// The `role_names` scopes the URL to specific roles; if not specified, default roles are used
 	// (`authenticator`, `authenticated`, `anonymous`).
+	//
 	// The `jwt_audience` specifies which `aud` values are accepted in JWTs.
 	//
 	// POST /projects/{project_id}/jwks
@@ -90,63 +96,60 @@ type Invoker interface {
 	AssignOrganizationVPCEndpoint(ctx context.Context, request *VPCEndpointAssignment, params AssignOrganizationVPCEndpointParams) error
 	// AssignProjectVPCEndpoint invokes assignProjectVPCEndpoint operation.
 	//
-	// Sets or updates a VPC endpoint restriction for a Neon project.
-	// When a VPC endpoint restriction is set, the project only accepts connections
-	// from the specified VPC.
-	// A VPC endpoint can be set as a restriction only after it is assigned to the
-	// parent organization of the Neon project.
+	// Sets or updates a VPC endpoint restriction for a Neon project. When a VPC endpoint restriction is
+	// set, the project only accepts connections from the specified VPC. A VPC endpoint can be set as a
+	// restriction only after it is assigned to the parent organization of the Neon project.
 	//
 	// POST /projects/{project_id}/vpc_endpoints/{vpc_endpoint_id}
 	AssignProjectVPCEndpoint(ctx context.Context, request *VPCEndpointAssignment, params AssignProjectVPCEndpointParams) error
 	// CountProjectBranches invokes countProjectBranches operation.
 	//
-	// Retrieves the total number of branches in the specified project.
-	// Supports an optional `search` parameter to count branches matching a name filter.
+	// Retrieves the total number of branches in the specified project. Supports an optional `search`
+	// parameter to count branches matching a name filter.
 	//
 	// GET /projects/{project_id}/branches/count
 	CountProjectBranches(ctx context.Context, params CountProjectBranchesParams) (*BranchesCountResponse, error)
 	// CreateApiKey invokes createApiKey operation.
 	//
-	// Creates an API key.
-	// The `key_name` is a user-specified name for the key.
-	// Returns an `id` and `key`; the `key` is a randomly generated, 64-bit token required to access the
-	// Neon API.
-	// Store the key securely — it is only returned once.
-	// API keys can also be managed in the Neon Console.
-	// See [Manage API keys](https://neon.com/docs/manage/api-keys/).
+	// Creates an API key. The `key_name` is a user-specified name for the key. Returns an `id` and `key`;
+	// the `key` is a randomly generated, 64-bit token required to access the Neon API. Store the key
+	// securely — it is only returned once. API keys can also be managed in the Neon Console. See
+	// [Manage API keys].
+	//
+	// [Manage API keys]: https://neon.com/docs/manage/api-keys/
 	//
 	// POST /api_keys
 	CreateApiKey(ctx context.Context, request *ApiKeyCreateRequest) (*ApiKeyCreateResponse, error)
 	// CreateBranchNeonAuthNewUser invokes createBranchNeonAuthNewUser operation.
 	//
-	// Creates a new user in the Neon Auth user directory for the specified branch.
-	// The user is created in the `neon_auth.users_sync` table and can immediately authenticate
-	// using the branch's configured auth providers.
+	// Creates a new user in the Neon Auth user directory for the specified branch. The user is created in
+	// the `neon_auth.users_sync` table and can immediately authenticate using the branch's configured auth
+	// providers.
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/auth/users
 	CreateBranchNeonAuthNewUser(ctx context.Context, request *CreateBranchNeonAuthNewUserRequest, params CreateBranchNeonAuthNewUserParams) (*NeonAuthCreateNewUserResponse, error)
 	// CreateCredential invokes createCredential operation.
 	//
-	// Issues a new scoped service credential anchored to the specified
-	// branch. The response carries `api_token` and `s3_secret_access_key`
-	// exactly once — they are not stored server-side.
-	// **Note**: This endpoint is currently in Private Beta.
+	// Issues a new scoped service credential anchored to the specified branch. The response carries
+	// `api_token` and `s3_secret_access_key` exactly once — they are not stored server-side.
+	//
+	// Note: This endpoint is currently in Private Beta.
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/credentials
 	CreateCredential(ctx context.Context, request *CreateCredentialRequest, params CreateCredentialParams) (*CreateCredentialResponse, error)
 	// CreateNeonAuth invokes createNeonAuth operation.
 	//
-	// Enables Neon Auth for the specified branch by connecting it to an authentication provider.
-	// Creating the integration provisions the `neon_auth` schema in the branch database, which stores
-	// user identity data synchronized from the provider.
+	// Enables Neon Auth for the specified branch by connecting it to an authentication provider. Creating
+	// the integration provisions the `neon_auth` schema in the branch database, which stores user identity
+	// data synchronized from the provider.
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/auth
 	CreateNeonAuth(ctx context.Context, request *EnableNeonAuthIntegrationRequest, params CreateNeonAuthParams) (*NeonAuthCreateIntegrationResponse, error)
 	// CreateNeonAuthIntegration invokes createNeonAuthIntegration operation.
 	//
 	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth` instead. Creates a project on a
-	// third-party authentication provider's platform for use with Neon Auth.
-	// Use this endpoint if the frontend integration flow can't be used.
+	// third-party authentication provider's platform for use with Neon Auth. Use this endpoint if the
+	// frontend integration flow can't be used.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
@@ -154,10 +157,9 @@ type Invoker interface {
 	CreateNeonAuthIntegration(ctx context.Context, request *NeonAuthCreateIntegrationRequest) (*NeonAuthCreateIntegrationResponse, error)
 	// CreateNeonAuthNewUser invokes createNeonAuthNewUser operation.
 	//
-	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/users` instead. Creates a new
-	// user in Neon Auth.
-	// The user will be created in your neon_auth.users_sync table and automatically propagated to your
-	// auth project, whether Neon-managed or provider-owned.
+	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/users` instead. Creates a new user
+	// in Neon Auth. The user will be created in your neon_auth.users_sync table and automatically
+	// propagated to your auth project, whether Neon-managed or provider-owned.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
@@ -165,146 +167,143 @@ type Invoker interface {
 	CreateNeonAuthNewUser(ctx context.Context, request *NeonAuthCreateNewUserRequest) (*NeonAuthCreateNewUserResponse, error)
 	// CreateNeonAuthProviderSDKKeys invokes createNeonAuthProviderSDKKeys operation.
 	//
-	// Generates SDK or API Keys for the auth provider. These might be called different things depending
-	// on the auth provider you're using, but are generally used for setting up the frontend and backend
-	// SDKs.
+	// Generates SDK or API Keys for the auth provider. These might be called different things depending on
+	// the auth provider you're using, but are generally used for setting up the frontend and backend SDKs.
 	//
 	// POST /projects/auth/keys
 	CreateNeonAuthProviderSDKKeys(ctx context.Context, request *NeonAuthCreateAuthProviderSDKKeysRequest) (*NeonAuthCreateIntegrationResponse, error)
 	// CreateOrgApiKey invokes createOrgApiKey operation.
 	//
-	// Creates an API key for the specified organization.
-	// The `key_name` is a user-specified name for the key.
-	// Returns an `id` and `key`; the `key` is a randomly generated, 64-bit token required to access the
-	// Neon API.
-	// Store the key securely — it is only returned once.
-	// API keys can also be managed in the Neon Console.
-	// See [Manage API keys](https://neon.com/docs/manage/api-keys/).
+	// Creates an API key for the specified organization. The `key_name` is a user-specified name for the
+	// key. Returns an `id` and `key`; the `key` is a randomly generated, 64-bit token required to access
+	// the Neon API. Store the key securely — it is only returned once. API keys can also be managed in
+	// the Neon Console. See [Manage API keys].
+	//
+	// [Manage API keys]: https://neon.com/docs/manage/api-keys/
 	//
 	// POST /organizations/{org_id}/api_keys
 	CreateOrgApiKey(ctx context.Context, request *OrgApiKeyCreateRequest, params CreateOrgApiKeyParams) (*OrgApiKeyCreateResponse, error)
 	// CreateOrganizationInvitations invokes createOrganizationInvitations operation.
 	//
-	// Creates invitations for a specific organization.
-	// If the invited user has an existing account, they automatically join as a member.
-	// If they don't yet have an account, they are invited to create one, after which they become a
-	// member.
-	// Each invited user receives an email notification.
+	// Creates invitations for a specific organization. If the invited user has an existing account, they
+	// automatically join as a member. If they don't yet have an account, they are invited to create one,
+	// after which they become a member. Each invited user receives an email notification.
 	//
 	// POST /organizations/{org_id}/invitations
 	CreateOrganizationInvitations(ctx context.Context, request *OrganizationInvitesCreateRequest, params CreateOrganizationInvitationsParams) (*OrganizationInvitationsResponse, error)
 	// CreateProject invokes createProject operation.
 	//
-	// Creates a Neon project within an organization.
-	// If using a personal API key, include the `org_id` parameter to specify which organization to
-	// create the project in.
-	// If using an org API key, `org_id` is automatically inferred from the key.
-	// Plan limits define how many projects you can create.
-	// For more information, see [Manage projects](https://neon.com/docs/manage/projects/).
-	// You can specify a region and Postgres version in the request body.
-	// Neon currently supports PostgreSQL 14, 15, 16, 17, and 18.
-	// For supported regions and `region_id` values, see [Regions](https://neon.
-	// com/docs/introduction/regions/).
+	// Creates a Neon project within an organization. If using a personal API key, include the `org_id`
+	// parameter to specify which organization to create the project in. If using an org API key, `org_id`
+	// is automatically inferred from the key. Plan limits define how many projects you can create. For
+	// more information, see [Manage projects].
+	//
+	// You can specify a region and Postgres version in the request body. Neon currently supports
+	// PostgreSQL 14, 15, 16, 17, and 18. For supported regions and `region_id` values, see [Regions].
+	//
+	// [Manage projects]: https://neon.com/docs/manage/projects/
+	// [Regions]: https://neon.com/docs/introduction/regions/
 	//
 	// POST /projects
 	CreateProject(ctx context.Context, request *ProjectCreateRequest) (*CreatedProject, error)
 	// CreateProjectBranch invokes createProjectBranch operation.
 	//
-	// Creates a branch in the specified project.
-	// No request body is required, but you can specify one to create a compute endpoint or select a
-	// non-default parent branch.
-	// By default, the branch is created from the project's default branch with no compute endpoint, and
-	// the branch name is auto-generated.
-	// To access the branch, add a `read_write` endpoint.
-	// Each branch supports one read-write endpoint and multiple read-only endpoints.
-	// For related information, see [Manage branches](https://neon.com/docs/manage/branches/).
+	// Creates a branch in the specified project. No request body is required, but you can specify one to
+	// create a compute endpoint or select a non-default parent branch. By default, the branch is created
+	// from the project's default branch with no compute endpoint, and the branch name is auto-generated.
+	// To access the branch, add a `read_write` endpoint. Each branch supports one read-write endpoint and
+	// multiple read-only endpoints. For related information, see [Manage branches].
+	//
+	// [Manage branches]: https://neon.com/docs/manage/branches/
 	//
 	// POST /projects/{project_id}/branches
 	CreateProjectBranch(ctx context.Context, request OptCreateProjectBranchReq, params CreateProjectBranchParams) (*CreatedBranch, error)
 	// CreateProjectBranchAnonymized invokes createProjectBranchAnonymized operation.
 	//
-	// Creates a new branch with anonymized data using PostgreSQL Anonymizer for static masking.
-	// This allows developers to work with masked production data.
-	// Optionally, provide `masking_rules` to set initial masking rules for the branch
-	// and `start_anonymization` to automatically start anonymization after creation. This
-	// combines functionality of updating masking rules and starting anonymization into the
-	// branch creation request.
-	// **Note**: This endpoint is currently in Beta.
+	// Creates a new branch with anonymized data using PostgreSQL Anonymizer for static masking. This
+	// allows developers to work with masked production data. Optionally, provide `masking_rules` to set
+	// initial masking rules for the branch and `start_anonymization` to automatically start anonymization
+	// after creation. This combines functionality of updating masking rules and starting anonymization
+	// into the branch creation request.
+	//
+	// Note: This endpoint is currently in Beta.
 	//
 	// POST /projects/{project_id}/branch_anonymized
 	CreateProjectBranchAnonymized(ctx context.Context, request *BranchAnonymizedCreateRequest, params CreateProjectBranchAnonymizedParams) (*CreatedBranch, error)
 	// CreateProjectBranchBucket invokes createProjectBranchBucket operation.
 	//
-	// Creates a new branchable object-storage bucket on the specified branch.
-	// Buckets are managed by the Neon Platform branchable-storage service.
-	// **Note**: This endpoint is currently in Private Beta.
+	// Creates a new branchable object-storage bucket on the specified branch. Buckets are managed by the
+	// Neon Platform branchable-storage service.
+	//
+	// Note: This endpoint is currently in Private Beta.
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/buckets
 	CreateProjectBranchBucket(ctx context.Context, request *BucketCreateRequest, params CreateProjectBranchBucketParams) (CreateProjectBranchBucketRes, error)
 	// CreateProjectBranchDataAPI invokes createProjectBranchDataAPI operation.
 	//
-	// Creates a new instance of Neon Data API in the specified branch.
-	// The Data API exposes a REST interface over the branch database. The `database_name` path parameter
-	// determines which database the API serves.
+	// Creates a new instance of Neon Data API in the specified branch. The Data API exposes a REST
+	// interface over the branch database. The `database_name` path parameter determines which database the
+	// API serves.
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/data-api/{database_name}
 	CreateProjectBranchDataAPI(ctx context.Context, request OptDataAPICreateRequest, params CreateProjectBranchDataAPIParams) (*DataAPICreateResponse, error)
 	// CreateProjectBranchDatabase invokes createProjectBranchDatabase operation.
 	//
-	// Creates a database in the specified branch.
-	// A branch can have multiple databases.
-	// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
+	// Creates a database in the specified branch. A branch can have multiple databases. For related
+	// information, see [Manage databases].
+	//
+	// [Manage databases]: https://neon.com/docs/manage/databases/
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/databases
 	CreateProjectBranchDatabase(ctx context.Context, request *DatabaseCreateRequest, params CreateProjectBranchDatabaseParams) (*DatabaseOperations, error)
 	// CreateProjectBranchFunctionDeployment invokes createProjectBranchFunctionDeployment operation.
 	//
-	// Creates a deployment for the function. Supply any subset of zip,
-	// environment, and runtime; omitted fields inherit the
-	// function's latest version. At least one field must be supplied. The
-	// first deployment of a function must include zip. The newest deployment
-	// becomes active.
-	// **Note**: This endpoint is currently in Private Beta.
+	// Creates a deployment for the function. Supply any subset of zip, environment, and runtime; omitted
+	// fields inherit the function's latest version. At least one field must be supplied. The first
+	// deployment of a function must include zip. The newest deployment becomes active.
+	//
+	// Note: This endpoint is currently in Private Beta.
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/functions/{slug}/deployments
 	CreateProjectBranchFunctionDeployment(ctx context.Context, request *FunctionDeployRequestMultipart, params CreateProjectBranchFunctionDeploymentParams) (*NeonFunctionDeploymentResponse, error)
 	// CreateProjectBranchRole invokes createProjectBranchRole operation.
 	//
-	// Creates a Postgres role in the specified branch.
-	// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
-	// Connections established to the active compute endpoint will be dropped.
-	// If the compute endpoint is idle, the endpoint becomes active for a short period of time and is
-	// suspended afterward.
+	// Creates a Postgres role in the specified branch. For related information, see [Manage roles].
+	//
+	// Connections established to the active compute endpoint will be dropped. If the compute endpoint is
+	// idle, the endpoint becomes active for a short period of time and is suspended afterward.
+	//
+	// [Manage roles]: https://neon.com/docs/manage/roles/
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/roles
 	CreateProjectBranchRole(ctx context.Context, request *RoleCreateRequest, params CreateProjectBranchRoleParams) (*RoleOperations, error)
 	// CreateProjectEndpoint invokes createProjectEndpoint operation.
 	//
-	// Creates a compute endpoint for the specified branch.
-	// A compute endpoint is a Neon compute instance.
-	// There is a maximum of one read-write compute endpoint per branch.
-	// If the specified branch already has a read-write compute endpoint, the operation fails.
-	// A branch can have multiple read-only compute endpoints.
-	// For more information about compute endpoints, see [Manage computes](https://neon.
-	// com/docs/manage/endpoints/).
+	// Creates a compute endpoint for the specified branch. A compute endpoint is a Neon compute instance.
+	// There is a maximum of one read-write compute endpoint per branch. If the specified branch already
+	// has a read-write compute endpoint, the operation fails. A branch can have multiple read-only compute
+	// endpoints.
+	//
+	// For more information about compute endpoints, see [Manage computes].
+	//
+	// [Manage computes]: https://neon.com/docs/manage/endpoints/
 	//
 	// POST /projects/{project_id}/endpoints
 	CreateProjectEndpoint(ctx context.Context, request *EndpointCreateRequest, params CreateProjectEndpointParams) (*EndpointOperations, error)
 	// CreateProjectTransferRequest invokes createProjectTransferRequest operation.
 	//
-	// Creates a transfer request for the specified project. The request expires after a set period.
-	// To accept the request, the recipient calls `PUT
-	// /projects/{project_id}/transfer_requests/{request_id}`
-	// or uses the Neon Console claim link.
-	// The optional `ru` parameter redirects the recipient after acceptance.
+	// Creates a transfer request for the specified project. The request expires after a set period. To
+	// accept the request, the recipient calls `PUT /projects/{project_id}/transfer_requests/{request_id}`
+	// or uses the Neon Console claim link. The optional `ru` parameter redirects the recipient after
+	// acceptance.
 	//
 	// POST /projects/{project_id}/transfer_requests
 	CreateProjectTransferRequest(ctx context.Context, request OptCreateProjectTransferRequestReq, params CreateProjectTransferRequestParams) (*ProjectTransferRequestResponse, error)
 	// CreateSnapshot invokes createSnapshot operation.
 	//
-	// Creates a snapshot from the specified branch.
-	// This operation may initiate an asynchronous process.
-	// **Note**: This endpoint is currently in Beta.
+	// Creates a snapshot from the specified branch. This operation may initiate an asynchronous process.
+	//
+	// Note: This endpoint is currently in Beta.
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/snapshot
 	CreateSnapshot(ctx context.Context, params CreateSnapshotParams) (*CreateSnapshotOK, error)
@@ -316,22 +315,22 @@ type Invoker interface {
 	DeleteBranchNeonAuthOauthProvider(ctx context.Context, params DeleteBranchNeonAuthOauthProviderParams) error
 	// DeleteBranchNeonAuthTrustedDomain invokes deleteBranchNeonAuthTrustedDomain operation.
 	//
-	// Removes a domain from the redirect URI whitelist for the specified branch.
-	// After removal, the domain can no longer be used as a redirect target after authentication.
+	// Removes a domain from the redirect URI whitelist for the specified branch. After removal, the domain
+	// can no longer be used as a redirect target after authentication.
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/auth/domains
 	DeleteBranchNeonAuthTrustedDomain(ctx context.Context, request *NeonAuthDeleteDomainFromRedirectURIWhitelistRequest, params DeleteBranchNeonAuthTrustedDomainParams) error
 	// DeleteBranchNeonAuthUser invokes deleteBranchNeonAuthUser operation.
 	//
-	// Deletes the specified user from the Neon Auth user directory for the specified branch.
-	// Removes the user record from `neon_auth.users_sync`. This action cannot be undone.
+	// Deletes the specified user from the Neon Auth user directory for the specified branch. Removes the
+	// user record from `neon_auth.users_sync`. This action cannot be undone.
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/auth/users/{auth_user_id}
 	DeleteBranchNeonAuthUser(ctx context.Context, params DeleteBranchNeonAuthUserParams) error
 	// DeleteNeonAuthDomainFromRedirectURIWhitelist invokes deleteNeonAuthDomainFromRedirectURIWhitelist operation.
 	//
-	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Deletes a
-	// domain from the redirect_uri whitelist for the specified project.
+	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Deletes a domain
+	// from the redirect_uri whitelist for the specified project.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
@@ -366,25 +365,24 @@ type Invoker interface {
 	DeleteNeonAuthUser(ctx context.Context, params DeleteNeonAuthUserParams) error
 	// DeleteOrganizationSpendingLimit invokes deleteOrganizationSpendingLimit operation.
 	//
-	// Removes the configured monthly spending limit for the specified organization.
-	// Idempotent — removing an already-unset limit still succeeds.
-	// Available to organization admins on Launch and Scale plans only.
+	// Removes the configured monthly spending limit for the specified organization. Idempotent —
+	// removing an already-unset limit still succeeds. Available to organization admins on Launch and Scale
+	// plans only.
 	//
 	// DELETE /organizations/{org_id}/billing/spending_limit
 	DeleteOrganizationSpendingLimit(ctx context.Context, params DeleteOrganizationSpendingLimitParams) error
 	// DeleteOrganizationVPCEndpoint invokes deleteOrganizationVPCEndpoint operation.
 	//
-	// Deletes the VPC endpoint from the specified Neon organization.
-	// If you delete a VPC endpoint from a Neon organization, that VPC endpoint cannot
-	// be added back to the Neon organization.
+	// Deletes the VPC endpoint from the specified Neon organization. If you delete a VPC endpoint from a
+	// Neon organization, that VPC endpoint cannot be added back to the Neon organization.
 	//
 	// DELETE /organizations/{org_id}/vpc/region/{region_id}/vpc_endpoints/{vpc_endpoint_id}
 	DeleteOrganizationVPCEndpoint(ctx context.Context, params DeleteOrganizationVPCEndpointParams) error
 	// DeleteProject invokes deleteProject operation.
 	//
-	// Deletes the specified project and all its endpoints, branches, databases, and users.
-	// Deleted projects can be recovered within 7 days using `POST /projects/{project_id}/recover`.
-	// To list recoverable projects, use `GET /projects?recoverable=true`.
+	// Deletes the specified project and all its endpoints, branches, databases, and users. Deleted
+	// projects can be recovered within 7 days using `POST /projects/{project_id}/recover`. To list
+	// recoverable projects, use `GET /projects?recoverable=true`.
 	//
 	// DELETE /projects/{project_id}
 	DeleteProject(ctx context.Context, params DeleteProjectParams) (*ProjectResponse, error)
@@ -392,93 +390,101 @@ type Invoker interface {
 	//
 	// Deletes the specified branch from a project and places all compute endpoints into an idle state,
 	// breaking existing client connections.
-	// The deletion completes after all operations finish.
-	// You cannot delete a project's root or default branch, or a branch that has a child branch.
-	// A project must have at least one branch.
-	// By default, deleted branches can be recovered within a 7-day grace period.
-	// Use the `hard_delete` parameter to permanently delete the branch immediately.
-	// For related information, see [Manage branches](https://neon.com/docs/manage/branches/).
+	//
+	// The deletion completes after all operations finish. You cannot delete a project's root or default
+	// branch, or a branch that has a child branch. A project must have at least one branch.
+	//
+	// By default, deleted branches can be recovered within a 7-day grace period. Use the `hard_delete`
+	// parameter to permanently delete the branch immediately. For related information, see
+	// [Manage branches].
+	//
+	// [Manage branches]: https://neon.com/docs/manage/branches/
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}
 	DeleteProjectBranch(ctx context.Context, params DeleteProjectBranchParams) (DeleteProjectBranchRes, error)
 	// DeleteProjectBranchBucket invokes deleteProjectBranchBucket operation.
 	//
 	// Deletes the named bucket from the specified branch.
-	// **Note**: This endpoint is currently in Private Beta.
+	//
+	// Note: This endpoint is currently in Private Beta.
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}
 	DeleteProjectBranchBucket(ctx context.Context, params DeleteProjectBranchBucketParams) (DeleteProjectBranchBucketRes, error)
 	// DeleteProjectBranchBucketObject invokes deleteProjectBranchBucketObject operation.
 	//
-	// Deletes the named object from the bucket on the specified branch.
-	// Served by the user's session (no customer S3 credentials required).
-	// **Note**: This endpoint is currently in Private Beta.
+	// Deletes the named object from the bucket on the specified branch. Served by the user's session (no
+	// customer S3 credentials required).
+	//
+	// Note: This endpoint is currently in Private Beta.
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects/{object_key}
 	DeleteProjectBranchBucketObject(ctx context.Context, params DeleteProjectBranchBucketObjectParams) (DeleteProjectBranchBucketObjectRes, error)
 	// DeleteProjectBranchBucketObjectsByPrefix invokes deleteProjectBranchBucketObjectsByPrefix operation.
 	//
-	// Soft-deletes every object on the specified branch whose key starts with
-	// `prefix`, in a single call. Intended to back a "delete folder" action in
-	// an object browser: a `prefix` of `app/avatars/` removes every object
-	// beneath that folder. Served by the user's session (no customer S3
-	// credentials required).
-	// `prefix` must be non-empty, end with `/`, be at most 1024 bytes, and
-	// contain no control characters - a partial-segment prefix cannot
-	// accidentally delete sibling keys. Returns the number of objects
-	// soft-deleted (`deleted`), which may be 0 when no live object matched the
-	// prefix on this branch.
-	// Only objects physically present on this branch are tombstoned; objects
-	// inherited from an ancestor branch via copy-on-write (not materialized on
-	// this branch) are out of scope.
-	// **Note**: This endpoint is currently in Private Beta.
+	// Soft-deletes every object on the specified branch whose key starts with `prefix`, in a single call.
+	// Intended to back a "delete folder" action in an object browser: a `prefix` of `app/avatars/` removes
+	// every object beneath that folder. Served by the user's session (no customer S3 credentials
+	// required).
+	//
+	// `prefix` must be non-empty, end with `/`, be at most 1024 bytes, and contain no control characters -
+	// a partial-segment prefix cannot accidentally delete sibling keys. Returns the number of objects
+	// soft-deleted (`deleted`), which may be 0 when no live object matched the prefix on this branch.
+	//
+	// Only objects physically present on this branch are tombstoned; objects inherited from an ancestor
+	// branch via copy-on-write (not materialized on this branch) are out of scope.
+	//
+	// Note: This endpoint is currently in Private Beta.
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects-by-prefix
 	DeleteProjectBranchBucketObjectsByPrefix(ctx context.Context, params DeleteProjectBranchBucketObjectsByPrefixParams) (DeleteProjectBranchBucketObjectsByPrefixRes, error)
 	// DeleteProjectBranchDataAPI invokes deleteProjectBranchDataAPI operation.
 	//
-	// Deletes the Neon Data API for the specified branch.
-	// Existing connections using the Data API endpoint will fail after deletion.
+	// Deletes the Neon Data API for the specified branch. Existing connections using the Data API endpoint
+	// will fail after deletion.
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/data-api/{database_name}
 	DeleteProjectBranchDataAPI(ctx context.Context, params DeleteProjectBranchDataAPIParams) error
 	// DeleteProjectBranchDatabase invokes deleteProjectBranchDatabase operation.
 	//
-	// Deletes the specified database from the branch.
-	// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
+	// Deletes the specified database from the branch. For related information, see [Manage databases].
+	//
+	// [Manage databases]: https://neon.com/docs/manage/databases/
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/databases/{database_name}
 	DeleteProjectBranchDatabase(ctx context.Context, params DeleteProjectBranchDatabaseParams) (DeleteProjectBranchDatabaseRes, error)
 	// DeleteProjectBranchFunction invokes deleteProjectBranchFunction operation.
 	//
 	// Deletes the function identified by its slug.
-	// **Note**: This endpoint is currently in Private Beta.
+	//
+	// Note: This endpoint is currently in Private Beta.
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/functions/{slug}
 	DeleteProjectBranchFunction(ctx context.Context, params DeleteProjectBranchFunctionParams) error
 	// DeleteProjectBranchRole invokes deleteProjectBranchRole operation.
 	//
-	// Deletes the specified Postgres role from the branch.
-	// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
+	// Deletes the specified Postgres role from the branch. For related information, see [Manage roles].
+	//
+	// [Manage roles]: https://neon.com/docs/manage/roles/
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/roles/{role_name}
 	DeleteProjectBranchRole(ctx context.Context, params DeleteProjectBranchRoleParams) (DeleteProjectBranchRoleRes, error)
 	// DeleteProjectEndpoint invokes deleteProjectEndpoint operation.
 	//
-	// Deletes the specified compute endpoint.
-	// A compute endpoint is a Neon compute instance.
-	// Deleting a compute endpoint drops existing network connections to the compute endpoint.
-	// The deletion is completed when the last operation in the chain finishes successfully.
-	// An `endpoint_id` has an `ep-` prefix.
-	// For information about compute endpoints, see [Manage computes](https://neon.
-	// com/docs/manage/endpoints/).
+	// Deletes the specified compute endpoint. A compute endpoint is a Neon compute instance. Deleting a
+	// compute endpoint drops existing network connections to the compute endpoint. The deletion is
+	// completed when the last operation in the chain finishes successfully.
+	//
+	// An `endpoint_id` has an `ep-` prefix. For information about compute endpoints, see
+	// [Manage computes].
+	//
+	// [Manage computes]: https://neon.com/docs/manage/endpoints/
 	//
 	// DELETE /projects/{project_id}/endpoints/{endpoint_id}
 	DeleteProjectEndpoint(ctx context.Context, params DeleteProjectEndpointParams) (DeleteProjectEndpointRes, error)
 	// DeleteProjectJWKS invokes deleteProjectJWKS operation.
 	//
-	// Removes the specified JWKS URL from the project.
-	// JWTs signed by keys from the removed URL can no longer authenticate to the project's endpoints.
+	// Removes the specified JWKS URL from the project. JWTs signed by keys from the removed URL can no
+	// longer authenticate to the project's endpoints.
 	//
 	// DELETE /projects/{project_id}/jwks/{jwks_id}
 	DeleteProjectJWKS(ctx context.Context, params DeleteProjectJWKSParams) (*JWKS, error)
@@ -491,41 +497,43 @@ type Invoker interface {
 	// DeleteSnapshot invokes deleteSnapshot operation.
 	//
 	// Deletes the specified snapshot.
-	// **Note**: This endpoint is currently in Beta.
+	//
+	// Note: This endpoint is currently in Beta.
 	//
 	// DELETE /projects/{project_id}/snapshots/{snapshot_id}
 	DeleteSnapshot(ctx context.Context, params DeleteSnapshotParams) (*OperationsResponse, error)
 	// DisableNeonAuth invokes disableNeonAuth operation.
 	//
-	// Disables the Neon Auth integration for the specified branch, removing the connection
-	// to the authentication provider.
-	// If `delete_data` is `true`, also deletes the `neon_auth` schema and all associated tables
-	// from the branch database.
-	// The integration can be re-enabled by calling `POST
-	// /projects/{project_id}/branches/{branch_id}/auth`.
+	// Disables the Neon Auth integration for the specified branch, removing the connection to the
+	// authentication provider. If `delete_data` is `true`, also deletes the `neon_auth` schema and all
+	// associated tables from the branch database. The integration can be re-enabled by calling
+	// `POST /projects/{project_id}/branches/{branch_id}/auth`.
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/auth
 	DisableNeonAuth(ctx context.Context, request OptDisableNeonAuthReq, params DisableNeonAuthParams) error
 	// FinalizeRestoreBranch invokes finalizeRestoreBranch operation.
 	//
-	// Finalize the restore operation for a branch created from a snapshot.
-	// This operation updates the branch so it functions as the original branch it replaced.
-	// This includes:
-	// - Reassigning any computes from the original branch to the restored branch (this will restart the
-	// computes)
-	// - Renaming the restored branch to the original branch's name
-	// - Renaming the original branch so it no longer uses the original name
+	// Finalize the restore operation for a branch created from a snapshot. This operation updates the
+	// branch so it functions as the original branch it replaced. This includes:
+	//
+	//  - Reassigning any computes from the original branch to the restored branch (this will restart the
+	//    computes)
+	//  - Renaming the restored branch to the original branch's name
+	//  - Renaming the original branch so it no longer uses the original name
+	//
 	// This operation only applies to branches created using the `restoreSnapshot` endpoint with
 	// `finalize_restore: false`.
-	// **Note**: This endpoint is currently in Beta.
+	//
+	// Note: This endpoint is currently in Beta.
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/finalize_restore
 	FinalizeRestoreBranch(ctx context.Context, request OptFinalizeRestoreBranchReq, params FinalizeRestoreBranchParams) (*OperationsResponse, error)
 	// GetActiveRegions invokes getActiveRegions operation.
 	//
 	// Lists supported Neon regions.
-	// **Note:** Not all regions are available to all organizations. Pass the `org_id`
-	// parameter to get an accurate list of regions available to your organization.
+	//
+	// Note: Not all regions are available to all organizations. Pass the `org_id` parameter to get an
+	// accurate list of regions available to your organization.
 	//
 	// GET /regions
 	GetActiveRegions(ctx context.Context, params GetActiveRegionsParams) (*ActiveRegionsResponse, error)
@@ -533,123 +541,126 @@ type Invoker interface {
 	//
 	// Retrieves the current status of an anonymized branch, including its state and progress information.
 	// This endpoint allows you to monitor the anonymization process from initialization through
-	// completion.
-	// Only anonymized branches will have status information available.
-	// **Note**: This endpoint is currently in Beta.
+	// completion. Only anonymized branches will have status information available.
+	//
+	// Note: This endpoint is currently in Beta.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/anonymized_status
 	GetAnonymizedBranchStatus(ctx context.Context, params GetAnonymizedBranchStatusParams) (*AnonymizedBranchStatusResponse, error)
 	// GetAuthDetails invokes getAuthDetails operation.
 	//
-	// Returns authentication details for the credentials used in the request,
-	// including the credential type (API key, Bearer token, or OAuth session)
-	// and the associated identity.
+	// Returns authentication details for the credentials used in the request, including the credential
+	// type (API key, Bearer token, or OAuth session) and the associated identity.
 	//
 	// GET /auth
 	GetAuthDetails(ctx context.Context) (*AuthDetailsResponse, error)
 	// GetAvailablePreloadLibraries invokes getAvailablePreloadLibraries operation.
 	//
-	// Returns the shared preload libraries available for the specified project's Postgres version.
-	// Shared preload libraries are Postgres extensions that require the `shared_preload_libraries`
-	// setting and a compute restart to activate.
-	// Use this list to determine which libraries can be enabled in the project's
-	// `settings.preload_libraries` configuration.
+	// Returns the shared preload libraries available for the specified project's Postgres version. Shared
+	// preload libraries are Postgres extensions that require the `shared_preload_libraries` setting and a
+	// compute restart to activate. Use this list to determine which libraries can be enabled in the
+	// project's `settings.preload_libraries` configuration.
 	//
 	// GET /projects/{project_id}/available_preload_libraries
 	GetAvailablePreloadLibraries(ctx context.Context, params GetAvailablePreloadLibrariesParams) (*AvailablePreloadLibraries, error)
 	// GetConnectionURI invokes getConnectionURI operation.
 	//
-	// Retrieves a connection URI for the specified database.
-	// The URI uses the standard PostgreSQL connection string format. Set `pooled=true` to include the
-	// `-pooler` suffix for a connection pooler URI.
+	// Retrieves a connection URI for the specified database. The URI uses the standard PostgreSQL
+	// connection string format. Set `pooled=true` to include the `-pooler` suffix for a connection pooler
+	// URI.
 	//
 	// GET /projects/{project_id}/connection_uri
 	GetConnectionURI(ctx context.Context, params GetConnectionURIParams) (*ConnectionURIResponse, error)
 	// GetConsumptionHistoryPerBranchV2 invokes getConsumptionHistoryPerBranchV2 operation.
 	//
-	// Returns consumption metrics for each branch across one or more projects listed in
-	// `project_ids` (1 to 100 projects). Available for accounts on paid usage-based Launch, Scale,
-	// Agent, and Enterprise plans.
+	// Returns consumption metrics for each branch across one or more projects listed in `project_ids` (1
+	// to 100 projects). Available for accounts on paid usage-based Launch, Scale, Agent, and Enterprise
+	// plans.
+	//
 	// History starts when the account first ingests branch-level consumption data.
-	// The `metrics` query parameter is required. Only these six values are supported on this
-	// endpoint:
+	//
+	// The `metrics` query parameter is required. Only these six values are supported on this endpoint:
 	// `compute_unit_seconds`, `root_branch_bytes_month`, `child_branch_bytes_month`,
 	// `instant_restore_bytes_month`, `public_network_transfer_bytes`, `private_network_transfer_bytes`.
-	// This endpoint does not support `extra_branches_month` or `snapshot_storage_bytes_month`.
-	// Use `GET /consumption_history/v2/projects` for those.
-	// Consumption metrics within each branch are returned in ascending time order (oldest first).
-	// This request does not wake project computes.
+	//
+	// This endpoint does not support `extra_branches_month` or `snapshot_storage_bytes_month`. Use
+	// `GET /consumption_history/v2/projects` for those.
+	//
+	// Consumption metrics within each branch are returned in ascending time order (oldest first). This
+	// request does not wake project computes.
 	//
 	// GET /consumption_history/v2/branches
 	GetConsumptionHistoryPerBranchV2(ctx context.Context, params GetConsumptionHistoryPerBranchV2Params) (GetConsumptionHistoryPerBranchV2Res, error)
 	// GetConsumptionHistoryPerProject invokes getConsumptionHistoryPerProject operation.
 	//
 	// Retrieves consumption metrics for Scale, Business, and Enterprise plan projects. History begins at
-	// the time of upgrade.
-	// Results are ordered by time in ascending order (oldest to newest).
-	// Issuing a call to this API does not wake a project's compute endpoint.
+	// the time of upgrade. Results are ordered by time in ascending order (oldest to newest). Issuing a
+	// call to this API does not wake a project's compute endpoint.
 	//
 	// GET /consumption_history/projects
 	GetConsumptionHistoryPerProject(ctx context.Context, params GetConsumptionHistoryPerProjectParams) (GetConsumptionHistoryPerProjectRes, error)
 	// GetConsumptionHistoryPerProjectV2 invokes getConsumptionHistoryPerProjectV2 operation.
 	//
 	// Returns consumption metrics for up to `limit` projects per page. If `project_ids` is omitted,
-	// projects in the organization are included across pages (use `cursor`). If `project_ids` is
-	// provided, the response is limited to those projects (up to 100). Available for accounts on
-	// Launch, Scale, Agent, Business, and Enterprise plans.
+	// projects in the organization are included across pages (use `cursor`). If `project_ids` is provided,
+	// the response is limited to those projects (up to 100). Available for accounts on Launch, Scale,
+	// Agent, Business, and Enterprise plans.
+	//
 	// History starts when the account upgrades to an eligible plan.
-	// The `metrics` query parameter is required. Supported values:
-	// `compute_unit_seconds`, `root_branch_bytes_month`, `child_branch_bytes_month`,
-	// `instant_restore_bytes_month`, `public_network_transfer_bytes`, `private_network_transfer_bytes`,
-	// `extra_branches_month`, `snapshot_storage_bytes_month`.
-	// Consumption metrics within each project are returned in ascending time order (oldest first).
-	// This request does not wake project computes.
+	//
+	// The `metrics` query parameter is required. Supported values: `compute_unit_seconds`,
+	// `root_branch_bytes_month`, `child_branch_bytes_month`, `instant_restore_bytes_month`,
+	// `public_network_transfer_bytes`, `private_network_transfer_bytes`, `extra_branches_month`,
+	// `snapshot_storage_bytes_month`.
+	//
+	// Consumption metrics within each project are returned in ascending time order (oldest first). This
+	// request does not wake project computes.
 	//
 	// GET /consumption_history/v2/projects
 	GetConsumptionHistoryPerProjectV2(ctx context.Context, params GetConsumptionHistoryPerProjectV2Params) (GetConsumptionHistoryPerProjectV2Res, error)
 	// GetCurrentUserInfo invokes getCurrentUserInfo operation.
 	//
-	// Retrieves information about the currently authenticated Neon user,
-	// including account identifiers, plan details, and linked auth accounts.
+	// Retrieves information about the currently authenticated Neon user, including account identifiers,
+	// plan details, and linked auth accounts.
 	//
 	// GET /users/me
 	GetCurrentUserInfo(ctx context.Context) (*CurrentUserInfoResponse, error)
 	// GetCurrentUserOrganizations invokes getCurrentUserOrganizations operation.
 	//
 	// Retrieves the organizations that the currently authenticated user belongs to.
-	// When called with an organization- or project-scoped API key (which is not
-	// tied to a user), this returns the single organization that owns the key.
+	//
+	// When called with an organization- or project-scoped API key (which is not tied to a user), this
+	// returns the single organization that owns the key.
 	//
 	// GET /users/me/organizations
 	GetCurrentUserOrganizations(ctx context.Context) (*OrganizationsResponse, error)
 	// GetMaskingRules invokes getMaskingRules operation.
 	//
-	// Retrieves the masking rules for the specified anonymized branch.
-	// Masking rules define how sensitive data should be anonymized using PostgreSQL Anonymizer.
-	// **Note**: This endpoint is currently in Beta.
+	// Retrieves the masking rules for the specified anonymized branch. Masking rules define how sensitive
+	// data should be anonymized using PostgreSQL Anonymizer.
+	//
+	// Note: This endpoint is currently in Beta.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/masking_rules
 	GetMaskingRules(ctx context.Context, params GetMaskingRulesParams) (*MaskingRulesResponse, error)
 	// GetNeonAuth invokes getNeonAuth operation.
 	//
-	// Retrieves the Neon Auth integration details for the specified branch,
-	// including the auth provider type and integration status.
+	// Retrieves the Neon Auth integration details for the specified branch, including the auth provider
+	// type and integration status.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/auth
 	GetNeonAuth(ctx context.Context, params GetNeonAuthParams) (*NeonAuthIntegration, error)
 	// GetNeonAuthAllowLocalhost invokes getNeonAuthAllowLocalhost operation.
 	//
-	// Retrieves the localhost allow setting for the specified branch's Neon Auth integration.
-	// When enabled, authentication flows work from `localhost` without adding it to the redirect URI
-	// whitelist.
+	// Retrieves the localhost allow setting for the specified branch's Neon Auth integration. When
+	// enabled, authentication flows work from `localhost` without adding it to the redirect URI whitelist.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/auth/allow_localhost
 	GetNeonAuthAllowLocalhost(ctx context.Context, params GetNeonAuthAllowLocalhostParams) (*NeonAuthAllowLocalhostResponse, error)
 	// GetNeonAuthEmailAndPasswordConfig invokes getNeonAuthEmailAndPasswordConfig operation.
 	//
 	// Retrieves the email and password authentication configuration for the specified branch's Neon Auth
-	// integration,
-	// including whether it is enabled and the email verification method.
+	// integration, including whether it is enabled and the email verification method.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/auth/email_and_password
 	GetNeonAuthEmailAndPasswordConfig(ctx context.Context, params GetNeonAuthEmailAndPasswordConfigParams) (*NeonAuthEmailAndPasswordConfig, error)
@@ -662,8 +673,8 @@ type Invoker interface {
 	GetNeonAuthEmailProvider(ctx context.Context, params GetNeonAuthEmailProviderParams) (*NeonAuthEmailServerConfig, error)
 	// GetNeonAuthEmailServer invokes getNeonAuthEmailServer operation.
 	//
-	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/email_provider` instead. Gets
-	// the email server configuration for the specified project.
+	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/email_provider` instead. Gets the
+	// email server configuration for the specified project.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
@@ -671,23 +682,22 @@ type Invoker interface {
 	GetNeonAuthEmailServer(ctx context.Context, params GetNeonAuthEmailServerParams) (*NeonAuthEmailServerConfig, error)
 	// GetNeonAuthPhoneNumberPlugin invokes getNeonAuthPhoneNumberPlugin operation.
 	//
-	// Returns the phone number plugin configuration for Neon Auth.
-	// The phone number plugin enables phone-based OTP authentication.
+	// Returns the phone number plugin configuration for Neon Auth. The phone number plugin enables
+	// phone-based OTP authentication.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/auth/plugins/phone-number
 	GetNeonAuthPhoneNumberPlugin(ctx context.Context, params GetNeonAuthPhoneNumberPluginParams) (*NeonAuthPhoneNumberConfig, error)
 	// GetNeonAuthPluginConfigs invokes getNeonAuthPluginConfigs operation.
 	//
-	// Returns all plugin configurations for Neon Auth in a single response.
-	// This endpoint aggregates organization, email provider, email and password,
-	// OAuth providers, and localhost settings.
+	// Returns all plugin configurations for Neon Auth in a single response. This endpoint aggregates
+	// organization, email provider, email and password, OAuth providers, and localhost settings.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/auth/plugins
 	GetNeonAuthPluginConfigs(ctx context.Context, params GetNeonAuthPluginConfigsParams) (*NeonAuthPluginConfigs, error)
 	// GetNeonAuthWebhookConfig invokes getNeonAuthWebhookConfig operation.
 	//
-	// Returns the webhook configuration for the specified branch's Neon Auth integration,
-	// including the endpoint URL and the events that trigger it.
+	// Returns the webhook configuration for the specified branch's Neon Auth integration, including the
+	// endpoint URL and the events that trigger it.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/auth/webhooks
 	GetNeonAuthWebhookConfig(ctx context.Context, params GetNeonAuthWebhookConfigParams) (*NeonAuthWebhookConfig, error)
@@ -718,8 +728,8 @@ type Invoker interface {
 	// GetOrganizationSpendingLimit invokes getOrganizationSpendingLimit operation.
 	//
 	// Returns the configured monthly spending limit for the specified organization.
-	// `spending_limit_cents: null` indicates that no limit is currently set.
-	// Available to organization members with read access on Launch and Scale plans only.
+	// `spending_limit_cents: null` indicates that no limit is currently set. Available to organization
+	// members with read access on Launch and Scale plans only.
 	//
 	// GET /organizations/{org_id}/billing/spending_limit
 	GetOrganizationSpendingLimit(ctx context.Context, params GetOrganizationSpendingLimitParams) (*SpendingLimitResponse, error)
@@ -731,92 +741,98 @@ type Invoker interface {
 	GetOrganizationVPCEndpointDetails(ctx context.Context, params GetOrganizationVPCEndpointDetailsParams) (*VPCEndpointDetails, error)
 	// GetProject invokes getProject operation.
 	//
-	// Retrieves information about the specified project.
-	// Returned details include the project settings, compute configuration, history retention, owner
-	// information, and current usage metrics.
+	// Retrieves information about the specified project. Returned details include the project settings,
+	// compute configuration, history retention, owner information, and current usage metrics.
 	//
 	// GET /projects/{project_id}
 	GetProject(ctx context.Context, params GetProjectParams) (*ProjectResponse, error)
 	// GetProjectAdvisorSecurityIssues invokes getProjectAdvisorSecurityIssues operation.
 	//
-	// Analyzes the database for security and performance issues.
-	// Returns a list of issues categorized by severity (ERROR, WARN, INFO).
+	// Analyzes the database for security and performance issues. Returns a list of issues categorized by
+	// severity (ERROR, WARN, INFO).
+	//
 	// Requires read access to the project and Data API enabled.
 	//
 	// GET /projects/{project_id}/advisors
 	GetProjectAdvisorSecurityIssues(ctx context.Context, params GetProjectAdvisorSecurityIssuesParams) (*GetProjectAdvisorSecurityIssuesOK, error)
 	// GetProjectBranch invokes getProjectBranch operation.
 	//
-	// Retrieves information about the specified branch.
-	// A `branch_id` value has a `br-` prefix.
-	// Each Neon project is initially created with a root and default branch named `main`.
-	// A project can contain one or more branches.
-	// A parent branch is identified by a `parent_id` value, which is the `id` of the parent branch.
-	// For related information, see [Manage branches](https://neon.com/docs/manage/branches/).
+	// Retrieves information about the specified branch. A `branch_id` value has a `br-` prefix.
+	//
+	// Each Neon project is initially created with a root and default branch named `main`. A project can
+	// contain one or more branches. A parent branch is identified by a `parent_id` value, which is the
+	// `id` of the parent branch. For related information, see [Manage branches].
+	//
+	// [Manage branches]: https://neon.com/docs/manage/branches/
 	//
 	// GET /projects/{project_id}/branches/{branch_id}
 	GetProjectBranch(ctx context.Context, params GetProjectBranchParams) (*GetProjectBranchOK, error)
 	// GetProjectBranchAiGateway invokes getProjectBranchAiGateway operation.
 	//
-	// Returns the AI Gateway endpoint host for the specified branch, used to
-	// render code-snippet base URLs. A 200 response means the branch is
-	// registered and this region serves the AI gateway. A 404 response
-	// includes a `reason` field indicating why the gateway is unavailable.
-	// **Note**: This endpoint is currently in Private Beta.
+	// Returns the AI Gateway endpoint host for the specified branch, used to render code-snippet base
+	// URLs. A 200 response means the branch is registered and this region serves the AI gateway. A 404
+	// response includes a `reason` field indicating why the gateway is unavailable.
+	//
+	// Note: This endpoint is currently in Private Beta.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/ai_gateway
 	GetProjectBranchAiGateway(ctx context.Context, params GetProjectBranchAiGatewayParams) (GetProjectBranchAiGatewayRes, error)
 	// GetProjectBranchBucketObject invokes getProjectBranchBucketObject operation.
 	//
-	// Streams the raw bytes of the named object from the bucket on the
-	// specified branch, including objects inherited from ancestor branches.
-	// Served by the user's session (no customer S3 credentials required).
-	// The body is returned as `application/octet-stream` so a browser treats
-	// it as a download; the `Content-Length` and `ETag` response headers echo
-	// the stored object metadata.
-	// BINARY-STREAM EXCEPTION TO THE BUILD-GENERATED-TYPES RULE (#7029): the
-	// successful 200 body is the raw object stream, proxied verbatim from the
-	// platform storage admin endpoint. It is modeled as an
-	// `application/octet-stream` binary body (not a JSON response schema) and
-	// is streamed without buffering the whole object in memory. Error
-	// responses still use the generated `GeneralError` shape.
-	// **Note**: This endpoint is currently in Private Beta.
+	// Streams the raw bytes of the named object from the bucket on the specified branch, including objects
+	// inherited from ancestor branches. Served by the user's session (no customer S3 credentials
+	// required).
+	//
+	// The body is returned as `application/octet-stream` so a browser treats it as a download; the
+	// `Content-Length` and `ETag` response headers echo the stored object metadata.
+	//
+	// BINARY-STREAM EXCEPTION TO THE BUILD-GENERATED-TYPES RULE (#7029): the successful 200 body is the
+	// raw object stream, proxied verbatim from the platform storage admin endpoint. It is modeled as an
+	// `application/octet-stream` binary body (not a JSON response schema) and is streamed without
+	// buffering the whole object in memory. Error responses still use the generated `GeneralError` shape.
+	//
+	// Note: This endpoint is currently in Private Beta.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects/{object_key}/download
 	GetProjectBranchBucketObject(ctx context.Context, params GetProjectBranchBucketObjectParams) (GetProjectBranchBucketObjectRes, error)
 	// GetProjectBranchDataAPI invokes getProjectBranchDataAPI operation.
 	//
-	// Retrieves the Neon Data API configuration for the specified branch,
-	// including endpoint URL, enabled state, and database settings.
+	// Retrieves the Neon Data API configuration for the specified branch, including endpoint URL, enabled
+	// state, and database settings.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/data-api/{database_name}
 	GetProjectBranchDataAPI(ctx context.Context, params GetProjectBranchDataAPIParams) (*DataAPIReponse, error)
 	// GetProjectBranchDatabase invokes getProjectBranchDatabase operation.
 	//
-	// Retrieves information about the specified database.
-	// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
+	// Retrieves information about the specified database. For related information, see [Manage databases].
+	//
+	// [Manage databases]: https://neon.com/docs/manage/databases/
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/databases/{database_name}
 	GetProjectBranchDatabase(ctx context.Context, params GetProjectBranchDatabaseParams) (*DatabaseResponse, error)
 	// GetProjectBranchFunction invokes getProjectBranchFunction operation.
 	//
 	// Returns the function identified by its slug.
-	// **Note**: This endpoint is currently in Private Beta.
+	//
+	// Note: This endpoint is currently in Private Beta.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/functions/{slug}
 	GetProjectBranchFunction(ctx context.Context, params GetProjectBranchFunctionParams) (*NeonFunctionResponse, error)
 	// GetProjectBranchRole invokes getProjectBranchRole operation.
 	//
-	// Retrieves details about the specified role.
-	// In Neon, the terms "role" and "user" are synonymous.
-	// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
+	// Retrieves details about the specified role. In Neon, the terms "role" and "user" are synonymous. For
+	// related information, see [Manage roles].
+	//
+	// [Manage roles]: https://neon.com/docs/manage/roles/
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/roles/{role_name}
 	GetProjectBranchRole(ctx context.Context, params GetProjectBranchRoleParams) (*RoleResponse, error)
 	// GetProjectBranchRolePassword invokes getProjectBranchRolePassword operation.
 	//
-	// Retrieves the password for the specified Postgres role, if possible.
-	// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
+	// Retrieves the password for the specified Postgres role, if possible. For related information, see
+	// [Manage roles].
+	//
+	// [Manage roles]: https://neon.com/docs/manage/roles/
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/roles/{role_name}/reveal_password
 	GetProjectBranchRolePassword(ctx context.Context, params GetProjectBranchRolePasswordParams) (GetProjectBranchRolePasswordRes, error)
@@ -836,21 +852,21 @@ type Invoker interface {
 	GetProjectBranchSchemaComparison(ctx context.Context, params GetProjectBranchSchemaComparisonParams) (*BranchSchemaCompareResponse, error)
 	// GetProjectBranchStorage invokes getProjectBranchStorage operation.
 	//
-	// Returns whether branchable object-storage is usable for the specified
-	// branch. A 200 response means the branch is registered in the storage
-	// service and the S3 data plane will accept requests for it. A 404
-	// response includes a `reason` field indicating why storage is unavailable.
-	// **Note**: This endpoint is currently in Private Beta.
+	// Returns whether branchable object-storage is usable for the specified branch. A 200 response means
+	// the branch is registered in the storage service and the S3 data plane will accept requests for it. A
+	// 404 response includes a `reason` field indicating why storage is unavailable.
+	//
+	// Note: This endpoint is currently in Private Beta.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/storage
 	GetProjectBranchStorage(ctx context.Context, params GetProjectBranchStorageParams) (GetProjectBranchStorageRes, error)
 	// GetProjectEndpoint invokes getProjectEndpoint operation.
 	//
-	// Retrieves information about the specified compute endpoint.
-	// A compute endpoint is a Neon compute instance.
-	// An `endpoint_id` has an `ep-` prefix.
-	// For information about compute endpoints, see [Manage computes](https://neon.
-	// com/docs/manage/endpoints/).
+	// Retrieves information about the specified compute endpoint. A compute endpoint is a Neon compute
+	// instance. An `endpoint_id` has an `ep-` prefix. For information about compute endpoints, see
+	// [Manage computes].
+	//
+	// [Manage computes]: https://neon.com/docs/manage/endpoints/
 	//
 	// GET /projects/{project_id}/endpoints/{endpoint_id}
 	GetProjectEndpoint(ctx context.Context, params GetProjectEndpointParams) (*EndpointResponse, error)
@@ -863,16 +879,16 @@ type Invoker interface {
 	GetProjectJWKS(ctx context.Context, params GetProjectJWKSParams) (*ProjectJWKSResponse, error)
 	// GetProjectOperation invokes getProjectOperation operation.
 	//
-	// Retrieves details for the specified operation.
-	// An operation is an action performed on a Neon project resource.
+	// Retrieves details for the specified operation. An operation is an action performed on a Neon project
+	// resource.
 	//
 	// GET /projects/{project_id}/operations/{operation_id}
 	GetProjectOperation(ctx context.Context, params GetProjectOperationParams) (*OperationResponse, error)
 	// GetSnapshotSchedule invokes getSnapshotSchedule operation.
 	//
-	// Returns the backup schedule for the specified branch, including the configured snapshot
-	// frequencies.
-	// **Note**: This endpoint is currently in Beta.
+	// Returns the backup schedule for the specified branch, including the configured snapshot frequencies.
+	//
+	// Note: This endpoint is currently in Beta.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/backup_schedule
 	GetSnapshotSchedule(ctx context.Context, params GetSnapshotScheduleParams) (*BackupSchedule, error)
@@ -884,10 +900,11 @@ type Invoker interface {
 	GrantPermissionToProject(ctx context.Context, request *GrantPermissionToProjectRequest, params GrantPermissionToProjectParams) (*ProjectPermission, error)
 	// ListApiKeys invokes listApiKeys operation.
 	//
-	// Retrieves the API keys for your Neon account.
-	// The response does not include API key tokens. A token is only provided when creating an API key.
-	// API keys can also be managed in the Neon Console.
-	// For more information, see [Manage API keys](https://neon.com/docs/manage/api-keys/).
+	// Retrieves the API keys for your Neon account. The response does not include API key tokens. A token
+	// is only provided when creating an API key. API keys can also be managed in the Neon Console. For
+	// more information, see [Manage API keys].
+	//
+	// [Manage API keys]: https://neon.com/docs/manage/api-keys/
 	//
 	// GET /api_keys
 	ListApiKeys(ctx context.Context) ([]ApiKeysListResponseItem, error)
@@ -899,16 +916,16 @@ type Invoker interface {
 	ListBranchNeonAuthOauthProviders(ctx context.Context, params ListBranchNeonAuthOauthProvidersParams) (*ListNeonAuthOauthProvidersResponse, error)
 	// ListBranchNeonAuthTrustedDomains invokes listBranchNeonAuthTrustedDomains operation.
 	//
-	// Lists the trusted domains in the redirect URI whitelist for the specified branch.
-	// Only domains in this list are permitted as redirect targets after authentication.
+	// Lists the trusted domains in the redirect URI whitelist for the specified branch. Only domains in
+	// this list are permitted as redirect targets after authentication.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/auth/domains
 	ListBranchNeonAuthTrustedDomains(ctx context.Context, params ListBranchNeonAuthTrustedDomainsParams) (*NeonAuthRedirectURIWhitelistResponse, error)
 	// ListCredentials invokes listCredentials operation.
 	//
-	// Returns metadata for customer-issued credentials on the branch.
-	// Secrets are never included.
-	// **Note**: This endpoint is currently in Private Beta.
+	// Returns metadata for customer-issued credentials on the branch. Secrets are never included.
+	//
+	// Note: This endpoint is currently in Private Beta.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/credentials
 	ListCredentials(ctx context.Context, params ListCredentialsParams) (*ListCredentialsResponse, error)
@@ -940,10 +957,11 @@ type Invoker interface {
 	ListNeonAuthRedirectURIWhitelistDomains(ctx context.Context, params ListNeonAuthRedirectURIWhitelistDomainsParams) (*NeonAuthRedirectURIWhitelistResponse, error)
 	// ListOrgApiKeys invokes listOrgApiKeys operation.
 	//
-	// Retrieves the API keys for the specified organization.
-	// The response does not include API key tokens. A token is only provided when creating an API key.
-	// API keys can also be managed in the Neon Console.
-	// For more information, see [Manage API keys](https://neon.com/docs/manage/api-keys/).
+	// Retrieves the API keys for the specified organization. The response does not include API key tokens.
+	// A token is only provided when creating an API key. API keys can also be managed in the Neon Console.
+	// For more information, see [Manage API keys].
+	//
+	// [Manage API keys]: https://neon.com/docs/manage/api-keys/
 	//
 	// GET /organizations/{org_id}/api_keys
 	ListOrgApiKeys(ctx context.Context, params ListOrgApiKeysParams) ([]OrgApiKeysListResponseItem, error)
@@ -961,83 +979,122 @@ type Invoker interface {
 	ListOrganizationVPCEndpointsAllRegions(ctx context.Context, params ListOrganizationVPCEndpointsAllRegionsParams) (*VPCEndpointsWithRegionResponse, error)
 	// ListProjectBranchBucketObjects invokes listProjectBranchBucketObjects operation.
 	//
-	// Lists objects visible in the named bucket on the specified branch,
-	// including those inherited from ancestor branches. Listing is served by
-	// the user's session (no customer S3 credentials required).
-	// When `delimiter` is supplied (typically `/`), keys are collapsed into
-	// common prefixes (`folders`) so callers can render a folder-style
-	// browser; keys that do not contain the delimiter after `prefix` are
+	// Lists objects visible in the named bucket on the specified branch, including those inherited from
+	// ancestor branches. Listing is served by the user's session (no customer S3 credentials required).
+	//
+	// When `delimiter` is supplied (typically `/`), keys are collapsed into common prefixes (`folders`) so
+	// callers can render a folder-style browser; keys that do not contain the delimiter after `prefix` are
 	// returned as `objects`.
-	// **Note**: This endpoint is currently in Private Beta.
+	//
+	// Note: This endpoint is currently in Private Beta.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects
 	ListProjectBranchBucketObjects(ctx context.Context, params ListProjectBranchBucketObjectsParams) (*BucketObjectsListResponse, error)
 	// ListProjectBranchBuckets invokes listProjectBranchBuckets operation.
 	//
-	// Lists branchable object-storage buckets visible on the specified branch,
-	// including those inherited from ancestor branches.
-	// **Note**: This endpoint is currently in Private Beta.
+	// Lists branchable object-storage buckets visible on the specified branch, including those inherited
+	// from ancestor branches.
+	//
+	// Note: This endpoint is currently in Private Beta.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/buckets
 	ListProjectBranchBuckets(ctx context.Context, params ListProjectBranchBucketsParams) (*BucketsListResponse, error)
 	// ListProjectBranchDatabases invokes listProjectBranchDatabases operation.
 	//
-	// Retrieves a list of databases for the specified branch.
-	// A branch can have multiple databases.
-	// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
+	// Retrieves a list of databases for the specified branch. A branch can have multiple databases. For
+	// related information, see [Manage databases].
+	//
+	// [Manage databases]: https://neon.com/docs/manage/databases/
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/databases
 	ListProjectBranchDatabases(ctx context.Context, params ListProjectBranchDatabasesParams) (*DatabasesResponse, error)
 	// ListProjectBranchEndpoints invokes listProjectBranchEndpoints operation.
 	//
-	// Retrieves a list of compute endpoints for the specified branch.
-	// Neon permits only one read-write compute endpoint per branch.
-	// A branch can have multiple read-only compute endpoints.
+	// Retrieves a list of compute endpoints for the specified branch. Neon permits only one read-write
+	// compute endpoint per branch. A branch can have multiple read-only compute endpoints.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/endpoints
 	ListProjectBranchEndpoints(ctx context.Context, params ListProjectBranchEndpointsParams) (*EndpointsResponse, error)
 	// ListProjectBranchFunctions invokes listProjectBranchFunctions operation.
 	//
 	// Lists functions on the specified branch.
-	// **Note**: This endpoint is currently in Private Beta.
+	//
+	// Note: This endpoint is currently in Private Beta.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/functions
 	ListProjectBranchFunctions(ctx context.Context, params ListProjectBranchFunctionsParams) (*ListProjectBranchFunctionsOK, error)
+	// ListProjectBranchLogFieldValues invokes listProjectBranchLogFieldValues operation.
+	//
+	// Lists the distinct values observed for a low-cardinality log field in the requested time range. Call
+	// the log fields endpoint first to learn which `field_name` values this branch supports; a field that
+	// branch has never emitted is rejected with `unknown_field`.
+	//
+	// Give the window either as `since` or as an explicit `start_time`; supplying both is rejected. If
+	// neither is given, the previous six hours are used. The maximum supported time range is seven days.
+	//
+	// Note: This endpoint is currently in Private Beta.
+	//
+	// GET /projects/{project_id}/branches/{branch_id}/logs/fields/{field_name}/values
+	ListProjectBranchLogFieldValues(ctx context.Context, params ListProjectBranchLogFieldValuesParams) (ListProjectBranchLogFieldValuesRes, error)
+	// ListProjectBranchLogFields invokes listProjectBranchLogFields operation.
+	//
+	// Lists the low-cardinality log fields observed on this branch whose distinct values can be discovered
+	// with the log field-values endpoint.
+	//
+	// The set is computed per branch and grows as new fields are observed, so treat it as data rather than
+	// a fixed list: discover a field here, then pass it as `field_name` to the field-values endpoint.
+	//
+	// Note: This endpoint is currently in Private Beta.
+	//
+	// GET /projects/{project_id}/branches/{branch_id}/logs/fields
+	ListProjectBranchLogFields(ctx context.Context, params ListProjectBranchLogFieldsParams) (ListProjectBranchLogFieldsRes, error)
 	// ListProjectBranchRoles invokes listProjectBranchRoles operation.
 	//
-	// Retrieves a list of Postgres roles from the specified branch.
-	// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
+	// Retrieves a list of Postgres roles from the specified branch. For related information, see
+	// [Manage roles].
+	//
+	// [Manage roles]: https://neon.com/docs/manage/roles/
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/roles
 	ListProjectBranchRoles(ctx context.Context, params ListProjectBranchRolesParams) (*RolesResponse, error)
 	// ListProjectBranches invokes listProjectBranches operation.
 	//
 	// Retrieves a list of branches for the specified project.
-	// Each Neon project has a root branch named `main`.
-	// A `branch_id` value has a `br-` prefix.
-	// A project may contain child branches that were branched from `main` or from another branch.
-	// A parent branch is identified by the `parent_id` value, which is the `id` of the parent branch.
-	// For related information, see [Manage branches](https://neon.com/docs/manage/branches/).
+	//
+	// Each Neon project has a root branch named `main`. A `branch_id` value has a `br-` prefix. A project
+	// may contain child branches that were branched from `main` or from another branch. A parent branch is
+	// identified by the `parent_id` value, which is the `id` of the parent branch. For related
+	// information, see [Manage branches].
+	//
+	// [Manage branches]: https://neon.com/docs/manage/branches/
 	//
 	// GET /projects/{project_id}/branches
 	ListProjectBranches(ctx context.Context, params ListProjectBranchesParams) (*ListProjectBranchesOK, error)
 	// ListProjectEndpoints invokes listProjectEndpoints operation.
 	//
-	// Retrieves a list of compute endpoints for the specified project.
-	// A compute endpoint is a Neon compute instance.
-	// For information about compute endpoints, see [Manage computes](https://neon.
-	// com/docs/manage/endpoints/).
+	// Retrieves a list of compute endpoints for the specified project. A compute endpoint is a Neon
+	// compute instance. For information about compute endpoints, see [Manage computes].
+	//
+	// [Manage computes]: https://neon.com/docs/manage/endpoints/
 	//
 	// GET /projects/{project_id}/endpoints
 	ListProjectEndpoints(ctx context.Context, params ListProjectEndpointsParams) (*EndpointsResponse, error)
+	// ListProjectMembers invokes listProjectMembers operation.
+	//
+	// Lists organization members and their per-project roles for an org-owned project. Returns 404 when
+	// the project is not org-owned, per-project role management is disabled, or the caller has no access.
+	// Callers with VIEWER or EDITOR see members with effective project access. Callers with ADMIN also see
+	// unassigned org members.
+	//
+	// GET /projects/{project_id}/members
+	ListProjectMembers(ctx context.Context, params ListProjectMembersParams) (*ProjectMembers, error)
 	// ListProjectOperations invokes listProjectOperations operation.
 	//
-	// Retrieves a list of operations for the specified Neon project.
-	// The number of operations returned can be large.
-	// To paginate the response, issue an initial request with a `limit` value.
-	// Then, add the `cursor` value that was returned in the response to the next request.
-	// Operations older than 6 months may be deleted from our systems.
-	// If you need more history than that, you should store your own history.
+	// Retrieves a list of operations for the specified Neon project. The number of operations returned can
+	// be large. To paginate the response, issue an initial request with a `limit` value. Then, add the
+	// `cursor` value that was returned in the response to the next request. Operations older than 6 months
+	// may be deleted from our systems. If you need more history than that, you should store your own
+	// history.
 	//
 	// GET /projects/{project_id}/operations
 	ListProjectOperations(ctx context.Context, params ListProjectOperationsParams) (*ListOperations, error)
@@ -1056,211 +1113,258 @@ type Invoker interface {
 	ListProjectVPCEndpoints(ctx context.Context, params ListProjectVPCEndpointsParams) (*VPCEndpointsResponse, error)
 	// ListProjects invokes listProjects operation.
 	//
-	// Retrieves a list of projects for the specified organization.
-	// If using a personal API key, include the `org_id` parameter to specify which organization to work
-	// with.
-	// If using an org API key, `org_id` is automatically inferred from the key.
-	// For more information, see [Manage organizations using the Neon API](https://neon.
-	// com/docs/manage/orgs-api)
-	// and [Manage projects](https://neon.com/docs/manage/projects/).
+	// Retrieves a list of projects for the specified organization. If using a personal API key, include
+	// the `org_id` parameter to specify which organization to work with. If using an org API key, `org_id`
+	// is automatically inferred from the key. For more information, see
+	// [Manage organizations using the Neon API] and [Manage projects].
+	//
+	// [Manage organizations using the Neon API]: https://neon.com/docs/manage/orgs-api
+	// [Manage projects]: https://neon.com/docs/manage/projects/
 	//
 	// GET /projects
 	ListProjects(ctx context.Context, params ListProjectsParams) (*ListProjectsOK, error)
 	// ListSharedProjects invokes listSharedProjects operation.
 	//
-	// Retrieves a list of projects shared with your Neon account.
-	// For more information, see [Manage projects](https://neon.com/docs/manage/projects/).
+	// Retrieves a list of projects shared with your Neon account. For more information, see
+	// [Manage projects].
+	//
+	// [Manage projects]: https://neon.com/docs/manage/projects/
 	//
 	// GET /projects/shared
 	ListSharedProjects(ctx context.Context, params ListSharedProjectsParams) (*ListSharedProjectsOK, error)
 	// ListSnapshots invokes listSnapshots operation.
 	//
-	// Lists the snapshots for the specified project.
-	// Each snapshot represents a point-in-time backup of the project data.
-	// **Note**: This endpoint is currently in Beta.
+	// Lists the snapshots for the specified project. Each snapshot represents a point-in-time backup of
+	// the project data.
+	//
+	// Note: This endpoint is currently in Beta.
 	//
 	// GET /projects/{project_id}/snapshots
 	ListSnapshots(ctx context.Context, params ListSnapshotsParams) (*ListSnapshotsOK, error)
 	// PresignProjectBranchBucketObject invokes presignProjectBranchBucketObject operation.
 	//
-	// Returns a presigned URL that transfers bytes directly to or from the
-	// object's bucket on the specified branch, without the caller ever
-	// handling S3 credentials. The `operation` field selects the direction:
-	// - `upload` returns a presigned `PUT` URL (the caller `PUT`s the file
-	// bytes straight to `url` with the returned `headers`). Authorized with
-	// project write access.
-	// - `download` returns a presigned `GET` URL (the caller `GET`s the
-	// bytes straight from `url`). Authorized with project read access.
-	// The platform mints a short-lived credential and builds the SigV4-signed
-	// URL against the branch's S3 data-plane host, returning it together with
-	// the HTTP method, any headers the caller must echo, and the URL's expiry.
+	// Returns a presigned URL that transfers bytes directly to or from the object's bucket on the
+	// specified branch, without the caller ever handling S3 credentials. The `operation` field selects the
+	// direction:
+	//
+	//  - `upload` returns a presigned `PUT` URL (the caller `PUT`s the file bytes straight to `url` with
+	//    the returned `headers`). Authorized with project write access.
+	//  - `download` returns a presigned `GET` URL (the caller `GET`s the bytes straight from `url`).
+	//    Authorized with project read access.
+	//
+	// The platform mints a short-lived credential and builds the SigV4-signed URL against the branch's S3
+	// data-plane host, returning it together with the HTTP method, any headers the caller must echo, and
+	// the URL's expiry.
+	//
 	// Served by the user's session (no customer S3 credentials required).
-	// **Note**: This endpoint is currently in Private Beta.
+	//
+	// Note: This endpoint is currently in Private Beta.
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects/{object_key}/presign
 	PresignProjectBranchBucketObject(ctx context.Context, request *PresignRequest, params PresignProjectBranchBucketObjectParams) (PresignProjectBranchBucketObjectRes, error)
+	// QueryProjectBranchLogs invokes queryProjectBranchLogs operation.
+	//
+	// Returns logs emitted by services running on the specified branch, ordered by timestamp according to
+	// `sort_order`.
+	//
+	// All supplied filters are combined with `AND`: a record is returned only when it matches every
+	// filter. `minimum_severity` and `severity_text` are independent filters, so setting both requires a
+	// record to clear the severity floor and match the exact severity text.
+	//
+	// Supply `logql` instead of the structured filters to run a raw LogQL expression. Combining it with
+	// any structured filter is rejected rather than silently ignored; `limit`, `sort_order`, and the time
+	// window still apply, because those bound the query rather than form part of the expression.
+	//
+	// Give the window either as `since` — a duration ending at `end_time`, or at the current time when
+	// `end_time` is omitted — or as an explicit `start_time`. Supplying both is rejected.
+	//
+	// A single response holds at most 1,000 records. When `is_truncated` is `true`, pass the returned
+	// `next_cursor` back as `cursor` to fetch the next page, repeating the time range and every filter
+	// unchanged.
+	//
+	// If no time range is supplied, the query covers the previous hour. The maximum supported time range
+	// is seven days. `end_time` is exclusive.
+	//
+	// Note: This endpoint is currently in Private Beta.
+	//
+	// POST /projects/{project_id}/branches/{branch_id}/logs/query
+	QueryProjectBranchLogs(ctx context.Context, request *ProjectBranchLogsQueryRequest, params QueryProjectBranchLogsParams) (QueryProjectBranchLogsRes, error)
 	// RecoverProject invokes recoverProject operation.
 	//
-	// Recovers a deleted project within the 7-day deletion recovery period.
-	// Restores branches, endpoints, settings, and connection strings.
-	// Some integrations require manual reconfiguration after recovery.
+	// Recovers a deleted project within the 7-day deletion recovery period. Restores branches, endpoints,
+	// settings, and connection strings. Some integrations require manual reconfiguration after recovery.
 	// To list recoverable projects, use `GET /projects?recoverable=true`.
 	//
 	// POST /projects/{project_id}/recover
 	RecoverProject(ctx context.Context, params RecoverProjectParams) (*ProjectRecoverResponse, error)
 	// RecoverProjectBranch invokes recoverProjectBranch operation.
 	//
-	// Recovers a deleted branch within the 7-day deletion recovery period.
-	// The branch must have been soft deleted and not yet permanently deleted.
-	// Recovery restores the branch and its endpoints to an idle state.
-	// Connection strings remain valid after recovery.
-	// TTL branches become non-TTL branches after recovery.
-	// To list deleted branches available for recovery, use `GET
-	// /projects/{project_id}/branches?include_deleted=true`.
+	// Recovers a deleted branch within the 7-day deletion recovery period. The branch must have been soft
+	// deleted and not yet permanently deleted. Recovery restores the branch and its endpoints to an idle
+	// state. Connection strings remain valid after recovery. TTL branches become non-TTL branches after
+	// recovery.
+	//
+	// To list deleted branches available for recovery, use
+	// `GET /projects/{project_id}/branches?include_deleted=true`.
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/recover
 	RecoverProjectBranch(ctx context.Context, params RecoverProjectBranchParams) (*BranchRecoverResponse, error)
 	// RemoveOrganizationMember invokes removeOrganizationMember operation.
 	//
-	// Removes the specified member from the organization.
-	// Only organization admins can perform this action.
-	// The last admin in an organization cannot be removed.
+	// Removes the specified member from the organization. Only organization admins can perform this
+	// action. The last admin in an organization cannot be removed.
 	//
 	// DELETE /organizations/{org_id}/members/{member_id}
 	RemoveOrganizationMember(ctx context.Context, params RemoveOrganizationMemberParams) error
+	// RemoveProjectMemberRole invokes removeProjectMemberRole operation.
+	//
+	// Idempotently removes the explicit project grant. The member's organization-role default project
+	// permission still applies. Self-DELETE requires `confirm_self_lockout=true` when effective manage
+	// access would be lost.
+	//
+	// DELETE /projects/{project_id}/members/{member_id}/role
+	RemoveProjectMemberRole(ctx context.Context, params RemoveProjectMemberRoleParams) (*ProjectMemberRoleResponse, error)
 	// ResetProjectBranchRolePassword invokes resetProjectBranchRolePassword operation.
 	//
-	// Resets the password for the specified Postgres role.
-	// Returns a new password and operations. The new password is ready to use when the last operation
-	// finishes.
-	// The old password remains valid until last operation finishes.
-	// Connections to the compute endpoint are dropped. If idle,
-	// the compute endpoint becomes active for a short period of time.
-	// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
+	// Resets the password for the specified Postgres role. Returns a new password and operations. The new
+	// password is ready to use when the last operation finishes. The old password remains valid until last
+	// operation finishes. Connections to the compute endpoint are dropped. If idle, the compute endpoint
+	// becomes active for a short period of time.
+	//
+	// For related information, see [Manage roles].
+	//
+	// [Manage roles]: https://neon.com/docs/manage/roles/
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/roles/{role_name}/reset_password
 	ResetProjectBranchRolePassword(ctx context.Context, params ResetProjectBranchRolePasswordParams) (*RoleOperations, error)
 	// RestartProjectEndpoint invokes restartProjectEndpoint operation.
 	//
-	// Restarts the specified compute endpoint by immediately suspending it and then starting it again.
-	// An `endpoint_id` has an `ep-` prefix.
-	// For information about compute endpoints, see [Manage computes](https://neon.
-	// com/docs/manage/endpoints/).
+	// Restarts the specified compute endpoint by immediately suspending it and then starting it again. An
+	// `endpoint_id` has an `ep-` prefix. For information about compute endpoints, see [Manage computes].
+	//
+	// [Manage computes]: https://neon.com/docs/manage/endpoints/
 	//
 	// POST /projects/{project_id}/endpoints/{endpoint_id}/restart
 	RestartProjectEndpoint(ctx context.Context, params RestartProjectEndpointParams) (*EndpointOperations, error)
 	// RestoreProjectBranch invokes restoreProjectBranch operation.
 	//
-	// Restores a branch to an earlier state in its own or another branch's history
-	// by specifying an LSN or timestamp.
-	// Creates a new branch from the historical state.
+	// Restores a branch to an earlier state in its own or another branch's history by specifying an LSN or
+	// timestamp. Creates a new branch from the historical state.
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/restore
 	RestoreProjectBranch(ctx context.Context, request *BranchRestoreRequest, params RestoreProjectBranchParams) (*BranchOperations, error)
 	// RestoreSnapshot invokes restoreSnapshot operation.
 	//
-	// Restores the specified snapshot to a new branch,
-	// and optionally finalizes the restore operation to replace the original branch.
-	// **Note**: This endpoint is currently in Beta.
+	// Restores the specified snapshot to a new branch, and optionally finalizes the restore operation to
+	// replace the original branch.
+	//
+	// Note: This endpoint is currently in Beta.
 	//
 	// POST /projects/{project_id}/snapshots/{snapshot_id}/restore
 	RestoreSnapshot(ctx context.Context, request OptRestoreSnapshotReq, params RestoreSnapshotParams) (*RestoredSnapshot, error)
 	// RevokeApiKey invokes revokeApiKey operation.
 	//
-	// Revokes the specified API key.
-	// An API key that is no longer needed can be revoked.
-	// This action cannot be reversed.
-	// API keys can also be managed in the Neon Console.
-	// See [Manage API keys](https://neon.com/docs/manage/api-keys/).
+	// Revokes the specified API key. An API key that is no longer needed can be revoked. This action
+	// cannot be reversed. API keys can also be managed in the Neon Console. See [Manage API keys].
+	//
+	// [Manage API keys]: https://neon.com/docs/manage/api-keys/
 	//
 	// DELETE /api_keys/{key_id}
 	RevokeApiKey(ctx context.Context, params RevokeApiKeyParams) (*ApiKeyRevokeResponse, error)
 	// RevokeCredential invokes revokeCredential operation.
 	//
-	// Soft-deletes the credential.  Idempotent.
-	// **Note**: This endpoint is currently in Private Beta.
+	// Soft-deletes the credential. Idempotent.
+	//
+	// Note: This endpoint is currently in Private Beta.
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/credentials/{token_id}
 	RevokeCredential(ctx context.Context, params RevokeCredentialParams) (RevokeCredentialRes, error)
 	// RevokeOrgApiKey invokes revokeOrgApiKey operation.
 	//
-	// Revokes the specified organization API key.
-	// An API key that is no longer needed can be revoked.
-	// This action cannot be reversed.
-	// API keys can also be managed in the Neon Console.
-	// See [Manage API keys](https://neon.com/docs/manage/api-keys/).
+	// Revokes the specified organization API key. An API key that is no longer needed can be revoked. This
+	// action cannot be reversed. API keys can also be managed in the Neon Console. See [Manage API keys].
+	//
+	// [Manage API keys]: https://neon.com/docs/manage/api-keys/
 	//
 	// DELETE /organizations/{org_id}/api_keys/{key_id}
 	RevokeOrgApiKey(ctx context.Context, params RevokeOrgApiKeyParams) (*OrgApiKeyRevokeResponse, error)
 	// RevokePermissionFromProject invokes revokePermissionFromProject operation.
 	//
-	// Revokes project access from the user associated with the specified permission `id`. You can
-	// retrieve a user's permission `id` by listing project access.
+	// Revokes project access from the user associated with the specified permission `id`. You can retrieve
+	// a user's permission `id` by listing project access.
 	//
 	// DELETE /projects/{project_id}/permissions/{permission_id}
 	RevokePermissionFromProject(ctx context.Context, params RevokePermissionFromProjectParams) (*ProjectPermission, error)
 	// SendNeonAuthTestEmail invokes sendNeonAuthTestEmail operation.
 	//
 	// Sends a test email using the configured email server settings to verify SMTP connectivity and
-	// credentials.
-	// The request body must include the SMTP server settings
-	// (`host`, `port`, `username`, `password`, `sender_email`, `sender_name`) and the `recipient_email`
-	// address.
+	// credentials. The request body must include the SMTP server settings (`host`, `port`, `username`,
+	// `password`, `sender_email`, `sender_name`) and the `recipient_email` address.
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/auth/send_test_email
 	SendNeonAuthTestEmail(ctx context.Context, request *SendNeonAuthTestEmailRequest, params SendNeonAuthTestEmailParams) (*SendNeonAuthTestEmailResponse, error)
 	// SetDefaultProjectBranch invokes setDefaultProjectBranch operation.
 	//
-	// Sets the specified branch as the project's default branch.
-	// The default designation is automatically removed from the previous default branch.
-	// For more information, see [Manage branches](https://neon.com/docs/manage/branches/).
+	// Sets the specified branch as the project's default branch. The default designation is automatically
+	// removed from the previous default branch. For more information, see [Manage branches].
+	//
+	// [Manage branches]: https://neon.com/docs/manage/branches/
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/set_as_default
 	SetDefaultProjectBranch(ctx context.Context, params SetDefaultProjectBranchParams) (*BranchOperations, error)
 	// SetOrganizationSpendingLimit invokes setOrganizationSpendingLimit operation.
 	//
-	// Sets the monthly spending limit for the specified organization.
-	// To remove a previously configured limit, send a DELETE request to this endpoint.
-	// When a limit is configured, email notifications are sent at 80% and 100% of the limit.
-	// Computes are not suspended when the limit is reached.
-	// Available to organization admins on Launch and Scale plans only.
+	// Sets the monthly spending limit for the specified organization. To remove a previously configured
+	// limit, send a DELETE request to this endpoint. When a limit is configured, email notifications are
+	// sent at 80% and 100% of the limit. Computes are not suspended when the limit is reached. Available
+	// to organization admins on Launch and Scale plans only.
 	//
 	// PUT /organizations/{org_id}/billing/spending_limit
 	SetOrganizationSpendingLimit(ctx context.Context, request *SpendingLimitUpdateRequest, params SetOrganizationSpendingLimitParams) (*SpendingLimitResponse, error)
+	// SetProjectMemberRole invokes setProjectMemberRole operation.
+	//
+	// Idempotently sets or updates the explicit project grant of the specified org member. Self-demotion
+	// requires `confirm_self_demotion=true`.
+	//
+	// PUT /projects/{project_id}/members/{member_id}/role
+	SetProjectMemberRole(ctx context.Context, request *SetProjectMemberRoleRequest, params SetProjectMemberRoleParams) (*ProjectMemberRoleResponse, error)
 	// SetSnapshotSchedule invokes setSnapshotSchedule operation.
 	//
-	// Updates the backup schedule for the specified branch.
-	// The schedule defines how often automatic snapshots are created (e.g., `hourly`, `daily`).
-	// **Note**: This endpoint is currently in Beta.
+	// Updates the backup schedule for the specified branch. The schedule defines how often automatic
+	// snapshots are created (e.g., `daily`, `weekly`).
+	//
+	// Note: This endpoint is currently in Beta.
 	//
 	// PUT /projects/{project_id}/branches/{branch_id}/backup_schedule
 	SetSnapshotSchedule(ctx context.Context, request *BackupSchedule, params SetSnapshotScheduleParams) error
 	// StartAnonymization invokes startAnonymization operation.
 	//
 	// Starts the anonymization process for an anonymized branch that is in the initialized, error, or
-	// anonymized state.
-	// This will apply all defined masking rules to anonymize sensitive data in the branch databases.
-	// The branch must be an anonymized branch to start anonymization.
-	// **Note**: This endpoint is currently in Beta.
+	// anonymized state. This will apply all defined masking rules to anonymize sensitive data in the
+	// branch databases. The branch must be an anonymized branch to start anonymization.
+	//
+	// Note: This endpoint is currently in Beta.
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/anonymize
 	StartAnonymization(ctx context.Context, params StartAnonymizationParams) (*AnonymizedBranchStatusResponse, error)
 	// StartProjectEndpoint invokes startProjectEndpoint operation.
 	//
-	// Starts a compute endpoint.
-	// The compute endpoint is ready to use after the last operation in the chain finishes successfully.
-	// An `endpoint_id` has an `ep-` prefix.
-	// For information about compute endpoints, see [Manage computes](https://neon.
-	// com/docs/manage/endpoints/).
+	// Starts a compute endpoint. The compute endpoint is ready to use after the last operation in the
+	// chain finishes successfully.
+	//
+	// An `endpoint_id` has an `ep-` prefix. For information about compute endpoints, see
+	// [Manage computes].
+	//
+	// [Manage computes]: https://neon.com/docs/manage/endpoints/
 	//
 	// POST /projects/{project_id}/endpoints/{endpoint_id}/start
 	StartProjectEndpoint(ctx context.Context, params StartProjectEndpointParams) (*EndpointOperations, error)
 	// SuspendProjectEndpoint invokes suspendProjectEndpoint operation.
 	//
-	// Suspends the specified compute endpoint.
-	// An `endpoint_id` has an `ep-` prefix.
-	// For information about compute endpoints, see [Manage computes](https://neon.
-	// com/docs/manage/endpoints/).
+	// Suspends the specified compute endpoint. An `endpoint_id` has an `ep-` prefix. For information about
+	// compute endpoints, see [Manage computes].
+	//
+	// [Manage computes]: https://neon.com/docs/manage/endpoints/
 	//
 	// POST /projects/{project_id}/endpoints/{endpoint_id}/suspend
 	SuspendProjectEndpoint(ctx context.Context, params SuspendProjectEndpointParams) (*EndpointOperations, error)
@@ -1294,40 +1398,38 @@ type Invoker interface {
 	UpdateBranchNeonAuthOauthProvider(ctx context.Context, request *NeonAuthUpdateOAuthProviderRequest, params UpdateBranchNeonAuthOauthProviderParams) (*NeonAuthOauthProvider, error)
 	// UpdateMaskingRules invokes updateMaskingRules operation.
 	//
-	// Updates the masking rules for the specified anonymized branch.
-	// Masking rules define how sensitive data should be anonymized using PostgreSQL Anonymizer.
-	// **Note**: This endpoint is currently in Beta.
+	// Updates the masking rules for the specified anonymized branch. Masking rules define how sensitive
+	// data should be anonymized using PostgreSQL Anonymizer.
+	//
+	// Note: This endpoint is currently in Beta.
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/masking_rules
 	UpdateMaskingRules(ctx context.Context, request *MaskingRulesUpdateRequest, params UpdateMaskingRulesParams) (*MaskingRulesResponse, error)
 	// UpdateNeonAuthAllowLocalhost invokes updateNeonAuthAllowLocalhost operation.
 	//
-	// Updates the localhost allow setting for the specified branch's Neon Auth integration.
-	// When enabled, authentication flows work from `localhost` without adding it to the redirect URI
-	// whitelist.
+	// Updates the localhost allow setting for the specified branch's Neon Auth integration. When enabled,
+	// authentication flows work from `localhost` without adding it to the redirect URI whitelist.
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/auth/allow_localhost
 	UpdateNeonAuthAllowLocalhost(ctx context.Context, request *UpdateNeonAuthAllowLocalhostRequest, params UpdateNeonAuthAllowLocalhostParams) (*NeonAuthAllowLocalhostResponse, error)
 	// UpdateNeonAuthConfig invokes updateNeonAuthConfig operation.
 	//
-	// Updates the auth configuration for the branch.
-	// Currently supports updating the application name used in auth emails.
+	// Updates the auth configuration for the branch. Currently supports updating the application name used
+	// in auth emails.
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/auth/config
 	UpdateNeonAuthConfig(ctx context.Context, request *NeonAuthConfigUpdate, params UpdateNeonAuthConfigParams) (*NeonAuthConfigResponse, error)
 	// UpdateNeonAuthEmailAndPasswordConfig invokes updateNeonAuthEmailAndPasswordConfig operation.
 	//
 	// Updates the email and password authentication configuration for the specified branch's Neon Auth
-	// integration.
-	// Only the fields provided in the request body are updated.
+	// integration. Only the fields provided in the request body are updated.
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/auth/email_and_password
 	UpdateNeonAuthEmailAndPasswordConfig(ctx context.Context, request *NeonAuthEmailAndPasswordConfigUpdate, params UpdateNeonAuthEmailAndPasswordConfigParams) (*NeonAuthEmailAndPasswordConfig, error)
 	// UpdateNeonAuthEmailProvider invokes updateNeonAuthEmailProvider operation.
 	//
-	// Updates the email provider configuration for the specified branch's Neon Auth integration.
-	// The email provider handles transactional messages such as verification emails and password reset
-	// links.
+	// Updates the email provider configuration for the specified branch's Neon Auth integration. The email
+	// provider handles transactional messages such as verification emails and password reset links.
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/auth/email_provider
 	UpdateNeonAuthEmailProvider(ctx context.Context, request *NeonAuthEmailServerConfig, params UpdateNeonAuthEmailProviderParams) (*NeonAuthEmailServerConfig, error)
@@ -1342,8 +1444,8 @@ type Invoker interface {
 	UpdateNeonAuthEmailServer(ctx context.Context, request *NeonAuthEmailServerConfig, params UpdateNeonAuthEmailServerParams) (*NeonAuthEmailServerConfig, error)
 	// UpdateNeonAuthMagicLinkPlugin invokes updateNeonAuthMagicLinkPlugin operation.
 	//
-	// Updates the magic link plugin configuration for Neon Auth.
-	// The magic link plugin enables passwordless authentication via email magic links.
+	// Updates the magic link plugin configuration for Neon Auth. The magic link plugin enables
+	// passwordless authentication via email magic links.
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/magic-link
 	UpdateNeonAuthMagicLinkPlugin(ctx context.Context, request *NeonAuthMagicLinkConfigUpdate, params UpdateNeonAuthMagicLinkPluginParams) (*NeonAuthMagicLinkConfig, error)
@@ -1359,106 +1461,107 @@ type Invoker interface {
 	UpdateNeonAuthOauthProvider(ctx context.Context, request *NeonAuthUpdateOAuthProviderRequest, params UpdateNeonAuthOauthProviderParams) (*NeonAuthOauthProvider, error)
 	// UpdateNeonAuthOrganizationPlugin invokes updateNeonAuthOrganizationPlugin operation.
 	//
-	// Updates the organization plugin configuration for Neon Auth.
-	// The organization plugin enables multi-tenant organization support.
+	// Updates the organization plugin configuration for Neon Auth. The organization plugin enables
+	// multi-tenant organization support.
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/organization
 	UpdateNeonAuthOrganizationPlugin(ctx context.Context, request *NeonAuthOrganizationConfigUpdate, params UpdateNeonAuthOrganizationPluginParams) (*NeonAuthOrganizationConfig, error)
 	// UpdateNeonAuthPhoneNumberPlugin invokes updateNeonAuthPhoneNumberPlugin operation.
 	//
-	// Updates the phone number plugin configuration for Neon Auth.
-	// Only the fields provided in the request body are updated; omitted fields retain their current
-	// values.
-	// The phone number plugin enables phone-based OTP authentication.
-	// OTP codes are delivered via the `send.otp` webhook event with `delivery_preference: "sms"`.
-	// A webhook must be configured with the `send.otp` event enabled for SMS delivery to work.
+	// Updates the phone number plugin configuration for Neon Auth. Only the fields provided in the request
+	// body are updated; omitted fields retain their current values. The phone number plugin enables
+	// phone-based OTP authentication. OTP codes are delivered via the `send.otp` webhook event with
+	// `delivery_preference: "sms"`. A webhook must be configured with the `send.otp` event enabled for SMS
+	// delivery to work.
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/phone-number
 	UpdateNeonAuthPhoneNumberPlugin(ctx context.Context, request *NeonAuthPhoneNumberConfigUpdate, params UpdateNeonAuthPhoneNumberPluginParams) (*NeonAuthPhoneNumberConfig, error)
 	// UpdateNeonAuthUserRole invokes updateNeonAuthUserRole operation.
 	//
-	// Updates the role of a user in the Neon Auth user directory for the specified branch.
-	// The role controls the user's level of access within the Neon Auth integration.
+	// Updates the role of a user in the Neon Auth user directory for the specified branch. The role
+	// controls the user's level of access within the Neon Auth integration.
 	//
 	// PUT /projects/{project_id}/branches/{branch_id}/auth/users/{auth_user_id}/role
 	UpdateNeonAuthUserRole(ctx context.Context, request *UpdateNeonAuthUserRoleRequest, params UpdateNeonAuthUserRoleParams) (*UpdateNeonAuthUserRoleResponse, error)
 	// UpdateNeonAuthWebhookConfig invokes updateNeonAuthWebhookConfig operation.
 	//
-	// Updates the webhook configuration for the specified branch's Neon Auth integration.
-	// Webhooks notify an external endpoint when auth events occur, such as user creation or sign-in.
+	// Updates the webhook configuration for the specified branch's Neon Auth integration. Webhooks notify
+	// an external endpoint when auth events occur, such as user creation or sign-in.
 	//
 	// PUT /projects/{project_id}/branches/{branch_id}/auth/webhooks
 	UpdateNeonAuthWebhookConfig(ctx context.Context, request *NeonAuthWebhookConfig, params UpdateNeonAuthWebhookConfigParams) (*NeonAuthWebhookConfig, error)
 	// UpdateOrganizationMember invokes updateOrganizationMember operation.
 	//
-	// Updates the role of an existing member in the specified organization.
-	// The requested role must be valid for the organization.
-	// Only organization admins can call this endpoint.
+	// Updates the role of an existing member in the specified organization. The requested role must be
+	// valid for the organization. Only organization admins can call this endpoint.
 	//
 	// PATCH /organizations/{org_id}/members/{member_id}
 	UpdateOrganizationMember(ctx context.Context, request *OrganizationMemberUpdateRequest, params UpdateOrganizationMemberParams) (*Member, error)
 	// UpdateProject invokes updateProject operation.
 	//
-	// Updates the specified project.
-	// Configurable properties include the project name, default compute settings, history retention
-	// period, and IP allowlist.
+	// Updates the specified project. Configurable properties include the project name, default compute
+	// settings, history retention period, and IP allowlist.
 	//
 	// PATCH /projects/{project_id}
 	UpdateProject(ctx context.Context, request *ProjectUpdateRequest, params UpdateProjectParams) (*UpdateProjectOK, error)
 	// UpdateProjectBranch invokes updateProjectBranch operation.
 	//
-	// Updates the specified branch.
-	// For more information, see [Manage branches](https://neon.com/docs/manage/branches/).
+	// Updates the specified branch. For more information, see [Manage branches].
+	//
+	// [Manage branches]: https://neon.com/docs/manage/branches/
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}
 	UpdateProjectBranch(ctx context.Context, request *BranchUpdateRequest, params UpdateProjectBranchParams) (*BranchOperations, error)
 	// UpdateProjectBranchDataAPI invokes updateProjectBranchDataAPI operation.
 	//
-	// Updates the Neon Data API configuration for the specified branch.
-	// You can optionally provide settings to update the Data API configuration.
-	// The schema cache is always refreshed as part of this operation.
+	// Updates the Neon Data API configuration for the specified branch. You can optionally provide
+	// settings to update the Data API configuration. The schema cache is always refreshed as part of this
+	// operation.
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/data-api/{database_name}
 	UpdateProjectBranchDataAPI(ctx context.Context, request OptDataAPIUpdateRequest, params UpdateProjectBranchDataAPIParams) error
 	// UpdateProjectBranchDatabase invokes updateProjectBranchDatabase operation.
 	//
-	// Updates the specified database in the branch.
-	// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
+	// Updates the specified database in the branch. For related information, see [Manage databases].
+	//
+	// [Manage databases]: https://neon.com/docs/manage/databases/
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/databases/{database_name}
 	UpdateProjectBranchDatabase(ctx context.Context, request *DatabaseUpdateRequest, params UpdateProjectBranchDatabaseParams) (*DatabaseOperations, error)
 	// UpdateProjectBranchFunction invokes updateProjectBranchFunction operation.
 	//
-	// Updates the function's mutable metadata — currently only the display
-	// `name`. A string sets the display name; `null` clears it, after which
-	// the function's `name` falls back to its slug. Leading and trailing
-	// whitespace is trimmed; a whitespace-only name is rejected. Acts only
-	// on a function owned by the branch: a slug that is only inherited from
-	// an ancestor branch returns 404 — rename it on the branch that owns
-	// it. Like every other change on a branch, a rename is isolated per
-	// branch: a branch forked before the rename keeps the name it had at
-	// fork time.
-	// **Note**: This endpoint is currently in Private Beta.
+	// Updates the function's mutable metadata — currently only the display `name`. A string sets the
+	// display name; `null` clears it, after which the function's `name` falls back to its slug. Leading
+	// and trailing whitespace is trimmed; a whitespace-only name is rejected. Acts only on a function
+	// owned by the branch: a slug that is only inherited from an ancestor branch returns 404 — rename it
+	// on the branch that owns it. Like every other change on a branch, a rename is isolated per branch: a
+	// branch forked before the rename keeps the name it had at fork time.
+	//
+	// Note: This endpoint is currently in Private Beta.
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/functions/{slug}
 	UpdateProjectBranchFunction(ctx context.Context, request *NeonFunctionUpdateRequest, params UpdateProjectBranchFunctionParams) (*NeonFunctionResponse, error)
 	// UpdateProjectEndpoint invokes updateProjectEndpoint operation.
 	//
 	// Updates the specified compute endpoint.
-	// An `endpoint_id` has an `ep-` prefix. A `branch_id` has a `br-` prefix.
-	// For more information about compute endpoints, see [Manage computes](https://neon.
-	// com/docs/manage/endpoints/).
-	// If the returned list of operations is not empty, the compute endpoint is not ready to use.
-	// The client must wait for the last operation to finish before using the compute endpoint.
-	// If the compute endpoint was idle before the update, it becomes active for a short period of time,
-	// and the control plane suspends it again after the update.
+	//
+	// An `endpoint_id` has an `ep-` prefix. A `branch_id` has a `br-` prefix. For more information about
+	// compute endpoints, see [Manage computes].
+	//
+	// If the returned list of operations is not empty, the compute endpoint is not ready to use. The
+	// client must wait for the last operation to finish before using the compute endpoint. If the compute
+	// endpoint was idle before the update, it becomes active for a short period of time, and the control
+	// plane suspends it again after the update.
+	//
+	// [Manage computes]: https://neon.com/docs/manage/endpoints/
 	//
 	// PATCH /projects/{project_id}/endpoints/{endpoint_id}
 	UpdateProjectEndpoint(ctx context.Context, request *EndpointUpdateRequest, params UpdateProjectEndpointParams) (*EndpointOperations, error)
 	// UpdateSnapshot invokes updateSnapshot operation.
 	//
 	// Updates the specified snapshot.
-	// **Note**: This endpoint is currently in Beta.
+	//
+	// Note: This endpoint is currently in Beta.
 	//
 	// PATCH /projects/{project_id}/snapshots/{snapshot_id}
 	UpdateSnapshot(ctx context.Context, request *SnapshotUpdateRequest, params UpdateSnapshotParams) (*UpdateSnapshotOK, error)
@@ -1667,7 +1770,13 @@ func (c *Client) sendAcceptProjectTransferRequest(ctx context.Context, request O
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeAcceptProjectTransferRequestResponse(resp)
@@ -1680,8 +1789,8 @@ func (c *Client) sendAcceptProjectTransferRequest(ctx context.Context, request O
 
 // AddBranchNeonAuthOauthProvider invokes addBranchNeonAuthOauthProvider operation.
 //
-// Adds an OAuth provider configuration to the specified branch's Neon Auth integration.
-// After adding, users can authenticate using the configured provider.
+// Adds an OAuth provider configuration to the specified branch's Neon Auth integration. After adding,
+// users can authenticate using the configured provider.
 //
 // POST /projects/{project_id}/branches/{branch_id}/auth/oauth_providers
 func (c *Client) AddBranchNeonAuthOauthProvider(ctx context.Context, request *NeonAuthAddOAuthProviderRequest, params AddBranchNeonAuthOauthProviderParams) (*NeonAuthOauthProvider, error) {
@@ -1840,7 +1949,13 @@ func (c *Client) sendAddBranchNeonAuthOauthProvider(ctx context.Context, request
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeAddBranchNeonAuthOauthProviderResponse(resp)
@@ -1853,8 +1968,8 @@ func (c *Client) sendAddBranchNeonAuthOauthProvider(ctx context.Context, request
 
 // AddBranchNeonAuthTrustedDomain invokes addBranchNeonAuthTrustedDomain operation.
 //
-// Adds a domain to the redirect URI whitelist for the specified branch.
-// Only domains in this list are permitted as redirect targets after authentication.
+// Adds a domain to the redirect URI whitelist for the specified branch. Only domains in this list are
+// permitted as redirect targets after authentication.
 //
 // POST /projects/{project_id}/branches/{branch_id}/auth/domains
 func (c *Client) AddBranchNeonAuthTrustedDomain(ctx context.Context, request *NeonAuthAddDomainToRedirectURIWhitelistRequest, params AddBranchNeonAuthTrustedDomainParams) error {
@@ -2013,7 +2128,13 @@ func (c *Client) sendAddBranchNeonAuthTrustedDomain(ctx context.Context, request
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeAddBranchNeonAuthTrustedDomainResponse(resp)
@@ -2026,8 +2147,8 @@ func (c *Client) sendAddBranchNeonAuthTrustedDomain(ctx context.Context, request
 
 // AddNeonAuthDomainToRedirectURIWhitelist invokes addNeonAuthDomainToRedirectURIWhitelist operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Adds a domain
-// to the redirect_uri whitelist for the specified project.
+// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Adds a domain to
+// the redirect_uri whitelist for the specified project.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -2169,7 +2290,13 @@ func (c *Client) sendAddNeonAuthDomainToRedirectURIWhitelist(ctx context.Context
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeAddNeonAuthDomainToRedirectURIWhitelistResponse(resp)
@@ -2182,8 +2309,8 @@ func (c *Client) sendAddNeonAuthDomainToRedirectURIWhitelist(ctx context.Context
 
 // AddNeonAuthOauthProvider invokes addNeonAuthOauthProvider operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead.
-// Adds an OAuth provider to the specified project.
+// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead. Adds an
+// OAuth provider to the specified project.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -2325,7 +2452,13 @@ func (c *Client) sendAddNeonAuthOauthProvider(ctx context.Context, request *Neon
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeAddNeonAuthOauthProviderResponse(resp)
@@ -2339,13 +2472,18 @@ func (c *Client) sendAddNeonAuthOauthProvider(ctx context.Context, request *Neon
 // AddProjectJWKS invokes addProjectJWKS operation.
 //
 // Adds a JWKS URL to the specified project for verifying JWTs used as the authentication mechanism.
+//
 // The URL must be a valid HTTPS URL that returns a JSON Web Key Set.
+//
 // The `provider_name` field allows you to specify which authentication provider you're using (e.g.,
 // Clerk, Auth0, AWS Cognito).
+//
 // The `branch_id` scopes the JWKS URL to specific branches; if not specified, it applies to all
 // branches.
+//
 // The `role_names` scopes the URL to specific roles; if not specified, default roles are used
 // (`authenticator`, `authenticated`, `anonymous`).
+//
 // The `jwt_audience` specifies which `aud` values are accepted in JWTs.
 //
 // POST /projects/{project_id}/jwks
@@ -2486,7 +2624,13 @@ func (c *Client) sendAddProjectJWKS(ctx context.Context, request *AddProjectJWKS
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeAddProjectJWKSResponse(resp)
@@ -2676,7 +2820,13 @@ func (c *Client) sendAssignOrganizationVPCEndpoint(ctx context.Context, request 
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeAssignOrganizationVPCEndpointResponse(resp)
@@ -2689,11 +2839,9 @@ func (c *Client) sendAssignOrganizationVPCEndpoint(ctx context.Context, request 
 
 // AssignProjectVPCEndpoint invokes assignProjectVPCEndpoint operation.
 //
-// Sets or updates a VPC endpoint restriction for a Neon project.
-// When a VPC endpoint restriction is set, the project only accepts connections
-// from the specified VPC.
-// A VPC endpoint can be set as a restriction only after it is assigned to the
-// parent organization of the Neon project.
+// Sets or updates a VPC endpoint restriction for a Neon project. When a VPC endpoint restriction is
+// set, the project only accepts connections from the specified VPC. A VPC endpoint can be set as a
+// restriction only after it is assigned to the parent organization of the Neon project.
 //
 // POST /projects/{project_id}/vpc_endpoints/{vpc_endpoint_id}
 func (c *Client) AssignProjectVPCEndpoint(ctx context.Context, request *VPCEndpointAssignment, params AssignProjectVPCEndpointParams) error {
@@ -2851,7 +2999,13 @@ func (c *Client) sendAssignProjectVPCEndpoint(ctx context.Context, request *VPCE
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeAssignProjectVPCEndpointResponse(resp)
@@ -2864,8 +3018,8 @@ func (c *Client) sendAssignProjectVPCEndpoint(ctx context.Context, request *VPCE
 
 // CountProjectBranches invokes countProjectBranches operation.
 //
-// Retrieves the total number of branches in the specified project.
-// Supports an optional `search` parameter to count branches matching a name filter.
+// Retrieves the total number of branches in the specified project. Supports an optional `search`
+// parameter to count branches matching a name filter.
 //
 // GET /projects/{project_id}/branches/count
 func (c *Client) CountProjectBranches(ctx context.Context, params CountProjectBranchesParams) (*BranchesCountResponse, error) {
@@ -3023,7 +3177,13 @@ func (c *Client) sendCountProjectBranches(ctx context.Context, params CountProje
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeCountProjectBranchesResponse(resp)
@@ -3036,15 +3196,14 @@ func (c *Client) sendCountProjectBranches(ctx context.Context, params CountProje
 
 // CreateApiKey invokes createApiKey operation.
 //
-// Creates an API key.
-// The `key_name` is a user-specified name for the key.
-// Returns an `id` and `key`; the `key` is a randomly generated, 64-bit token required to access the
-// Neon API.
-// Store the key securely — it is only returned once.
-// API keys can also be managed in the Neon Console.
-// See [Manage API keys](https://neon.com/docs/manage/api-keys/).
+// Creates an API key. The `key_name` is a user-specified name for the key. Returns an `id` and `key`;
+// the `key` is a randomly generated, 64-bit token required to access the Neon API. Store the key
+// securely — it is only returned once. API keys can also be managed in the Neon Console. See
+// [Manage API keys].
 //
 // POST /api_keys
+//
+// [Manage API keys]: https://neon.com/docs/manage/api-keys/
 func (c *Client) CreateApiKey(ctx context.Context, request *ApiKeyCreateRequest) (*ApiKeyCreateResponse, error) {
 	res, err := c.sendCreateApiKey(ctx, request)
 	return res, err
@@ -3163,7 +3322,13 @@ func (c *Client) sendCreateApiKey(ctx context.Context, request *ApiKeyCreateRequ
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateApiKeyResponse(resp)
@@ -3176,9 +3341,9 @@ func (c *Client) sendCreateApiKey(ctx context.Context, request *ApiKeyCreateRequ
 
 // CreateBranchNeonAuthNewUser invokes createBranchNeonAuthNewUser operation.
 //
-// Creates a new user in the Neon Auth user directory for the specified branch.
-// The user is created in the `neon_auth.users_sync` table and can immediately authenticate
-// using the branch's configured auth providers.
+// Creates a new user in the Neon Auth user directory for the specified branch. The user is created in
+// the `neon_auth.users_sync` table and can immediately authenticate using the branch's configured auth
+// providers.
 //
 // POST /projects/{project_id}/branches/{branch_id}/auth/users
 func (c *Client) CreateBranchNeonAuthNewUser(ctx context.Context, request *CreateBranchNeonAuthNewUserRequest, params CreateBranchNeonAuthNewUserParams) (*NeonAuthCreateNewUserResponse, error) {
@@ -3337,7 +3502,13 @@ func (c *Client) sendCreateBranchNeonAuthNewUser(ctx context.Context, request *C
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateBranchNeonAuthNewUserResponse(resp)
@@ -3350,10 +3521,10 @@ func (c *Client) sendCreateBranchNeonAuthNewUser(ctx context.Context, request *C
 
 // CreateCredential invokes createCredential operation.
 //
-// Issues a new scoped service credential anchored to the specified
-// branch. The response carries `api_token` and `s3_secret_access_key`
-// exactly once — they are not stored server-side.
-// **Note**: This endpoint is currently in Private Beta.
+// Issues a new scoped service credential anchored to the specified branch. The response carries
+// `api_token` and `s3_secret_access_key` exactly once — they are not stored server-side.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/credentials
 func (c *Client) CreateCredential(ctx context.Context, request *CreateCredentialRequest, params CreateCredentialParams) (*CreateCredentialResponse, error) {
@@ -3512,7 +3683,13 @@ func (c *Client) sendCreateCredential(ctx context.Context, request *CreateCreden
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateCredentialResponse(resp)
@@ -3525,9 +3702,9 @@ func (c *Client) sendCreateCredential(ctx context.Context, request *CreateCreden
 
 // CreateNeonAuth invokes createNeonAuth operation.
 //
-// Enables Neon Auth for the specified branch by connecting it to an authentication provider.
-// Creating the integration provisions the `neon_auth` schema in the branch database, which stores
-// user identity data synchronized from the provider.
+// Enables Neon Auth for the specified branch by connecting it to an authentication provider. Creating
+// the integration provisions the `neon_auth` schema in the branch database, which stores user identity
+// data synchronized from the provider.
 //
 // POST /projects/{project_id}/branches/{branch_id}/auth
 func (c *Client) CreateNeonAuth(ctx context.Context, request *EnableNeonAuthIntegrationRequest, params CreateNeonAuthParams) (*NeonAuthCreateIntegrationResponse, error) {
@@ -3686,7 +3863,13 @@ func (c *Client) sendCreateNeonAuth(ctx context.Context, request *EnableNeonAuth
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateNeonAuthResponse(resp)
@@ -3700,8 +3883,8 @@ func (c *Client) sendCreateNeonAuth(ctx context.Context, request *EnableNeonAuth
 // CreateNeonAuthIntegration invokes createNeonAuthIntegration operation.
 //
 // DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth` instead. Creates a project on a
-// third-party authentication provider's platform for use with Neon Auth.
-// Use this endpoint if the frontend integration flow can't be used.
+// third-party authentication provider's platform for use with Neon Auth. Use this endpoint if the
+// frontend integration flow can't be used.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -3824,7 +4007,13 @@ func (c *Client) sendCreateNeonAuthIntegration(ctx context.Context, request *Neo
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateNeonAuthIntegrationResponse(resp)
@@ -3837,10 +4026,9 @@ func (c *Client) sendCreateNeonAuthIntegration(ctx context.Context, request *Neo
 
 // CreateNeonAuthNewUser invokes createNeonAuthNewUser operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/users` instead. Creates a new
-// user in Neon Auth.
-// The user will be created in your neon_auth.users_sync table and automatically propagated to your
-// auth project, whether Neon-managed or provider-owned.
+// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/users` instead. Creates a new user
+// in Neon Auth. The user will be created in your neon_auth.users_sync table and automatically
+// propagated to your auth project, whether Neon-managed or provider-owned.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -3963,7 +4151,13 @@ func (c *Client) sendCreateNeonAuthNewUser(ctx context.Context, request *NeonAut
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateNeonAuthNewUserResponse(resp)
@@ -3976,9 +4170,8 @@ func (c *Client) sendCreateNeonAuthNewUser(ctx context.Context, request *NeonAut
 
 // CreateNeonAuthProviderSDKKeys invokes createNeonAuthProviderSDKKeys operation.
 //
-// Generates SDK or API Keys for the auth provider. These might be called different things depending
-// on the auth provider you're using, but are generally used for setting up the frontend and backend
-// SDKs.
+// Generates SDK or API Keys for the auth provider. These might be called different things depending on
+// the auth provider you're using, but are generally used for setting up the frontend and backend SDKs.
 //
 // POST /projects/auth/keys
 func (c *Client) CreateNeonAuthProviderSDKKeys(ctx context.Context, request *NeonAuthCreateAuthProviderSDKKeysRequest) (*NeonAuthCreateIntegrationResponse, error) {
@@ -4099,7 +4292,13 @@ func (c *Client) sendCreateNeonAuthProviderSDKKeys(ctx context.Context, request 
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateNeonAuthProviderSDKKeysResponse(resp)
@@ -4112,15 +4311,14 @@ func (c *Client) sendCreateNeonAuthProviderSDKKeys(ctx context.Context, request 
 
 // CreateOrgApiKey invokes createOrgApiKey operation.
 //
-// Creates an API key for the specified organization.
-// The `key_name` is a user-specified name for the key.
-// Returns an `id` and `key`; the `key` is a randomly generated, 64-bit token required to access the
-// Neon API.
-// Store the key securely — it is only returned once.
-// API keys can also be managed in the Neon Console.
-// See [Manage API keys](https://neon.com/docs/manage/api-keys/).
+// Creates an API key for the specified organization. The `key_name` is a user-specified name for the
+// key. Returns an `id` and `key`; the `key` is a randomly generated, 64-bit token required to access
+// the Neon API. Store the key securely — it is only returned once. API keys can also be managed in
+// the Neon Console. See [Manage API keys].
 //
 // POST /organizations/{org_id}/api_keys
+//
+// [Manage API keys]: https://neon.com/docs/manage/api-keys/
 func (c *Client) CreateOrgApiKey(ctx context.Context, request *OrgApiKeyCreateRequest, params CreateOrgApiKeyParams) (*OrgApiKeyCreateResponse, error) {
 	res, err := c.sendCreateOrgApiKey(ctx, request, params)
 	return res, err
@@ -4258,7 +4456,13 @@ func (c *Client) sendCreateOrgApiKey(ctx context.Context, request *OrgApiKeyCrea
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateOrgApiKeyResponse(resp)
@@ -4271,11 +4475,9 @@ func (c *Client) sendCreateOrgApiKey(ctx context.Context, request *OrgApiKeyCrea
 
 // CreateOrganizationInvitations invokes createOrganizationInvitations operation.
 //
-// Creates invitations for a specific organization.
-// If the invited user has an existing account, they automatically join as a member.
-// If they don't yet have an account, they are invited to create one, after which they become a
-// member.
-// Each invited user receives an email notification.
+// Creates invitations for a specific organization. If the invited user has an existing account, they
+// automatically join as a member. If they don't yet have an account, they are invited to create one,
+// after which they become a member. Each invited user receives an email notification.
 //
 // POST /organizations/{org_id}/invitations
 func (c *Client) CreateOrganizationInvitations(ctx context.Context, request *OrganizationInvitesCreateRequest, params CreateOrganizationInvitationsParams) (*OrganizationInvitationsResponse, error) {
@@ -4415,7 +4617,13 @@ func (c *Client) sendCreateOrganizationInvitations(ctx context.Context, request 
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateOrganizationInvitationsResponse(resp)
@@ -4428,18 +4636,18 @@ func (c *Client) sendCreateOrganizationInvitations(ctx context.Context, request 
 
 // CreateProject invokes createProject operation.
 //
-// Creates a Neon project within an organization.
-// If using a personal API key, include the `org_id` parameter to specify which organization to
-// create the project in.
-// If using an org API key, `org_id` is automatically inferred from the key.
-// Plan limits define how many projects you can create.
-// For more information, see [Manage projects](https://neon.com/docs/manage/projects/).
-// You can specify a region and Postgres version in the request body.
-// Neon currently supports PostgreSQL 14, 15, 16, 17, and 18.
-// For supported regions and `region_id` values, see [Regions](https://neon.
-// com/docs/introduction/regions/).
+// Creates a Neon project within an organization. If using a personal API key, include the `org_id`
+// parameter to specify which organization to create the project in. If using an org API key, `org_id`
+// is automatically inferred from the key. Plan limits define how many projects you can create. For
+// more information, see [Manage projects].
+//
+// You can specify a region and Postgres version in the request body. Neon currently supports
+// PostgreSQL 14, 15, 16, 17, and 18. For supported regions and `region_id` values, see [Regions].
 //
 // POST /projects
+//
+// [Manage projects]: https://neon.com/docs/manage/projects/
+// [Regions]: https://neon.com/docs/introduction/regions/
 func (c *Client) CreateProject(ctx context.Context, request *ProjectCreateRequest) (*CreatedProject, error) {
 	res, err := c.sendCreateProject(ctx, request)
 	return res, err
@@ -4558,7 +4766,13 @@ func (c *Client) sendCreateProject(ctx context.Context, request *ProjectCreateRe
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateProjectResponse(resp)
@@ -4571,16 +4785,15 @@ func (c *Client) sendCreateProject(ctx context.Context, request *ProjectCreateRe
 
 // CreateProjectBranch invokes createProjectBranch operation.
 //
-// Creates a branch in the specified project.
-// No request body is required, but you can specify one to create a compute endpoint or select a
-// non-default parent branch.
-// By default, the branch is created from the project's default branch with no compute endpoint, and
-// the branch name is auto-generated.
-// To access the branch, add a `read_write` endpoint.
-// Each branch supports one read-write endpoint and multiple read-only endpoints.
-// For related information, see [Manage branches](https://neon.com/docs/manage/branches/).
+// Creates a branch in the specified project. No request body is required, but you can specify one to
+// create a compute endpoint or select a non-default parent branch. By default, the branch is created
+// from the project's default branch with no compute endpoint, and the branch name is auto-generated.
+// To access the branch, add a `read_write` endpoint. Each branch supports one read-write endpoint and
+// multiple read-only endpoints. For related information, see [Manage branches].
 //
 // POST /projects/{project_id}/branches
+//
+// [Manage branches]: https://neon.com/docs/manage/branches/
 func (c *Client) CreateProjectBranch(ctx context.Context, request OptCreateProjectBranchReq, params CreateProjectBranchParams) (*CreatedBranch, error) {
 	res, err := c.sendCreateProjectBranch(ctx, request, params)
 	return res, err
@@ -4718,7 +4931,13 @@ func (c *Client) sendCreateProjectBranch(ctx context.Context, request OptCreateP
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateProjectBranchResponse(resp)
@@ -4731,13 +4950,13 @@ func (c *Client) sendCreateProjectBranch(ctx context.Context, request OptCreateP
 
 // CreateProjectBranchAnonymized invokes createProjectBranchAnonymized operation.
 //
-// Creates a new branch with anonymized data using PostgreSQL Anonymizer for static masking.
-// This allows developers to work with masked production data.
-// Optionally, provide `masking_rules` to set initial masking rules for the branch
-// and `start_anonymization` to automatically start anonymization after creation. This
-// combines functionality of updating masking rules and starting anonymization into the
-// branch creation request.
-// **Note**: This endpoint is currently in Beta.
+// Creates a new branch with anonymized data using PostgreSQL Anonymizer for static masking. This
+// allows developers to work with masked production data. Optionally, provide `masking_rules` to set
+// initial masking rules for the branch and `start_anonymization` to automatically start anonymization
+// after creation. This combines functionality of updating masking rules and starting anonymization
+// into the branch creation request.
+//
+// Note: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/branch_anonymized
 func (c *Client) CreateProjectBranchAnonymized(ctx context.Context, request *BranchAnonymizedCreateRequest, params CreateProjectBranchAnonymizedParams) (*CreatedBranch, error) {
@@ -4877,7 +5096,13 @@ func (c *Client) sendCreateProjectBranchAnonymized(ctx context.Context, request 
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateProjectBranchAnonymizedResponse(resp)
@@ -4890,9 +5115,10 @@ func (c *Client) sendCreateProjectBranchAnonymized(ctx context.Context, request 
 
 // CreateProjectBranchBucket invokes createProjectBranchBucket operation.
 //
-// Creates a new branchable object-storage bucket on the specified branch.
-// Buckets are managed by the Neon Platform branchable-storage service.
-// **Note**: This endpoint is currently in Private Beta.
+// Creates a new branchable object-storage bucket on the specified branch. Buckets are managed by the
+// Neon Platform branchable-storage service.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/buckets
 func (c *Client) CreateProjectBranchBucket(ctx context.Context, request *BucketCreateRequest, params CreateProjectBranchBucketParams) (CreateProjectBranchBucketRes, error) {
@@ -5051,7 +5277,13 @@ func (c *Client) sendCreateProjectBranchBucket(ctx context.Context, request *Buc
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateProjectBranchBucketResponse(resp)
@@ -5064,9 +5296,9 @@ func (c *Client) sendCreateProjectBranchBucket(ctx context.Context, request *Buc
 
 // CreateProjectBranchDataAPI invokes createProjectBranchDataAPI operation.
 //
-// Creates a new instance of Neon Data API in the specified branch.
-// The Data API exposes a REST interface over the branch database. The `database_name` path parameter
-// determines which database the API serves.
+// Creates a new instance of Neon Data API in the specified branch. The Data API exposes a REST
+// interface over the branch database. The `database_name` path parameter determines which database the
+// API serves.
 //
 // POST /projects/{project_id}/branches/{branch_id}/data-api/{database_name}
 func (c *Client) CreateProjectBranchDataAPI(ctx context.Context, request OptDataAPICreateRequest, params CreateProjectBranchDataAPIParams) (*DataAPICreateResponse, error) {
@@ -5243,7 +5475,13 @@ func (c *Client) sendCreateProjectBranchDataAPI(ctx context.Context, request Opt
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateProjectBranchDataAPIResponse(resp)
@@ -5256,11 +5494,12 @@ func (c *Client) sendCreateProjectBranchDataAPI(ctx context.Context, request Opt
 
 // CreateProjectBranchDatabase invokes createProjectBranchDatabase operation.
 //
-// Creates a database in the specified branch.
-// A branch can have multiple databases.
-// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
+// Creates a database in the specified branch. A branch can have multiple databases. For related
+// information, see [Manage databases].
 //
 // POST /projects/{project_id}/branches/{branch_id}/databases
+//
+// [Manage databases]: https://neon.com/docs/manage/databases/
 func (c *Client) CreateProjectBranchDatabase(ctx context.Context, request *DatabaseCreateRequest, params CreateProjectBranchDatabaseParams) (*DatabaseOperations, error) {
 	res, err := c.sendCreateProjectBranchDatabase(ctx, request, params)
 	return res, err
@@ -5417,7 +5656,13 @@ func (c *Client) sendCreateProjectBranchDatabase(ctx context.Context, request *D
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateProjectBranchDatabaseResponse(resp)
@@ -5430,12 +5675,11 @@ func (c *Client) sendCreateProjectBranchDatabase(ctx context.Context, request *D
 
 // CreateProjectBranchFunctionDeployment invokes createProjectBranchFunctionDeployment operation.
 //
-// Creates a deployment for the function. Supply any subset of zip,
-// environment, and runtime; omitted fields inherit the
-// function's latest version. At least one field must be supplied. The
-// first deployment of a function must include zip. The newest deployment
-// becomes active.
-// **Note**: This endpoint is currently in Private Beta.
+// Creates a deployment for the function. Supply any subset of zip, environment, and runtime; omitted
+// fields inherit the function's latest version. At least one field must be supplied. The first
+// deployment of a function must include zip. The newest deployment becomes active.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/functions/{slug}/deployments
 func (c *Client) CreateProjectBranchFunctionDeployment(ctx context.Context, request *FunctionDeployRequestMultipart, params CreateProjectBranchFunctionDeploymentParams) (*NeonFunctionDeploymentResponse, error) {
@@ -5613,7 +5857,13 @@ func (c *Client) sendCreateProjectBranchFunctionDeployment(ctx context.Context, 
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateProjectBranchFunctionDeploymentResponse(resp)
@@ -5626,13 +5876,14 @@ func (c *Client) sendCreateProjectBranchFunctionDeployment(ctx context.Context, 
 
 // CreateProjectBranchRole invokes createProjectBranchRole operation.
 //
-// Creates a Postgres role in the specified branch.
-// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
-// Connections established to the active compute endpoint will be dropped.
-// If the compute endpoint is idle, the endpoint becomes active for a short period of time and is
-// suspended afterward.
+// Creates a Postgres role in the specified branch. For related information, see [Manage roles].
+//
+// Connections established to the active compute endpoint will be dropped. If the compute endpoint is
+// idle, the endpoint becomes active for a short period of time and is suspended afterward.
 //
 // POST /projects/{project_id}/branches/{branch_id}/roles
+//
+// [Manage roles]: https://neon.com/docs/manage/roles/
 func (c *Client) CreateProjectBranchRole(ctx context.Context, request *RoleCreateRequest, params CreateProjectBranchRoleParams) (*RoleOperations, error) {
 	res, err := c.sendCreateProjectBranchRole(ctx, request, params)
 	return res, err
@@ -5789,7 +6040,13 @@ func (c *Client) sendCreateProjectBranchRole(ctx context.Context, request *RoleC
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateProjectBranchRoleResponse(resp)
@@ -5802,15 +6059,16 @@ func (c *Client) sendCreateProjectBranchRole(ctx context.Context, request *RoleC
 
 // CreateProjectEndpoint invokes createProjectEndpoint operation.
 //
-// Creates a compute endpoint for the specified branch.
-// A compute endpoint is a Neon compute instance.
-// There is a maximum of one read-write compute endpoint per branch.
-// If the specified branch already has a read-write compute endpoint, the operation fails.
-// A branch can have multiple read-only compute endpoints.
-// For more information about compute endpoints, see [Manage computes](https://neon.
-// com/docs/manage/endpoints/).
+// Creates a compute endpoint for the specified branch. A compute endpoint is a Neon compute instance.
+// There is a maximum of one read-write compute endpoint per branch. If the specified branch already
+// has a read-write compute endpoint, the operation fails. A branch can have multiple read-only compute
+// endpoints.
+//
+// For more information about compute endpoints, see [Manage computes].
 //
 // POST /projects/{project_id}/endpoints
+//
+// [Manage computes]: https://neon.com/docs/manage/endpoints/
 func (c *Client) CreateProjectEndpoint(ctx context.Context, request *EndpointCreateRequest, params CreateProjectEndpointParams) (*EndpointOperations, error) {
 	res, err := c.sendCreateProjectEndpoint(ctx, request, params)
 	return res, err
@@ -5948,7 +6206,13 @@ func (c *Client) sendCreateProjectEndpoint(ctx context.Context, request *Endpoin
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateProjectEndpointResponse(resp)
@@ -5961,11 +6225,10 @@ func (c *Client) sendCreateProjectEndpoint(ctx context.Context, request *Endpoin
 
 // CreateProjectTransferRequest invokes createProjectTransferRequest operation.
 //
-// Creates a transfer request for the specified project. The request expires after a set period.
-// To accept the request, the recipient calls `PUT
-// /projects/{project_id}/transfer_requests/{request_id}`
-// or uses the Neon Console claim link.
-// The optional `ru` parameter redirects the recipient after acceptance.
+// Creates a transfer request for the specified project. The request expires after a set period. To
+// accept the request, the recipient calls `PUT /projects/{project_id}/transfer_requests/{request_id}`
+// or uses the Neon Console claim link. The optional `ru` parameter redirects the recipient after
+// acceptance.
 //
 // POST /projects/{project_id}/transfer_requests
 func (c *Client) CreateProjectTransferRequest(ctx context.Context, request OptCreateProjectTransferRequestReq, params CreateProjectTransferRequestParams) (*ProjectTransferRequestResponse, error) {
@@ -6105,7 +6368,13 @@ func (c *Client) sendCreateProjectTransferRequest(ctx context.Context, request O
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateProjectTransferRequestResponse(resp)
@@ -6118,9 +6387,9 @@ func (c *Client) sendCreateProjectTransferRequest(ctx context.Context, request O
 
 // CreateSnapshot invokes createSnapshot operation.
 //
-// Creates a snapshot from the specified branch.
-// This operation may initiate an asynchronous process.
-// **Note**: This endpoint is currently in Beta.
+// Creates a snapshot from the specified branch. This operation may initiate an asynchronous process.
+//
+// Note: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/snapshot
 func (c *Client) CreateSnapshot(ctx context.Context, params CreateSnapshotParams) (*CreateSnapshotOK, error) {
@@ -6348,7 +6617,13 @@ func (c *Client) sendCreateSnapshot(ctx context.Context, params CreateSnapshotPa
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateSnapshotResponse(resp)
@@ -6535,7 +6810,13 @@ func (c *Client) sendDeleteBranchNeonAuthOauthProvider(ctx context.Context, para
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteBranchNeonAuthOauthProviderResponse(resp)
@@ -6548,8 +6829,8 @@ func (c *Client) sendDeleteBranchNeonAuthOauthProvider(ctx context.Context, para
 
 // DeleteBranchNeonAuthTrustedDomain invokes deleteBranchNeonAuthTrustedDomain operation.
 //
-// Removes a domain from the redirect URI whitelist for the specified branch.
-// After removal, the domain can no longer be used as a redirect target after authentication.
+// Removes a domain from the redirect URI whitelist for the specified branch. After removal, the domain
+// can no longer be used as a redirect target after authentication.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/auth/domains
 func (c *Client) DeleteBranchNeonAuthTrustedDomain(ctx context.Context, request *NeonAuthDeleteDomainFromRedirectURIWhitelistRequest, params DeleteBranchNeonAuthTrustedDomainParams) error {
@@ -6708,7 +6989,13 @@ func (c *Client) sendDeleteBranchNeonAuthTrustedDomain(ctx context.Context, requ
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteBranchNeonAuthTrustedDomainResponse(resp)
@@ -6721,8 +7008,8 @@ func (c *Client) sendDeleteBranchNeonAuthTrustedDomain(ctx context.Context, requ
 
 // DeleteBranchNeonAuthUser invokes deleteBranchNeonAuthUser operation.
 //
-// Deletes the specified user from the Neon Auth user directory for the specified branch.
-// Removes the user record from `neon_auth.users_sync`. This action cannot be undone.
+// Deletes the specified user from the Neon Auth user directory for the specified branch. Removes the
+// user record from `neon_auth.users_sync`. This action cannot be undone.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/auth/users/{auth_user_id}
 func (c *Client) DeleteBranchNeonAuthUser(ctx context.Context, params DeleteBranchNeonAuthUserParams) error {
@@ -6896,7 +7183,13 @@ func (c *Client) sendDeleteBranchNeonAuthUser(ctx context.Context, params Delete
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteBranchNeonAuthUserResponse(resp)
@@ -6909,8 +7202,8 @@ func (c *Client) sendDeleteBranchNeonAuthUser(ctx context.Context, params Delete
 
 // DeleteNeonAuthDomainFromRedirectURIWhitelist invokes deleteNeonAuthDomainFromRedirectURIWhitelist operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Deletes a
-// domain from the redirect_uri whitelist for the specified project.
+// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Deletes a domain
+// from the redirect_uri whitelist for the specified project.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -7052,7 +7345,13 @@ func (c *Client) sendDeleteNeonAuthDomainFromRedirectURIWhitelist(ctx context.Co
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteNeonAuthDomainFromRedirectURIWhitelistResponse(resp)
@@ -7225,7 +7524,13 @@ func (c *Client) sendDeleteNeonAuthIntegration(ctx context.Context, request OptD
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteNeonAuthIntegrationResponse(resp)
@@ -7397,7 +7702,13 @@ func (c *Client) sendDeleteNeonAuthOauthProvider(ctx context.Context, params Del
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteNeonAuthOauthProviderResponse(resp)
@@ -7568,7 +7879,13 @@ func (c *Client) sendDeleteNeonAuthUser(ctx context.Context, params DeleteNeonAu
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteNeonAuthUserResponse(resp)
@@ -7581,9 +7898,9 @@ func (c *Client) sendDeleteNeonAuthUser(ctx context.Context, params DeleteNeonAu
 
 // DeleteOrganizationSpendingLimit invokes deleteOrganizationSpendingLimit operation.
 //
-// Removes the configured monthly spending limit for the specified organization.
-// Idempotent — removing an already-unset limit still succeeds.
-// Available to organization admins on Launch and Scale plans only.
+// Removes the configured monthly spending limit for the specified organization. Idempotent —
+// removing an already-unset limit still succeeds. Available to organization admins on Launch and Scale
+// plans only.
 //
 // DELETE /organizations/{org_id}/billing/spending_limit
 func (c *Client) DeleteOrganizationSpendingLimit(ctx context.Context, params DeleteOrganizationSpendingLimitParams) error {
@@ -7720,7 +8037,13 @@ func (c *Client) sendDeleteOrganizationSpendingLimit(ctx context.Context, params
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteOrganizationSpendingLimitResponse(resp)
@@ -7733,9 +8056,8 @@ func (c *Client) sendDeleteOrganizationSpendingLimit(ctx context.Context, params
 
 // DeleteOrganizationVPCEndpoint invokes deleteOrganizationVPCEndpoint operation.
 //
-// Deletes the VPC endpoint from the specified Neon organization.
-// If you delete a VPC endpoint from a Neon organization, that VPC endpoint cannot
-// be added back to the Neon organization.
+// Deletes the VPC endpoint from the specified Neon organization. If you delete a VPC endpoint from a
+// Neon organization, that VPC endpoint cannot be added back to the Neon organization.
 //
 // DELETE /organizations/{org_id}/vpc/region/{region_id}/vpc_endpoints/{vpc_endpoint_id}
 func (c *Client) DeleteOrganizationVPCEndpoint(ctx context.Context, params DeleteOrganizationVPCEndpointParams) error {
@@ -7909,7 +8231,13 @@ func (c *Client) sendDeleteOrganizationVPCEndpoint(ctx context.Context, params D
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteOrganizationVPCEndpointResponse(resp)
@@ -7922,9 +8250,9 @@ func (c *Client) sendDeleteOrganizationVPCEndpoint(ctx context.Context, params D
 
 // DeleteProject invokes deleteProject operation.
 //
-// Deletes the specified project and all its endpoints, branches, databases, and users.
-// Deleted projects can be recovered within 7 days using `POST /projects/{project_id}/recover`.
-// To list recoverable projects, use `GET /projects?recoverable=true`.
+// Deletes the specified project and all its endpoints, branches, databases, and users. Deleted
+// projects can be recovered within 7 days using `POST /projects/{project_id}/recover`. To list
+// recoverable projects, use `GET /projects?recoverable=true`.
 //
 // DELETE /projects/{project_id}
 func (c *Client) DeleteProject(ctx context.Context, params DeleteProjectParams) (*ProjectResponse, error) {
@@ -8060,7 +8388,13 @@ func (c *Client) sendDeleteProject(ctx context.Context, params DeleteProjectPara
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteProjectResponse(resp)
@@ -8075,14 +8409,17 @@ func (c *Client) sendDeleteProject(ctx context.Context, params DeleteProjectPara
 //
 // Deletes the specified branch from a project and places all compute endpoints into an idle state,
 // breaking existing client connections.
-// The deletion completes after all operations finish.
-// You cannot delete a project's root or default branch, or a branch that has a child branch.
-// A project must have at least one branch.
-// By default, deleted branches can be recovered within a 7-day grace period.
-// Use the `hard_delete` parameter to permanently delete the branch immediately.
-// For related information, see [Manage branches](https://neon.com/docs/manage/branches/).
+//
+// The deletion completes after all operations finish. You cannot delete a project's root or default
+// branch, or a branch that has a child branch. A project must have at least one branch.
+//
+// By default, deleted branches can be recovered within a 7-day grace period. Use the `hard_delete`
+// parameter to permanently delete the branch immediately. For related information, see
+// [Manage branches].
 //
 // DELETE /projects/{project_id}/branches/{branch_id}
+//
+// [Manage branches]: https://neon.com/docs/manage/branches/
 func (c *Client) DeleteProjectBranch(ctx context.Context, params DeleteProjectBranchParams) (DeleteProjectBranchRes, error) {
 	res, err := c.sendDeleteProjectBranch(ctx, params)
 	return res, err
@@ -8256,7 +8593,13 @@ func (c *Client) sendDeleteProjectBranch(ctx context.Context, params DeleteProje
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteProjectBranchResponse(resp)
@@ -8270,7 +8613,8 @@ func (c *Client) sendDeleteProjectBranch(ctx context.Context, params DeleteProje
 // DeleteProjectBranchBucket invokes deleteProjectBranchBucket operation.
 //
 // Deletes the named bucket from the specified branch.
-// **Note**: This endpoint is currently in Private Beta.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}
 func (c *Client) DeleteProjectBranchBucket(ctx context.Context, params DeleteProjectBranchBucketParams) (DeleteProjectBranchBucketRes, error) {
@@ -8444,7 +8788,13 @@ func (c *Client) sendDeleteProjectBranchBucket(ctx context.Context, params Delet
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteProjectBranchBucketResponse(resp)
@@ -8457,9 +8807,10 @@ func (c *Client) sendDeleteProjectBranchBucket(ctx context.Context, params Delet
 
 // DeleteProjectBranchBucketObject invokes deleteProjectBranchBucketObject operation.
 //
-// Deletes the named object from the bucket on the specified branch.
-// Served by the user's session (no customer S3 credentials required).
-// **Note**: This endpoint is currently in Private Beta.
+// Deletes the named object from the bucket on the specified branch. Served by the user's session (no
+// customer S3 credentials required).
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects/{object_key}
 func (c *Client) DeleteProjectBranchBucketObject(ctx context.Context, params DeleteProjectBranchBucketObjectParams) (DeleteProjectBranchBucketObjectRes, error) {
@@ -8652,7 +9003,13 @@ func (c *Client) sendDeleteProjectBranchBucketObject(ctx context.Context, params
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteProjectBranchBucketObjectResponse(resp)
@@ -8665,20 +9022,19 @@ func (c *Client) sendDeleteProjectBranchBucketObject(ctx context.Context, params
 
 // DeleteProjectBranchBucketObjectsByPrefix invokes deleteProjectBranchBucketObjectsByPrefix operation.
 //
-// Soft-deletes every object on the specified branch whose key starts with
-// `prefix`, in a single call. Intended to back a "delete folder" action in
-// an object browser: a `prefix` of `app/avatars/` removes every object
-// beneath that folder. Served by the user's session (no customer S3
-// credentials required).
-// `prefix` must be non-empty, end with `/`, be at most 1024 bytes, and
-// contain no control characters - a partial-segment prefix cannot
-// accidentally delete sibling keys. Returns the number of objects
-// soft-deleted (`deleted`), which may be 0 when no live object matched the
-// prefix on this branch.
-// Only objects physically present on this branch are tombstoned; objects
-// inherited from an ancestor branch via copy-on-write (not materialized on
-// this branch) are out of scope.
-// **Note**: This endpoint is currently in Private Beta.
+// Soft-deletes every object on the specified branch whose key starts with `prefix`, in a single call.
+// Intended to back a "delete folder" action in an object browser: a `prefix` of `app/avatars/` removes
+// every object beneath that folder. Served by the user's session (no customer S3 credentials
+// required).
+//
+// `prefix` must be non-empty, end with `/`, be at most 1024 bytes, and contain no control characters -
+// a partial-segment prefix cannot accidentally delete sibling keys. Returns the number of objects
+// soft-deleted (`deleted`), which may be 0 when no live object matched the prefix on this branch.
+//
+// Only objects physically present on this branch are tombstoned; objects inherited from an ancestor
+// branch via copy-on-write (not materialized on this branch) are out of scope.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects-by-prefix
 func (c *Client) DeleteProjectBranchBucketObjectsByPrefix(ctx context.Context, params DeleteProjectBranchBucketObjectsByPrefixParams) (DeleteProjectBranchBucketObjectsByPrefixRes, error) {
@@ -8871,7 +9227,13 @@ func (c *Client) sendDeleteProjectBranchBucketObjectsByPrefix(ctx context.Contex
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteProjectBranchBucketObjectsByPrefixResponse(resp)
@@ -8884,8 +9246,8 @@ func (c *Client) sendDeleteProjectBranchBucketObjectsByPrefix(ctx context.Contex
 
 // DeleteProjectBranchDataAPI invokes deleteProjectBranchDataAPI operation.
 //
-// Deletes the Neon Data API for the specified branch.
-// Existing connections using the Data API endpoint will fail after deletion.
+// Deletes the Neon Data API for the specified branch. Existing connections using the Data API endpoint
+// will fail after deletion.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/data-api/{database_name}
 func (c *Client) DeleteProjectBranchDataAPI(ctx context.Context, params DeleteProjectBranchDataAPIParams) error {
@@ -9059,7 +9421,13 @@ func (c *Client) sendDeleteProjectBranchDataAPI(ctx context.Context, params Dele
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteProjectBranchDataAPIResponse(resp)
@@ -9072,10 +9440,11 @@ func (c *Client) sendDeleteProjectBranchDataAPI(ctx context.Context, params Dele
 
 // DeleteProjectBranchDatabase invokes deleteProjectBranchDatabase operation.
 //
-// Deletes the specified database from the branch.
-// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
+// Deletes the specified database from the branch. For related information, see [Manage databases].
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/databases/{database_name}
+//
+// [Manage databases]: https://neon.com/docs/manage/databases/
 func (c *Client) DeleteProjectBranchDatabase(ctx context.Context, params DeleteProjectBranchDatabaseParams) (DeleteProjectBranchDatabaseRes, error) {
 	res, err := c.sendDeleteProjectBranchDatabase(ctx, params)
 	return res, err
@@ -9247,7 +9616,13 @@ func (c *Client) sendDeleteProjectBranchDatabase(ctx context.Context, params Del
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteProjectBranchDatabaseResponse(resp)
@@ -9261,7 +9636,8 @@ func (c *Client) sendDeleteProjectBranchDatabase(ctx context.Context, params Del
 // DeleteProjectBranchFunction invokes deleteProjectBranchFunction operation.
 //
 // Deletes the function identified by its slug.
-// **Note**: This endpoint is currently in Private Beta.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/functions/{slug}
 func (c *Client) DeleteProjectBranchFunction(ctx context.Context, params DeleteProjectBranchFunctionParams) error {
@@ -9435,7 +9811,13 @@ func (c *Client) sendDeleteProjectBranchFunction(ctx context.Context, params Del
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteProjectBranchFunctionResponse(resp)
@@ -9448,10 +9830,11 @@ func (c *Client) sendDeleteProjectBranchFunction(ctx context.Context, params Del
 
 // DeleteProjectBranchRole invokes deleteProjectBranchRole operation.
 //
-// Deletes the specified Postgres role from the branch.
-// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
+// Deletes the specified Postgres role from the branch. For related information, see [Manage roles].
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/roles/{role_name}
+//
+// [Manage roles]: https://neon.com/docs/manage/roles/
 func (c *Client) DeleteProjectBranchRole(ctx context.Context, params DeleteProjectBranchRoleParams) (DeleteProjectBranchRoleRes, error) {
 	res, err := c.sendDeleteProjectBranchRole(ctx, params)
 	return res, err
@@ -9623,7 +10006,13 @@ func (c *Client) sendDeleteProjectBranchRole(ctx context.Context, params DeleteP
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteProjectBranchRoleResponse(resp)
@@ -9636,15 +10025,16 @@ func (c *Client) sendDeleteProjectBranchRole(ctx context.Context, params DeleteP
 
 // DeleteProjectEndpoint invokes deleteProjectEndpoint operation.
 //
-// Deletes the specified compute endpoint.
-// A compute endpoint is a Neon compute instance.
-// Deleting a compute endpoint drops existing network connections to the compute endpoint.
-// The deletion is completed when the last operation in the chain finishes successfully.
-// An `endpoint_id` has an `ep-` prefix.
-// For information about compute endpoints, see [Manage computes](https://neon.
-// com/docs/manage/endpoints/).
+// Deletes the specified compute endpoint. A compute endpoint is a Neon compute instance. Deleting a
+// compute endpoint drops existing network connections to the compute endpoint. The deletion is
+// completed when the last operation in the chain finishes successfully.
+//
+// An `endpoint_id` has an `ep-` prefix. For information about compute endpoints, see
+// [Manage computes].
 //
 // DELETE /projects/{project_id}/endpoints/{endpoint_id}
+//
+// [Manage computes]: https://neon.com/docs/manage/endpoints/
 func (c *Client) DeleteProjectEndpoint(ctx context.Context, params DeleteProjectEndpointParams) (DeleteProjectEndpointRes, error) {
 	res, err := c.sendDeleteProjectEndpoint(ctx, params)
 	return res, err
@@ -9797,7 +10187,13 @@ func (c *Client) sendDeleteProjectEndpoint(ctx context.Context, params DeletePro
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteProjectEndpointResponse(resp)
@@ -9810,8 +10206,8 @@ func (c *Client) sendDeleteProjectEndpoint(ctx context.Context, params DeletePro
 
 // DeleteProjectJWKS invokes deleteProjectJWKS operation.
 //
-// Removes the specified JWKS URL from the project.
-// JWTs signed by keys from the removed URL can no longer authenticate to the project's endpoints.
+// Removes the specified JWKS URL from the project. JWTs signed by keys from the removed URL can no
+// longer authenticate to the project's endpoints.
 //
 // DELETE /projects/{project_id}/jwks/{jwks_id}
 func (c *Client) DeleteProjectJWKS(ctx context.Context, params DeleteProjectJWKSParams) (*JWKS, error) {
@@ -9966,7 +10362,13 @@ func (c *Client) sendDeleteProjectJWKS(ctx context.Context, params DeleteProject
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteProjectJWKSResponse(resp)
@@ -10134,7 +10536,13 @@ func (c *Client) sendDeleteProjectVPCEndpoint(ctx context.Context, params Delete
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteProjectVPCEndpointResponse(resp)
@@ -10148,7 +10556,8 @@ func (c *Client) sendDeleteProjectVPCEndpoint(ctx context.Context, params Delete
 // DeleteSnapshot invokes deleteSnapshot operation.
 //
 // Deletes the specified snapshot.
-// **Note**: This endpoint is currently in Beta.
+//
+// Note: This endpoint is currently in Beta.
 //
 // DELETE /projects/{project_id}/snapshots/{snapshot_id}
 func (c *Client) DeleteSnapshot(ctx context.Context, params DeleteSnapshotParams) (*OperationsResponse, error) {
@@ -10303,7 +10712,13 @@ func (c *Client) sendDeleteSnapshot(ctx context.Context, params DeleteSnapshotPa
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteSnapshotResponse(resp)
@@ -10316,12 +10731,10 @@ func (c *Client) sendDeleteSnapshot(ctx context.Context, params DeleteSnapshotPa
 
 // DisableNeonAuth invokes disableNeonAuth operation.
 //
-// Disables the Neon Auth integration for the specified branch, removing the connection
-// to the authentication provider.
-// If `delete_data` is `true`, also deletes the `neon_auth` schema and all associated tables
-// from the branch database.
-// The integration can be re-enabled by calling `POST
-// /projects/{project_id}/branches/{branch_id}/auth`.
+// Disables the Neon Auth integration for the specified branch, removing the connection to the
+// authentication provider. If `delete_data` is `true`, also deletes the `neon_auth` schema and all
+// associated tables from the branch database. The integration can be re-enabled by calling
+// `POST /projects/{project_id}/branches/{branch_id}/auth`.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/auth
 func (c *Client) DisableNeonAuth(ctx context.Context, request OptDisableNeonAuthReq, params DisableNeonAuthParams) error {
@@ -10480,7 +10893,13 @@ func (c *Client) sendDisableNeonAuth(ctx context.Context, request OptDisableNeon
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDisableNeonAuthResponse(resp)
@@ -10493,16 +10912,18 @@ func (c *Client) sendDisableNeonAuth(ctx context.Context, request OptDisableNeon
 
 // FinalizeRestoreBranch invokes finalizeRestoreBranch operation.
 //
-// Finalize the restore operation for a branch created from a snapshot.
-// This operation updates the branch so it functions as the original branch it replaced.
-// This includes:
-// - Reassigning any computes from the original branch to the restored branch (this will restart the
-// computes)
-// - Renaming the restored branch to the original branch's name
-// - Renaming the original branch so it no longer uses the original name
+// Finalize the restore operation for a branch created from a snapshot. This operation updates the
+// branch so it functions as the original branch it replaced. This includes:
+//
+//   - Reassigning any computes from the original branch to the restored branch (this will restart the
+//     computes)
+//   - Renaming the restored branch to the original branch's name
+//   - Renaming the original branch so it no longer uses the original name
+//
 // This operation only applies to branches created using the `restoreSnapshot` endpoint with
 // `finalize_restore: false`.
-// **Note**: This endpoint is currently in Beta.
+//
+// Note: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/finalize_restore
 func (c *Client) FinalizeRestoreBranch(ctx context.Context, request OptFinalizeRestoreBranchReq, params FinalizeRestoreBranchParams) (*OperationsResponse, error) {
@@ -10661,7 +11082,13 @@ func (c *Client) sendFinalizeRestoreBranch(ctx context.Context, request OptFinal
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeFinalizeRestoreBranchResponse(resp)
@@ -10675,8 +11102,9 @@ func (c *Client) sendFinalizeRestoreBranch(ctx context.Context, request OptFinal
 // GetActiveRegions invokes getActiveRegions operation.
 //
 // Lists supported Neon regions.
-// **Note:** Not all regions are available to all organizations. Pass the `org_id`
-// parameter to get an accurate list of regions available to your organization.
+//
+// Note: Not all regions are available to all organizations. Pass the `org_id` parameter to get an
+// accurate list of regions available to your organization.
 //
 // GET /regions
 func (c *Client) GetActiveRegions(ctx context.Context, params GetActiveRegionsParams) (*ActiveRegionsResponse, error) {
@@ -10815,7 +11243,13 @@ func (c *Client) sendGetActiveRegions(ctx context.Context, params GetActiveRegio
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetActiveRegionsResponse(resp)
@@ -10830,9 +11264,9 @@ func (c *Client) sendGetActiveRegions(ctx context.Context, params GetActiveRegio
 //
 // Retrieves the current status of an anonymized branch, including its state and progress information.
 // This endpoint allows you to monitor the anonymization process from initialization through
-// completion.
-// Only anonymized branches will have status information available.
-// **Note**: This endpoint is currently in Beta.
+// completion. Only anonymized branches will have status information available.
+//
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/anonymized_status
 func (c *Client) GetAnonymizedBranchStatus(ctx context.Context, params GetAnonymizedBranchStatusParams) (*AnonymizedBranchStatusResponse, error) {
@@ -10988,7 +11422,13 @@ func (c *Client) sendGetAnonymizedBranchStatus(ctx context.Context, params GetAn
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetAnonymizedBranchStatusResponse(resp)
@@ -11001,9 +11441,8 @@ func (c *Client) sendGetAnonymizedBranchStatus(ctx context.Context, params GetAn
 
 // GetAuthDetails invokes getAuthDetails operation.
 //
-// Returns authentication details for the credentials used in the request,
-// including the credential type (API key, Bearer token, or OAuth session)
-// and the associated identity.
+// Returns authentication details for the credentials used in the request, including the credential
+// type (API key, Bearer token, or OAuth session) and the associated identity.
 //
 // GET /auth
 func (c *Client) GetAuthDetails(ctx context.Context) (*AuthDetailsResponse, error) {
@@ -11121,7 +11560,13 @@ func (c *Client) sendGetAuthDetails(ctx context.Context) (res *AuthDetailsRespon
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetAuthDetailsResponse(resp)
@@ -11134,11 +11579,10 @@ func (c *Client) sendGetAuthDetails(ctx context.Context) (res *AuthDetailsRespon
 
 // GetAvailablePreloadLibraries invokes getAvailablePreloadLibraries operation.
 //
-// Returns the shared preload libraries available for the specified project's Postgres version.
-// Shared preload libraries are Postgres extensions that require the `shared_preload_libraries`
-// setting and a compute restart to activate.
-// Use this list to determine which libraries can be enabled in the project's
-// `settings.preload_libraries` configuration.
+// Returns the shared preload libraries available for the specified project's Postgres version. Shared
+// preload libraries are Postgres extensions that require the `shared_preload_libraries` setting and a
+// compute restart to activate. Use this list to determine which libraries can be enabled in the
+// project's `settings.preload_libraries` configuration.
 //
 // GET /projects/{project_id}/available_preload_libraries
 func (c *Client) GetAvailablePreloadLibraries(ctx context.Context, params GetAvailablePreloadLibrariesParams) (*AvailablePreloadLibraries, error) {
@@ -11275,7 +11719,13 @@ func (c *Client) sendGetAvailablePreloadLibraries(ctx context.Context, params Ge
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetAvailablePreloadLibrariesResponse(resp)
@@ -11288,9 +11738,9 @@ func (c *Client) sendGetAvailablePreloadLibraries(ctx context.Context, params Ge
 
 // GetConnectionURI invokes getConnectionURI operation.
 //
-// Retrieves a connection URI for the specified database.
-// The URI uses the standard PostgreSQL connection string format. Set `pooled=true` to include the
-// `-pooler` suffix for a connection pooler URI.
+// Retrieves a connection URI for the specified database. The URI uses the standard PostgreSQL
+// connection string format. Set `pooled=true` to include the `-pooler` suffix for a connection pooler
+// URI.
 //
 // GET /projects/{project_id}/connection_uri
 func (c *Client) GetConnectionURI(ctx context.Context, params GetConnectionURIParams) (*ConnectionURIResponse, error) {
@@ -11510,7 +11960,13 @@ func (c *Client) sendGetConnectionURI(ctx context.Context, params GetConnectionU
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetConnectionURIResponse(resp)
@@ -11523,18 +11979,21 @@ func (c *Client) sendGetConnectionURI(ctx context.Context, params GetConnectionU
 
 // GetConsumptionHistoryPerBranchV2 invokes getConsumptionHistoryPerBranchV2 operation.
 //
-// Returns consumption metrics for each branch across one or more projects listed in
-// `project_ids` (1 to 100 projects). Available for accounts on paid usage-based Launch, Scale,
-// Agent, and Enterprise plans.
+// Returns consumption metrics for each branch across one or more projects listed in `project_ids` (1
+// to 100 projects). Available for accounts on paid usage-based Launch, Scale, Agent, and Enterprise
+// plans.
+//
 // History starts when the account first ingests branch-level consumption data.
-// The `metrics` query parameter is required. Only these six values are supported on this
-// endpoint:
+//
+// The `metrics` query parameter is required. Only these six values are supported on this endpoint:
 // `compute_unit_seconds`, `root_branch_bytes_month`, `child_branch_bytes_month`,
 // `instant_restore_bytes_month`, `public_network_transfer_bytes`, `private_network_transfer_bytes`.
-// This endpoint does not support `extra_branches_month` or `snapshot_storage_bytes_month`.
-// Use `GET /consumption_history/v2/projects` for those.
-// Consumption metrics within each branch are returned in ascending time order (oldest first).
-// This request does not wake project computes.
+//
+// This endpoint does not support `extra_branches_month` or `snapshot_storage_bytes_month`. Use
+// `GET /consumption_history/v2/projects` for those.
+//
+// Consumption metrics within each branch are returned in ascending time order (oldest first). This
+// request does not wake project computes.
 //
 // GET /consumption_history/v2/branches
 func (c *Client) GetConsumptionHistoryPerBranchV2(ctx context.Context, params GetConsumptionHistoryPerBranchV2Params) (GetConsumptionHistoryPerBranchV2Res, error) {
@@ -11824,7 +12283,13 @@ func (c *Client) sendGetConsumptionHistoryPerBranchV2(ctx context.Context, param
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetConsumptionHistoryPerBranchV2Response(resp)
@@ -11838,9 +12303,8 @@ func (c *Client) sendGetConsumptionHistoryPerBranchV2(ctx context.Context, param
 // GetConsumptionHistoryPerProject invokes getConsumptionHistoryPerProject operation.
 //
 // Retrieves consumption metrics for Scale, Business, and Enterprise plan projects. History begins at
-// the time of upgrade.
-// Results are ordered by time in ascending order (oldest to newest).
-// Issuing a call to this API does not wake a project's compute endpoint.
+// the time of upgrade. Results are ordered by time in ascending order (oldest to newest). Issuing a
+// call to this API does not wake a project's compute endpoint.
 //
 // GET /consumption_history/projects
 func (c *Client) GetConsumptionHistoryPerProject(ctx context.Context, params GetConsumptionHistoryPerProjectParams) (GetConsumptionHistoryPerProjectRes, error) {
@@ -12127,7 +12591,13 @@ func (c *Client) sendGetConsumptionHistoryPerProject(ctx context.Context, params
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetConsumptionHistoryPerProjectResponse(resp)
@@ -12141,16 +12611,19 @@ func (c *Client) sendGetConsumptionHistoryPerProject(ctx context.Context, params
 // GetConsumptionHistoryPerProjectV2 invokes getConsumptionHistoryPerProjectV2 operation.
 //
 // Returns consumption metrics for up to `limit` projects per page. If `project_ids` is omitted,
-// projects in the organization are included across pages (use `cursor`). If `project_ids` is
-// provided, the response is limited to those projects (up to 100). Available for accounts on
-// Launch, Scale, Agent, Business, and Enterprise plans.
+// projects in the organization are included across pages (use `cursor`). If `project_ids` is provided,
+// the response is limited to those projects (up to 100). Available for accounts on Launch, Scale,
+// Agent, Business, and Enterprise plans.
+//
 // History starts when the account upgrades to an eligible plan.
-// The `metrics` query parameter is required. Supported values:
-// `compute_unit_seconds`, `root_branch_bytes_month`, `child_branch_bytes_month`,
-// `instant_restore_bytes_month`, `public_network_transfer_bytes`, `private_network_transfer_bytes`,
-// `extra_branches_month`, `snapshot_storage_bytes_month`.
-// Consumption metrics within each project are returned in ascending time order (oldest first).
-// This request does not wake project computes.
+//
+// The `metrics` query parameter is required. Supported values: `compute_unit_seconds`,
+// `root_branch_bytes_month`, `child_branch_bytes_month`, `instant_restore_bytes_month`,
+// `public_network_transfer_bytes`, `private_network_transfer_bytes`, `extra_branches_month`,
+// `snapshot_storage_bytes_month`.
+//
+// Consumption metrics within each project are returned in ascending time order (oldest first). This
+// request does not wake project computes.
 //
 // GET /consumption_history/v2/projects
 func (c *Client) GetConsumptionHistoryPerProjectV2(ctx context.Context, params GetConsumptionHistoryPerProjectV2Params) (GetConsumptionHistoryPerProjectV2Res, error) {
@@ -12417,7 +12890,13 @@ func (c *Client) sendGetConsumptionHistoryPerProjectV2(ctx context.Context, para
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetConsumptionHistoryPerProjectV2Response(resp)
@@ -12430,8 +12909,8 @@ func (c *Client) sendGetConsumptionHistoryPerProjectV2(ctx context.Context, para
 
 // GetCurrentUserInfo invokes getCurrentUserInfo operation.
 //
-// Retrieves information about the currently authenticated Neon user,
-// including account identifiers, plan details, and linked auth accounts.
+// Retrieves information about the currently authenticated Neon user, including account identifiers,
+// plan details, and linked auth accounts.
 //
 // GET /users/me
 func (c *Client) GetCurrentUserInfo(ctx context.Context) (*CurrentUserInfoResponse, error) {
@@ -12549,7 +13028,13 @@ func (c *Client) sendGetCurrentUserInfo(ctx context.Context) (res *CurrentUserIn
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetCurrentUserInfoResponse(resp)
@@ -12563,8 +13048,9 @@ func (c *Client) sendGetCurrentUserInfo(ctx context.Context) (res *CurrentUserIn
 // GetCurrentUserOrganizations invokes getCurrentUserOrganizations operation.
 //
 // Retrieves the organizations that the currently authenticated user belongs to.
-// When called with an organization- or project-scoped API key (which is not
-// tied to a user), this returns the single organization that owns the key.
+//
+// When called with an organization- or project-scoped API key (which is not tied to a user), this
+// returns the single organization that owns the key.
 //
 // GET /users/me/organizations
 func (c *Client) GetCurrentUserOrganizations(ctx context.Context) (*OrganizationsResponse, error) {
@@ -12682,7 +13168,13 @@ func (c *Client) sendGetCurrentUserOrganizations(ctx context.Context) (res *Orga
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetCurrentUserOrganizationsResponse(resp)
@@ -12695,9 +13187,10 @@ func (c *Client) sendGetCurrentUserOrganizations(ctx context.Context) (res *Orga
 
 // GetMaskingRules invokes getMaskingRules operation.
 //
-// Retrieves the masking rules for the specified anonymized branch.
-// Masking rules define how sensitive data should be anonymized using PostgreSQL Anonymizer.
-// **Note**: This endpoint is currently in Beta.
+// Retrieves the masking rules for the specified anonymized branch. Masking rules define how sensitive
+// data should be anonymized using PostgreSQL Anonymizer.
+//
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/masking_rules
 func (c *Client) GetMaskingRules(ctx context.Context, params GetMaskingRulesParams) (*MaskingRulesResponse, error) {
@@ -12853,7 +13346,13 @@ func (c *Client) sendGetMaskingRules(ctx context.Context, params GetMaskingRules
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetMaskingRulesResponse(resp)
@@ -12866,8 +13365,8 @@ func (c *Client) sendGetMaskingRules(ctx context.Context, params GetMaskingRules
 
 // GetNeonAuth invokes getNeonAuth operation.
 //
-// Retrieves the Neon Auth integration details for the specified branch,
-// including the auth provider type and integration status.
+// Retrieves the Neon Auth integration details for the specified branch, including the auth provider
+// type and integration status.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth
 func (c *Client) GetNeonAuth(ctx context.Context, params GetNeonAuthParams) (*NeonAuthIntegration, error) {
@@ -13023,7 +13522,13 @@ func (c *Client) sendGetNeonAuth(ctx context.Context, params GetNeonAuthParams) 
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetNeonAuthResponse(resp)
@@ -13036,9 +13541,8 @@ func (c *Client) sendGetNeonAuth(ctx context.Context, params GetNeonAuthParams) 
 
 // GetNeonAuthAllowLocalhost invokes getNeonAuthAllowLocalhost operation.
 //
-// Retrieves the localhost allow setting for the specified branch's Neon Auth integration.
-// When enabled, authentication flows work from `localhost` without adding it to the redirect URI
-// whitelist.
+// Retrieves the localhost allow setting for the specified branch's Neon Auth integration. When
+// enabled, authentication flows work from `localhost` without adding it to the redirect URI whitelist.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/allow_localhost
 func (c *Client) GetNeonAuthAllowLocalhost(ctx context.Context, params GetNeonAuthAllowLocalhostParams) (*NeonAuthAllowLocalhostResponse, error) {
@@ -13194,7 +13698,13 @@ func (c *Client) sendGetNeonAuthAllowLocalhost(ctx context.Context, params GetNe
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetNeonAuthAllowLocalhostResponse(resp)
@@ -13208,8 +13718,7 @@ func (c *Client) sendGetNeonAuthAllowLocalhost(ctx context.Context, params GetNe
 // GetNeonAuthEmailAndPasswordConfig invokes getNeonAuthEmailAndPasswordConfig operation.
 //
 // Retrieves the email and password authentication configuration for the specified branch's Neon Auth
-// integration,
-// including whether it is enabled and the email verification method.
+// integration, including whether it is enabled and the email verification method.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/email_and_password
 func (c *Client) GetNeonAuthEmailAndPasswordConfig(ctx context.Context, params GetNeonAuthEmailAndPasswordConfigParams) (*NeonAuthEmailAndPasswordConfig, error) {
@@ -13365,7 +13874,13 @@ func (c *Client) sendGetNeonAuthEmailAndPasswordConfig(ctx context.Context, para
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetNeonAuthEmailAndPasswordConfigResponse(resp)
@@ -13535,7 +14050,13 @@ func (c *Client) sendGetNeonAuthEmailProvider(ctx context.Context, params GetNeo
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetNeonAuthEmailProviderResponse(resp)
@@ -13548,8 +14069,8 @@ func (c *Client) sendGetNeonAuthEmailProvider(ctx context.Context, params GetNeo
 
 // GetNeonAuthEmailServer invokes getNeonAuthEmailServer operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/email_provider` instead. Gets
-// the email server configuration for the specified project.
+// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/email_provider` instead. Gets the
+// email server configuration for the specified project.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -13688,7 +14209,13 @@ func (c *Client) sendGetNeonAuthEmailServer(ctx context.Context, params GetNeonA
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetNeonAuthEmailServerResponse(resp)
@@ -13701,8 +14228,8 @@ func (c *Client) sendGetNeonAuthEmailServer(ctx context.Context, params GetNeonA
 
 // GetNeonAuthPhoneNumberPlugin invokes getNeonAuthPhoneNumberPlugin operation.
 //
-// Returns the phone number plugin configuration for Neon Auth.
-// The phone number plugin enables phone-based OTP authentication.
+// Returns the phone number plugin configuration for Neon Auth. The phone number plugin enables
+// phone-based OTP authentication.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/plugins/phone-number
 func (c *Client) GetNeonAuthPhoneNumberPlugin(ctx context.Context, params GetNeonAuthPhoneNumberPluginParams) (*NeonAuthPhoneNumberConfig, error) {
@@ -13858,7 +14385,13 @@ func (c *Client) sendGetNeonAuthPhoneNumberPlugin(ctx context.Context, params Ge
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetNeonAuthPhoneNumberPluginResponse(resp)
@@ -13871,9 +14404,8 @@ func (c *Client) sendGetNeonAuthPhoneNumberPlugin(ctx context.Context, params Ge
 
 // GetNeonAuthPluginConfigs invokes getNeonAuthPluginConfigs operation.
 //
-// Returns all plugin configurations for Neon Auth in a single response.
-// This endpoint aggregates organization, email provider, email and password,
-// OAuth providers, and localhost settings.
+// Returns all plugin configurations for Neon Auth in a single response. This endpoint aggregates
+// organization, email provider, email and password, OAuth providers, and localhost settings.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/plugins
 func (c *Client) GetNeonAuthPluginConfigs(ctx context.Context, params GetNeonAuthPluginConfigsParams) (*NeonAuthPluginConfigs, error) {
@@ -14029,7 +14561,13 @@ func (c *Client) sendGetNeonAuthPluginConfigs(ctx context.Context, params GetNeo
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetNeonAuthPluginConfigsResponse(resp)
@@ -14042,8 +14580,8 @@ func (c *Client) sendGetNeonAuthPluginConfigs(ctx context.Context, params GetNeo
 
 // GetNeonAuthWebhookConfig invokes getNeonAuthWebhookConfig operation.
 //
-// Returns the webhook configuration for the specified branch's Neon Auth integration,
-// including the endpoint URL and the events that trigger it.
+// Returns the webhook configuration for the specified branch's Neon Auth integration, including the
+// endpoint URL and the events that trigger it.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/webhooks
 func (c *Client) GetNeonAuthWebhookConfig(ctx context.Context, params GetNeonAuthWebhookConfigParams) (*NeonAuthWebhookConfig, error) {
@@ -14199,7 +14737,13 @@ func (c *Client) sendGetNeonAuthWebhookConfig(ctx context.Context, params GetNeo
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetNeonAuthWebhookConfigResponse(resp)
@@ -14348,7 +14892,13 @@ func (c *Client) sendGetOrganization(ctx context.Context, params GetOrganization
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetOrganizationResponse(resp)
@@ -14498,7 +15048,13 @@ func (c *Client) sendGetOrganizationInvitations(ctx context.Context, params GetO
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetOrganizationInvitationsResponse(resp)
@@ -14666,7 +15222,13 @@ func (c *Client) sendGetOrganizationMember(ctx context.Context, params GetOrgani
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetOrganizationMemberResponse(resp)
@@ -14888,7 +15450,13 @@ func (c *Client) sendGetOrganizationMembers(ctx context.Context, params GetOrgan
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetOrganizationMembersResponse(resp)
@@ -14902,8 +15470,8 @@ func (c *Client) sendGetOrganizationMembers(ctx context.Context, params GetOrgan
 // GetOrganizationSpendingLimit invokes getOrganizationSpendingLimit operation.
 //
 // Returns the configured monthly spending limit for the specified organization.
-// `spending_limit_cents: null` indicates that no limit is currently set.
-// Available to organization members with read access on Launch and Scale plans only.
+// `spending_limit_cents: null` indicates that no limit is currently set. Available to organization
+// members with read access on Launch and Scale plans only.
 //
 // GET /organizations/{org_id}/billing/spending_limit
 func (c *Client) GetOrganizationSpendingLimit(ctx context.Context, params GetOrganizationSpendingLimitParams) (*SpendingLimitResponse, error) {
@@ -15040,7 +15608,13 @@ func (c *Client) sendGetOrganizationSpendingLimit(ctx context.Context, params Ge
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetOrganizationSpendingLimitResponse(resp)
@@ -15227,7 +15801,13 @@ func (c *Client) sendGetOrganizationVPCEndpointDetails(ctx context.Context, para
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetOrganizationVPCEndpointDetailsResponse(resp)
@@ -15240,9 +15820,8 @@ func (c *Client) sendGetOrganizationVPCEndpointDetails(ctx context.Context, para
 
 // GetProject invokes getProject operation.
 //
-// Retrieves information about the specified project.
-// Returned details include the project settings, compute configuration, history retention, owner
-// information, and current usage metrics.
+// Retrieves information about the specified project. Returned details include the project settings,
+// compute configuration, history retention, owner information, and current usage metrics.
 //
 // GET /projects/{project_id}
 func (c *Client) GetProject(ctx context.Context, params GetProjectParams) (*ProjectResponse, error) {
@@ -15378,7 +15957,13 @@ func (c *Client) sendGetProject(ctx context.Context, params GetProjectParams) (r
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetProjectResponse(resp)
@@ -15391,8 +15976,9 @@ func (c *Client) sendGetProject(ctx context.Context, params GetProjectParams) (r
 
 // GetProjectAdvisorSecurityIssues invokes getProjectAdvisorSecurityIssues operation.
 //
-// Analyzes the database for security and performance issues.
-// Returns a list of issues categorized by severity (ERROR, WARN, INFO).
+// Analyzes the database for security and performance issues. Returns a list of issues categorized by
+// severity (ERROR, WARN, INFO).
+//
 // Requires read access to the project and Data API enabled.
 //
 // GET /projects/{project_id}/advisors
@@ -15602,7 +16188,13 @@ func (c *Client) sendGetProjectAdvisorSecurityIssues(ctx context.Context, params
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetProjectAdvisorSecurityIssuesResponse(resp)
@@ -15615,14 +16207,15 @@ func (c *Client) sendGetProjectAdvisorSecurityIssues(ctx context.Context, params
 
 // GetProjectBranch invokes getProjectBranch operation.
 //
-// Retrieves information about the specified branch.
-// A `branch_id` value has a `br-` prefix.
-// Each Neon project is initially created with a root and default branch named `main`.
-// A project can contain one or more branches.
-// A parent branch is identified by a `parent_id` value, which is the `id` of the parent branch.
-// For related information, see [Manage branches](https://neon.com/docs/manage/branches/).
+// Retrieves information about the specified branch. A `branch_id` value has a `br-` prefix.
+//
+// Each Neon project is initially created with a root and default branch named `main`. A project can
+// contain one or more branches. A parent branch is identified by a `parent_id` value, which is the
+// `id` of the parent branch. For related information, see [Manage branches].
 //
 // GET /projects/{project_id}/branches/{branch_id}
+//
+// [Manage branches]: https://neon.com/docs/manage/branches/
 func (c *Client) GetProjectBranch(ctx context.Context, params GetProjectBranchParams) (*GetProjectBranchOK, error) {
 	res, err := c.sendGetProjectBranch(ctx, params)
 	return res, err
@@ -15775,7 +16368,13 @@ func (c *Client) sendGetProjectBranch(ctx context.Context, params GetProjectBran
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetProjectBranchResponse(resp)
@@ -15788,11 +16387,11 @@ func (c *Client) sendGetProjectBranch(ctx context.Context, params GetProjectBran
 
 // GetProjectBranchAiGateway invokes getProjectBranchAiGateway operation.
 //
-// Returns the AI Gateway endpoint host for the specified branch, used to
-// render code-snippet base URLs. A 200 response means the branch is
-// registered and this region serves the AI gateway. A 404 response
-// includes a `reason` field indicating why the gateway is unavailable.
-// **Note**: This endpoint is currently in Private Beta.
+// Returns the AI Gateway endpoint host for the specified branch, used to render code-snippet base
+// URLs. A 200 response means the branch is registered and this region serves the AI gateway. A 404
+// response includes a `reason` field indicating why the gateway is unavailable.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/ai_gateway
 func (c *Client) GetProjectBranchAiGateway(ctx context.Context, params GetProjectBranchAiGatewayParams) (GetProjectBranchAiGatewayRes, error) {
@@ -15948,7 +16547,13 @@ func (c *Client) sendGetProjectBranchAiGateway(ctx context.Context, params GetPr
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetProjectBranchAiGatewayResponse(resp)
@@ -15961,19 +16566,19 @@ func (c *Client) sendGetProjectBranchAiGateway(ctx context.Context, params GetPr
 
 // GetProjectBranchBucketObject invokes getProjectBranchBucketObject operation.
 //
-// Streams the raw bytes of the named object from the bucket on the
-// specified branch, including objects inherited from ancestor branches.
-// Served by the user's session (no customer S3 credentials required).
-// The body is returned as `application/octet-stream` so a browser treats
-// it as a download; the `Content-Length` and `ETag` response headers echo
-// the stored object metadata.
-// BINARY-STREAM EXCEPTION TO THE BUILD-GENERATED-TYPES RULE (#7029): the
-// successful 200 body is the raw object stream, proxied verbatim from the
-// platform storage admin endpoint. It is modeled as an
-// `application/octet-stream` binary body (not a JSON response schema) and
-// is streamed without buffering the whole object in memory. Error
-// responses still use the generated `GeneralError` shape.
-// **Note**: This endpoint is currently in Private Beta.
+// Streams the raw bytes of the named object from the bucket on the specified branch, including objects
+// inherited from ancestor branches. Served by the user's session (no customer S3 credentials
+// required).
+//
+// The body is returned as `application/octet-stream` so a browser treats it as a download; the
+// `Content-Length` and `ETag` response headers echo the stored object metadata.
+//
+// BINARY-STREAM EXCEPTION TO THE BUILD-GENERATED-TYPES RULE (#7029): the successful 200 body is the
+// raw object stream, proxied verbatim from the platform storage admin endpoint. It is modeled as an
+// `application/octet-stream` binary body (not a JSON response schema) and is streamed without
+// buffering the whole object in memory. Error responses still use the generated `GeneralError` shape.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects/{object_key}/download
 func (c *Client) GetProjectBranchBucketObject(ctx context.Context, params GetProjectBranchBucketObjectParams) (GetProjectBranchBucketObjectRes, error) {
@@ -16167,7 +16772,13 @@ func (c *Client) sendGetProjectBranchBucketObject(ctx context.Context, params Ge
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetProjectBranchBucketObjectResponse(resp)
@@ -16180,8 +16791,8 @@ func (c *Client) sendGetProjectBranchBucketObject(ctx context.Context, params Ge
 
 // GetProjectBranchDataAPI invokes getProjectBranchDataAPI operation.
 //
-// Retrieves the Neon Data API configuration for the specified branch,
-// including endpoint URL, enabled state, and database settings.
+// Retrieves the Neon Data API configuration for the specified branch, including endpoint URL, enabled
+// state, and database settings.
 //
 // GET /projects/{project_id}/branches/{branch_id}/data-api/{database_name}
 func (c *Client) GetProjectBranchDataAPI(ctx context.Context, params GetProjectBranchDataAPIParams) (*DataAPIReponse, error) {
@@ -16355,7 +16966,13 @@ func (c *Client) sendGetProjectBranchDataAPI(ctx context.Context, params GetProj
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetProjectBranchDataAPIResponse(resp)
@@ -16368,10 +16985,11 @@ func (c *Client) sendGetProjectBranchDataAPI(ctx context.Context, params GetProj
 
 // GetProjectBranchDatabase invokes getProjectBranchDatabase operation.
 //
-// Retrieves information about the specified database.
-// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
+// Retrieves information about the specified database. For related information, see [Manage databases].
 //
 // GET /projects/{project_id}/branches/{branch_id}/databases/{database_name}
+//
+// [Manage databases]: https://neon.com/docs/manage/databases/
 func (c *Client) GetProjectBranchDatabase(ctx context.Context, params GetProjectBranchDatabaseParams) (*DatabaseResponse, error) {
 	res, err := c.sendGetProjectBranchDatabase(ctx, params)
 	return res, err
@@ -16543,7 +17161,13 @@ func (c *Client) sendGetProjectBranchDatabase(ctx context.Context, params GetPro
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetProjectBranchDatabaseResponse(resp)
@@ -16557,7 +17181,8 @@ func (c *Client) sendGetProjectBranchDatabase(ctx context.Context, params GetPro
 // GetProjectBranchFunction invokes getProjectBranchFunction operation.
 //
 // Returns the function identified by its slug.
-// **Note**: This endpoint is currently in Private Beta.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/functions/{slug}
 func (c *Client) GetProjectBranchFunction(ctx context.Context, params GetProjectBranchFunctionParams) (*NeonFunctionResponse, error) {
@@ -16731,7 +17356,13 @@ func (c *Client) sendGetProjectBranchFunction(ctx context.Context, params GetPro
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetProjectBranchFunctionResponse(resp)
@@ -16744,11 +17375,12 @@ func (c *Client) sendGetProjectBranchFunction(ctx context.Context, params GetPro
 
 // GetProjectBranchRole invokes getProjectBranchRole operation.
 //
-// Retrieves details about the specified role.
-// In Neon, the terms "role" and "user" are synonymous.
-// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
+// Retrieves details about the specified role. In Neon, the terms "role" and "user" are synonymous. For
+// related information, see [Manage roles].
 //
 // GET /projects/{project_id}/branches/{branch_id}/roles/{role_name}
+//
+// [Manage roles]: https://neon.com/docs/manage/roles/
 func (c *Client) GetProjectBranchRole(ctx context.Context, params GetProjectBranchRoleParams) (*RoleResponse, error) {
 	res, err := c.sendGetProjectBranchRole(ctx, params)
 	return res, err
@@ -16920,7 +17552,13 @@ func (c *Client) sendGetProjectBranchRole(ctx context.Context, params GetProject
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetProjectBranchRoleResponse(resp)
@@ -16933,10 +17571,12 @@ func (c *Client) sendGetProjectBranchRole(ctx context.Context, params GetProject
 
 // GetProjectBranchRolePassword invokes getProjectBranchRolePassword operation.
 //
-// Retrieves the password for the specified Postgres role, if possible.
-// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
+// Retrieves the password for the specified Postgres role, if possible. For related information, see
+// [Manage roles].
 //
 // GET /projects/{project_id}/branches/{branch_id}/roles/{role_name}/reveal_password
+//
+// [Manage roles]: https://neon.com/docs/manage/roles/
 func (c *Client) GetProjectBranchRolePassword(ctx context.Context, params GetProjectBranchRolePasswordParams) (GetProjectBranchRolePasswordRes, error) {
 	res, err := c.sendGetProjectBranchRolePassword(ctx, params)
 	return res, err
@@ -17109,7 +17749,13 @@ func (c *Client) sendGetProjectBranchRolePassword(ctx context.Context, params Ge
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetProjectBranchRolePasswordResponse(resp)
@@ -17349,7 +17995,13 @@ func (c *Client) sendGetProjectBranchSchema(ctx context.Context, params GetProje
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetProjectBranchSchemaResponse(resp)
@@ -17621,7 +18273,13 @@ func (c *Client) sendGetProjectBranchSchemaComparison(ctx context.Context, param
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetProjectBranchSchemaComparisonResponse(resp)
@@ -17634,11 +18292,11 @@ func (c *Client) sendGetProjectBranchSchemaComparison(ctx context.Context, param
 
 // GetProjectBranchStorage invokes getProjectBranchStorage operation.
 //
-// Returns whether branchable object-storage is usable for the specified
-// branch. A 200 response means the branch is registered in the storage
-// service and the S3 data plane will accept requests for it. A 404
-// response includes a `reason` field indicating why storage is unavailable.
-// **Note**: This endpoint is currently in Private Beta.
+// Returns whether branchable object-storage is usable for the specified branch. A 200 response means
+// the branch is registered in the storage service and the S3 data plane will accept requests for it. A
+// 404 response includes a `reason` field indicating why storage is unavailable.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/storage
 func (c *Client) GetProjectBranchStorage(ctx context.Context, params GetProjectBranchStorageParams) (GetProjectBranchStorageRes, error) {
@@ -17794,7 +18452,13 @@ func (c *Client) sendGetProjectBranchStorage(ctx context.Context, params GetProj
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetProjectBranchStorageResponse(resp)
@@ -17807,13 +18471,13 @@ func (c *Client) sendGetProjectBranchStorage(ctx context.Context, params GetProj
 
 // GetProjectEndpoint invokes getProjectEndpoint operation.
 //
-// Retrieves information about the specified compute endpoint.
-// A compute endpoint is a Neon compute instance.
-// An `endpoint_id` has an `ep-` prefix.
-// For information about compute endpoints, see [Manage computes](https://neon.
-// com/docs/manage/endpoints/).
+// Retrieves information about the specified compute endpoint. A compute endpoint is a Neon compute
+// instance. An `endpoint_id` has an `ep-` prefix. For information about compute endpoints, see
+// [Manage computes].
 //
 // GET /projects/{project_id}/endpoints/{endpoint_id}
+//
+// [Manage computes]: https://neon.com/docs/manage/endpoints/
 func (c *Client) GetProjectEndpoint(ctx context.Context, params GetProjectEndpointParams) (*EndpointResponse, error) {
 	res, err := c.sendGetProjectEndpoint(ctx, params)
 	return res, err
@@ -17966,7 +18630,13 @@ func (c *Client) sendGetProjectEndpoint(ctx context.Context, params GetProjectEn
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetProjectEndpointResponse(resp)
@@ -18117,7 +18787,13 @@ func (c *Client) sendGetProjectJWKS(ctx context.Context, params GetProjectJWKSPa
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetProjectJWKSResponse(resp)
@@ -18130,8 +18806,8 @@ func (c *Client) sendGetProjectJWKS(ctx context.Context, params GetProjectJWKSPa
 
 // GetProjectOperation invokes getProjectOperation operation.
 //
-// Retrieves details for the specified operation.
-// An operation is an action performed on a Neon project resource.
+// Retrieves details for the specified operation. An operation is an action performed on a Neon project
+// resource.
 //
 // GET /projects/{project_id}/operations/{operation_id}
 func (c *Client) GetProjectOperation(ctx context.Context, params GetProjectOperationParams) (*OperationResponse, error) {
@@ -18286,7 +18962,13 @@ func (c *Client) sendGetProjectOperation(ctx context.Context, params GetProjectO
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetProjectOperationResponse(resp)
@@ -18299,9 +18981,9 @@ func (c *Client) sendGetProjectOperation(ctx context.Context, params GetProjectO
 
 // GetSnapshotSchedule invokes getSnapshotSchedule operation.
 //
-// Returns the backup schedule for the specified branch, including the configured snapshot
-// frequencies.
-// **Note**: This endpoint is currently in Beta.
+// Returns the backup schedule for the specified branch, including the configured snapshot frequencies.
+//
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/backup_schedule
 func (c *Client) GetSnapshotSchedule(ctx context.Context, params GetSnapshotScheduleParams) (*BackupSchedule, error) {
@@ -18457,7 +19139,13 @@ func (c *Client) sendGetSnapshotSchedule(ctx context.Context, params GetSnapshot
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetSnapshotScheduleResponse(resp)
@@ -18610,7 +19298,13 @@ func (c *Client) sendGrantPermissionToProject(ctx context.Context, request *Gran
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGrantPermissionToProjectResponse(resp)
@@ -18623,12 +19317,13 @@ func (c *Client) sendGrantPermissionToProject(ctx context.Context, request *Gran
 
 // ListApiKeys invokes listApiKeys operation.
 //
-// Retrieves the API keys for your Neon account.
-// The response does not include API key tokens. A token is only provided when creating an API key.
-// API keys can also be managed in the Neon Console.
-// For more information, see [Manage API keys](https://neon.com/docs/manage/api-keys/).
+// Retrieves the API keys for your Neon account. The response does not include API key tokens. A token
+// is only provided when creating an API key. API keys can also be managed in the Neon Console. For
+// more information, see [Manage API keys].
 //
 // GET /api_keys
+//
+// [Manage API keys]: https://neon.com/docs/manage/api-keys/
 func (c *Client) ListApiKeys(ctx context.Context) ([]ApiKeysListResponseItem, error) {
 	res, err := c.sendListApiKeys(ctx)
 	return res, err
@@ -18744,7 +19439,13 @@ func (c *Client) sendListApiKeys(ctx context.Context) (res []ApiKeysListResponse
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListApiKeysResponse(resp)
@@ -18913,7 +19614,13 @@ func (c *Client) sendListBranchNeonAuthOauthProviders(ctx context.Context, param
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListBranchNeonAuthOauthProvidersResponse(resp)
@@ -18926,8 +19633,8 @@ func (c *Client) sendListBranchNeonAuthOauthProviders(ctx context.Context, param
 
 // ListBranchNeonAuthTrustedDomains invokes listBranchNeonAuthTrustedDomains operation.
 //
-// Lists the trusted domains in the redirect URI whitelist for the specified branch.
-// Only domains in this list are permitted as redirect targets after authentication.
+// Lists the trusted domains in the redirect URI whitelist for the specified branch. Only domains in
+// this list are permitted as redirect targets after authentication.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/domains
 func (c *Client) ListBranchNeonAuthTrustedDomains(ctx context.Context, params ListBranchNeonAuthTrustedDomainsParams) (*NeonAuthRedirectURIWhitelistResponse, error) {
@@ -19083,7 +19790,13 @@ func (c *Client) sendListBranchNeonAuthTrustedDomains(ctx context.Context, param
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListBranchNeonAuthTrustedDomainsResponse(resp)
@@ -19096,9 +19809,9 @@ func (c *Client) sendListBranchNeonAuthTrustedDomains(ctx context.Context, param
 
 // ListCredentials invokes listCredentials operation.
 //
-// Returns metadata for customer-issued credentials on the branch.
-// Secrets are never included.
-// **Note**: This endpoint is currently in Private Beta.
+// Returns metadata for customer-issued credentials on the branch. Secrets are never included.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/credentials
 func (c *Client) ListCredentials(ctx context.Context, params ListCredentialsParams) (*ListCredentialsResponse, error) {
@@ -19254,7 +19967,13 @@ func (c *Client) sendListCredentials(ctx context.Context, params ListCredentials
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListCredentialsResponse(resp)
@@ -19406,7 +20125,13 @@ func (c *Client) sendListNeonAuthIntegrations(ctx context.Context, params ListNe
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListNeonAuthIntegrationsResponse(resp)
@@ -19559,7 +20284,13 @@ func (c *Client) sendListNeonAuthOauthProviders(ctx context.Context, params List
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListNeonAuthOauthProvidersResponse(resp)
@@ -19712,7 +20443,13 @@ func (c *Client) sendListNeonAuthRedirectURIWhitelistDomains(ctx context.Context
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListNeonAuthRedirectURIWhitelistDomainsResponse(resp)
@@ -19725,12 +20462,13 @@ func (c *Client) sendListNeonAuthRedirectURIWhitelistDomains(ctx context.Context
 
 // ListOrgApiKeys invokes listOrgApiKeys operation.
 //
-// Retrieves the API keys for the specified organization.
-// The response does not include API key tokens. A token is only provided when creating an API key.
-// API keys can also be managed in the Neon Console.
-// For more information, see [Manage API keys](https://neon.com/docs/manage/api-keys/).
+// Retrieves the API keys for the specified organization. The response does not include API key tokens.
+// A token is only provided when creating an API key. API keys can also be managed in the Neon Console.
+// For more information, see [Manage API keys].
 //
 // GET /organizations/{org_id}/api_keys
+//
+// [Manage API keys]: https://neon.com/docs/manage/api-keys/
 func (c *Client) ListOrgApiKeys(ctx context.Context, params ListOrgApiKeysParams) ([]OrgApiKeysListResponseItem, error) {
 	res, err := c.sendListOrgApiKeys(ctx, params)
 	return res, err
@@ -19865,7 +20603,13 @@ func (c *Client) sendListOrgApiKeys(ctx context.Context, params ListOrgApiKeysPa
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListOrgApiKeysResponse(resp)
@@ -20034,7 +20778,13 @@ func (c *Client) sendListOrganizationVPCEndpoints(ctx context.Context, params Li
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListOrganizationVPCEndpointsResponse(resp)
@@ -20184,7 +20934,13 @@ func (c *Client) sendListOrganizationVPCEndpointsAllRegions(ctx context.Context,
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListOrganizationVPCEndpointsAllRegionsResponse(resp)
@@ -20197,14 +20953,14 @@ func (c *Client) sendListOrganizationVPCEndpointsAllRegions(ctx context.Context,
 
 // ListProjectBranchBucketObjects invokes listProjectBranchBucketObjects operation.
 //
-// Lists objects visible in the named bucket on the specified branch,
-// including those inherited from ancestor branches. Listing is served by
-// the user's session (no customer S3 credentials required).
-// When `delimiter` is supplied (typically `/`), keys are collapsed into
-// common prefixes (`folders`) so callers can render a folder-style
-// browser; keys that do not contain the delimiter after `prefix` are
+// Lists objects visible in the named bucket on the specified branch, including those inherited from
+// ancestor branches. Listing is served by the user's session (no customer S3 credentials required).
+//
+// When `delimiter` is supplied (typically `/`), keys are collapsed into common prefixes (`folders`) so
+// callers can render a folder-style browser; keys that do not contain the delimiter after `prefix` are
 // returned as `objects`.
-// **Note**: This endpoint is currently in Private Beta.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects
 func (c *Client) ListProjectBranchBucketObjects(ctx context.Context, params ListProjectBranchBucketObjectsParams) (*BucketObjectsListResponse, error) {
@@ -20451,7 +21207,13 @@ func (c *Client) sendListProjectBranchBucketObjects(ctx context.Context, params 
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListProjectBranchBucketObjectsResponse(resp)
@@ -20464,9 +21226,10 @@ func (c *Client) sendListProjectBranchBucketObjects(ctx context.Context, params 
 
 // ListProjectBranchBuckets invokes listProjectBranchBuckets operation.
 //
-// Lists branchable object-storage buckets visible on the specified branch,
-// including those inherited from ancestor branches.
-// **Note**: This endpoint is currently in Private Beta.
+// Lists branchable object-storage buckets visible on the specified branch, including those inherited
+// from ancestor branches.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/buckets
 func (c *Client) ListProjectBranchBuckets(ctx context.Context, params ListProjectBranchBucketsParams) (*BucketsListResponse, error) {
@@ -20622,7 +21385,13 @@ func (c *Client) sendListProjectBranchBuckets(ctx context.Context, params ListPr
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListProjectBranchBucketsResponse(resp)
@@ -20635,11 +21404,12 @@ func (c *Client) sendListProjectBranchBuckets(ctx context.Context, params ListPr
 
 // ListProjectBranchDatabases invokes listProjectBranchDatabases operation.
 //
-// Retrieves a list of databases for the specified branch.
-// A branch can have multiple databases.
-// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
+// Retrieves a list of databases for the specified branch. A branch can have multiple databases. For
+// related information, see [Manage databases].
 //
 // GET /projects/{project_id}/branches/{branch_id}/databases
+//
+// [Manage databases]: https://neon.com/docs/manage/databases/
 func (c *Client) ListProjectBranchDatabases(ctx context.Context, params ListProjectBranchDatabasesParams) (*DatabasesResponse, error) {
 	res, err := c.sendListProjectBranchDatabases(ctx, params)
 	return res, err
@@ -20793,7 +21563,13 @@ func (c *Client) sendListProjectBranchDatabases(ctx context.Context, params List
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListProjectBranchDatabasesResponse(resp)
@@ -20806,9 +21582,8 @@ func (c *Client) sendListProjectBranchDatabases(ctx context.Context, params List
 
 // ListProjectBranchEndpoints invokes listProjectBranchEndpoints operation.
 //
-// Retrieves a list of compute endpoints for the specified branch.
-// Neon permits only one read-write compute endpoint per branch.
-// A branch can have multiple read-only compute endpoints.
+// Retrieves a list of compute endpoints for the specified branch. Neon permits only one read-write
+// compute endpoint per branch. A branch can have multiple read-only compute endpoints.
 //
 // GET /projects/{project_id}/branches/{branch_id}/endpoints
 func (c *Client) ListProjectBranchEndpoints(ctx context.Context, params ListProjectBranchEndpointsParams) (*EndpointsResponse, error) {
@@ -20964,7 +21739,13 @@ func (c *Client) sendListProjectBranchEndpoints(ctx context.Context, params List
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListProjectBranchEndpointsResponse(resp)
@@ -20978,7 +21759,8 @@ func (c *Client) sendListProjectBranchEndpoints(ctx context.Context, params List
 // ListProjectBranchFunctions invokes listProjectBranchFunctions operation.
 //
 // Lists functions on the specified branch.
-// **Note**: This endpoint is currently in Private Beta.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/functions
 func (c *Client) ListProjectBranchFunctions(ctx context.Context, params ListProjectBranchFunctionsParams) (*ListProjectBranchFunctionsOK, error) {
@@ -21172,7 +21954,13 @@ func (c *Client) sendListProjectBranchFunctions(ctx context.Context, params List
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListProjectBranchFunctionsResponse(resp)
@@ -21183,12 +21971,488 @@ func (c *Client) sendListProjectBranchFunctions(ctx context.Context, params List
 	return result, nil
 }
 
+// ListProjectBranchLogFieldValues invokes listProjectBranchLogFieldValues operation.
+//
+// Lists the distinct values observed for a low-cardinality log field in the requested time range. Call
+// the log fields endpoint first to learn which `field_name` values this branch supports; a field that
+// branch has never emitted is rejected with `unknown_field`.
+//
+// Give the window either as `since` or as an explicit `start_time`; supplying both is rejected. If
+// neither is given, the previous six hours are used. The maximum supported time range is seven days.
+//
+// Note: This endpoint is currently in Private Beta.
+//
+// GET /projects/{project_id}/branches/{branch_id}/logs/fields/{field_name}/values
+func (c *Client) ListProjectBranchLogFieldValues(ctx context.Context, params ListProjectBranchLogFieldValuesParams) (ListProjectBranchLogFieldValuesRes, error) {
+	res, err := c.sendListProjectBranchLogFieldValues(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendListProjectBranchLogFieldValues(ctx context.Context, params ListProjectBranchLogFieldValuesParams) (res ListProjectBranchLogFieldValuesRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("listProjectBranchLogFieldValues"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/logs/fields/{field_name}/values"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ListProjectBranchLogFieldValuesOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [7]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/logs/fields/"
+	{
+		// Encode "field_name" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "field_name",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.FieldName))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	pathParts[6] = "/values"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "since" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "since",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Since.Get(); ok {
+				if unwrapped := string(val); true {
+					return e.EncodeValue(conv.StringToString(unwrapped))
+				}
+				return nil
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "start_time" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "start_time",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.StartTime.Get(); ok {
+				return e.EncodeValue(conv.DateTimeToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "end_time" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "end_time",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.EndTime.Get(); ok {
+				return e.EncodeValue(conv.DateTimeToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "source" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "source",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Source.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Limit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, ListProjectBranchLogFieldValuesOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, ListProjectBranchLogFieldValuesOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, ListProjectBranchLogFieldValuesOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeListProjectBranchLogFieldValuesResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ListProjectBranchLogFields invokes listProjectBranchLogFields operation.
+//
+// Lists the low-cardinality log fields observed on this branch whose distinct values can be discovered
+// with the log field-values endpoint.
+//
+// The set is computed per branch and grows as new fields are observed, so treat it as data rather than
+// a fixed list: discover a field here, then pass it as `field_name` to the field-values endpoint.
+//
+// Note: This endpoint is currently in Private Beta.
+//
+// GET /projects/{project_id}/branches/{branch_id}/logs/fields
+func (c *Client) ListProjectBranchLogFields(ctx context.Context, params ListProjectBranchLogFieldsParams) (ListProjectBranchLogFieldsRes, error) {
+	res, err := c.sendListProjectBranchLogFields(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendListProjectBranchLogFields(ctx context.Context, params ListProjectBranchLogFieldsParams) (res ListProjectBranchLogFieldsRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("listProjectBranchLogFields"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/logs/fields"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ListProjectBranchLogFieldsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/logs/fields"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, ListProjectBranchLogFieldsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, ListProjectBranchLogFieldsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, ListProjectBranchLogFieldsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeListProjectBranchLogFieldsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // ListProjectBranchRoles invokes listProjectBranchRoles operation.
 //
-// Retrieves a list of Postgres roles from the specified branch.
-// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
+// Retrieves a list of Postgres roles from the specified branch. For related information, see
+// [Manage roles].
 //
 // GET /projects/{project_id}/branches/{branch_id}/roles
+//
+// [Manage roles]: https://neon.com/docs/manage/roles/
 func (c *Client) ListProjectBranchRoles(ctx context.Context, params ListProjectBranchRolesParams) (*RolesResponse, error) {
 	res, err := c.sendListProjectBranchRoles(ctx, params)
 	return res, err
@@ -21342,7 +22606,13 @@ func (c *Client) sendListProjectBranchRoles(ctx context.Context, params ListProj
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListProjectBranchRolesResponse(resp)
@@ -21356,13 +22626,15 @@ func (c *Client) sendListProjectBranchRoles(ctx context.Context, params ListProj
 // ListProjectBranches invokes listProjectBranches operation.
 //
 // Retrieves a list of branches for the specified project.
-// Each Neon project has a root branch named `main`.
-// A `branch_id` value has a `br-` prefix.
-// A project may contain child branches that were branched from `main` or from another branch.
-// A parent branch is identified by the `parent_id` value, which is the `id` of the parent branch.
-// For related information, see [Manage branches](https://neon.com/docs/manage/branches/).
+//
+// Each Neon project has a root branch named `main`. A `branch_id` value has a `br-` prefix. A project
+// may contain child branches that were branched from `main` or from another branch. A parent branch is
+// identified by the `parent_id` value, which is the `id` of the parent branch. For related
+// information, see [Manage branches].
 //
 // GET /projects/{project_id}/branches
+//
+// [Manage branches]: https://neon.com/docs/manage/branches/
 func (c *Client) ListProjectBranches(ctx context.Context, params ListProjectBranchesParams) (*ListProjectBranchesOK, error) {
 	res, err := c.sendListProjectBranches(ctx, params)
 	return res, err
@@ -21603,7 +22875,13 @@ func (c *Client) sendListProjectBranches(ctx context.Context, params ListProject
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListProjectBranchesResponse(resp)
@@ -21616,12 +22894,12 @@ func (c *Client) sendListProjectBranches(ctx context.Context, params ListProject
 
 // ListProjectEndpoints invokes listProjectEndpoints operation.
 //
-// Retrieves a list of compute endpoints for the specified project.
-// A compute endpoint is a Neon compute instance.
-// For information about compute endpoints, see [Manage computes](https://neon.
-// com/docs/manage/endpoints/).
+// Retrieves a list of compute endpoints for the specified project. A compute endpoint is a Neon
+// compute instance. For information about compute endpoints, see [Manage computes].
 //
 // GET /projects/{project_id}/endpoints
+//
+// [Manage computes]: https://neon.com/docs/manage/endpoints/
 func (c *Client) ListProjectEndpoints(ctx context.Context, params ListProjectEndpointsParams) (*EndpointsResponse, error) {
 	res, err := c.sendListProjectEndpoints(ctx, params)
 	return res, err
@@ -21756,7 +23034,13 @@ func (c *Client) sendListProjectEndpoints(ctx context.Context, params ListProjec
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListProjectEndpointsResponse(resp)
@@ -21767,14 +23051,210 @@ func (c *Client) sendListProjectEndpoints(ctx context.Context, params ListProjec
 	return result, nil
 }
 
+// ListProjectMembers invokes listProjectMembers operation.
+//
+// Lists organization members and their per-project roles for an org-owned project. Returns 404 when
+// the project is not org-owned, per-project role management is disabled, or the caller has no access.
+// Callers with VIEWER or EDITOR see members with effective project access. Callers with ADMIN also see
+// unassigned org members.
+//
+// GET /projects/{project_id}/members
+func (c *Client) ListProjectMembers(ctx context.Context, params ListProjectMembersParams) (*ProjectMembers, error) {
+	res, err := c.sendListProjectMembers(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendListProjectMembers(ctx context.Context, params ListProjectMembersParams) (res *ProjectMembers, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("listProjectMembers"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/members"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ListProjectMembersOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/members"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "cursor" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "cursor",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Cursor.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Limit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, ListProjectMembersOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, ListProjectMembersOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, ListProjectMembersOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeListProjectMembersResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // ListProjectOperations invokes listProjectOperations operation.
 //
-// Retrieves a list of operations for the specified Neon project.
-// The number of operations returned can be large.
-// To paginate the response, issue an initial request with a `limit` value.
-// Then, add the `cursor` value that was returned in the response to the next request.
-// Operations older than 6 months may be deleted from our systems.
-// If you need more history than that, you should store your own history.
+// Retrieves a list of operations for the specified Neon project. The number of operations returned can
+// be large. To paginate the response, issue an initial request with a `limit` value. Then, add the
+// `cursor` value that was returned in the response to the next request. Operations older than 6 months
+// may be deleted from our systems. If you need more history than that, you should store your own
+// history.
 //
 // GET /projects/{project_id}/operations
 func (c *Client) ListProjectOperations(ctx context.Context, params ListProjectOperationsParams) (*ListOperations, error) {
@@ -21949,7 +23429,13 @@ func (c *Client) sendListProjectOperations(ctx context.Context, params ListProje
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListProjectOperationsResponse(resp)
@@ -22100,7 +23586,13 @@ func (c *Client) sendListProjectPermissions(ctx context.Context, params ListProj
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListProjectPermissionsResponse(resp)
@@ -22250,7 +23742,13 @@ func (c *Client) sendListProjectVPCEndpoints(ctx context.Context, params ListPro
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListProjectVPCEndpointsResponse(resp)
@@ -22263,15 +23761,15 @@ func (c *Client) sendListProjectVPCEndpoints(ctx context.Context, params ListPro
 
 // ListProjects invokes listProjects operation.
 //
-// Retrieves a list of projects for the specified organization.
-// If using a personal API key, include the `org_id` parameter to specify which organization to work
-// with.
-// If using an org API key, `org_id` is automatically inferred from the key.
-// For more information, see [Manage organizations using the Neon API](https://neon.
-// com/docs/manage/orgs-api)
-// and [Manage projects](https://neon.com/docs/manage/projects/).
+// Retrieves a list of projects for the specified organization. If using a personal API key, include
+// the `org_id` parameter to specify which organization to work with. If using an org API key, `org_id`
+// is automatically inferred from the key. For more information, see
+// [Manage organizations using the Neon API] and [Manage projects].
 //
 // GET /projects
+//
+// [Manage organizations using the Neon API]: https://neon.com/docs/manage/orgs-api
+// [Manage projects]: https://neon.com/docs/manage/projects/
 func (c *Client) ListProjects(ctx context.Context, params ListProjectsParams) (*ListProjectsOK, error) {
 	res, err := c.sendListProjects(ctx, params)
 	return res, err
@@ -22493,7 +23991,13 @@ func (c *Client) sendListProjects(ctx context.Context, params ListProjectsParams
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListProjectsResponse(resp)
@@ -22506,10 +24010,12 @@ func (c *Client) sendListProjects(ctx context.Context, params ListProjectsParams
 
 // ListSharedProjects invokes listSharedProjects operation.
 //
-// Retrieves a list of projects shared with your Neon account.
-// For more information, see [Manage projects](https://neon.com/docs/manage/projects/).
+// Retrieves a list of projects shared with your Neon account. For more information, see
+// [Manage projects].
 //
 // GET /projects/shared
+//
+// [Manage projects]: https://neon.com/docs/manage/projects/
 func (c *Client) ListSharedProjects(ctx context.Context, params ListSharedProjectsParams) (*ListSharedProjectsOK, error) {
 	res, err := c.sendListSharedProjects(ctx, params)
 	return res, err
@@ -22697,7 +24203,13 @@ func (c *Client) sendListSharedProjects(ctx context.Context, params ListSharedPr
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListSharedProjectsResponse(resp)
@@ -22710,9 +24222,10 @@ func (c *Client) sendListSharedProjects(ctx context.Context, params ListSharedPr
 
 // ListSnapshots invokes listSnapshots operation.
 //
-// Lists the snapshots for the specified project.
-// Each snapshot represents a point-in-time backup of the project data.
-// **Note**: This endpoint is currently in Beta.
+// Lists the snapshots for the specified project. Each snapshot represents a point-in-time backup of
+// the project data.
+//
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/snapshots
 func (c *Client) ListSnapshots(ctx context.Context, params ListSnapshotsParams) (*ListSnapshotsOK, error) {
@@ -22849,7 +24362,13 @@ func (c *Client) sendListSnapshots(ctx context.Context, params ListSnapshotsPara
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeListSnapshotsResponse(resp)
@@ -22862,19 +24381,22 @@ func (c *Client) sendListSnapshots(ctx context.Context, params ListSnapshotsPara
 
 // PresignProjectBranchBucketObject invokes presignProjectBranchBucketObject operation.
 //
-// Returns a presigned URL that transfers bytes directly to or from the
-// object's bucket on the specified branch, without the caller ever
-// handling S3 credentials. The `operation` field selects the direction:
-// - `upload` returns a presigned `PUT` URL (the caller `PUT`s the file
-// bytes straight to `url` with the returned `headers`). Authorized with
-// project write access.
-// - `download` returns a presigned `GET` URL (the caller `GET`s the
-// bytes straight from `url`). Authorized with project read access.
-// The platform mints a short-lived credential and builds the SigV4-signed
-// URL against the branch's S3 data-plane host, returning it together with
-// the HTTP method, any headers the caller must echo, and the URL's expiry.
+// Returns a presigned URL that transfers bytes directly to or from the object's bucket on the
+// specified branch, without the caller ever handling S3 credentials. The `operation` field selects the
+// direction:
+//
+//   - `upload` returns a presigned `PUT` URL (the caller `PUT`s the file bytes straight to `url` with
+//     the returned `headers`). Authorized with project write access.
+//   - `download` returns a presigned `GET` URL (the caller `GET`s the bytes straight from `url`).
+//     Authorized with project read access.
+//
+// The platform mints a short-lived credential and builds the SigV4-signed URL against the branch's S3
+// data-plane host, returning it together with the HTTP method, any headers the caller must echo, and
+// the URL's expiry.
+//
 // Served by the user's session (no customer S3 credentials required).
-// **Note**: This endpoint is currently in Private Beta.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects/{object_key}/presign
 func (c *Client) PresignProjectBranchBucketObject(ctx context.Context, request *PresignRequest, params PresignProjectBranchBucketObjectParams) (PresignProjectBranchBucketObjectRes, error) {
@@ -23071,7 +24593,13 @@ func (c *Client) sendPresignProjectBranchBucketObject(ctx context.Context, reque
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodePresignProjectBranchBucketObjectResponse(resp)
@@ -23082,11 +24610,209 @@ func (c *Client) sendPresignProjectBranchBucketObject(ctx context.Context, reque
 	return result, nil
 }
 
+// QueryProjectBranchLogs invokes queryProjectBranchLogs operation.
+//
+// Returns logs emitted by services running on the specified branch, ordered by timestamp according to
+// `sort_order`.
+//
+// All supplied filters are combined with `AND`: a record is returned only when it matches every
+// filter. `minimum_severity` and `severity_text` are independent filters, so setting both requires a
+// record to clear the severity floor and match the exact severity text.
+//
+// Supply `logql` instead of the structured filters to run a raw LogQL expression. Combining it with
+// any structured filter is rejected rather than silently ignored; `limit`, `sort_order`, and the time
+// window still apply, because those bound the query rather than form part of the expression.
+//
+// Give the window either as `since` — a duration ending at `end_time`, or at the current time when
+// `end_time` is omitted — or as an explicit `start_time`. Supplying both is rejected.
+//
+// A single response holds at most 1,000 records. When `is_truncated` is `true`, pass the returned
+// `next_cursor` back as `cursor` to fetch the next page, repeating the time range and every filter
+// unchanged.
+//
+// If no time range is supplied, the query covers the previous hour. The maximum supported time range
+// is seven days. `end_time` is exclusive.
+//
+// Note: This endpoint is currently in Private Beta.
+//
+// POST /projects/{project_id}/branches/{branch_id}/logs/query
+func (c *Client) QueryProjectBranchLogs(ctx context.Context, request *ProjectBranchLogsQueryRequest, params QueryProjectBranchLogsParams) (QueryProjectBranchLogsRes, error) {
+	res, err := c.sendQueryProjectBranchLogs(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendQueryProjectBranchLogs(ctx context.Context, request *ProjectBranchLogsQueryRequest, params QueryProjectBranchLogsParams) (res QueryProjectBranchLogsRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("queryProjectBranchLogs"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/logs/query"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, QueryProjectBranchLogsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/logs/query"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeQueryProjectBranchLogsRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, QueryProjectBranchLogsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, QueryProjectBranchLogsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, QueryProjectBranchLogsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeQueryProjectBranchLogsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // RecoverProject invokes recoverProject operation.
 //
-// Recovers a deleted project within the 7-day deletion recovery period.
-// Restores branches, endpoints, settings, and connection strings.
-// Some integrations require manual reconfiguration after recovery.
+// Recovers a deleted project within the 7-day deletion recovery period. Restores branches, endpoints,
+// settings, and connection strings. Some integrations require manual reconfiguration after recovery.
 // To list recoverable projects, use `GET /projects?recoverable=true`.
 //
 // POST /projects/{project_id}/recover
@@ -23224,7 +24950,13 @@ func (c *Client) sendRecoverProject(ctx context.Context, params RecoverProjectPa
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeRecoverProjectResponse(resp)
@@ -23237,13 +24969,13 @@ func (c *Client) sendRecoverProject(ctx context.Context, params RecoverProjectPa
 
 // RecoverProjectBranch invokes recoverProjectBranch operation.
 //
-// Recovers a deleted branch within the 7-day deletion recovery period.
-// The branch must have been soft deleted and not yet permanently deleted.
-// Recovery restores the branch and its endpoints to an idle state.
-// Connection strings remain valid after recovery.
-// TTL branches become non-TTL branches after recovery.
-// To list deleted branches available for recovery, use `GET
-// /projects/{project_id}/branches?include_deleted=true`.
+// Recovers a deleted branch within the 7-day deletion recovery period. The branch must have been soft
+// deleted and not yet permanently deleted. Recovery restores the branch and its endpoints to an idle
+// state. Connection strings remain valid after recovery. TTL branches become non-TTL branches after
+// recovery.
+//
+// To list deleted branches available for recovery, use
+// `GET /projects/{project_id}/branches?include_deleted=true`.
 //
 // POST /projects/{project_id}/branches/{branch_id}/recover
 func (c *Client) RecoverProjectBranch(ctx context.Context, params RecoverProjectBranchParams) (*BranchRecoverResponse, error) {
@@ -23399,7 +25131,13 @@ func (c *Client) sendRecoverProjectBranch(ctx context.Context, params RecoverPro
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeRecoverProjectBranchResponse(resp)
@@ -23412,9 +25150,8 @@ func (c *Client) sendRecoverProjectBranch(ctx context.Context, params RecoverPro
 
 // RemoveOrganizationMember invokes removeOrganizationMember operation.
 //
-// Removes the specified member from the organization.
-// Only organization admins can perform this action.
-// The last admin in an organization cannot be removed.
+// Removes the specified member from the organization. Only organization admins can perform this
+// action. The last admin in an organization cannot be removed.
 //
 // DELETE /organizations/{org_id}/members/{member_id}
 func (c *Client) RemoveOrganizationMember(ctx context.Context, params RemoveOrganizationMemberParams) error {
@@ -23569,7 +25306,13 @@ func (c *Client) sendRemoveOrganizationMember(ctx context.Context, params Remove
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeRemoveOrganizationMemberResponse(resp)
@@ -23580,17 +25323,216 @@ func (c *Client) sendRemoveOrganizationMember(ctx context.Context, params Remove
 	return result, nil
 }
 
+// RemoveProjectMemberRole invokes removeProjectMemberRole operation.
+//
+// Idempotently removes the explicit project grant. The member's organization-role default project
+// permission still applies. Self-DELETE requires `confirm_self_lockout=true` when effective manage
+// access would be lost.
+//
+// DELETE /projects/{project_id}/members/{member_id}/role
+func (c *Client) RemoveProjectMemberRole(ctx context.Context, params RemoveProjectMemberRoleParams) (*ProjectMemberRoleResponse, error) {
+	res, err := c.sendRemoveProjectMemberRole(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendRemoveProjectMemberRole(ctx context.Context, params RemoveProjectMemberRoleParams) (res *ProjectMemberRoleResponse, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("removeProjectMemberRole"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/members/{member_id}/role"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, RemoveProjectMemberRoleOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/members/"
+	{
+		// Encode "member_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "member_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.MemberID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/role"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "confirm_self_lockout" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "confirm_self_lockout",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.ConfirmSelfLockout.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, RemoveProjectMemberRoleOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, RemoveProjectMemberRoleOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, RemoveProjectMemberRoleOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeRemoveProjectMemberRoleResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // ResetProjectBranchRolePassword invokes resetProjectBranchRolePassword operation.
 //
-// Resets the password for the specified Postgres role.
-// Returns a new password and operations. The new password is ready to use when the last operation
-// finishes.
-// The old password remains valid until last operation finishes.
-// Connections to the compute endpoint are dropped. If idle,
-// the compute endpoint becomes active for a short period of time.
-// For related information, see [Manage roles](https://neon.com/docs/manage/roles/).
+// Resets the password for the specified Postgres role. Returns a new password and operations. The new
+// password is ready to use when the last operation finishes. The old password remains valid until last
+// operation finishes. Connections to the compute endpoint are dropped. If idle, the compute endpoint
+// becomes active for a short period of time.
+//
+// For related information, see [Manage roles].
 //
 // POST /projects/{project_id}/branches/{branch_id}/roles/{role_name}/reset_password
+//
+// [Manage roles]: https://neon.com/docs/manage/roles/
 func (c *Client) ResetProjectBranchRolePassword(ctx context.Context, params ResetProjectBranchRolePasswordParams) (*RoleOperations, error) {
 	res, err := c.sendResetProjectBranchRolePassword(ctx, params)
 	return res, err
@@ -23763,7 +25705,13 @@ func (c *Client) sendResetProjectBranchRolePassword(ctx context.Context, params 
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeResetProjectBranchRolePasswordResponse(resp)
@@ -23776,12 +25724,12 @@ func (c *Client) sendResetProjectBranchRolePassword(ctx context.Context, params 
 
 // RestartProjectEndpoint invokes restartProjectEndpoint operation.
 //
-// Restarts the specified compute endpoint by immediately suspending it and then starting it again.
-// An `endpoint_id` has an `ep-` prefix.
-// For information about compute endpoints, see [Manage computes](https://neon.
-// com/docs/manage/endpoints/).
+// Restarts the specified compute endpoint by immediately suspending it and then starting it again. An
+// `endpoint_id` has an `ep-` prefix. For information about compute endpoints, see [Manage computes].
 //
 // POST /projects/{project_id}/endpoints/{endpoint_id}/restart
+//
+// [Manage computes]: https://neon.com/docs/manage/endpoints/
 func (c *Client) RestartProjectEndpoint(ctx context.Context, params RestartProjectEndpointParams) (*EndpointOperations, error) {
 	res, err := c.sendRestartProjectEndpoint(ctx, params)
 	return res, err
@@ -23935,7 +25883,13 @@ func (c *Client) sendRestartProjectEndpoint(ctx context.Context, params RestartP
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeRestartProjectEndpointResponse(resp)
@@ -23948,9 +25902,8 @@ func (c *Client) sendRestartProjectEndpoint(ctx context.Context, params RestartP
 
 // RestoreProjectBranch invokes restoreProjectBranch operation.
 //
-// Restores a branch to an earlier state in its own or another branch's history
-// by specifying an LSN or timestamp.
-// Creates a new branch from the historical state.
+// Restores a branch to an earlier state in its own or another branch's history by specifying an LSN or
+// timestamp. Creates a new branch from the historical state.
 //
 // POST /projects/{project_id}/branches/{branch_id}/restore
 func (c *Client) RestoreProjectBranch(ctx context.Context, request *BranchRestoreRequest, params RestoreProjectBranchParams) (*BranchOperations, error) {
@@ -24109,7 +26062,13 @@ func (c *Client) sendRestoreProjectBranch(ctx context.Context, request *BranchRe
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeRestoreProjectBranchResponse(resp)
@@ -24122,9 +26081,10 @@ func (c *Client) sendRestoreProjectBranch(ctx context.Context, request *BranchRe
 
 // RestoreSnapshot invokes restoreSnapshot operation.
 //
-// Restores the specified snapshot to a new branch,
-// and optionally finalizes the restore operation to replace the original branch.
-// **Note**: This endpoint is currently in Beta.
+// Restores the specified snapshot to a new branch, and optionally finalizes the restore operation to
+// replace the original branch.
+//
+// Note: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/snapshots/{snapshot_id}/restore
 func (c *Client) RestoreSnapshot(ctx context.Context, request OptRestoreSnapshotReq, params RestoreSnapshotParams) (*RestoredSnapshot, error) {
@@ -24304,7 +26264,13 @@ func (c *Client) sendRestoreSnapshot(ctx context.Context, request OptRestoreSnap
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeRestoreSnapshotResponse(resp)
@@ -24317,13 +26283,12 @@ func (c *Client) sendRestoreSnapshot(ctx context.Context, request OptRestoreSnap
 
 // RevokeApiKey invokes revokeApiKey operation.
 //
-// Revokes the specified API key.
-// An API key that is no longer needed can be revoked.
-// This action cannot be reversed.
-// API keys can also be managed in the Neon Console.
-// See [Manage API keys](https://neon.com/docs/manage/api-keys/).
+// Revokes the specified API key. An API key that is no longer needed can be revoked. This action
+// cannot be reversed. API keys can also be managed in the Neon Console. See [Manage API keys].
 //
 // DELETE /api_keys/{key_id}
+//
+// [Manage API keys]: https://neon.com/docs/manage/api-keys/
 func (c *Client) RevokeApiKey(ctx context.Context, params RevokeApiKeyParams) (*ApiKeyRevokeResponse, error) {
 	res, err := c.sendRevokeApiKey(ctx, params)
 	return res, err
@@ -24457,7 +26422,13 @@ func (c *Client) sendRevokeApiKey(ctx context.Context, params RevokeApiKeyParams
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeRevokeApiKeyResponse(resp)
@@ -24470,8 +26441,9 @@ func (c *Client) sendRevokeApiKey(ctx context.Context, params RevokeApiKeyParams
 
 // RevokeCredential invokes revokeCredential operation.
 //
-// Soft-deletes the credential.  Idempotent.
-// **Note**: This endpoint is currently in Private Beta.
+// Soft-deletes the credential. Idempotent.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/credentials/{token_id}
 func (c *Client) RevokeCredential(ctx context.Context, params RevokeCredentialParams) (RevokeCredentialRes, error) {
@@ -24645,7 +26617,13 @@ func (c *Client) sendRevokeCredential(ctx context.Context, params RevokeCredenti
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeRevokeCredentialResponse(resp)
@@ -24658,13 +26636,12 @@ func (c *Client) sendRevokeCredential(ctx context.Context, params RevokeCredenti
 
 // RevokeOrgApiKey invokes revokeOrgApiKey operation.
 //
-// Revokes the specified organization API key.
-// An API key that is no longer needed can be revoked.
-// This action cannot be reversed.
-// API keys can also be managed in the Neon Console.
-// See [Manage API keys](https://neon.com/docs/manage/api-keys/).
+// Revokes the specified organization API key. An API key that is no longer needed can be revoked. This
+// action cannot be reversed. API keys can also be managed in the Neon Console. See [Manage API keys].
 //
 // DELETE /organizations/{org_id}/api_keys/{key_id}
+//
+// [Manage API keys]: https://neon.com/docs/manage/api-keys/
 func (c *Client) RevokeOrgApiKey(ctx context.Context, params RevokeOrgApiKeyParams) (*OrgApiKeyRevokeResponse, error) {
 	res, err := c.sendRevokeOrgApiKey(ctx, params)
 	return res, err
@@ -24817,7 +26794,13 @@ func (c *Client) sendRevokeOrgApiKey(ctx context.Context, params RevokeOrgApiKey
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeRevokeOrgApiKeyResponse(resp)
@@ -24830,8 +26813,8 @@ func (c *Client) sendRevokeOrgApiKey(ctx context.Context, params RevokeOrgApiKey
 
 // RevokePermissionFromProject invokes revokePermissionFromProject operation.
 //
-// Revokes project access from the user associated with the specified permission `id`. You can
-// retrieve a user's permission `id` by listing project access.
+// Revokes project access from the user associated with the specified permission `id`. You can retrieve
+// a user's permission `id` by listing project access.
 //
 // DELETE /projects/{project_id}/permissions/{permission_id}
 func (c *Client) RevokePermissionFromProject(ctx context.Context, params RevokePermissionFromProjectParams) (*ProjectPermission, error) {
@@ -24986,7 +26969,13 @@ func (c *Client) sendRevokePermissionFromProject(ctx context.Context, params Rev
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeRevokePermissionFromProjectResponse(resp)
@@ -25000,10 +26989,8 @@ func (c *Client) sendRevokePermissionFromProject(ctx context.Context, params Rev
 // SendNeonAuthTestEmail invokes sendNeonAuthTestEmail operation.
 //
 // Sends a test email using the configured email server settings to verify SMTP connectivity and
-// credentials.
-// The request body must include the SMTP server settings
-// (`host`, `port`, `username`, `password`, `sender_email`, `sender_name`) and the `recipient_email`
-// address.
+// credentials. The request body must include the SMTP server settings (`host`, `port`, `username`,
+// `password`, `sender_email`, `sender_name`) and the `recipient_email` address.
 //
 // POST /projects/{project_id}/branches/{branch_id}/auth/send_test_email
 func (c *Client) SendNeonAuthTestEmail(ctx context.Context, request *SendNeonAuthTestEmailRequest, params SendNeonAuthTestEmailParams) (*SendNeonAuthTestEmailResponse, error) {
@@ -25162,7 +27149,13 @@ func (c *Client) sendSendNeonAuthTestEmail(ctx context.Context, request *SendNeo
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeSendNeonAuthTestEmailResponse(resp)
@@ -25175,11 +27168,12 @@ func (c *Client) sendSendNeonAuthTestEmail(ctx context.Context, request *SendNeo
 
 // SetDefaultProjectBranch invokes setDefaultProjectBranch operation.
 //
-// Sets the specified branch as the project's default branch.
-// The default designation is automatically removed from the previous default branch.
-// For more information, see [Manage branches](https://neon.com/docs/manage/branches/).
+// Sets the specified branch as the project's default branch. The default designation is automatically
+// removed from the previous default branch. For more information, see [Manage branches].
 //
 // POST /projects/{project_id}/branches/{branch_id}/set_as_default
+//
+// [Manage branches]: https://neon.com/docs/manage/branches/
 func (c *Client) SetDefaultProjectBranch(ctx context.Context, params SetDefaultProjectBranchParams) (*BranchOperations, error) {
 	res, err := c.sendSetDefaultProjectBranch(ctx, params)
 	return res, err
@@ -25333,7 +27327,13 @@ func (c *Client) sendSetDefaultProjectBranch(ctx context.Context, params SetDefa
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeSetDefaultProjectBranchResponse(resp)
@@ -25346,11 +27346,10 @@ func (c *Client) sendSetDefaultProjectBranch(ctx context.Context, params SetDefa
 
 // SetOrganizationSpendingLimit invokes setOrganizationSpendingLimit operation.
 //
-// Sets the monthly spending limit for the specified organization.
-// To remove a previously configured limit, send a DELETE request to this endpoint.
-// When a limit is configured, email notifications are sent at 80% and 100% of the limit.
-// Computes are not suspended when the limit is reached.
-// Available to organization admins on Launch and Scale plans only.
+// Sets the monthly spending limit for the specified organization. To remove a previously configured
+// limit, send a DELETE request to this endpoint. When a limit is configured, email notifications are
+// sent at 80% and 100% of the limit. Computes are not suspended when the limit is reached. Available
+// to organization admins on Launch and Scale plans only.
 //
 // PUT /organizations/{org_id}/billing/spending_limit
 func (c *Client) SetOrganizationSpendingLimit(ctx context.Context, request *SpendingLimitUpdateRequest, params SetOrganizationSpendingLimitParams) (*SpendingLimitResponse, error) {
@@ -25490,7 +27489,13 @@ func (c *Client) sendSetOrganizationSpendingLimit(ctx context.Context, request *
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeSetOrganizationSpendingLimitResponse(resp)
@@ -25501,11 +27506,212 @@ func (c *Client) sendSetOrganizationSpendingLimit(ctx context.Context, request *
 	return result, nil
 }
 
+// SetProjectMemberRole invokes setProjectMemberRole operation.
+//
+// Idempotently sets or updates the explicit project grant of the specified org member. Self-demotion
+// requires `confirm_self_demotion=true`.
+//
+// PUT /projects/{project_id}/members/{member_id}/role
+func (c *Client) SetProjectMemberRole(ctx context.Context, request *SetProjectMemberRoleRequest, params SetProjectMemberRoleParams) (*ProjectMemberRoleResponse, error) {
+	res, err := c.sendSetProjectMemberRole(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendSetProjectMemberRole(ctx context.Context, request *SetProjectMemberRoleRequest, params SetProjectMemberRoleParams) (res *ProjectMemberRoleResponse, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("setProjectMemberRole"),
+		semconv.HTTPRequestMethodKey.String("PUT"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/members/{member_id}/role"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, SetProjectMemberRoleOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/members/"
+	{
+		// Encode "member_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "member_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.MemberID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/role"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "confirm_self_demotion" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "confirm_self_demotion",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.ConfirmSelfDemotion.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeSetProjectMemberRoleRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, SetProjectMemberRoleOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, SetProjectMemberRoleOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, SetProjectMemberRoleOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeSetProjectMemberRoleResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // SetSnapshotSchedule invokes setSnapshotSchedule operation.
 //
-// Updates the backup schedule for the specified branch.
-// The schedule defines how often automatic snapshots are created (e.g., `hourly`, `daily`).
-// **Note**: This endpoint is currently in Beta.
+// Updates the backup schedule for the specified branch. The schedule defines how often automatic
+// snapshots are created (e.g., `daily`, `weekly`).
+//
+// Note: This endpoint is currently in Beta.
 //
 // PUT /projects/{project_id}/branches/{branch_id}/backup_schedule
 func (c *Client) SetSnapshotSchedule(ctx context.Context, request *BackupSchedule, params SetSnapshotScheduleParams) error {
@@ -25664,7 +27870,13 @@ func (c *Client) sendSetSnapshotSchedule(ctx context.Context, request *BackupSch
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeSetSnapshotScheduleResponse(resp)
@@ -25678,10 +27890,10 @@ func (c *Client) sendSetSnapshotSchedule(ctx context.Context, request *BackupSch
 // StartAnonymization invokes startAnonymization operation.
 //
 // Starts the anonymization process for an anonymized branch that is in the initialized, error, or
-// anonymized state.
-// This will apply all defined masking rules to anonymize sensitive data in the branch databases.
-// The branch must be an anonymized branch to start anonymization.
-// **Note**: This endpoint is currently in Beta.
+// anonymized state. This will apply all defined masking rules to anonymize sensitive data in the
+// branch databases. The branch must be an anonymized branch to start anonymization.
+//
+// Note: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/anonymize
 func (c *Client) StartAnonymization(ctx context.Context, params StartAnonymizationParams) (*AnonymizedBranchStatusResponse, error) {
@@ -25837,7 +28049,13 @@ func (c *Client) sendStartAnonymization(ctx context.Context, params StartAnonymi
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeStartAnonymizationResponse(resp)
@@ -25850,13 +28068,15 @@ func (c *Client) sendStartAnonymization(ctx context.Context, params StartAnonymi
 
 // StartProjectEndpoint invokes startProjectEndpoint operation.
 //
-// Starts a compute endpoint.
-// The compute endpoint is ready to use after the last operation in the chain finishes successfully.
-// An `endpoint_id` has an `ep-` prefix.
-// For information about compute endpoints, see [Manage computes](https://neon.
-// com/docs/manage/endpoints/).
+// Starts a compute endpoint. The compute endpoint is ready to use after the last operation in the
+// chain finishes successfully.
+//
+// An `endpoint_id` has an `ep-` prefix. For information about compute endpoints, see
+// [Manage computes].
 //
 // POST /projects/{project_id}/endpoints/{endpoint_id}/start
+//
+// [Manage computes]: https://neon.com/docs/manage/endpoints/
 func (c *Client) StartProjectEndpoint(ctx context.Context, params StartProjectEndpointParams) (*EndpointOperations, error) {
 	res, err := c.sendStartProjectEndpoint(ctx, params)
 	return res, err
@@ -26010,7 +28230,13 @@ func (c *Client) sendStartProjectEndpoint(ctx context.Context, params StartProje
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeStartProjectEndpointResponse(resp)
@@ -26023,12 +28249,12 @@ func (c *Client) sendStartProjectEndpoint(ctx context.Context, params StartProje
 
 // SuspendProjectEndpoint invokes suspendProjectEndpoint operation.
 //
-// Suspends the specified compute endpoint.
-// An `endpoint_id` has an `ep-` prefix.
-// For information about compute endpoints, see [Manage computes](https://neon.
-// com/docs/manage/endpoints/).
+// Suspends the specified compute endpoint. An `endpoint_id` has an `ep-` prefix. For information about
+// compute endpoints, see [Manage computes].
 //
 // POST /projects/{project_id}/endpoints/{endpoint_id}/suspend
+//
+// [Manage computes]: https://neon.com/docs/manage/endpoints/
 func (c *Client) SuspendProjectEndpoint(ctx context.Context, params SuspendProjectEndpointParams) (*EndpointOperations, error) {
 	res, err := c.sendSuspendProjectEndpoint(ctx, params)
 	return res, err
@@ -26182,7 +28408,13 @@ func (c *Client) sendSuspendProjectEndpoint(ctx context.Context, params SuspendP
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeSuspendProjectEndpointResponse(resp)
@@ -26316,7 +28548,13 @@ func (c *Client) sendTransferNeonAuthProviderProject(ctx context.Context, reques
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeTransferNeonAuthProviderProjectResponse(resp)
@@ -26470,7 +28708,13 @@ func (c *Client) sendTransferProjectsFromOrgToOrg(ctx context.Context, request *
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeTransferProjectsFromOrgToOrgResponse(resp)
@@ -26607,7 +28851,13 @@ func (c *Client) sendTransferProjectsFromUserToOrg(ctx context.Context, request 
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeTransferProjectsFromUserToOrgResponse(resp)
@@ -26797,7 +29047,13 @@ func (c *Client) sendUpdateBranchNeonAuthOauthProvider(ctx context.Context, requ
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateBranchNeonAuthOauthProviderResponse(resp)
@@ -26810,9 +29066,10 @@ func (c *Client) sendUpdateBranchNeonAuthOauthProvider(ctx context.Context, requ
 
 // UpdateMaskingRules invokes updateMaskingRules operation.
 //
-// Updates the masking rules for the specified anonymized branch.
-// Masking rules define how sensitive data should be anonymized using PostgreSQL Anonymizer.
-// **Note**: This endpoint is currently in Beta.
+// Updates the masking rules for the specified anonymized branch. Masking rules define how sensitive
+// data should be anonymized using PostgreSQL Anonymizer.
+//
+// Note: This endpoint is currently in Beta.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/masking_rules
 func (c *Client) UpdateMaskingRules(ctx context.Context, request *MaskingRulesUpdateRequest, params UpdateMaskingRulesParams) (*MaskingRulesResponse, error) {
@@ -26971,7 +29228,13 @@ func (c *Client) sendUpdateMaskingRules(ctx context.Context, request *MaskingRul
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateMaskingRulesResponse(resp)
@@ -26984,9 +29247,8 @@ func (c *Client) sendUpdateMaskingRules(ctx context.Context, request *MaskingRul
 
 // UpdateNeonAuthAllowLocalhost invokes updateNeonAuthAllowLocalhost operation.
 //
-// Updates the localhost allow setting for the specified branch's Neon Auth integration.
-// When enabled, authentication flows work from `localhost` without adding it to the redirect URI
-// whitelist.
+// Updates the localhost allow setting for the specified branch's Neon Auth integration. When enabled,
+// authentication flows work from `localhost` without adding it to the redirect URI whitelist.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/allow_localhost
 func (c *Client) UpdateNeonAuthAllowLocalhost(ctx context.Context, request *UpdateNeonAuthAllowLocalhostRequest, params UpdateNeonAuthAllowLocalhostParams) (*NeonAuthAllowLocalhostResponse, error) {
@@ -27145,7 +29407,13 @@ func (c *Client) sendUpdateNeonAuthAllowLocalhost(ctx context.Context, request *
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateNeonAuthAllowLocalhostResponse(resp)
@@ -27158,8 +29426,8 @@ func (c *Client) sendUpdateNeonAuthAllowLocalhost(ctx context.Context, request *
 
 // UpdateNeonAuthConfig invokes updateNeonAuthConfig operation.
 //
-// Updates the auth configuration for the branch.
-// Currently supports updating the application name used in auth emails.
+// Updates the auth configuration for the branch. Currently supports updating the application name used
+// in auth emails.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/config
 func (c *Client) UpdateNeonAuthConfig(ctx context.Context, request *NeonAuthConfigUpdate, params UpdateNeonAuthConfigParams) (*NeonAuthConfigResponse, error) {
@@ -27318,7 +29586,13 @@ func (c *Client) sendUpdateNeonAuthConfig(ctx context.Context, request *NeonAuth
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateNeonAuthConfigResponse(resp)
@@ -27332,8 +29606,7 @@ func (c *Client) sendUpdateNeonAuthConfig(ctx context.Context, request *NeonAuth
 // UpdateNeonAuthEmailAndPasswordConfig invokes updateNeonAuthEmailAndPasswordConfig operation.
 //
 // Updates the email and password authentication configuration for the specified branch's Neon Auth
-// integration.
-// Only the fields provided in the request body are updated.
+// integration. Only the fields provided in the request body are updated.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/email_and_password
 func (c *Client) UpdateNeonAuthEmailAndPasswordConfig(ctx context.Context, request *NeonAuthEmailAndPasswordConfigUpdate, params UpdateNeonAuthEmailAndPasswordConfigParams) (*NeonAuthEmailAndPasswordConfig, error) {
@@ -27492,7 +29765,13 @@ func (c *Client) sendUpdateNeonAuthEmailAndPasswordConfig(ctx context.Context, r
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateNeonAuthEmailAndPasswordConfigResponse(resp)
@@ -27505,9 +29784,8 @@ func (c *Client) sendUpdateNeonAuthEmailAndPasswordConfig(ctx context.Context, r
 
 // UpdateNeonAuthEmailProvider invokes updateNeonAuthEmailProvider operation.
 //
-// Updates the email provider configuration for the specified branch's Neon Auth integration.
-// The email provider handles transactional messages such as verification emails and password reset
-// links.
+// Updates the email provider configuration for the specified branch's Neon Auth integration. The email
+// provider handles transactional messages such as verification emails and password reset links.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/email_provider
 func (c *Client) UpdateNeonAuthEmailProvider(ctx context.Context, request *NeonAuthEmailServerConfig, params UpdateNeonAuthEmailProviderParams) (*NeonAuthEmailServerConfig, error) {
@@ -27666,7 +29944,13 @@ func (c *Client) sendUpdateNeonAuthEmailProvider(ctx context.Context, request *N
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateNeonAuthEmailProviderResponse(resp)
@@ -27822,7 +30106,13 @@ func (c *Client) sendUpdateNeonAuthEmailServer(ctx context.Context, request *Neo
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateNeonAuthEmailServerResponse(resp)
@@ -27835,8 +30125,8 @@ func (c *Client) sendUpdateNeonAuthEmailServer(ctx context.Context, request *Neo
 
 // UpdateNeonAuthMagicLinkPlugin invokes updateNeonAuthMagicLinkPlugin operation.
 //
-// Updates the magic link plugin configuration for Neon Auth.
-// The magic link plugin enables passwordless authentication via email magic links.
+// Updates the magic link plugin configuration for Neon Auth. The magic link plugin enables
+// passwordless authentication via email magic links.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/magic-link
 func (c *Client) UpdateNeonAuthMagicLinkPlugin(ctx context.Context, request *NeonAuthMagicLinkConfigUpdate, params UpdateNeonAuthMagicLinkPluginParams) (*NeonAuthMagicLinkConfig, error) {
@@ -27995,7 +30285,13 @@ func (c *Client) sendUpdateNeonAuthMagicLinkPlugin(ctx context.Context, request 
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateNeonAuthMagicLinkPluginResponse(resp)
@@ -28170,7 +30466,13 @@ func (c *Client) sendUpdateNeonAuthOauthProvider(ctx context.Context, request *N
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateNeonAuthOauthProviderResponse(resp)
@@ -28183,8 +30485,8 @@ func (c *Client) sendUpdateNeonAuthOauthProvider(ctx context.Context, request *N
 
 // UpdateNeonAuthOrganizationPlugin invokes updateNeonAuthOrganizationPlugin operation.
 //
-// Updates the organization plugin configuration for Neon Auth.
-// The organization plugin enables multi-tenant organization support.
+// Updates the organization plugin configuration for Neon Auth. The organization plugin enables
+// multi-tenant organization support.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/organization
 func (c *Client) UpdateNeonAuthOrganizationPlugin(ctx context.Context, request *NeonAuthOrganizationConfigUpdate, params UpdateNeonAuthOrganizationPluginParams) (*NeonAuthOrganizationConfig, error) {
@@ -28343,7 +30645,13 @@ func (c *Client) sendUpdateNeonAuthOrganizationPlugin(ctx context.Context, reque
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateNeonAuthOrganizationPluginResponse(resp)
@@ -28356,12 +30664,11 @@ func (c *Client) sendUpdateNeonAuthOrganizationPlugin(ctx context.Context, reque
 
 // UpdateNeonAuthPhoneNumberPlugin invokes updateNeonAuthPhoneNumberPlugin operation.
 //
-// Updates the phone number plugin configuration for Neon Auth.
-// Only the fields provided in the request body are updated; omitted fields retain their current
-// values.
-// The phone number plugin enables phone-based OTP authentication.
-// OTP codes are delivered via the `send.otp` webhook event with `delivery_preference: "sms"`.
-// A webhook must be configured with the `send.otp` event enabled for SMS delivery to work.
+// Updates the phone number plugin configuration for Neon Auth. Only the fields provided in the request
+// body are updated; omitted fields retain their current values. The phone number plugin enables
+// phone-based OTP authentication. OTP codes are delivered via the `send.otp` webhook event with
+// `delivery_preference: "sms"`. A webhook must be configured with the `send.otp` event enabled for SMS
+// delivery to work.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/phone-number
 func (c *Client) UpdateNeonAuthPhoneNumberPlugin(ctx context.Context, request *NeonAuthPhoneNumberConfigUpdate, params UpdateNeonAuthPhoneNumberPluginParams) (*NeonAuthPhoneNumberConfig, error) {
@@ -28520,7 +30827,13 @@ func (c *Client) sendUpdateNeonAuthPhoneNumberPlugin(ctx context.Context, reques
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateNeonAuthPhoneNumberPluginResponse(resp)
@@ -28533,8 +30846,8 @@ func (c *Client) sendUpdateNeonAuthPhoneNumberPlugin(ctx context.Context, reques
 
 // UpdateNeonAuthUserRole invokes updateNeonAuthUserRole operation.
 //
-// Updates the role of a user in the Neon Auth user directory for the specified branch.
-// The role controls the user's level of access within the Neon Auth integration.
+// Updates the role of a user in the Neon Auth user directory for the specified branch. The role
+// controls the user's level of access within the Neon Auth integration.
 //
 // PUT /projects/{project_id}/branches/{branch_id}/auth/users/{auth_user_id}/role
 func (c *Client) UpdateNeonAuthUserRole(ctx context.Context, request *UpdateNeonAuthUserRoleRequest, params UpdateNeonAuthUserRoleParams) (*UpdateNeonAuthUserRoleResponse, error) {
@@ -28712,7 +31025,13 @@ func (c *Client) sendUpdateNeonAuthUserRole(ctx context.Context, request *Update
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateNeonAuthUserRoleResponse(resp)
@@ -28725,8 +31044,8 @@ func (c *Client) sendUpdateNeonAuthUserRole(ctx context.Context, request *Update
 
 // UpdateNeonAuthWebhookConfig invokes updateNeonAuthWebhookConfig operation.
 //
-// Updates the webhook configuration for the specified branch's Neon Auth integration.
-// Webhooks notify an external endpoint when auth events occur, such as user creation or sign-in.
+// Updates the webhook configuration for the specified branch's Neon Auth integration. Webhooks notify
+// an external endpoint when auth events occur, such as user creation or sign-in.
 //
 // PUT /projects/{project_id}/branches/{branch_id}/auth/webhooks
 func (c *Client) UpdateNeonAuthWebhookConfig(ctx context.Context, request *NeonAuthWebhookConfig, params UpdateNeonAuthWebhookConfigParams) (*NeonAuthWebhookConfig, error) {
@@ -28885,7 +31204,13 @@ func (c *Client) sendUpdateNeonAuthWebhookConfig(ctx context.Context, request *N
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateNeonAuthWebhookConfigResponse(resp)
@@ -28898,9 +31223,8 @@ func (c *Client) sendUpdateNeonAuthWebhookConfig(ctx context.Context, request *N
 
 // UpdateOrganizationMember invokes updateOrganizationMember operation.
 //
-// Updates the role of an existing member in the specified organization.
-// The requested role must be valid for the organization.
-// Only organization admins can call this endpoint.
+// Updates the role of an existing member in the specified organization. The requested role must be
+// valid for the organization. Only organization admins can call this endpoint.
 //
 // PATCH /organizations/{org_id}/members/{member_id}
 func (c *Client) UpdateOrganizationMember(ctx context.Context, request *OrganizationMemberUpdateRequest, params UpdateOrganizationMemberParams) (*Member, error) {
@@ -29058,7 +31382,13 @@ func (c *Client) sendUpdateOrganizationMember(ctx context.Context, request *Orga
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateOrganizationMemberResponse(resp)
@@ -29071,9 +31401,8 @@ func (c *Client) sendUpdateOrganizationMember(ctx context.Context, request *Orga
 
 // UpdateProject invokes updateProject operation.
 //
-// Updates the specified project.
-// Configurable properties include the project name, default compute settings, history retention
-// period, and IP allowlist.
+// Updates the specified project. Configurable properties include the project name, default compute
+// settings, history retention period, and IP allowlist.
 //
 // PATCH /projects/{project_id}
 func (c *Client) UpdateProject(ctx context.Context, request *ProjectUpdateRequest, params UpdateProjectParams) (*UpdateProjectOK, error) {
@@ -29212,7 +31541,13 @@ func (c *Client) sendUpdateProject(ctx context.Context, request *ProjectUpdateRe
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateProjectResponse(resp)
@@ -29225,10 +31560,11 @@ func (c *Client) sendUpdateProject(ctx context.Context, request *ProjectUpdateRe
 
 // UpdateProjectBranch invokes updateProjectBranch operation.
 //
-// Updates the specified branch.
-// For more information, see [Manage branches](https://neon.com/docs/manage/branches/).
+// Updates the specified branch. For more information, see [Manage branches].
 //
 // PATCH /projects/{project_id}/branches/{branch_id}
+//
+// [Manage branches]: https://neon.com/docs/manage/branches/
 func (c *Client) UpdateProjectBranch(ctx context.Context, request *BranchUpdateRequest, params UpdateProjectBranchParams) (*BranchOperations, error) {
 	res, err := c.sendUpdateProjectBranch(ctx, request, params)
 	return res, err
@@ -29384,7 +31720,13 @@ func (c *Client) sendUpdateProjectBranch(ctx context.Context, request *BranchUpd
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateProjectBranchResponse(resp)
@@ -29397,9 +31739,9 @@ func (c *Client) sendUpdateProjectBranch(ctx context.Context, request *BranchUpd
 
 // UpdateProjectBranchDataAPI invokes updateProjectBranchDataAPI operation.
 //
-// Updates the Neon Data API configuration for the specified branch.
-// You can optionally provide settings to update the Data API configuration.
-// The schema cache is always refreshed as part of this operation.
+// Updates the Neon Data API configuration for the specified branch. You can optionally provide
+// settings to update the Data API configuration. The schema cache is always refreshed as part of this
+// operation.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/data-api/{database_name}
 func (c *Client) UpdateProjectBranchDataAPI(ctx context.Context, request OptDataAPIUpdateRequest, params UpdateProjectBranchDataAPIParams) error {
@@ -29576,7 +31918,13 @@ func (c *Client) sendUpdateProjectBranchDataAPI(ctx context.Context, request Opt
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateProjectBranchDataAPIResponse(resp)
@@ -29589,10 +31937,11 @@ func (c *Client) sendUpdateProjectBranchDataAPI(ctx context.Context, request Opt
 
 // UpdateProjectBranchDatabase invokes updateProjectBranchDatabase operation.
 //
-// Updates the specified database in the branch.
-// For related information, see [Manage databases](https://neon.com/docs/manage/databases/).
+// Updates the specified database in the branch. For related information, see [Manage databases].
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/databases/{database_name}
+//
+// [Manage databases]: https://neon.com/docs/manage/databases/
 func (c *Client) UpdateProjectBranchDatabase(ctx context.Context, request *DatabaseUpdateRequest, params UpdateProjectBranchDatabaseParams) (*DatabaseOperations, error) {
 	res, err := c.sendUpdateProjectBranchDatabase(ctx, request, params)
 	return res, err
@@ -29767,7 +32116,13 @@ func (c *Client) sendUpdateProjectBranchDatabase(ctx context.Context, request *D
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateProjectBranchDatabaseResponse(resp)
@@ -29780,16 +32135,14 @@ func (c *Client) sendUpdateProjectBranchDatabase(ctx context.Context, request *D
 
 // UpdateProjectBranchFunction invokes updateProjectBranchFunction operation.
 //
-// Updates the function's mutable metadata — currently only the display
-// `name`. A string sets the display name; `null` clears it, after which
-// the function's `name` falls back to its slug. Leading and trailing
-// whitespace is trimmed; a whitespace-only name is rejected. Acts only
-// on a function owned by the branch: a slug that is only inherited from
-// an ancestor branch returns 404 — rename it on the branch that owns
-// it. Like every other change on a branch, a rename is isolated per
-// branch: a branch forked before the rename keeps the name it had at
-// fork time.
-// **Note**: This endpoint is currently in Private Beta.
+// Updates the function's mutable metadata — currently only the display `name`. A string sets the
+// display name; `null` clears it, after which the function's `name` falls back to its slug. Leading
+// and trailing whitespace is trimmed; a whitespace-only name is rejected. Acts only on a function
+// owned by the branch: a slug that is only inherited from an ancestor branch returns 404 — rename it
+// on the branch that owns it. Like every other change on a branch, a rename is isolated per branch: a
+// branch forked before the rename keeps the name it had at fork time.
+//
+// Note: This endpoint is currently in Private Beta.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/functions/{slug}
 func (c *Client) UpdateProjectBranchFunction(ctx context.Context, request *NeonFunctionUpdateRequest, params UpdateProjectBranchFunctionParams) (*NeonFunctionResponse, error) {
@@ -29966,7 +32319,13 @@ func (c *Client) sendUpdateProjectBranchFunction(ctx context.Context, request *N
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateProjectBranchFunctionResponse(resp)
@@ -29980,15 +32339,18 @@ func (c *Client) sendUpdateProjectBranchFunction(ctx context.Context, request *N
 // UpdateProjectEndpoint invokes updateProjectEndpoint operation.
 //
 // Updates the specified compute endpoint.
-// An `endpoint_id` has an `ep-` prefix. A `branch_id` has a `br-` prefix.
-// For more information about compute endpoints, see [Manage computes](https://neon.
-// com/docs/manage/endpoints/).
-// If the returned list of operations is not empty, the compute endpoint is not ready to use.
-// The client must wait for the last operation to finish before using the compute endpoint.
-// If the compute endpoint was idle before the update, it becomes active for a short period of time,
-// and the control plane suspends it again after the update.
+//
+// An `endpoint_id` has an `ep-` prefix. A `branch_id` has a `br-` prefix. For more information about
+// compute endpoints, see [Manage computes].
+//
+// If the returned list of operations is not empty, the compute endpoint is not ready to use. The
+// client must wait for the last operation to finish before using the compute endpoint. If the compute
+// endpoint was idle before the update, it becomes active for a short period of time, and the control
+// plane suspends it again after the update.
 //
 // PATCH /projects/{project_id}/endpoints/{endpoint_id}
+//
+// [Manage computes]: https://neon.com/docs/manage/endpoints/
 func (c *Client) UpdateProjectEndpoint(ctx context.Context, request *EndpointUpdateRequest, params UpdateProjectEndpointParams) (*EndpointOperations, error) {
 	res, err := c.sendUpdateProjectEndpoint(ctx, request, params)
 	return res, err
@@ -30144,7 +32506,13 @@ func (c *Client) sendUpdateProjectEndpoint(ctx context.Context, request *Endpoin
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateProjectEndpointResponse(resp)
@@ -30158,7 +32526,8 @@ func (c *Client) sendUpdateProjectEndpoint(ctx context.Context, request *Endpoin
 // UpdateSnapshot invokes updateSnapshot operation.
 //
 // Updates the specified snapshot.
-// **Note**: This endpoint is currently in Beta.
+//
+// Note: This endpoint is currently in Beta.
 //
 // PATCH /projects/{project_id}/snapshots/{snapshot_id}
 func (c *Client) UpdateSnapshot(ctx context.Context, request *SnapshotUpdateRequest, params UpdateSnapshotParams) (*UpdateSnapshotOK, error) {
@@ -30316,7 +32685,13 @@ func (c *Client) sendUpdateSnapshot(ctx context.Context, request *SnapshotUpdate
 		return res, errors.Wrap(err, "do request")
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateSnapshotResponse(resp)
