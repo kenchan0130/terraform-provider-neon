@@ -18,6 +18,7 @@ import (
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neonwait"
+	"github.com/kenchan0130/terraform-provider-neon/internal/planmodifiers"
 )
 
 var (
@@ -161,7 +162,7 @@ func branchSchemaComputedAttributes() map[string]schema.Attribute {
 			Description: "The current state of the branch.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChange(),
 			},
 		},
 		"logical_size": schema.Int64Attribute{
@@ -217,14 +218,14 @@ func branchSchemaComputedAttributes() map[string]schema.Attribute {
 			Description: "The pending state of the branch.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChange(),
 			},
 		},
 		"state_changed_at": schema.StringAttribute{
 			Description: "A timestamp indicating when the current state began.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChange(),
 			},
 		},
 		"last_reset_at": schema.StringAttribute{
@@ -259,7 +260,7 @@ func branchSchemaComputedAttributes() map[string]schema.Attribute {
 			Description: "The last update timestamp.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChange(),
 			},
 		},
 	}
@@ -465,6 +466,13 @@ func (r *branchResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		BranchID:  data.ID.ValueString(),
 	})
 	if err != nil {
+		if neonerror.IsNotFound(err) {
+			// The branch is already gone; treat as a successful delete so
+			// terraform apply doesn't fail forever on a resource that was
+			// removed outside Terraform (e.g. an async delete operation
+			// from a previous, retried apply already completed).
+			return
+		}
 		resp.Diagnostics.AddError("Failed to delete branch", neonerror.Detail(err))
 		return
 	}

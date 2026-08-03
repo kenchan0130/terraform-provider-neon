@@ -1,6 +1,7 @@
 package compute_endpoint_test
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"regexp"
@@ -409,10 +410,12 @@ resource "neon_endpoint" "test" {
 // Terraform core taints a resource whose Create response carries both a
 // non-null new state and error diagnostics, so the next apply destroys and
 // recreates it rather than merely refreshing. This test's second POST
-// response succeeds (operation "finished") to let that recreate converge,
-// and asserts the Delete mock (for the tainted instance) and the second
-// Create were both exercised - proving the first Create's result was never
-// lost even though it errored.
+// response succeeds (operation "finished") to let that recreate converge.
+// It records the ORDER of POST/DELETE calls (not just counts) and asserts
+// the tainted instance's DELETE happened before the second (recreate) POST
+// - counts alone (createCallCount==2, deleteCallCount>=1) would also pass
+// if state had been lost and Terraform, for some unrelated reason, still
+// issued two creates and a delete in the wrong order.
 func TestEndpointResource_Create_OperationFailureStillPersistsState(t *testing.T) {
 	transport := httpmock.NewMockTransport()
 	httpClient := &http.Client{Transport: transport}
@@ -431,11 +434,14 @@ func TestEndpointResource_Create_OperationFailureStillPersistsState(t *testing.T
 		"total_duration_ms": 100
 	}`
 
+	var events []string
+
 	createCallCount := 0
 	transport.RegisterResponder(http.MethodPost,
 		"https://neon.example.com/api/v2/projects/test-project-id/endpoints",
 		func(req *http.Request) (*http.Response, error) {
 			createCallCount++
+			events = append(events, fmt.Sprintf("POST#%d", createCallCount))
 			if createCallCount == 1 {
 				return testutil.JSONResponder(201, `{"endpoint": `+endpointJSON+`, "operations": [`+operationFailedJSON+`]}`)(req)
 			}
@@ -453,6 +459,7 @@ func TestEndpointResource_Create_OperationFailureStillPersistsState(t *testing.T
 		"https://neon.example.com/api/v2/projects/test-project-id/endpoints/ep-test-001",
 		func(req *http.Request) (*http.Response, error) {
 			deleteCallCount++
+			events = append(events, fmt.Sprintf("DELETE#%d", deleteCallCount))
 			return testutil.JSONResponder(200, `{"endpoint": `+endpointJSON+`, "operations": []}`)(req)
 		},
 	)
@@ -508,6 +515,78 @@ resource "neon_endpoint" "test" {
 	// the framework's final destroy at the end of the test.
 	if deleteCallCount < 1 {
 		t.Errorf("expected the tainted resource to be destroyed at least once before recreation, got %d delete calls", deleteCallCount)
+	}
+
+	deleteIdx, postIdx := -1, -1
+	for i, e := range events {
+		if deleteIdx == -1 && e == "DELETE#1" {
+			deleteIdx = i
+		}
+		if postIdx == -1 && e == "POST#2" {
+			postIdx = i
+		}
+	}
+	if deleteIdx == -1 || postIdx == -1 {
+		t.Fatalf("expected both DELETE#1 and POST#2 to occur, got event order: %v", events)
+	}
+	if deleteIdx > postIdx {
+		t.Errorf("expected the tainted resource's DELETE to happen before the recreate POST (state would otherwise have been lost), got event order: %v", events)
+	}
+}
+
+// TestEndpointResource_DeleteAfter404 verifies the CLAUDE.md "Delete + 404
+// must be success" rule: if the endpoint is already gone by the time
+// Terraform issues the DELETE (e.g. an async delete operation from a
+// previous, retried apply already completed, or it was removed outside
+// Terraform), the provider must treat the 404 as a successful delete
+// instead of surfacing an error that would make destroy fail forever.
+func TestEndpointResource_DeleteAfter404(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/projects/test-project-id/endpoints",
+		testutil.JSONResponder(201, `{"endpoint": `+endpointJSON+`, "operations": []}`),
+	)
+
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id/endpoints/ep-test-001",
+		testutil.JSONResponder(200, `{"endpoint": `+endpointJSON+`}`),
+	)
+
+	deleteCallCount := 0
+	transport.RegisterResponder(http.MethodDelete,
+		"https://neon.example.com/api/v2/projects/test-project-id/endpoints/ep-test-001",
+		func(req *http.Request) (*http.Response, error) {
+			deleteCallCount++
+			return testutil.JSONResponder(404, `{"code":"not_found","message":"endpoint not found"}`)(req)
+		},
+	)
+
+	// If Delete did not treat 404 as success, the automatic destroy that
+	// resource.UnitTest performs at the end of the test would fail the
+	// test with a fatal apply error.
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_endpoint" "test" {
+  project_id             = "test-project-id"
+  branch_id              = "br-test-001"
+  type                   = "read_write"
+  autoscaling_limit_min_cu = 0.25
+  autoscaling_limit_max_cu = 1
+  suspend_timeout_seconds  = 300
+  disabled                 = false
+}
+`),
+			},
+		},
+	})
+
+	if deleteCallCount == 0 {
+		t.Error("expected DeleteProjectEndpoint to be called during test cleanup")
 	}
 }
 

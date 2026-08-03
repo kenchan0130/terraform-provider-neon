@@ -392,6 +392,64 @@ resource "neon_branch" "test" {
 	}
 }
 
+// TestBranchResource_DeleteAfter404 verifies the CLAUDE.md "Delete + 404
+// must be success" rule: if the branch is already gone by the time
+// Terraform issues the DELETE (e.g. an async delete operation from a
+// previous, retried apply already completed, or it was removed outside
+// Terraform), the provider must treat the 404 as a successful delete
+// instead of surfacing an error that would make destroy fail forever.
+func TestBranchResource_DeleteAfter404(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/projects/test-project-id/branches",
+		testutil.JSONResponder(201, `{
+			"branch": `+branchJSON+`,
+			"endpoints": [],
+			"operations": [],
+			"roles": [],
+			"databases": [],
+			"connection_uris": []
+		}`),
+	)
+
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id/branches/br-test-001",
+		testutil.JSONResponder(200, `{"branch": `+branchJSON+`, "annotation": {"object": {"type": "branch", "id": "br-test-001"}, "value": {}}}`),
+	)
+
+	deleteCallCount := 0
+	transport.RegisterResponder(http.MethodDelete,
+		"https://neon.example.com/api/v2/projects/test-project-id/branches/br-test-001",
+		func(req *http.Request) (*http.Response, error) {
+			deleteCallCount++
+			return testutil.JSONResponder(404, `{"code":"not_found","message":"branch not found"}`)(req)
+		},
+	)
+
+	// If Delete did not treat 404 as success, the automatic destroy that
+	// resource.UnitTest performs at the end of the test would fail the
+	// test with a fatal apply error.
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_branch" "test" {
+  project_id = "test-project-id"
+  name       = "dev-branch"
+}
+`),
+			},
+		},
+	})
+
+	if deleteCallCount == 0 {
+		t.Error("expected DeleteProjectBranch to be called during test cleanup")
+	}
+}
+
 func TestBranchResource_APIError(t *testing.T) {
 	transport := httpmock.NewMockTransport()
 	httpClient := &http.Client{Transport: transport}

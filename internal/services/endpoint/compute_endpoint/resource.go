@@ -370,10 +370,11 @@ func (r *endpointResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
+	// mapEndpointToModel mutates data in place even when it appends error
+	// diagnostics (e.g. from settings conversion); state must still be
+	// saved regardless, so the endpoint the POST already created is not
+	// orphaned outside Terraform because of an unrelated mapping failure.
 	mapEndpointToModel(ctx, &result.Endpoint, &data, &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -448,10 +449,10 @@ func (r *endpointResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
+	// mapEndpointToModel mutates data in place even when it appends error
+	// diagnostics; state must still be saved regardless so the update
+	// already accepted by the API is not lost.
 	mapEndpointToModel(ctx, &result.Endpoint, &data, &resp.Diagnostics)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -478,6 +479,13 @@ func (r *endpointResource) Delete(ctx context.Context, req resource.DeleteReques
 		EndpointID: data.ID.ValueString(),
 	})
 	if err != nil {
+		if neonerror.IsNotFound(err) {
+			// The endpoint is already gone; treat as a successful delete so
+			// terraform apply doesn't fail forever on a resource that was
+			// removed outside Terraform (e.g. an async delete operation
+			// from a previous, retried apply already completed).
+			return
+		}
 		resp.Diagnostics.AddError("Failed to delete endpoint", neonerror.Detail(err))
 		return
 	}
