@@ -385,7 +385,25 @@ func (r *endpointResource) Create(ctx context.Context, req resource.CreateReques
 	// state.Set, to avoid orphaning the created endpoint outside Terraform.
 	if err := neonwait.WaitForOperations(ctx, r.client, data.ProjectID.ValueString(), result.Operations, neonwait.DefaultInterval); err != nil {
 		resp.Diagnostics.AddError("Endpoint created but operations did not complete", neonerror.Detail(err))
+		return
 	}
+
+	// The operations that provisioned the endpoint have now finished; they
+	// may have changed volatile fields (current_state, pending_state,
+	// last_active, updated_at, ...), so refresh from the API and save the
+	// final representation. The pre-wait state saved above already
+	// protects against orphaning if this read-back fails.
+	readResult, err := r.client.GetProjectEndpoint(ctx, neon.GetProjectEndpointParams{
+		ProjectID:  data.ProjectID.ValueString(),
+		EndpointID: data.ID.ValueString(),
+	})
+	if err != nil {
+		resp.Diagnostics.AddError("Endpoint created and operations completed, but failed to read back the final state", neonerror.Detail(err))
+		return
+	}
+
+	mapEndpointToModel(ctx, &readResult.Endpoint, &data, &resp.Diagnostics)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *endpointResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -464,7 +482,26 @@ func (r *endpointResource) Update(ctx context.Context, req resource.UpdateReques
 	// what the API accepted.
 	if err := neonwait.WaitForOperations(ctx, r.client, state.ProjectID.ValueString(), result.Operations, neonwait.DefaultInterval); err != nil {
 		resp.Diagnostics.AddError("Endpoint updated but operations did not complete", neonerror.Detail(err))
+		return
 	}
+
+	// The operations that applied the update have now finished; they may
+	// have changed volatile fields (current_state, pending_state,
+	// last_active, updated_at, ...), so refresh from the API and save the
+	// final representation. The pre-wait state saved above already
+	// protects against a stale-but-consistent state if this read-back
+	// fails.
+	readResult, err := r.client.GetProjectEndpoint(ctx, neon.GetProjectEndpointParams{
+		ProjectID:  state.ProjectID.ValueString(),
+		EndpointID: state.ID.ValueString(),
+	})
+	if err != nil {
+		resp.Diagnostics.AddError("Endpoint updated and operations completed, but failed to read back the final state", neonerror.Detail(err))
+		return
+	}
+
+	mapEndpointToModel(ctx, &readResult.Endpoint, &data, &resp.Diagnostics)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *endpointResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

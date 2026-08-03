@@ -327,7 +327,25 @@ func (r *branchResource) Create(ctx context.Context, req resource.CreateRequest,
 	// state.Set, to avoid orphaning the created branch outside Terraform.
 	if err := neonwait.WaitForOperations(ctx, r.client, data.ProjectID.ValueString(), result.Operations, neonwait.DefaultInterval); err != nil {
 		resp.Diagnostics.AddError("Branch created but operations did not complete", neonerror.Detail(err))
+		return
 	}
+
+	// The operations that provisioned the branch have now finished; they
+	// may have changed volatile fields (current_state, pending_state,
+	// state_changed_at, updated_at, logical_size, ...), so refresh from the
+	// API and save the final representation. The pre-wait state saved above
+	// already protects against orphaning if this read-back fails.
+	readResult, err := r.client.GetProjectBranch(ctx, neon.GetProjectBranchParams{
+		ProjectID: data.ProjectID.ValueString(),
+		BranchID:  data.ID.ValueString(),
+	})
+	if err != nil {
+		resp.Diagnostics.AddError("Branch created and operations completed, but failed to read back the final state", neonerror.Detail(err))
+		return
+	}
+
+	r.mapBranchToModel(&readResult.Branch, &data)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func buildBranchCreateRequest(data *branchResourceModel) (neon.CreateProjectBranchReqBranch, diag.Diagnostics) {
@@ -451,7 +469,26 @@ func (r *branchResource) Update(ctx context.Context, req resource.UpdateRequest,
 	// what the API accepted.
 	if err := neonwait.WaitForOperations(ctx, r.client, state.ProjectID.ValueString(), result.Operations, neonwait.DefaultInterval); err != nil {
 		resp.Diagnostics.AddError("Branch updated but operations did not complete", neonerror.Detail(err))
+		return
 	}
+
+	// The operations that applied the update have now finished; they may
+	// have changed volatile fields (current_state, pending_state,
+	// state_changed_at, updated_at, logical_size, ...), so refresh from the
+	// API and save the final representation. The pre-wait state saved above
+	// already protects against a stale-but-consistent state if this
+	// read-back fails.
+	readResult, err := r.client.GetProjectBranch(ctx, neon.GetProjectBranchParams{
+		ProjectID: state.ProjectID.ValueString(),
+		BranchID:  state.ID.ValueString(),
+	})
+	if err != nil {
+		resp.Diagnostics.AddError("Branch updated and operations completed, but failed to read back the final state", neonerror.Detail(err))
+		return
+	}
+
+	r.mapBranchToModel(&readResult.Branch, &data)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *branchResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

@@ -161,6 +161,53 @@ func TestWaitForOperations_ContextCancellationAborts(t *testing.T) {
 	}
 }
 
+// TestWaitForOperations_AllStatusValues exercises every neon.OperationStatus
+// value to make sure each is classified correctly: scheduling/running/
+// cancelling keep polling (and the wait succeeds once a later poll reports
+// finished), finished/skipped succeed immediately, and failed/error/
+// cancelled fail immediately.
+func TestWaitForOperations_AllStatusValues(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		status    neon.OperationStatus
+		wantErr   bool
+		wantPolls int32 // polls before the getter reports "finished"
+	}{
+		"scheduling keeps polling then finishes": {status: neon.OperationStatusScheduling, wantErr: false, wantPolls: 1},
+		"running keeps polling then finishes":    {status: neon.OperationStatusRunning, wantErr: false, wantPolls: 1},
+		"cancelling keeps polling then finishes": {status: neon.OperationStatusCancelling, wantErr: false, wantPolls: 1},
+		"finished succeeds immediately":          {status: neon.OperationStatusFinished, wantErr: false, wantPolls: 0},
+		"skipped succeeds immediately":           {status: neon.OperationStatusSkipped, wantErr: false, wantPolls: 0},
+		"failed fails immediately":               {status: neon.OperationStatusFailed, wantErr: true, wantPolls: 0},
+		"error fails immediately":                {status: neon.OperationStatusError, wantErr: true, wantPolls: 0},
+		"cancelled fails immediately":            {status: neon.OperationStatusCancelled, wantErr: true, wantPolls: 0},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			getter := &sequenceGetter{
+				responses: []neon.Operation{newOp(neon.OperationStatusFinished)},
+			}
+			ops := []neon.Operation{newOp(tt.status)}
+
+			err := neonwait.WaitForOperations(context.Background(), getter, "proj", ops, testInterval)
+
+			if tt.wantErr && err == nil {
+				t.Fatal("expected an error, got nil")
+			}
+			if !tt.wantErr && err != nil {
+				t.Fatalf("expected nil error, got %v", err)
+			}
+			if getter.calls.Load() != tt.wantPolls {
+				t.Errorf("expected %d polls, got %d", tt.wantPolls, getter.calls.Load())
+			}
+		})
+	}
+}
+
 func TestWaitForOperations_APIErrorIsWrapped(t *testing.T) {
 	t.Parallel()
 
