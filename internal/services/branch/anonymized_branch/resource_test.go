@@ -175,7 +175,11 @@ func TestAnonymizedBranchResource_ReadBackFailureAfterCreate(t *testing.T) {
 		"https://neon.example.com/api/v2/projects/test-project-id/branches/br-anon-001/masking_rules",
 		func(req *http.Request) (*http.Response, error) {
 			maskingRulesCallCount++
-			if maskingRulesCallCount == 1 {
+			// Test provider config uses RetryMax: 3, i.e. 4 total attempts
+			// per Terraform-level request. Return 500 for all 4 attempts of
+			// the first apply's request so the retry layer exhausts and the
+			// step still fails, then succeed on the next apply.
+			if maskingRulesCallCount <= 4 {
 				return testutil.JSONResponder(500, `{"message":"internal error"}`)(req)
 			}
 			return testutil.JSONResponder(200, maskingRulesJSON)(req)

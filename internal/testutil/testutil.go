@@ -2,17 +2,24 @@ package testutil
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/jarcoal/httpmock"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonretry"
 	"github.com/kenchan0130/terraform-provider-neon/internal/provider"
 )
 
 func ProtoV6ProviderFactories(httpClient *http.Client) map[string]func() (tfprotov6.ProviderServer, error) {
+	retryConfig := neonretry.Config{
+		RetryMax:     3,
+		RetryWaitMin: time.Millisecond,
+		RetryWaitMax: 5 * time.Millisecond,
+	}
 	return map[string]func() (tfprotov6.ProviderServer, error){
-		"neon": providerserver.NewProtocol6WithError(provider.NewWithHTTPClient("test", httpClient)()),
+		"neon": providerserver.NewProtocol6WithError(provider.NewWithHTTPClient("test", httpClient, retryConfig)()),
 	}
 }
 

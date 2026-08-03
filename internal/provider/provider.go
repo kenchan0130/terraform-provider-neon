@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonretry"
 	"github.com/kenchan0130/terraform-provider-neon/internal/services/api_key"
 	"github.com/kenchan0130/terraform-provider-neon/internal/services/branch/anonymized_branch"
 	"github.com/kenchan0130/terraform-provider-neon/internal/services/branch/branch"
@@ -56,8 +57,9 @@ import (
 const defaultBaseURL = "https://console.neon.tech/api/v2"
 
 type NeonProvider struct {
-	version    string
-	httpClient *http.Client
+	version     string
+	httpClient  *http.Client
+	retryConfig *neonretry.Config
 }
 
 type neonProviderModel struct {
@@ -73,11 +75,12 @@ func New(version string) func() provider.Provider {
 	}
 }
 
-func NewWithHTTPClient(version string, httpClient *http.Client) func() provider.Provider {
+func NewWithHTTPClient(version string, httpClient *http.Client, retryConfig neonretry.Config) func() provider.Provider {
 	return func() provider.Provider {
 		return &NeonProvider{
-			version:    version,
-			httpClient: httpClient,
+			version:     version,
+			httpClient:  httpClient,
+			retryConfig: &retryConfig,
 		}
 	}
 }
@@ -169,21 +172,20 @@ func (p *NeonProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 
 	secSource := &neonSecuritySource{apiKey: apiKey}
 
-	var httpClient *http.Client
-	if p.httpClient != nil {
-		httpClient = p.httpClient
-	} else {
-		retryClient := retryablehttp.NewClient()
-		retryClient.Logger = nil
-		retryClient.RequestLogHook = func(_ retryablehttp.Logger, req *http.Request, retryNumber int) {
-			tflog.Debug(ctx, "Sending request", map[string]any{
-				"method":       req.Method,
-				"url":          req.URL.String(),
-				"retry_number": retryNumber,
-			})
-		}
-		httpClient = retryClient.StandardClient()
+	cfg := neonretry.DefaultConfig()
+	if p.retryConfig != nil {
+		cfg = *p.retryConfig
 	}
+
+	logHook := func(_ retryablehttp.Logger, req *http.Request, retryNumber int) {
+		tflog.Debug(ctx, "Sending request", map[string]any{
+			"method":       req.Method,
+			"url":          req.URL.String(),
+			"retry_number": retryNumber,
+		})
+	}
+
+	httpClient := neonretry.NewHTTPClient(p.httpClient, cfg, logHook)
 
 	client, err := neon.NewClient(baseURL, secSource, neon.WithClient(httpClient))
 	if err != nil {
