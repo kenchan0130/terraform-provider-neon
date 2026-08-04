@@ -64,9 +64,25 @@ func NewHTTPClient(inner *http.Client, cfg Config, logHook retryablehttp.Request
 	c.Logger = nil
 	c.RequestLogHook = logHook
 
+	// Wrap the effective inner client's transport so that non-JSON error
+	// bodies (e.g. an HTML 502 from an intermediate proxy) are rewritten
+	// into valid GeneralError JSON before ogen's generated decoder sees
+	// them. Without this, ogen's default error branch requires
+	// Content-Type: application/json and fails with
+	// validate.InvalidContentType, discarding the body content entirely.
+	//
+	// A shallow copy is made so we never mutate an *http.Client the caller
+	// still holds a reference to (e.g. a test-provided client wrapping an
+	// httpmock transport).
+	var effective *http.Client
 	if inner != nil {
-		c.HTTPClient = inner
+		innerCopy := *inner
+		effective = &innerCopy
+	} else {
+		effective = &http.Client{Transport: http.DefaultTransport}
 	}
+	effective.Transport = NewErrorBodyRoundTripper(effective.Transport)
+	c.HTTPClient = effective
 
 	c.RetryMax = cfg.RetryMax
 	c.RetryWaitMin = cfg.RetryWaitMin
