@@ -41,7 +41,7 @@ resource "neon_endpoint" "example" {
 - `name` (String) Optional name of the compute endpoint.
 - `passwordless_access` (Boolean) Whether to permit passwordless access to the compute endpoint.
 - `region_id` (String) The region identifier.
-- `settings` (Attributes) Endpoint settings. (see [below for nested schema](#nestedatt--settings))
+- `settings` (Attributes) Endpoint settings. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value. (see [below for nested schema](#nestedatt--settings))
 - `suspend_timeout_seconds` (Number) The duration of inactivity in seconds after which the compute is suspended.
 
 ### Read-Only

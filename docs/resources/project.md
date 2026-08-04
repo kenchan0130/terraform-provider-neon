@@ -28,8 +28,8 @@ resource "neon_project" "example" {
 ### Optional
 
 - `compute_provisioner` (String) The provisioner for the project. Cannot be changed after creation.
-- `default_endpoint_settings` (Attributes) Default endpoint settings for the project. (see [below for nested schema](#nestedatt--default_endpoint_settings))
-- `history_retention_seconds` (Number) The number of seconds to retain the shared history for all branches.
+- `default_endpoint_settings` (Attributes) Default endpoint settings for the project. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value. (see [below for nested schema](#nestedatt--default_endpoint_settings))
+- `history_retention_seconds` (Number) The number of seconds to retain the shared history for all branches. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value.
 - `name` (String) The project name.
 - `org_id` (String) The organization ID. If set, the project belongs to the specified organization. Cannot be changed after creation.
 - `pg_version` (Number) The Postgres version.
@@ -59,15 +59,15 @@ Optional:
 
 Optional:
 
-- `allowed_ips` (Attributes) A list of IP addresses that are allowed to connect to the endpoint. (see [below for nested schema](#nestedatt--settings--allowed_ips))
-- `audit_log_level` (String) The audit log level. One of: base, extended, full.
-- `block_public_connections` (Boolean) When set, connections from the public internet are disallowed.
-- `block_vpc_connections` (Boolean) When set, connections using VPC endpoints are disallowed.
-- `enable_logical_replication` (Boolean) Sets wal_level=logical for all compute endpoints in this project.
-- `hipaa` (Boolean) Whether HIPAA compliance is enabled for the project.
+- `allowed_ips` (Attributes) A list of IP addresses that are allowed to connect to the endpoint. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value. (see [below for nested schema](#nestedatt--settings--allowed_ips))
+- `audit_log_level` (String) The audit log level. One of: base, extended, full. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value.
+- `block_public_connections` (Boolean) When set, connections from the public internet are disallowed. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value.
+- `block_vpc_connections` (Boolean) When set, connections using VPC endpoints are disallowed. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value.
+- `enable_logical_replication` (Boolean) Sets wal_level=logical for all compute endpoints in this project. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value.
+- `hipaa` (Boolean) Whether HIPAA compliance is enabled for the project. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value.
 - `maintenance_window` (Attributes) The maintenance window configuration. Once set, removing this attribute from configuration does not restore the previous default; it keeps the current window. (see [below for nested schema](#nestedatt--settings--maintenance_window))
-- `preload_libraries` (Attributes) Configuration for preloaded Postgres libraries. (see [below for nested schema](#nestedatt--settings--preload_libraries))
-- `quota` (Attributes) Per-project consumption quota. (see [below for nested schema](#nestedatt--settings--quota))
+- `preload_libraries` (Attributes) Configuration for preloaded Postgres libraries. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value. (see [below for nested schema](#nestedatt--settings--preload_libraries))
+- `quota` (Attributes) Per-project consumption quota. Once set, removing this attribute from configuration does not unset the value on the server; it keeps the current value. (see [below for nested schema](#nestedatt--settings--quota))
 
 <a id="nestedatt--settings--allowed_ips"></a>
 ### Nested Schema for `settings.allowed_ips`
