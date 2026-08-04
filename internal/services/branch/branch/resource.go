@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -169,7 +168,7 @@ func branchSchemaComputedAttributes() map[string]schema.Attribute {
 			Description: "The logical size of the branch, in bytes.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.Int64{
-				int64planmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChangeInt64(),
 			},
 		},
 		"creation_source": schema.StringAttribute{
@@ -190,28 +189,28 @@ func branchSchemaComputedAttributes() map[string]schema.Attribute {
 			Description: "Compute time used by the branch, in seconds.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.Int64{
-				int64planmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChangeInt64(),
 			},
 		},
 		"active_time_seconds": schema.Int64Attribute{
 			Description: "Active time for the branch, in seconds.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.Int64{
-				int64planmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChangeInt64(),
 			},
 		},
 		"written_data_bytes": schema.Int64Attribute{
 			Description: "Written data for the branch, in bytes.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.Int64{
-				int64planmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChangeInt64(),
 			},
 		},
 		"data_transfer_bytes": schema.Int64Attribute{
 			Description: "Data transfer for the branch, in bytes.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.Int64{
-				int64planmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChangeInt64(),
 			},
 		},
 		"pending_state": schema.StringAttribute{
