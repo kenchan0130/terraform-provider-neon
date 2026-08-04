@@ -11,12 +11,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neon"
 	"github.com/kenchan0130/terraform-provider-neon/internal/neonerror"
+	"github.com/kenchan0130/terraform-provider-neon/internal/neonwait"
+	"github.com/kenchan0130/terraform-provider-neon/internal/planmodifiers"
 )
 
 var (
@@ -160,14 +161,14 @@ func branchSchemaComputedAttributes() map[string]schema.Attribute {
 			Description: "The current state of the branch.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChange(),
 			},
 		},
 		"logical_size": schema.Int64Attribute{
 			Description: "The logical size of the branch, in bytes.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.Int64{
-				int64planmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChangeInt64(),
 			},
 		},
 		"creation_source": schema.StringAttribute{
@@ -188,42 +189,42 @@ func branchSchemaComputedAttributes() map[string]schema.Attribute {
 			Description: "Compute time used by the branch, in seconds.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.Int64{
-				int64planmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChangeInt64(),
 			},
 		},
 		"active_time_seconds": schema.Int64Attribute{
 			Description: "Active time for the branch, in seconds.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.Int64{
-				int64planmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChangeInt64(),
 			},
 		},
 		"written_data_bytes": schema.Int64Attribute{
 			Description: "Written data for the branch, in bytes.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.Int64{
-				int64planmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChangeInt64(),
 			},
 		},
 		"data_transfer_bytes": schema.Int64Attribute{
 			Description: "Data transfer for the branch, in bytes.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.Int64{
-				int64planmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChangeInt64(),
 			},
 		},
 		"pending_state": schema.StringAttribute{
 			Description: "The pending state of the branch.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChange(),
 			},
 		},
 		"state_changed_at": schema.StringAttribute{
 			Description: "A timestamp indicating when the current state began.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChange(),
 			},
 		},
 		"last_reset_at": schema.StringAttribute{
@@ -258,7 +259,7 @@ func branchSchemaComputedAttributes() map[string]schema.Attribute {
 			Description: "The last update timestamp.",
 			Computed:    true,
 			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
+				planmodifiers.UnknownOnResourceChange(),
 			},
 		},
 	}
@@ -315,6 +316,34 @@ func (r *branchResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	r.mapBranchToModel(&result.Branch, &data)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// The Create API call already succeeded, so state has been saved above.
+	// A wait failure must be reported as a diagnostic, not a return before
+	// state.Set, to avoid orphaning the created branch outside Terraform.
+	if err := neonwait.WaitForOperations(ctx, r.client, data.ProjectID.ValueString(), result.Operations, neonwait.DefaultInterval); err != nil {
+		resp.Diagnostics.AddError("Branch created but operations did not complete", neonerror.Detail(err))
+		return
+	}
+
+	// The operations that provisioned the branch have now finished; they
+	// may have changed volatile fields (current_state, pending_state,
+	// state_changed_at, updated_at, logical_size, ...), so refresh from the
+	// API and save the final representation. The pre-wait state saved above
+	// already protects against orphaning if this read-back fails.
+	readResult, err := r.client.GetProjectBranch(ctx, neon.GetProjectBranchParams{
+		ProjectID: data.ProjectID.ValueString(),
+		BranchID:  data.ID.ValueString(),
+	})
+	if err != nil {
+		resp.Diagnostics.AddError("Branch created and operations completed, but failed to read back the final state", neonerror.Detail(err))
+		return
+	}
+
+	r.mapBranchToModel(&readResult.Branch, &data)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -429,6 +458,36 @@ func (r *branchResource) Update(ctx context.Context, req resource.UpdateRequest,
 
 	r.mapBranchToModel(&result.Branch, &data)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// The Update API call already succeeded, so the new state has been
+	// saved above. A wait failure must be reported as a diagnostic, not a
+	// return before state.Set, to avoid leaving state inconsistent with
+	// what the API accepted.
+	if err := neonwait.WaitForOperations(ctx, r.client, state.ProjectID.ValueString(), result.Operations, neonwait.DefaultInterval); err != nil {
+		resp.Diagnostics.AddError("Branch updated but operations did not complete", neonerror.Detail(err))
+		return
+	}
+
+	// The operations that applied the update have now finished; they may
+	// have changed volatile fields (current_state, pending_state,
+	// state_changed_at, updated_at, logical_size, ...), so refresh from the
+	// API and save the final representation. The pre-wait state saved above
+	// already protects against a stale-but-consistent state if this
+	// read-back fails.
+	readResult, err := r.client.GetProjectBranch(ctx, neon.GetProjectBranchParams{
+		ProjectID: state.ProjectID.ValueString(),
+		BranchID:  state.ID.ValueString(),
+	})
+	if err != nil {
+		resp.Diagnostics.AddError("Branch updated and operations completed, but failed to read back the final state", neonerror.Detail(err))
+		return
+	}
+
+	r.mapBranchToModel(&readResult.Branch, &data)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *branchResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -438,13 +497,27 @@ func (r *branchResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	_, err := r.client.DeleteProjectBranch(ctx, neon.DeleteProjectBranchParams{
+	result, err := r.client.DeleteProjectBranch(ctx, neon.DeleteProjectBranchParams{
 		ProjectID: data.ProjectID.ValueString(),
 		BranchID:  data.ID.ValueString(),
 	})
 	if err != nil {
+		if neonerror.IsNotFound(err) {
+			// The branch is already gone; treat as a successful delete so
+			// terraform apply doesn't fail forever on a resource that was
+			// removed outside Terraform (e.g. an async delete operation
+			// from a previous, retried apply already completed).
+			return
+		}
 		resp.Diagnostics.AddError("Failed to delete branch", neonerror.Detail(err))
 		return
+	}
+
+	if ops, ok := result.(*neon.BranchOperations); ok {
+		if err := neonwait.WaitForOperations(ctx, r.client, data.ProjectID.ValueString(), ops.Operations, neonwait.DefaultInterval); err != nil {
+			resp.Diagnostics.AddError("Branch deleted but operations did not complete", neonerror.Detail(err))
+			return
+		}
 	}
 }
 

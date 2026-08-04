@@ -1,6 +1,7 @@
 package compute_endpoint_test
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"regexp"
@@ -311,6 +312,481 @@ resource "neon_endpoint" "test" {
 	}
 	if seenBodies[0] != seenBodies[1] {
 		t.Fatalf("retried POST body differs from original:\nattempt 1: %s\nattempt 2: %s", seenBodies[0], seenBodies[1])
+	}
+}
+
+// TestEndpointResource_Create_WaitsForOperations verifies that Create polls
+// the operations endpoint until the operation returned alongside the
+// endpoint reaches a terminal state before returning, so a subsequent
+// resource depending on the endpoint (or the practitioner) doesn't observe
+// the endpoint before it has actually finished provisioning.
+func TestEndpointResource_Create_WaitsForOperations(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	const operationID = "6c4f1d3a-2f2b-4a4a-9d3e-2f6a2f6a2f6a"
+	const operationRunningJSON = `{
+		"id": "` + operationID + `",
+		"project_id": "test-project-id",
+		"endpoint_id": "ep-test-001",
+		"action": "create_compute",
+		"status": "running",
+		"failures_count": 0,
+		"created_at": "2025-01-01T00:00:00Z",
+		"updated_at": "2025-01-01T00:00:00Z",
+		"total_duration_ms": 0
+	}`
+	const operationFinishedJSON = `{
+		"id": "` + operationID + `",
+		"project_id": "test-project-id",
+		"endpoint_id": "ep-test-001",
+		"action": "create_compute",
+		"status": "finished",
+		"failures_count": 0,
+		"created_at": "2025-01-01T00:00:00Z",
+		"updated_at": "2025-01-01T00:00:01Z",
+		"total_duration_ms": 100
+	}`
+
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/projects/test-project-id/endpoints",
+		testutil.JSONResponder(201, `{"endpoint": `+endpointJSON+`, "operations": [`+operationRunningJSON+`]}`),
+	)
+
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id/endpoints/ep-test-001",
+		testutil.JSONResponder(200, `{"endpoint": `+endpointJSON+`}`),
+	)
+
+	transport.RegisterResponder(http.MethodDelete,
+		"https://neon.example.com/api/v2/projects/test-project-id/endpoints/ep-test-001",
+		testutil.JSONResponder(200, `{"endpoint": `+endpointJSON+`, "operations": []}`),
+	)
+
+	operationCallCount := 0
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id/operations/"+operationID,
+		func(req *http.Request) (*http.Response, error) {
+			operationCallCount++
+			if operationCallCount == 1 {
+				return testutil.JSONResponder(200, `{"operation": `+operationRunningJSON+`}`)(req)
+			}
+			return testutil.JSONResponder(200, `{"operation": `+operationFinishedJSON+`}`)(req)
+		},
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_endpoint" "test" {
+  project_id             = "test-project-id"
+  branch_id              = "br-test-001"
+  type                   = "read_write"
+  autoscaling_limit_min_cu = 0.25
+  autoscaling_limit_max_cu = 1
+  suspend_timeout_seconds  = 300
+  disabled                 = false
+}
+`),
+				Check: testutil.CheckResourceAttr("neon_endpoint.test", "id", "ep-test-001"),
+			},
+		},
+	})
+
+	if operationCallCount < 2 {
+		t.Errorf("expected the operations endpoint to be polled at least twice (running, then finished), got %d calls", operationCallCount)
+	}
+}
+
+// TestEndpointResource_Create_OperationFailureStillPersistsState verifies
+// the Create-orphan rule: once the Create API call itself has succeeded,
+// the created endpoint's ID and other attributes must be saved to state
+// even if the operation that provisions it later fails, so the endpoint
+// isn't left orphaned outside Terraform. The apply must still surface the
+// operation failure as an error.
+//
+// Terraform core taints a resource whose Create response carries both a
+// non-null new state and error diagnostics, so the next apply destroys and
+// recreates it rather than merely refreshing. This test's second POST
+// response succeeds (operation "finished") to let that recreate converge.
+// It records the ORDER of POST/DELETE calls (not just counts) and asserts
+// the tainted instance's DELETE happened before the second (recreate) POST
+// - counts alone (createCallCount==2, deleteCallCount>=1) would also pass
+// if state had been lost and Terraform, for some unrelated reason, still
+// issued two creates and a delete in the wrong order.
+func TestEndpointResource_Create_OperationFailureStillPersistsState(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	const operationID = "9a1b2c3d-4e5f-4a4a-9d3e-1a2b3c4d5e6f"
+	const operationFailedJSON = `{
+		"id": "` + operationID + `",
+		"project_id": "test-project-id",
+		"endpoint_id": "ep-test-001",
+		"action": "create_compute",
+		"status": "failed",
+		"error": "compute provisioning failed",
+		"failures_count": 1,
+		"created_at": "2025-01-01T00:00:00Z",
+		"updated_at": "2025-01-01T00:00:01Z",
+		"total_duration_ms": 100
+	}`
+
+	var events []string
+
+	createCallCount := 0
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/projects/test-project-id/endpoints",
+		func(req *http.Request) (*http.Response, error) {
+			createCallCount++
+			events = append(events, fmt.Sprintf("POST#%d", createCallCount))
+			if createCallCount == 1 {
+				return testutil.JSONResponder(201, `{"endpoint": `+endpointJSON+`, "operations": [`+operationFailedJSON+`]}`)(req)
+			}
+			return testutil.JSONResponder(201, `{"endpoint": `+endpointJSON+`, "operations": []}`)(req)
+		},
+	)
+
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id/endpoints/ep-test-001",
+		testutil.JSONResponder(200, `{"endpoint": `+endpointJSON+`}`),
+	)
+
+	deleteCallCount := 0
+	transport.RegisterResponder(http.MethodDelete,
+		"https://neon.example.com/api/v2/projects/test-project-id/endpoints/ep-test-001",
+		func(req *http.Request) (*http.Response, error) {
+			deleteCallCount++
+			events = append(events, fmt.Sprintf("DELETE#%d", deleteCallCount))
+			return testutil.JSONResponder(200, `{"endpoint": `+endpointJSON+`, "operations": []}`)(req)
+		},
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_endpoint" "test" {
+  project_id             = "test-project-id"
+  branch_id              = "br-test-001"
+  type                   = "read_write"
+  autoscaling_limit_min_cu = 0.25
+  autoscaling_limit_max_cu = 1
+  suspend_timeout_seconds  = 300
+  disabled                 = false
+}
+`),
+				// The operation ends "failed" without ever polling, so this
+				// error surfaces on the very first apply. Terraform still
+				// taints the resource using the state saved before the
+				// error (proving Create did not orphan it).
+				ExpectError: regexp.MustCompile(`Endpoint created but operations did not complete`),
+			},
+			{
+				// The tainted resource from step 1 is destroyed (exercising
+				// the Delete mock) and recreated; this time the operation
+				// finishes successfully.
+				Config: testutil.TestConfig(`
+resource "neon_endpoint" "test" {
+  project_id             = "test-project-id"
+  branch_id              = "br-test-001"
+  type                   = "read_write"
+  autoscaling_limit_min_cu = 0.25
+  autoscaling_limit_max_cu = 1
+  suspend_timeout_seconds  = 300
+  disabled                 = false
+}
+`),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testutil.CheckResourceAttr("neon_endpoint.test", "id", "ep-test-001"),
+					testutil.CheckResourceAttr("neon_endpoint.test", "host", "ep-test-001.us-east-1.aws.neon.tech"),
+				),
+			},
+		},
+	})
+
+	if createCallCount != 2 {
+		t.Errorf("expected 2 Create attempts (initial failure + recreate of the tainted resource), got %d", createCallCount)
+	}
+	// One delete for the tainted-resource replace in step 2, plus one for
+	// the framework's final destroy at the end of the test.
+	if deleteCallCount < 1 {
+		t.Errorf("expected the tainted resource to be destroyed at least once before recreation, got %d delete calls", deleteCallCount)
+	}
+
+	deleteIdx, postIdx := -1, -1
+	for i, e := range events {
+		if deleteIdx == -1 && e == "DELETE#1" {
+			deleteIdx = i
+		}
+		if postIdx == -1 && e == "POST#2" {
+			postIdx = i
+		}
+	}
+	if deleteIdx == -1 || postIdx == -1 {
+		t.Fatalf("expected both DELETE#1 and POST#2 to occur, got event order: %v", events)
+	}
+	if deleteIdx > postIdx {
+		t.Errorf("expected the tainted resource's DELETE to happen before the recreate POST (state would otherwise have been lost), got event order: %v", events)
+	}
+}
+
+// TestEndpointResource_Update_WaitsForOperations verifies that Update polls
+// the operations endpoint until the operation returned alongside the PATCH
+// response reaches a terminal state before returning, and that the final
+// state is refreshed from the API afterward (read-back).
+func TestEndpointResource_Update_WaitsForOperations(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	const operationID = "3d4e5f6a-7b8c-4d9e-a0f1-2b3c4d5e6f7a"
+	const operationRunningJSON = `{
+		"id": "` + operationID + `",
+		"project_id": "test-project-id",
+		"endpoint_id": "ep-test-001",
+		"action": "apply_config",
+		"status": "running",
+		"failures_count": 0,
+		"created_at": "2025-01-01T00:00:00Z",
+		"updated_at": "2025-01-01T00:00:00Z",
+		"total_duration_ms": 0
+	}`
+	const operationFinishedJSON = `{
+		"id": "` + operationID + `",
+		"project_id": "test-project-id",
+		"endpoint_id": "ep-test-001",
+		"action": "apply_config",
+		"status": "finished",
+		"failures_count": 0,
+		"created_at": "2025-01-01T00:00:00Z",
+		"updated_at": "2025-01-01T00:00:01Z",
+		"total_duration_ms": 100
+	}`
+
+	currentJSON := endpointJSON
+
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/projects/test-project-id/endpoints",
+		testutil.JSONResponder(201, `{"endpoint": `+endpointJSON+`, "operations": []}`),
+	)
+
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id/endpoints/ep-test-001",
+		func(req *http.Request) (*http.Response, error) {
+			return testutil.JSONResponder(200, `{"endpoint": `+currentJSON+`}`)(req)
+		},
+	)
+
+	transport.RegisterResponder(http.MethodDelete,
+		"https://neon.example.com/api/v2/projects/test-project-id/endpoints/ep-test-001",
+		func(req *http.Request) (*http.Response, error) {
+			return testutil.JSONResponder(200, `{"endpoint": `+currentJSON+`, "operations": []}`)(req)
+		},
+	)
+
+	transport.RegisterResponder(http.MethodPatch,
+		"https://neon.example.com/api/v2/projects/test-project-id/endpoints/ep-test-001",
+		func(req *http.Request) (*http.Response, error) {
+			currentJSON = endpointUpdatedJSON
+			return testutil.JSONResponder(200, `{"endpoint": `+endpointUpdatedJSON+`, "operations": [`+operationRunningJSON+`]}`)(req)
+		},
+	)
+
+	operationCallCount := 0
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id/operations/"+operationID,
+		func(req *http.Request) (*http.Response, error) {
+			operationCallCount++
+			if operationCallCount == 1 {
+				return testutil.JSONResponder(200, `{"operation": `+operationRunningJSON+`}`)(req)
+			}
+			return testutil.JSONResponder(200, `{"operation": `+operationFinishedJSON+`}`)(req)
+		},
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_endpoint" "test" {
+  project_id             = "test-project-id"
+  branch_id              = "br-test-001"
+  type                   = "read_write"
+  autoscaling_limit_min_cu = 0.25
+  autoscaling_limit_max_cu = 1
+  suspend_timeout_seconds  = 300
+  disabled                 = false
+}
+`),
+			},
+			{
+				// Setting name forces an Update (PATCH) call, whose mocked
+				// response carries the running-then-finished operation
+				// above.
+				Config: testutil.TestConfig(`
+resource "neon_endpoint" "test" {
+  project_id             = "test-project-id"
+  branch_id              = "br-test-001"
+  type                   = "read_write"
+  name                     = "renamed-endpoint"
+  autoscaling_limit_min_cu = 0.25
+  autoscaling_limit_max_cu = 1
+  suspend_timeout_seconds  = 300
+  disabled                 = false
+}
+`),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testutil.CheckResourceAttr("neon_endpoint.test", "name", "renamed-endpoint"),
+					testutil.CheckResourceAttr("neon_endpoint.test", "current_state", "active"),
+				),
+			},
+		},
+	})
+
+	if operationCallCount < 2 {
+		t.Errorf("expected the operations endpoint to be polled at least twice (running, then finished), got %d calls", operationCallCount)
+	}
+}
+
+// TestEndpointResource_Delete_WaitsForOperations verifies that Delete polls
+// the operations endpoint until the operation returned alongside the DELETE
+// response reaches a terminal state before returning.
+func TestEndpointResource_Delete_WaitsForOperations(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	const operationID = "4e5f6a7b-8c9d-4e0f-a1b2-3c4d5e6f7a8b"
+	const operationRunningJSON = `{
+		"id": "` + operationID + `",
+		"project_id": "test-project-id",
+		"endpoint_id": "ep-test-001",
+		"action": "suspend_compute",
+		"status": "running",
+		"failures_count": 0,
+		"created_at": "2025-01-01T00:00:00Z",
+		"updated_at": "2025-01-01T00:00:00Z",
+		"total_duration_ms": 0
+	}`
+	const operationFinishedJSON = `{
+		"id": "` + operationID + `",
+		"project_id": "test-project-id",
+		"endpoint_id": "ep-test-001",
+		"action": "suspend_compute",
+		"status": "finished",
+		"failures_count": 0,
+		"created_at": "2025-01-01T00:00:00Z",
+		"updated_at": "2025-01-01T00:00:01Z",
+		"total_duration_ms": 100
+	}`
+
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/projects/test-project-id/endpoints",
+		testutil.JSONResponder(201, `{"endpoint": `+endpointJSON+`, "operations": []}`),
+	)
+
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id/endpoints/ep-test-001",
+		testutil.JSONResponder(200, `{"endpoint": `+endpointJSON+`}`),
+	)
+
+	transport.RegisterResponder(http.MethodDelete,
+		"https://neon.example.com/api/v2/projects/test-project-id/endpoints/ep-test-001",
+		testutil.JSONResponder(200, `{"endpoint": `+endpointJSON+`, "operations": [`+operationRunningJSON+`]}`),
+	)
+
+	operationCallCount := 0
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id/operations/"+operationID,
+		func(req *http.Request) (*http.Response, error) {
+			operationCallCount++
+			if operationCallCount == 1 {
+				return testutil.JSONResponder(200, `{"operation": `+operationRunningJSON+`}`)(req)
+			}
+			return testutil.JSONResponder(200, `{"operation": `+operationFinishedJSON+`}`)(req)
+		},
+	)
+
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_endpoint" "test" {
+  project_id             = "test-project-id"
+  branch_id              = "br-test-001"
+  type                   = "read_write"
+  autoscaling_limit_min_cu = 0.25
+  autoscaling_limit_max_cu = 1
+  suspend_timeout_seconds  = 300
+  disabled                 = false
+}
+`),
+			},
+		},
+	})
+
+	if operationCallCount < 2 {
+		t.Errorf("expected the operations endpoint to be polled at least twice (running, then finished) during destroy, got %d calls", operationCallCount)
+	}
+}
+
+// TestEndpointResource_DeleteAfter404 verifies the CLAUDE.md "Delete + 404
+// must be success" rule: if the endpoint is already gone by the time
+// Terraform issues the DELETE (e.g. an async delete operation from a
+// previous, retried apply already completed, or it was removed outside
+// Terraform), the provider must treat the 404 as a successful delete
+// instead of surfacing an error that would make destroy fail forever.
+func TestEndpointResource_DeleteAfter404(t *testing.T) {
+	transport := httpmock.NewMockTransport()
+	httpClient := &http.Client{Transport: transport}
+
+	transport.RegisterResponder(http.MethodPost,
+		"https://neon.example.com/api/v2/projects/test-project-id/endpoints",
+		testutil.JSONResponder(201, `{"endpoint": `+endpointJSON+`, "operations": []}`),
+	)
+
+	transport.RegisterResponder(http.MethodGet,
+		"https://neon.example.com/api/v2/projects/test-project-id/endpoints/ep-test-001",
+		testutil.JSONResponder(200, `{"endpoint": `+endpointJSON+`}`),
+	)
+
+	deleteCallCount := 0
+	transport.RegisterResponder(http.MethodDelete,
+		"https://neon.example.com/api/v2/projects/test-project-id/endpoints/ep-test-001",
+		func(req *http.Request) (*http.Response, error) {
+			deleteCallCount++
+			return testutil.JSONResponder(404, `{"code":"not_found","message":"endpoint not found"}`)(req)
+		},
+	)
+
+	// If Delete did not treat 404 as success, the automatic destroy that
+	// resource.UnitTest performs at the end of the test would fail the
+	// test with a fatal apply error.
+	resource.UnitTest(t, resource.TestCase{
+		ProtoV6ProviderFactories: testutil.ProtoV6ProviderFactories(httpClient),
+		Steps: []resource.TestStep{
+			{
+				Config: testutil.TestConfig(`
+resource "neon_endpoint" "test" {
+  project_id             = "test-project-id"
+  branch_id              = "br-test-001"
+  type                   = "read_write"
+  autoscaling_limit_min_cu = 0.25
+  autoscaling_limit_max_cu = 1
+  suspend_timeout_seconds  = 300
+  disabled                 = false
+}
+`),
+			},
+		},
+	})
+
+	if deleteCallCount == 0 {
+		t.Error("expected DeleteProjectEndpoint to be called during test cleanup")
 	}
 }
 
