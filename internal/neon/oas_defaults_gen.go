@@ -11,10 +11,50 @@ func (s *AddProjectJWKSRequest) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *BackupScheduleItem) setDefaults() {
+	{
+		val := int(3024000)
+		s.RetentionSeconds.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *BranchAnonymizedCreateRequest) setDefaults() {
+	{
+		val := bool(false)
+		s.StartAnonymization.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *BranchCreateRequestBranch) setDefaults() {
+	{
+		val := bool(false)
+		s.Protected.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *BucketCreateRequest) setDefaults() {
 	{
 		val := BucketCreateRequestAccessLevel("private")
 		s.AccessLevel.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *CreateProjectBranchReqBranch) setDefaults() {
+	{
+		val := bool(false)
+		s.Protected.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *CreateProjectTransferRequestReq) setDefaults() {
+	{
+		val := int64(86400)
+		s.TTLSeconds.SetTo(val)
 	}
 }
 
@@ -145,7 +185,7 @@ func (s *PresignRequest) setDefaults() {
 // setDefaults set default value of fields.
 func (s *Project) setDefaults() {
 	{
-		val := int(17)
+		val := int(18)
 		s.PgVersion = PgVersion(val)
 	}
 }
@@ -165,7 +205,7 @@ func (s *ProjectBranchLogsQueryRequest) setDefaults() {
 // setDefaults set default value of fields.
 func (s *ProjectCreateRequestProject) setDefaults() {
 	{
-		val := int(17)
+		val := int(18)
 		s.PgVersion.SetTo(PgVersion(val))
 	}
 }
@@ -173,7 +213,7 @@ func (s *ProjectCreateRequestProject) setDefaults() {
 // setDefaults set default value of fields.
 func (s *ProjectListItem) setDefaults() {
 	{
-		val := int(17)
+		val := int(18)
 		s.PgVersion = PgVersion(val)
 	}
 }

@@ -1056,7 +1056,7 @@ func encodeGetNeonAuthEmailAndPasswordConfigResponse(response *NeonAuthEmailAndP
 	return nil
 }
 
-func encodeGetNeonAuthEmailProviderResponse(response *NeonAuthEmailServerConfig, w http.ResponseWriter, span trace.Span) error {
+func encodeGetNeonAuthEmailProviderResponse(response *NeonAuthEmailServerConfigResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 
@@ -1069,7 +1069,7 @@ func encodeGetNeonAuthEmailProviderResponse(response *NeonAuthEmailServerConfig,
 	return nil
 }
 
-func encodeGetNeonAuthEmailServerResponse(response *NeonAuthEmailServerConfig, w http.ResponseWriter, span trace.Span) error {
+func encodeGetNeonAuthEmailServerResponse(response *NeonAuthEmailServerConfigResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 
@@ -2078,19 +2078,6 @@ func encodeRecoverProjectResponse(response *ProjectRecoverResponse, w http.Respo
 	return nil
 }
 
-func encodeRecoverProjectBranchResponse(response *BranchRecoverResponse, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(200)
-
-	e := new(jx.Encoder)
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-
-	return nil
-}
-
 func encodeRemoveOrganizationMemberResponse(response *EmptyResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
@@ -2500,7 +2487,7 @@ func encodeUpdateNeonAuthEmailAndPasswordConfigResponse(response *NeonAuthEmailA
 	return nil
 }
 
-func encodeUpdateNeonAuthEmailProviderResponse(response *NeonAuthEmailServerConfig, w http.ResponseWriter, span trace.Span) error {
+func encodeUpdateNeonAuthEmailProviderResponse(response *NeonAuthEmailServerConfigResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 
@@ -2513,7 +2500,7 @@ func encodeUpdateNeonAuthEmailProviderResponse(response *NeonAuthEmailServerConf
 	return nil
 }
 
-func encodeUpdateNeonAuthEmailServerResponse(response *NeonAuthEmailServerConfig, w http.ResponseWriter, span trace.Span) error {
+func encodeUpdateNeonAuthEmailServerResponse(response *NeonAuthEmailServerConfigResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 

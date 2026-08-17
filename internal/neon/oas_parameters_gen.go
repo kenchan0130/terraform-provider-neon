@@ -3157,13 +3157,12 @@ type CreateSnapshotParams struct {
 	// The target Log Sequence Number (LSN) to take the snapshot from. Must fall within the restore window.
 	// Cannot be used with `timestamp`.
 	Lsn OptString `json:",omitempty,omitzero"`
-	// The target timestamp for the snapshot. Must fall within the restore window. Use ISO 8601 format
-	// (e.g. 2025-08-05T22:00:00Z). Cannot be used with `lsn`.
+	// The target timestamp for the snapshot. Must fall within the restore window. RFC 3339 format. Cannot
+	// be used with `lsn`.
 	Timestamp OptString `json:",omitempty,omitzero"`
 	// A name for the snapshot.
 	Name OptString `json:",omitempty,omitzero"`
-	// The time at which the snapshot will be automatically deleted. Use ISO 8601 format (e.g.
-	// 2025-08-05T22:00:00Z).
+	// The time at which the snapshot will be automatically deleted. RFC 3339 format.
 	ExpiresAt OptString `json:",omitempty,omitzero"`
 	// The Neon project ID.
 	ProjectID string
@@ -22250,166 +22249,6 @@ func decodeRecoverProjectParams(args [1]string, argsEscaped bool, r *http.Reques
 	return params, nil
 }
 
-// RecoverProjectBranchParams is parameters of recoverProjectBranch operation.
-type RecoverProjectBranchParams struct {
-	// The Neon project ID.
-	ProjectID string
-	// The branch ID.
-	BranchID string
-}
-
-func unpackRecoverProjectBranchParams(packed middleware.Parameters) (params RecoverProjectBranchParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "project_id",
-			In:   "path",
-		}
-		params.ProjectID = packed[key].(string)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "branch_id",
-			In:   "path",
-		}
-		params.BranchID = packed[key].(string)
-	}
-	return params
-}
-
-func decodeRecoverProjectBranchParams(args [2]string, argsEscaped bool, r *http.Request) (params RecoverProjectBranchParams, _ error) {
-	// Decode path: project_id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "project_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.ProjectID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-			if err := func() error {
-				if err := (validate.String{
-					MinLength:     0,
-					MinLengthSet:  false,
-					MaxLength:     0,
-					MaxLengthSet:  false,
-					Email:         false,
-					Hostname:      false,
-					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
-					MinNumeric:    0,
-					MinNumericSet: false,
-					MaxNumeric:    0,
-					MaxNumericSet: false,
-				}).Validate(string(params.ProjectID)); err != nil {
-					return errors.Wrap(err, "string")
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "project_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: branch_id.
-	if err := func() error {
-		param := args[1]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[1])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "branch_id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToString(val)
-				if err != nil {
-					return err
-				}
-
-				params.BranchID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-			if err := func() error {
-				if err := (validate.String{
-					MinLength:     0,
-					MinLengthSet:  false,
-					MaxLength:     0,
-					MaxLengthSet:  false,
-					Email:         false,
-					Hostname:      false,
-					Regex:         regexMap["^[a-z0-9-]{1,60}$"],
-					MinNumeric:    0,
-					MinNumericSet: false,
-					MaxNumeric:    0,
-					MaxNumericSet: false,
-				}).Validate(string(params.BranchID)); err != nil {
-					return errors.Wrap(err, "string")
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "branch_id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
 // RemoveOrganizationMemberParams is parameters of removeOrganizationMember operation.
 type RemoveOrganizationMemberParams struct {
 	// The Neon organization ID.
@@ -23276,8 +23115,8 @@ func decodeRestoreProjectBranchParams(args [2]string, argsEscaped bool, r *http.
 
 // RestoreSnapshotParams is parameters of restoreSnapshot operation.
 type RestoreSnapshotParams struct {
-	// DEPRECATED. Use the `name` field in the request body instead. A name for the newly restored branch.
-	// If omitted, a default name will be generated.
+	// Deprecated. Use the `name` field in the request body instead. Removal scheduled for November 29,
+	// 2025. A name for the newly restored branch. If omitted, a default name will be generated.
 	//
 	// Deprecated: schema marks this parameter as deprecated.
 	Name OptString `json:",omitempty,omitzero"`

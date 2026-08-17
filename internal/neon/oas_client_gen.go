@@ -53,8 +53,8 @@ type Invoker interface {
 	AddBranchNeonAuthTrustedDomain(ctx context.Context, request *NeonAuthAddDomainToRedirectURIWhitelistRequest, params AddBranchNeonAuthTrustedDomainParams) error
 	// AddNeonAuthDomainToRedirectURIWhitelist invokes addNeonAuthDomainToRedirectURIWhitelist operation.
 	//
-	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Adds a domain to
-	// the redirect_uri whitelist for the specified project.
+	// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Removal
+	// scheduled for March 1, 2026.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
@@ -62,8 +62,8 @@ type Invoker interface {
 	AddNeonAuthDomainToRedirectURIWhitelist(ctx context.Context, request *NeonAuthAddDomainToRedirectURIWhitelistRequest, params AddNeonAuthDomainToRedirectURIWhitelistParams) error
 	// AddNeonAuthOauthProvider invokes addNeonAuthOauthProvider operation.
 	//
-	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead. Adds an
-	// OAuth provider to the specified project.
+	// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead. Removal
+	// scheduled for March 1, 2026.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
@@ -133,7 +133,7 @@ type Invoker interface {
 	// Issues a new scoped service credential anchored to the specified branch. The response carries
 	// `api_token` and `s3_secret_access_key` exactly once — they are not stored server-side.
 	//
-	// Note: This endpoint is currently in Private Beta.
+	// Note: This endpoint is currently in Beta.
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/credentials
 	CreateCredential(ctx context.Context, request *CreateCredentialRequest, params CreateCredentialParams) (*CreateCredentialResponse, error)
@@ -147,9 +147,8 @@ type Invoker interface {
 	CreateNeonAuth(ctx context.Context, request *EnableNeonAuthIntegrationRequest, params CreateNeonAuthParams) (*NeonAuthCreateIntegrationResponse, error)
 	// CreateNeonAuthIntegration invokes createNeonAuthIntegration operation.
 	//
-	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth` instead. Creates a project on a
-	// third-party authentication provider's platform for use with Neon Auth. Use this endpoint if the
-	// frontend integration flow can't be used.
+	// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth` instead. Removal scheduled for
+	// March 1, 2026. Use this endpoint if the frontend integration flow can't be used.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
@@ -157,8 +156,8 @@ type Invoker interface {
 	CreateNeonAuthIntegration(ctx context.Context, request *NeonAuthCreateIntegrationRequest) (*NeonAuthCreateIntegrationResponse, error)
 	// CreateNeonAuthNewUser invokes createNeonAuthNewUser operation.
 	//
-	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/users` instead. Creates a new user
-	// in Neon Auth. The user will be created in your neon_auth.users_sync table and automatically
+	// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/users` instead. Removal scheduled
+	// for March 1, 2026. The user will be created in your neon_auth.users_sync table and automatically
 	// propagated to your auth project, whether Neon-managed or provider-owned.
 	//
 	// Deprecated: schema marks this operation as deprecated.
@@ -198,8 +197,9 @@ type Invoker interface {
 	// is automatically inferred from the key. Plan limits define how many projects you can create. For
 	// more information, see [Manage projects].
 	//
-	// You can specify a region and Postgres version in the request body. Neon currently supports
-	// PostgreSQL 14, 15, 16, 17, and 18. For supported regions and `region_id` values, see [Regions].
+	// You can specify a region and Postgres version in the request body. Neon supports Postgres 14 through
+	// 18, with 19 rolling out to enabled regions. For supported regions and `region_id` values, see
+	// [Regions].
 	//
 	// [Manage projects]: https://neon.com/docs/manage/projects/
 	// [Regions]: https://neon.com/docs/introduction/regions/
@@ -232,10 +232,10 @@ type Invoker interface {
 	CreateProjectBranchAnonymized(ctx context.Context, request *BranchAnonymizedCreateRequest, params CreateProjectBranchAnonymizedParams) (*CreatedBranch, error)
 	// CreateProjectBranchBucket invokes createProjectBranchBucket operation.
 	//
-	// Creates a new branchable object-storage bucket on the specified branch. Buckets are managed by the
-	// Neon Platform branchable-storage service.
+	// Creates a new branchable object storage bucket on the specified branch. Buckets are managed by the
+	// Neon Platform branchable object storage service.
 	//
-	// Note: This endpoint is currently in Private Beta.
+	// Note: This endpoint is currently in Beta.
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/buckets
 	CreateProjectBranchBucket(ctx context.Context, request *BucketCreateRequest, params CreateProjectBranchBucketParams) (CreateProjectBranchBucketRes, error)
@@ -262,7 +262,7 @@ type Invoker interface {
 	// fields inherit the function's latest version. At least one field must be supplied. The first
 	// deployment of a function must include zip. The newest deployment becomes active.
 	//
-	// Note: This endpoint is currently in Private Beta.
+	// Note: This endpoint is currently in Beta.
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/functions/{slug}/deployments
 	CreateProjectBranchFunctionDeployment(ctx context.Context, request *FunctionDeployRequestMultipart, params CreateProjectBranchFunctionDeploymentParams) (*NeonFunctionDeploymentResponse, error)
@@ -303,13 +303,11 @@ type Invoker interface {
 	//
 	// Creates a snapshot from the specified branch. This operation may initiate an asynchronous process.
 	//
-	// Note: This endpoint is currently in Beta.
-	//
 	// POST /projects/{project_id}/branches/{branch_id}/snapshot
 	CreateSnapshot(ctx context.Context, params CreateSnapshotParams) (*CreateSnapshotOK, error)
 	// DeleteBranchNeonAuthOauthProvider invokes deleteBranchNeonAuthOauthProvider operation.
 	//
-	// Deletes a OAuth provider from the specified project.
+	// Deletes an OAuth provider from the specified project.
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/auth/oauth_providers/{oauth_provider_id}
 	DeleteBranchNeonAuthOauthProvider(ctx context.Context, params DeleteBranchNeonAuthOauthProviderParams) error
@@ -329,8 +327,8 @@ type Invoker interface {
 	DeleteBranchNeonAuthUser(ctx context.Context, params DeleteBranchNeonAuthUserParams) error
 	// DeleteNeonAuthDomainFromRedirectURIWhitelist invokes deleteNeonAuthDomainFromRedirectURIWhitelist operation.
 	//
-	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Deletes a domain
-	// from the redirect_uri whitelist for the specified project.
+	// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Removal
+	// scheduled for March 1, 2026.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
@@ -338,7 +336,8 @@ type Invoker interface {
 	DeleteNeonAuthDomainFromRedirectURIWhitelist(ctx context.Context, request *NeonAuthDeleteDomainFromRedirectURIWhitelistRequest, params DeleteNeonAuthDomainFromRedirectURIWhitelistParams) error
 	// DeleteNeonAuthIntegration invokes deleteNeonAuthIntegration operation.
 	//
-	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth` instead.
+	// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth` instead. Removal scheduled for
+	// March 1, 2026.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
@@ -346,9 +345,9 @@ type Invoker interface {
 	DeleteNeonAuthIntegration(ctx context.Context, request OptDeleteNeonAuthIntegrationReq, params DeleteNeonAuthIntegrationParams) error
 	// DeleteNeonAuthOauthProvider invokes deleteNeonAuthOauthProvider operation.
 	//
-	// DEPRECATED, use
+	// Deprecated. Use
 	// `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers/{oauth_provider_id}` instead.
-	// Deletes a OAuth provider from the specified project.
+	// Removal scheduled for March 1, 2026.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
@@ -356,8 +355,8 @@ type Invoker interface {
 	DeleteNeonAuthOauthProvider(ctx context.Context, params DeleteNeonAuthOauthProviderParams) error
 	// DeleteNeonAuthUser invokes deleteNeonAuthUser operation.
 	//
-	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/users/{auth_user_id}` instead.
-	// Deletes the auth user for the specified project.
+	// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/users/{auth_user_id}` instead.
+	// Removal scheduled for March 1, 2026.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
@@ -406,7 +405,7 @@ type Invoker interface {
 	//
 	// Deletes the named bucket from the specified branch.
 	//
-	// Note: This endpoint is currently in Private Beta.
+	// Note: This endpoint is currently in Beta.
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}
 	DeleteProjectBranchBucket(ctx context.Context, params DeleteProjectBranchBucketParams) (DeleteProjectBranchBucketRes, error)
@@ -415,7 +414,7 @@ type Invoker interface {
 	// Deletes the named object from the bucket on the specified branch. Served by the user's session (no
 	// customer S3 credentials required).
 	//
-	// Note: This endpoint is currently in Private Beta.
+	// Note: This endpoint is currently in Beta.
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects/{object_key}
 	DeleteProjectBranchBucketObject(ctx context.Context, params DeleteProjectBranchBucketObjectParams) (DeleteProjectBranchBucketObjectRes, error)
@@ -433,7 +432,7 @@ type Invoker interface {
 	// Only objects physically present on this branch are tombstoned; objects inherited from an ancestor
 	// branch via copy-on-write (not materialized on this branch) are out of scope.
 	//
-	// Note: This endpoint is currently in Private Beta.
+	// Note: This endpoint is currently in Beta.
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects-by-prefix
 	DeleteProjectBranchBucketObjectsByPrefix(ctx context.Context, params DeleteProjectBranchBucketObjectsByPrefixParams) (DeleteProjectBranchBucketObjectsByPrefixRes, error)
@@ -456,7 +455,7 @@ type Invoker interface {
 	//
 	// Deletes the function identified by its slug.
 	//
-	// Note: This endpoint is currently in Private Beta.
+	// Note: This endpoint is currently in Beta.
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/functions/{slug}
 	DeleteProjectBranchFunction(ctx context.Context, params DeleteProjectBranchFunctionParams) error
@@ -498,8 +497,6 @@ type Invoker interface {
 	//
 	// Deletes the specified snapshot.
 	//
-	// Note: This endpoint is currently in Beta.
-	//
 	// DELETE /projects/{project_id}/snapshots/{snapshot_id}
 	DeleteSnapshot(ctx context.Context, params DeleteSnapshotParams) (*OperationsResponse, error)
 	// DisableNeonAuth invokes disableNeonAuth operation.
@@ -523,8 +520,6 @@ type Invoker interface {
 	//
 	// This operation only applies to branches created using the `restoreSnapshot` endpoint with
 	// `finalize_restore: false`.
-	//
-	// Note: This endpoint is currently in Beta.
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/finalize_restore
 	FinalizeRestoreBranch(ctx context.Context, request OptFinalizeRestoreBranchReq, params FinalizeRestoreBranchParams) (*OperationsResponse, error)
@@ -670,16 +665,16 @@ type Invoker interface {
 	// including the provider type and server settings.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/auth/email_provider
-	GetNeonAuthEmailProvider(ctx context.Context, params GetNeonAuthEmailProviderParams) (*NeonAuthEmailServerConfig, error)
+	GetNeonAuthEmailProvider(ctx context.Context, params GetNeonAuthEmailProviderParams) (*NeonAuthEmailServerConfigResponse, error)
 	// GetNeonAuthEmailServer invokes getNeonAuthEmailServer operation.
 	//
-	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/email_provider` instead. Gets the
-	// email server configuration for the specified project.
+	// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/email_provider` instead. Removal
+	// scheduled for March 1, 2026.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
 	// GET /projects/{project_id}/auth/email_server
-	GetNeonAuthEmailServer(ctx context.Context, params GetNeonAuthEmailServerParams) (*NeonAuthEmailServerConfig, error)
+	GetNeonAuthEmailServer(ctx context.Context, params GetNeonAuthEmailServerParams) (*NeonAuthEmailServerConfigResponse, error)
 	// GetNeonAuthPhoneNumberPlugin invokes getNeonAuthPhoneNumberPlugin operation.
 	//
 	// Returns the phone number plugin configuration for Neon Auth. The phone number plugin enables
@@ -773,7 +768,7 @@ type Invoker interface {
 	// URLs. A 200 response means the branch is registered and this region serves the AI gateway. A 404
 	// response includes a `reason` field indicating why the gateway is unavailable.
 	//
-	// Note: This endpoint is currently in Private Beta.
+	// Note: This endpoint is currently in Beta.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/ai_gateway
 	GetProjectBranchAiGateway(ctx context.Context, params GetProjectBranchAiGatewayParams) (GetProjectBranchAiGatewayRes, error)
@@ -787,11 +782,11 @@ type Invoker interface {
 	// `Content-Length` and `ETag` response headers echo the stored object metadata.
 	//
 	// BINARY-STREAM EXCEPTION TO THE BUILD-GENERATED-TYPES RULE (#7029): the successful 200 body is the
-	// raw object stream, proxied verbatim from the platform storage admin endpoint. It is modeled as an
-	// `application/octet-stream` binary body (not a JSON response schema) and is streamed without
+	// raw object stream, proxied verbatim from the platform object storage admin endpoint. It is modeled
+	// as an `application/octet-stream` binary body (not a JSON response schema) and is streamed without
 	// buffering the whole object in memory. Error responses still use the generated `GeneralError` shape.
 	//
-	// Note: This endpoint is currently in Private Beta.
+	// Note: This endpoint is currently in Beta.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects/{object_key}/download
 	GetProjectBranchBucketObject(ctx context.Context, params GetProjectBranchBucketObjectParams) (GetProjectBranchBucketObjectRes, error)
@@ -814,7 +809,7 @@ type Invoker interface {
 	//
 	// Returns the function identified by its slug.
 	//
-	// Note: This endpoint is currently in Private Beta.
+	// Note: This endpoint is currently in Beta.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/functions/{slug}
 	GetProjectBranchFunction(ctx context.Context, params GetProjectBranchFunctionParams) (*NeonFunctionResponse, error)
@@ -838,9 +833,8 @@ type Invoker interface {
 	GetProjectBranchRolePassword(ctx context.Context, params GetProjectBranchRolePasswordParams) (GetProjectBranchRolePasswordRes, error)
 	// GetProjectBranchSchema invokes getProjectBranchSchema operation.
 	//
-	// Retrieves the schema from the specified database. The `lsn` and `timestamp` values cannot be
-	// specified at the same time. If both are omitted, the database schema is retrieved from database's
-	// head.
+	// Retrieves the database schema. Specify `lsn` or `timestamp` (not both) to read at a point in time;
+	// omit both to read from the database's head.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/schema
 	GetProjectBranchSchema(ctx context.Context, params GetProjectBranchSchemaParams) (*BranchSchemaResponse, error)
@@ -852,11 +846,11 @@ type Invoker interface {
 	GetProjectBranchSchemaComparison(ctx context.Context, params GetProjectBranchSchemaComparisonParams) (*BranchSchemaCompareResponse, error)
 	// GetProjectBranchStorage invokes getProjectBranchStorage operation.
 	//
-	// Returns whether branchable object-storage is usable for the specified branch. A 200 response means
-	// the branch is registered in the storage service and the S3 data plane will accept requests for it. A
-	// 404 response includes a `reason` field indicating why storage is unavailable.
+	// Returns whether branchable object storage is usable for the specified branch. A 200 response means
+	// the branch is registered in the object storage service and the S3 data plane will accept requests
+	// for it. A 404 response includes a `reason` field indicating why object storage is unavailable.
 	//
-	// Note: This endpoint is currently in Private Beta.
+	// Note: This endpoint is currently in Beta.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/storage
 	GetProjectBranchStorage(ctx context.Context, params GetProjectBranchStorageParams) (GetProjectBranchStorageRes, error)
@@ -887,8 +881,6 @@ type Invoker interface {
 	// GetSnapshotSchedule invokes getSnapshotSchedule operation.
 	//
 	// Returns the backup schedule for the specified branch, including the configured snapshot frequencies.
-	//
-	// Note: This endpoint is currently in Beta.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/backup_schedule
 	GetSnapshotSchedule(ctx context.Context, params GetSnapshotScheduleParams) (*BackupSchedule, error)
@@ -925,13 +917,14 @@ type Invoker interface {
 	//
 	// Returns metadata for customer-issued credentials on the branch. Secrets are never included.
 	//
-	// Note: This endpoint is currently in Private Beta.
+	// Note: This endpoint is currently in Beta.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/credentials
 	ListCredentials(ctx context.Context, params ListCredentialsParams) (*ListCredentialsResponse, error)
 	// ListNeonAuthIntegrations invokes listNeonAuthIntegrations operation.
 	//
-	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth` instead.
+	// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth` instead. Removal scheduled for
+	// March 1, 2026.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
@@ -939,8 +932,8 @@ type Invoker interface {
 	ListNeonAuthIntegrations(ctx context.Context, params ListNeonAuthIntegrationsParams) (*ListNeonAuthIntegrationsResponse, error)
 	// ListNeonAuthOauthProviders invokes listNeonAuthOauthProviders operation.
 	//
-	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead. Lists
-	// the OAuth providers for the specified project.
+	// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead. Removal
+	// scheduled for March 1, 2026.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
@@ -948,8 +941,8 @@ type Invoker interface {
 	ListNeonAuthOauthProviders(ctx context.Context, params ListNeonAuthOauthProvidersParams) (*ListNeonAuthOauthProvidersResponse, error)
 	// ListNeonAuthRedirectURIWhitelistDomains invokes listNeonAuthRedirectURIWhitelistDomains operation.
 	//
-	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Lists the
-	// domains in the redirect_uri whitelist for the specified project.
+	// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Removal
+	// scheduled for March 1, 2026.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
@@ -986,16 +979,16 @@ type Invoker interface {
 	// callers can render a folder-style browser; keys that do not contain the delimiter after `prefix` are
 	// returned as `objects`.
 	//
-	// Note: This endpoint is currently in Private Beta.
+	// Note: This endpoint is currently in Beta.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects
 	ListProjectBranchBucketObjects(ctx context.Context, params ListProjectBranchBucketObjectsParams) (*BucketObjectsListResponse, error)
 	// ListProjectBranchBuckets invokes listProjectBranchBuckets operation.
 	//
-	// Lists branchable object-storage buckets visible on the specified branch, including those inherited
+	// Lists branchable object storage buckets visible on the specified branch, including those inherited
 	// from ancestor branches.
 	//
-	// Note: This endpoint is currently in Private Beta.
+	// Note: This endpoint is currently in Beta.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/buckets
 	ListProjectBranchBuckets(ctx context.Context, params ListProjectBranchBucketsParams) (*BucketsListResponse, error)
@@ -1019,7 +1012,7 @@ type Invoker interface {
 	//
 	// Lists functions on the specified branch.
 	//
-	// Note: This endpoint is currently in Private Beta.
+	// Note: This endpoint is currently in Beta.
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/functions
 	ListProjectBranchFunctions(ctx context.Context, params ListProjectBranchFunctionsParams) (*ListProjectBranchFunctionsOK, error)
@@ -1137,8 +1130,6 @@ type Invoker interface {
 	// Lists the snapshots for the specified project. Each snapshot represents a point-in-time backup of
 	// the project data.
 	//
-	// Note: This endpoint is currently in Beta.
-	//
 	// GET /projects/{project_id}/snapshots
 	ListSnapshots(ctx context.Context, params ListSnapshotsParams) (*ListSnapshotsOK, error)
 	// PresignProjectBranchBucketObject invokes presignProjectBranchBucketObject operation.
@@ -1158,7 +1149,7 @@ type Invoker interface {
 	//
 	// Served by the user's session (no customer S3 credentials required).
 	//
-	// Note: This endpoint is currently in Private Beta.
+	// Note: This endpoint is currently in Beta.
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects/{object_key}/presign
 	PresignProjectBranchBucketObject(ctx context.Context, request *PresignRequest, params PresignProjectBranchBucketObjectParams) (PresignProjectBranchBucketObjectRes, error)
@@ -1197,18 +1188,6 @@ type Invoker interface {
 	//
 	// POST /projects/{project_id}/recover
 	RecoverProject(ctx context.Context, params RecoverProjectParams) (*ProjectRecoverResponse, error)
-	// RecoverProjectBranch invokes recoverProjectBranch operation.
-	//
-	// Recovers a deleted branch within the 7-day deletion recovery period. The branch must have been soft
-	// deleted and not yet permanently deleted. Recovery restores the branch and its endpoints to an idle
-	// state. Connection strings remain valid after recovery. TTL branches become non-TTL branches after
-	// recovery.
-	//
-	// To list deleted branches available for recovery, use
-	// `GET /projects/{project_id}/branches?include_deleted=true`.
-	//
-	// POST /projects/{project_id}/branches/{branch_id}/recover
-	RecoverProjectBranch(ctx context.Context, params RecoverProjectBranchParams) (*BranchRecoverResponse, error)
 	// RemoveOrganizationMember invokes removeOrganizationMember operation.
 	//
 	// Removes the specified member from the organization. Only organization admins can perform this
@@ -1258,8 +1237,6 @@ type Invoker interface {
 	// Restores the specified snapshot to a new branch, and optionally finalizes the restore operation to
 	// replace the original branch.
 	//
-	// Note: This endpoint is currently in Beta.
-	//
 	// POST /projects/{project_id}/snapshots/{snapshot_id}/restore
 	RestoreSnapshot(ctx context.Context, request OptRestoreSnapshotReq, params RestoreSnapshotParams) (*RestoredSnapshot, error)
 	// RevokeApiKey invokes revokeApiKey operation.
@@ -1275,7 +1252,7 @@ type Invoker interface {
 	//
 	// Soft-deletes the credential. Idempotent.
 	//
-	// Note: This endpoint is currently in Private Beta.
+	// Note: This endpoint is currently in Beta.
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/credentials/{token_id}
 	RevokeCredential(ctx context.Context, params RevokeCredentialParams) (RevokeCredentialRes, error)
@@ -1331,9 +1308,7 @@ type Invoker interface {
 	// SetSnapshotSchedule invokes setSnapshotSchedule operation.
 	//
 	// Updates the backup schedule for the specified branch. The schedule defines how often automatic
-	// snapshots are created (e.g., `daily`, `weekly`).
-	//
-	// Note: This endpoint is currently in Beta.
+	// snapshots are created (for example, `daily` or `weekly`). Requires a paid plan.
 	//
 	// PUT /projects/{project_id}/branches/{branch_id}/backup_schedule
 	SetSnapshotSchedule(ctx context.Context, request *BackupSchedule, params SetSnapshotScheduleParams) error
@@ -1383,8 +1358,8 @@ type Invoker interface {
 	TransferProjectsFromOrgToOrg(ctx context.Context, request *TransferProjectsToOrganizationRequest, params TransferProjectsFromOrgToOrgParams) (TransferProjectsFromOrgToOrgRes, error)
 	// TransferProjectsFromUserToOrg invokes transferProjectsFromUserToOrg operation.
 	//
-	// DEPRECATED. Personal accounts have been migrated to organizations, making this operation no longer
-	// applicable.
+	// Deprecated. Personal accounts have been migrated to organizations, so this operation no longer
+	// applies. Removal scheduled for July 1, 2026.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
@@ -1392,7 +1367,7 @@ type Invoker interface {
 	TransferProjectsFromUserToOrg(ctx context.Context, request *TransferProjectsToOrganizationRequest) (TransferProjectsFromUserToOrgRes, error)
 	// UpdateBranchNeonAuthOauthProvider invokes updateBranchNeonAuthOauthProvider operation.
 	//
-	// Updates a OAuth provider for the specified project.
+	// Updates an OAuth provider for the specified project.
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/auth/oauth_providers/{oauth_provider_id}
 	UpdateBranchNeonAuthOauthProvider(ctx context.Context, request *NeonAuthUpdateOAuthProviderRequest, params UpdateBranchNeonAuthOauthProviderParams) (*NeonAuthOauthProvider, error)
@@ -1431,17 +1406,22 @@ type Invoker interface {
 	// Updates the email provider configuration for the specified branch's Neon Auth integration. The email
 	// provider handles transactional messages such as verification emails and password reset links.
 	//
+	// Partial `standard` updates — omitting fields to keep their stored values — are supported only
+	// for Better Auth integrations, which merge omitted fields server-side. Legacy Stack Auth integrations
+	// do not merge and require all six `standard` fields (`host`, `port`, `username`, `password`,
+	// `sender_email`, `sender_name`) on every update; a partial `standard` body is rejected with 400.
+	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/auth/email_provider
-	UpdateNeonAuthEmailProvider(ctx context.Context, request *NeonAuthEmailServerConfig, params UpdateNeonAuthEmailProviderParams) (*NeonAuthEmailServerConfig, error)
+	UpdateNeonAuthEmailProvider(ctx context.Context, request *NeonAuthEmailServerConfig, params UpdateNeonAuthEmailProviderParams) (*NeonAuthEmailServerConfigResponse, error)
 	// UpdateNeonAuthEmailServer invokes updateNeonAuthEmailServer operation.
 	//
-	// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/email_provider` instead. Updates
-	// the email server configuration for the specified project.
+	// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/email_provider` instead. Removal
+	// scheduled for March 1, 2026.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
 	// PATCH /projects/{project_id}/auth/email_server
-	UpdateNeonAuthEmailServer(ctx context.Context, request *NeonAuthEmailServerConfig, params UpdateNeonAuthEmailServerParams) (*NeonAuthEmailServerConfig, error)
+	UpdateNeonAuthEmailServer(ctx context.Context, request *NeonAuthEmailServerConfig, params UpdateNeonAuthEmailServerParams) (*NeonAuthEmailServerConfigResponse, error)
 	// UpdateNeonAuthMagicLinkPlugin invokes updateNeonAuthMagicLinkPlugin operation.
 	//
 	// Updates the magic link plugin configuration for Neon Auth. The magic link plugin enables
@@ -1451,9 +1431,9 @@ type Invoker interface {
 	UpdateNeonAuthMagicLinkPlugin(ctx context.Context, request *NeonAuthMagicLinkConfigUpdate, params UpdateNeonAuthMagicLinkPluginParams) (*NeonAuthMagicLinkConfig, error)
 	// UpdateNeonAuthOauthProvider invokes updateNeonAuthOauthProvider operation.
 	//
-	// DEPRECATED, use
+	// Deprecated. Use
 	// `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers/{oauth_provider_id}` instead.
-	// Updates a OAuth provider for the specified project.
+	// Removal scheduled for March 1, 2026.
 	//
 	// Deprecated: schema marks this operation as deprecated.
 	//
@@ -1537,7 +1517,7 @@ type Invoker interface {
 	// on the branch that owns it. Like every other change on a branch, a rename is isolated per branch: a
 	// branch forked before the rename keeps the name it had at fork time.
 	//
-	// Note: This endpoint is currently in Private Beta.
+	// Note: This endpoint is currently in Beta.
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/functions/{slug}
 	UpdateProjectBranchFunction(ctx context.Context, request *NeonFunctionUpdateRequest, params UpdateProjectBranchFunctionParams) (*NeonFunctionResponse, error)
@@ -1560,8 +1540,6 @@ type Invoker interface {
 	// UpdateSnapshot invokes updateSnapshot operation.
 	//
 	// Updates the specified snapshot.
-	//
-	// Note: This endpoint is currently in Beta.
 	//
 	// PATCH /projects/{project_id}/snapshots/{snapshot_id}
 	UpdateSnapshot(ctx context.Context, request *SnapshotUpdateRequest, params UpdateSnapshotParams) (*UpdateSnapshotOK, error)
@@ -2147,8 +2125,8 @@ func (c *Client) sendAddBranchNeonAuthTrustedDomain(ctx context.Context, request
 
 // AddNeonAuthDomainToRedirectURIWhitelist invokes addNeonAuthDomainToRedirectURIWhitelist operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Adds a domain to
-// the redirect_uri whitelist for the specified project.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Removal
+// scheduled for March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -2309,8 +2287,8 @@ func (c *Client) sendAddNeonAuthDomainToRedirectURIWhitelist(ctx context.Context
 
 // AddNeonAuthOauthProvider invokes addNeonAuthOauthProvider operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead. Adds an
-// OAuth provider to the specified project.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead. Removal
+// scheduled for March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -3524,7 +3502,7 @@ func (c *Client) sendCreateBranchNeonAuthNewUser(ctx context.Context, request *C
 // Issues a new scoped service credential anchored to the specified branch. The response carries
 // `api_token` and `s3_secret_access_key` exactly once — they are not stored server-side.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/credentials
 func (c *Client) CreateCredential(ctx context.Context, request *CreateCredentialRequest, params CreateCredentialParams) (*CreateCredentialResponse, error) {
@@ -3882,9 +3860,8 @@ func (c *Client) sendCreateNeonAuth(ctx context.Context, request *EnableNeonAuth
 
 // CreateNeonAuthIntegration invokes createNeonAuthIntegration operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth` instead. Creates a project on a
-// third-party authentication provider's platform for use with Neon Auth. Use this endpoint if the
-// frontend integration flow can't be used.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth` instead. Removal scheduled for
+// March 1, 2026. Use this endpoint if the frontend integration flow can't be used.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -4026,8 +4003,8 @@ func (c *Client) sendCreateNeonAuthIntegration(ctx context.Context, request *Neo
 
 // CreateNeonAuthNewUser invokes createNeonAuthNewUser operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/users` instead. Creates a new user
-// in Neon Auth. The user will be created in your neon_auth.users_sync table and automatically
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/users` instead. Removal scheduled
+// for March 1, 2026. The user will be created in your neon_auth.users_sync table and automatically
 // propagated to your auth project, whether Neon-managed or provider-owned.
 //
 // Deprecated: schema marks this operation as deprecated.
@@ -4641,8 +4618,9 @@ func (c *Client) sendCreateOrganizationInvitations(ctx context.Context, request 
 // is automatically inferred from the key. Plan limits define how many projects you can create. For
 // more information, see [Manage projects].
 //
-// You can specify a region and Postgres version in the request body. Neon currently supports
-// PostgreSQL 14, 15, 16, 17, and 18. For supported regions and `region_id` values, see [Regions].
+// You can specify a region and Postgres version in the request body. Neon supports Postgres 14 through
+// 18, with 19 rolling out to enabled regions. For supported regions and `region_id` values, see
+// [Regions].
 //
 // POST /projects
 //
@@ -5115,10 +5093,10 @@ func (c *Client) sendCreateProjectBranchAnonymized(ctx context.Context, request 
 
 // CreateProjectBranchBucket invokes createProjectBranchBucket operation.
 //
-// Creates a new branchable object-storage bucket on the specified branch. Buckets are managed by the
-// Neon Platform branchable-storage service.
+// Creates a new branchable object storage bucket on the specified branch. Buckets are managed by the
+// Neon Platform branchable object storage service.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/buckets
 func (c *Client) CreateProjectBranchBucket(ctx context.Context, request *BucketCreateRequest, params CreateProjectBranchBucketParams) (CreateProjectBranchBucketRes, error) {
@@ -5679,7 +5657,7 @@ func (c *Client) sendCreateProjectBranchDatabase(ctx context.Context, request *D
 // fields inherit the function's latest version. At least one field must be supplied. The first
 // deployment of a function must include zip. The newest deployment becomes active.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/functions/{slug}/deployments
 func (c *Client) CreateProjectBranchFunctionDeployment(ctx context.Context, request *FunctionDeployRequestMultipart, params CreateProjectBranchFunctionDeploymentParams) (*NeonFunctionDeploymentResponse, error) {
@@ -6389,8 +6367,6 @@ func (c *Client) sendCreateProjectTransferRequest(ctx context.Context, request O
 //
 // Creates a snapshot from the specified branch. This operation may initiate an asynchronous process.
 //
-// Note: This endpoint is currently in Beta.
-//
 // POST /projects/{project_id}/branches/{branch_id}/snapshot
 func (c *Client) CreateSnapshot(ctx context.Context, params CreateSnapshotParams) (*CreateSnapshotOK, error) {
 	res, err := c.sendCreateSnapshot(ctx, params)
@@ -6636,7 +6612,7 @@ func (c *Client) sendCreateSnapshot(ctx context.Context, params CreateSnapshotPa
 
 // DeleteBranchNeonAuthOauthProvider invokes deleteBranchNeonAuthOauthProvider operation.
 //
-// Deletes a OAuth provider from the specified project.
+// Deletes an OAuth provider from the specified project.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/auth/oauth_providers/{oauth_provider_id}
 func (c *Client) DeleteBranchNeonAuthOauthProvider(ctx context.Context, params DeleteBranchNeonAuthOauthProviderParams) error {
@@ -7202,8 +7178,8 @@ func (c *Client) sendDeleteBranchNeonAuthUser(ctx context.Context, params Delete
 
 // DeleteNeonAuthDomainFromRedirectURIWhitelist invokes deleteNeonAuthDomainFromRedirectURIWhitelist operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Deletes a domain
-// from the redirect_uri whitelist for the specified project.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Removal
+// scheduled for March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -7364,7 +7340,8 @@ func (c *Client) sendDeleteNeonAuthDomainFromRedirectURIWhitelist(ctx context.Co
 
 // DeleteNeonAuthIntegration invokes deleteNeonAuthIntegration operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth` instead.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth` instead. Removal scheduled for
+// March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -7543,9 +7520,9 @@ func (c *Client) sendDeleteNeonAuthIntegration(ctx context.Context, request OptD
 
 // DeleteNeonAuthOauthProvider invokes deleteNeonAuthOauthProvider operation.
 //
-// DEPRECATED, use
+// Deprecated. Use
 // `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers/{oauth_provider_id}` instead.
-// Deletes a OAuth provider from the specified project.
+// Removal scheduled for March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -7721,8 +7698,8 @@ func (c *Client) sendDeleteNeonAuthOauthProvider(ctx context.Context, params Del
 
 // DeleteNeonAuthUser invokes deleteNeonAuthUser operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/users/{auth_user_id}` instead.
-// Deletes the auth user for the specified project.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/users/{auth_user_id}` instead.
+// Removal scheduled for March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -8614,7 +8591,7 @@ func (c *Client) sendDeleteProjectBranch(ctx context.Context, params DeleteProje
 //
 // Deletes the named bucket from the specified branch.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}
 func (c *Client) DeleteProjectBranchBucket(ctx context.Context, params DeleteProjectBranchBucketParams) (DeleteProjectBranchBucketRes, error) {
@@ -8810,7 +8787,7 @@ func (c *Client) sendDeleteProjectBranchBucket(ctx context.Context, params Delet
 // Deletes the named object from the bucket on the specified branch. Served by the user's session (no
 // customer S3 credentials required).
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects/{object_key}
 func (c *Client) DeleteProjectBranchBucketObject(ctx context.Context, params DeleteProjectBranchBucketObjectParams) (DeleteProjectBranchBucketObjectRes, error) {
@@ -9034,7 +9011,7 @@ func (c *Client) sendDeleteProjectBranchBucketObject(ctx context.Context, params
 // Only objects physically present on this branch are tombstoned; objects inherited from an ancestor
 // branch via copy-on-write (not materialized on this branch) are out of scope.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects-by-prefix
 func (c *Client) DeleteProjectBranchBucketObjectsByPrefix(ctx context.Context, params DeleteProjectBranchBucketObjectsByPrefixParams) (DeleteProjectBranchBucketObjectsByPrefixRes, error) {
@@ -9637,7 +9614,7 @@ func (c *Client) sendDeleteProjectBranchDatabase(ctx context.Context, params Del
 //
 // Deletes the function identified by its slug.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/functions/{slug}
 func (c *Client) DeleteProjectBranchFunction(ctx context.Context, params DeleteProjectBranchFunctionParams) error {
@@ -10557,8 +10534,6 @@ func (c *Client) sendDeleteProjectVPCEndpoint(ctx context.Context, params Delete
 //
 // Deletes the specified snapshot.
 //
-// Note: This endpoint is currently in Beta.
-//
 // DELETE /projects/{project_id}/snapshots/{snapshot_id}
 func (c *Client) DeleteSnapshot(ctx context.Context, params DeleteSnapshotParams) (*OperationsResponse, error) {
 	res, err := c.sendDeleteSnapshot(ctx, params)
@@ -10922,8 +10897,6 @@ func (c *Client) sendDisableNeonAuth(ctx context.Context, request OptDisableNeon
 //
 // This operation only applies to branches created using the `restoreSnapshot` endpoint with
 // `finalize_restore: false`.
-//
-// Note: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/finalize_restore
 func (c *Client) FinalizeRestoreBranch(ctx context.Context, request OptFinalizeRestoreBranchReq, params FinalizeRestoreBranchParams) (*OperationsResponse, error) {
@@ -13897,12 +13870,12 @@ func (c *Client) sendGetNeonAuthEmailAndPasswordConfig(ctx context.Context, para
 // including the provider type and server settings.
 //
 // GET /projects/{project_id}/branches/{branch_id}/auth/email_provider
-func (c *Client) GetNeonAuthEmailProvider(ctx context.Context, params GetNeonAuthEmailProviderParams) (*NeonAuthEmailServerConfig, error) {
+func (c *Client) GetNeonAuthEmailProvider(ctx context.Context, params GetNeonAuthEmailProviderParams) (*NeonAuthEmailServerConfigResponse, error) {
 	res, err := c.sendGetNeonAuthEmailProvider(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendGetNeonAuthEmailProvider(ctx context.Context, params GetNeonAuthEmailProviderParams) (res *NeonAuthEmailServerConfig, err error) {
+func (c *Client) sendGetNeonAuthEmailProvider(ctx context.Context, params GetNeonAuthEmailProviderParams) (res *NeonAuthEmailServerConfigResponse, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getNeonAuthEmailProvider"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -14069,18 +14042,18 @@ func (c *Client) sendGetNeonAuthEmailProvider(ctx context.Context, params GetNeo
 
 // GetNeonAuthEmailServer invokes getNeonAuthEmailServer operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/email_provider` instead. Gets the
-// email server configuration for the specified project.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/email_provider` instead. Removal
+// scheduled for March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
 // GET /projects/{project_id}/auth/email_server
-func (c *Client) GetNeonAuthEmailServer(ctx context.Context, params GetNeonAuthEmailServerParams) (*NeonAuthEmailServerConfig, error) {
+func (c *Client) GetNeonAuthEmailServer(ctx context.Context, params GetNeonAuthEmailServerParams) (*NeonAuthEmailServerConfigResponse, error) {
 	res, err := c.sendGetNeonAuthEmailServer(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendGetNeonAuthEmailServer(ctx context.Context, params GetNeonAuthEmailServerParams) (res *NeonAuthEmailServerConfig, err error) {
+func (c *Client) sendGetNeonAuthEmailServer(ctx context.Context, params GetNeonAuthEmailServerParams) (res *NeonAuthEmailServerConfigResponse, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getNeonAuthEmailServer"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -16391,7 +16364,7 @@ func (c *Client) sendGetProjectBranch(ctx context.Context, params GetProjectBran
 // URLs. A 200 response means the branch is registered and this region serves the AI gateway. A 404
 // response includes a `reason` field indicating why the gateway is unavailable.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/ai_gateway
 func (c *Client) GetProjectBranchAiGateway(ctx context.Context, params GetProjectBranchAiGatewayParams) (GetProjectBranchAiGatewayRes, error) {
@@ -16574,11 +16547,11 @@ func (c *Client) sendGetProjectBranchAiGateway(ctx context.Context, params GetPr
 // `Content-Length` and `ETag` response headers echo the stored object metadata.
 //
 // BINARY-STREAM EXCEPTION TO THE BUILD-GENERATED-TYPES RULE (#7029): the successful 200 body is the
-// raw object stream, proxied verbatim from the platform storage admin endpoint. It is modeled as an
-// `application/octet-stream` binary body (not a JSON response schema) and is streamed without
+// raw object stream, proxied verbatim from the platform object storage admin endpoint. It is modeled
+// as an `application/octet-stream` binary body (not a JSON response schema) and is streamed without
 // buffering the whole object in memory. Error responses still use the generated `GeneralError` shape.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects/{object_key}/download
 func (c *Client) GetProjectBranchBucketObject(ctx context.Context, params GetProjectBranchBucketObjectParams) (GetProjectBranchBucketObjectRes, error) {
@@ -17182,7 +17155,7 @@ func (c *Client) sendGetProjectBranchDatabase(ctx context.Context, params GetPro
 //
 // Returns the function identified by its slug.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/functions/{slug}
 func (c *Client) GetProjectBranchFunction(ctx context.Context, params GetProjectBranchFunctionParams) (*NeonFunctionResponse, error) {
@@ -17768,9 +17741,8 @@ func (c *Client) sendGetProjectBranchRolePassword(ctx context.Context, params Ge
 
 // GetProjectBranchSchema invokes getProjectBranchSchema operation.
 //
-// Retrieves the schema from the specified database. The `lsn` and `timestamp` values cannot be
-// specified at the same time. If both are omitted, the database schema is retrieved from database's
-// head.
+// Retrieves the database schema. Specify `lsn` or `timestamp` (not both) to read at a point in time;
+// omit both to read from the database's head.
 //
 // GET /projects/{project_id}/branches/{branch_id}/schema
 func (c *Client) GetProjectBranchSchema(ctx context.Context, params GetProjectBranchSchemaParams) (*BranchSchemaResponse, error) {
@@ -18292,11 +18264,11 @@ func (c *Client) sendGetProjectBranchSchemaComparison(ctx context.Context, param
 
 // GetProjectBranchStorage invokes getProjectBranchStorage operation.
 //
-// Returns whether branchable object-storage is usable for the specified branch. A 200 response means
-// the branch is registered in the storage service and the S3 data plane will accept requests for it. A
-// 404 response includes a `reason` field indicating why storage is unavailable.
+// Returns whether branchable object storage is usable for the specified branch. A 200 response means
+// the branch is registered in the object storage service and the S3 data plane will accept requests
+// for it. A 404 response includes a `reason` field indicating why object storage is unavailable.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/storage
 func (c *Client) GetProjectBranchStorage(ctx context.Context, params GetProjectBranchStorageParams) (GetProjectBranchStorageRes, error) {
@@ -18982,8 +18954,6 @@ func (c *Client) sendGetProjectOperation(ctx context.Context, params GetProjectO
 // GetSnapshotSchedule invokes getSnapshotSchedule operation.
 //
 // Returns the backup schedule for the specified branch, including the configured snapshot frequencies.
-//
-// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/backup_schedule
 func (c *Client) GetSnapshotSchedule(ctx context.Context, params GetSnapshotScheduleParams) (*BackupSchedule, error) {
@@ -19811,7 +19781,7 @@ func (c *Client) sendListBranchNeonAuthTrustedDomains(ctx context.Context, param
 //
 // Returns metadata for customer-issued credentials on the branch. Secrets are never included.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/credentials
 func (c *Client) ListCredentials(ctx context.Context, params ListCredentialsParams) (*ListCredentialsResponse, error) {
@@ -19986,7 +19956,8 @@ func (c *Client) sendListCredentials(ctx context.Context, params ListCredentials
 
 // ListNeonAuthIntegrations invokes listNeonAuthIntegrations operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth` instead.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth` instead. Removal scheduled for
+// March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -20144,8 +20115,8 @@ func (c *Client) sendListNeonAuthIntegrations(ctx context.Context, params ListNe
 
 // ListNeonAuthOauthProviders invokes listNeonAuthOauthProviders operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead. Lists
-// the OAuth providers for the specified project.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead. Removal
+// scheduled for March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -20303,8 +20274,8 @@ func (c *Client) sendListNeonAuthOauthProviders(ctx context.Context, params List
 
 // ListNeonAuthRedirectURIWhitelistDomains invokes listNeonAuthRedirectURIWhitelistDomains operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Lists the
-// domains in the redirect_uri whitelist for the specified project.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Removal
+// scheduled for March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -20960,7 +20931,7 @@ func (c *Client) sendListOrganizationVPCEndpointsAllRegions(ctx context.Context,
 // callers can render a folder-style browser; keys that do not contain the delimiter after `prefix` are
 // returned as `objects`.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects
 func (c *Client) ListProjectBranchBucketObjects(ctx context.Context, params ListProjectBranchBucketObjectsParams) (*BucketObjectsListResponse, error) {
@@ -21226,10 +21197,10 @@ func (c *Client) sendListProjectBranchBucketObjects(ctx context.Context, params 
 
 // ListProjectBranchBuckets invokes listProjectBranchBuckets operation.
 //
-// Lists branchable object-storage buckets visible on the specified branch, including those inherited
+// Lists branchable object storage buckets visible on the specified branch, including those inherited
 // from ancestor branches.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/buckets
 func (c *Client) ListProjectBranchBuckets(ctx context.Context, params ListProjectBranchBucketsParams) (*BucketsListResponse, error) {
@@ -21760,7 +21731,7 @@ func (c *Client) sendListProjectBranchEndpoints(ctx context.Context, params List
 //
 // Lists functions on the specified branch.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/functions
 func (c *Client) ListProjectBranchFunctions(ctx context.Context, params ListProjectBranchFunctionsParams) (*ListProjectBranchFunctionsOK, error) {
@@ -24225,8 +24196,6 @@ func (c *Client) sendListSharedProjects(ctx context.Context, params ListSharedPr
 // Lists the snapshots for the specified project. Each snapshot represents a point-in-time backup of
 // the project data.
 //
-// Note: This endpoint is currently in Beta.
-//
 // GET /projects/{project_id}/snapshots
 func (c *Client) ListSnapshots(ctx context.Context, params ListSnapshotsParams) (*ListSnapshotsOK, error) {
 	res, err := c.sendListSnapshots(ctx, params)
@@ -24396,7 +24365,7 @@ func (c *Client) sendListSnapshots(ctx context.Context, params ListSnapshotsPara
 //
 // Served by the user's session (no customer S3 credentials required).
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects/{object_key}/presign
 func (c *Client) PresignProjectBranchBucketObject(ctx context.Context, request *PresignRequest, params PresignProjectBranchBucketObjectParams) (PresignProjectBranchBucketObjectRes, error) {
@@ -24960,187 +24929,6 @@ func (c *Client) sendRecoverProject(ctx context.Context, params RecoverProjectPa
 
 	stage = "DecodeResponse"
 	result, err := decodeRecoverProjectResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// RecoverProjectBranch invokes recoverProjectBranch operation.
-//
-// Recovers a deleted branch within the 7-day deletion recovery period. The branch must have been soft
-// deleted and not yet permanently deleted. Recovery restores the branch and its endpoints to an idle
-// state. Connection strings remain valid after recovery. TTL branches become non-TTL branches after
-// recovery.
-//
-// To list deleted branches available for recovery, use
-// `GET /projects/{project_id}/branches?include_deleted=true`.
-//
-// POST /projects/{project_id}/branches/{branch_id}/recover
-func (c *Client) RecoverProjectBranch(ctx context.Context, params RecoverProjectBranchParams) (*BranchRecoverResponse, error) {
-	res, err := c.sendRecoverProjectBranch(ctx, params)
-	return res, err
-}
-
-func (c *Client) sendRecoverProjectBranch(ctx context.Context, params RecoverProjectBranchParams) (res *BranchRecoverResponse, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("recoverProjectBranch"),
-		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/recover"),
-	}
-	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, RecoverProjectBranchOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [5]string
-	pathParts[0] = "/projects/"
-	{
-		// Encode "project_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "project_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.ProjectID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/branches/"
-	{
-		// Encode "branch_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "branch_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.BranchID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[3] = encoded
-	}
-	pathParts[4] = "/recover"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "POST", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			stage = "Security:BearerAuth"
-			switch err := c.securityBearerAuth(ctx, RecoverProjectBranchOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 0
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
-			}
-		}
-		{
-			stage = "Security:CookieAuth"
-			switch err := c.securityCookieAuth(ctx, RecoverProjectBranchOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 1
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"CookieAuth\"")
-			}
-		}
-		{
-			stage = "Security:TokenCookieAuth"
-			switch err := c.securityTokenCookieAuth(ctx, RecoverProjectBranchOperation, r); {
-			case err == nil: // if NO error
-				satisfied[0] |= 1 << 2
-			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
-				// Skip this security.
-			default:
-				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-				{0b00000100},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
-		}
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	body := resp.Body
-	defer func() {
-		// Drain the body to EOF before closing, so the underlying
-		// connection can be reused by the Transport regardless of the
-		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
-		_, _ = io.Copy(io.Discard, body)
-		_ = body.Close()
-	}()
-
-	stage = "DecodeResponse"
-	result, err := decodeRecoverProjectBranchResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -26084,8 +25872,6 @@ func (c *Client) sendRestoreProjectBranch(ctx context.Context, request *BranchRe
 // Restores the specified snapshot to a new branch, and optionally finalizes the restore operation to
 // replace the original branch.
 //
-// Note: This endpoint is currently in Beta.
-//
 // POST /projects/{project_id}/snapshots/{snapshot_id}/restore
 func (c *Client) RestoreSnapshot(ctx context.Context, request OptRestoreSnapshotReq, params RestoreSnapshotParams) (*RestoredSnapshot, error) {
 	res, err := c.sendRestoreSnapshot(ctx, request, params)
@@ -26443,7 +26229,7 @@ func (c *Client) sendRevokeApiKey(ctx context.Context, params RevokeApiKeyParams
 //
 // Soft-deletes the credential. Idempotent.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/credentials/{token_id}
 func (c *Client) RevokeCredential(ctx context.Context, params RevokeCredentialParams) (RevokeCredentialRes, error) {
@@ -27709,9 +27495,7 @@ func (c *Client) sendSetProjectMemberRole(ctx context.Context, request *SetProje
 // SetSnapshotSchedule invokes setSnapshotSchedule operation.
 //
 // Updates the backup schedule for the specified branch. The schedule defines how often automatic
-// snapshots are created (e.g., `daily`, `weekly`).
-//
-// Note: This endpoint is currently in Beta.
+// snapshots are created (for example, `daily` or `weekly`). Requires a paid plan.
 //
 // PUT /projects/{project_id}/branches/{branch_id}/backup_schedule
 func (c *Client) SetSnapshotSchedule(ctx context.Context, request *BackupSchedule, params SetSnapshotScheduleParams) error {
@@ -28727,8 +28511,8 @@ func (c *Client) sendTransferProjectsFromOrgToOrg(ctx context.Context, request *
 
 // TransferProjectsFromUserToOrg invokes transferProjectsFromUserToOrg operation.
 //
-// DEPRECATED. Personal accounts have been migrated to organizations, making this operation no longer
-// applicable.
+// Deprecated. Personal accounts have been migrated to organizations, so this operation no longer
+// applies. Removal scheduled for July 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -28870,7 +28654,7 @@ func (c *Client) sendTransferProjectsFromUserToOrg(ctx context.Context, request 
 
 // UpdateBranchNeonAuthOauthProvider invokes updateBranchNeonAuthOauthProvider operation.
 //
-// Updates a OAuth provider for the specified project.
+// Updates an OAuth provider for the specified project.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/oauth_providers/{oauth_provider_id}
 func (c *Client) UpdateBranchNeonAuthOauthProvider(ctx context.Context, request *NeonAuthUpdateOAuthProviderRequest, params UpdateBranchNeonAuthOauthProviderParams) (*NeonAuthOauthProvider, error) {
@@ -29787,13 +29571,18 @@ func (c *Client) sendUpdateNeonAuthEmailAndPasswordConfig(ctx context.Context, r
 // Updates the email provider configuration for the specified branch's Neon Auth integration. The email
 // provider handles transactional messages such as verification emails and password reset links.
 //
+// Partial `standard` updates — omitting fields to keep their stored values — are supported only
+// for Better Auth integrations, which merge omitted fields server-side. Legacy Stack Auth integrations
+// do not merge and require all six `standard` fields (`host`, `port`, `username`, `password`,
+// `sender_email`, `sender_name`) on every update; a partial `standard` body is rejected with 400.
+//
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/email_provider
-func (c *Client) UpdateNeonAuthEmailProvider(ctx context.Context, request *NeonAuthEmailServerConfig, params UpdateNeonAuthEmailProviderParams) (*NeonAuthEmailServerConfig, error) {
+func (c *Client) UpdateNeonAuthEmailProvider(ctx context.Context, request *NeonAuthEmailServerConfig, params UpdateNeonAuthEmailProviderParams) (*NeonAuthEmailServerConfigResponse, error) {
 	res, err := c.sendUpdateNeonAuthEmailProvider(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendUpdateNeonAuthEmailProvider(ctx context.Context, request *NeonAuthEmailServerConfig, params UpdateNeonAuthEmailProviderParams) (res *NeonAuthEmailServerConfig, err error) {
+func (c *Client) sendUpdateNeonAuthEmailProvider(ctx context.Context, request *NeonAuthEmailServerConfig, params UpdateNeonAuthEmailProviderParams) (res *NeonAuthEmailServerConfigResponse, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateNeonAuthEmailProvider"),
 		semconv.HTTPRequestMethodKey.String("PATCH"),
@@ -29963,18 +29752,18 @@ func (c *Client) sendUpdateNeonAuthEmailProvider(ctx context.Context, request *N
 
 // UpdateNeonAuthEmailServer invokes updateNeonAuthEmailServer operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/email_provider` instead. Updates
-// the email server configuration for the specified project.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/email_provider` instead. Removal
+// scheduled for March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
 // PATCH /projects/{project_id}/auth/email_server
-func (c *Client) UpdateNeonAuthEmailServer(ctx context.Context, request *NeonAuthEmailServerConfig, params UpdateNeonAuthEmailServerParams) (*NeonAuthEmailServerConfig, error) {
+func (c *Client) UpdateNeonAuthEmailServer(ctx context.Context, request *NeonAuthEmailServerConfig, params UpdateNeonAuthEmailServerParams) (*NeonAuthEmailServerConfigResponse, error) {
 	res, err := c.sendUpdateNeonAuthEmailServer(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendUpdateNeonAuthEmailServer(ctx context.Context, request *NeonAuthEmailServerConfig, params UpdateNeonAuthEmailServerParams) (res *NeonAuthEmailServerConfig, err error) {
+func (c *Client) sendUpdateNeonAuthEmailServer(ctx context.Context, request *NeonAuthEmailServerConfig, params UpdateNeonAuthEmailServerParams) (res *NeonAuthEmailServerConfigResponse, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateNeonAuthEmailServer"),
 		semconv.HTTPRequestMethodKey.String("PATCH"),
@@ -30304,9 +30093,9 @@ func (c *Client) sendUpdateNeonAuthMagicLinkPlugin(ctx context.Context, request 
 
 // UpdateNeonAuthOauthProvider invokes updateNeonAuthOauthProvider operation.
 //
-// DEPRECATED, use
+// Deprecated. Use
 // `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers/{oauth_provider_id}` instead.
-// Updates a OAuth provider for the specified project.
+// Removal scheduled for March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -32142,7 +31931,7 @@ func (c *Client) sendUpdateProjectBranchDatabase(ctx context.Context, request *D
 // on the branch that owns it. Like every other change on a branch, a rename is isolated per branch: a
 // branch forked before the rename keeps the name it had at fork time.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/functions/{slug}
 func (c *Client) UpdateProjectBranchFunction(ctx context.Context, request *NeonFunctionUpdateRequest, params UpdateProjectBranchFunctionParams) (*NeonFunctionResponse, error) {
@@ -32526,8 +32315,6 @@ func (c *Client) sendUpdateProjectEndpoint(ctx context.Context, request *Endpoin
 // UpdateSnapshot invokes updateSnapshot operation.
 //
 // Updates the specified snapshot.
-//
-// Note: This endpoint is currently in Beta.
 //
 // PATCH /projects/{project_id}/snapshots/{snapshot_id}
 func (c *Client) UpdateSnapshot(ctx context.Context, request *SnapshotUpdateRequest, params UpdateSnapshotParams) (*UpdateSnapshotOK, error) {
