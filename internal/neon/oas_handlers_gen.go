@@ -810,8 +810,8 @@ func (s *Server) handleAddBranchNeonAuthTrustedDomainRequest(args [2]string, arg
 
 // handleAddNeonAuthDomainToRedirectURIWhitelistRequest handles addNeonAuthDomainToRedirectURIWhitelist operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Adds a domain to
-// the redirect_uri whitelist for the specified project.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Removal
+// scheduled for March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -1066,8 +1066,8 @@ func (s *Server) handleAddNeonAuthDomainToRedirectURIWhitelistRequest(args [1]st
 
 // handleAddNeonAuthOauthProviderRequest handles addNeonAuthOauthProvider operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead. Adds an
-// OAuth provider to the specified project.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead. Removal
+// scheduled for March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -2856,7 +2856,7 @@ func (s *Server) handleCreateBranchNeonAuthNewUserRequest(args [2]string, argsEs
 // Issues a new scoped service credential anchored to the specified branch. The response carries
 // `api_token` and `s3_secret_access_key` exactly once — they are not stored server-side.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/credentials
 func (s *Server) handleCreateCredentialRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -3372,9 +3372,8 @@ func (s *Server) handleCreateNeonAuthRequest(args [2]string, argsEscaped bool, w
 
 // handleCreateNeonAuthIntegrationRequest handles createNeonAuthIntegration operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth` instead. Creates a project on a
-// third-party authentication provider's platform for use with Neon Auth. Use this endpoint if the
-// frontend integration flow can't be used.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth` instead. Removal scheduled for
+// March 1, 2026. Use this endpoint if the frontend integration flow can't be used.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -3614,8 +3613,8 @@ func (s *Server) handleCreateNeonAuthIntegrationRequest(args [0]string, argsEsca
 
 // handleCreateNeonAuthNewUserRequest handles createNeonAuthNewUser operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/users` instead. Creates a new user
-// in Neon Auth. The user will be created in your neon_auth.users_sync table and automatically
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/users` instead. Removal scheduled
+// for March 1, 2026. The user will be created in your neon_auth.users_sync table and automatically
 // propagated to your auth project, whether Neon-managed or provider-owned.
 //
 // Deprecated: schema marks this operation as deprecated.
@@ -4613,8 +4612,9 @@ func (s *Server) handleCreateOrganizationInvitationsRequest(args [1]string, args
 // is automatically inferred from the key. Plan limits define how many projects you can create. For
 // more information, see [Manage projects].
 //
-// You can specify a region and Postgres version in the request body. Neon currently supports
-// PostgreSQL 14, 15, 16, 17, and 18. For supported regions and `region_id` values, see [Regions].
+// You can specify a region and Postgres version in the request body. Neon supports Postgres 14 through
+// 18, with 19 rolling out to enabled regions. For supported regions and `region_id` values, see
+// [Regions].
 //
 // POST /projects
 //
@@ -5373,10 +5373,10 @@ func (s *Server) handleCreateProjectBranchAnonymizedRequest(args [1]string, args
 
 // handleCreateProjectBranchBucketRequest handles createProjectBranchBucket operation.
 //
-// Creates a new branchable object-storage bucket on the specified branch. Buckets are managed by the
-// Neon Platform branchable-storage service.
+// Creates a new branchable object storage bucket on the specified branch. Buckets are managed by the
+// Neon Platform branchable object storage service.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/buckets
 func (s *Server) handleCreateProjectBranchBucketRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -6160,7 +6160,7 @@ func (s *Server) handleCreateProjectBranchDatabaseRequest(args [2]string, argsEs
 // fields inherit the function's latest version. At least one field must be supplied. The first
 // deployment of a function must include zip. The newest deployment becomes active.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/functions/{slug}/deployments
 func (s *Server) handleCreateProjectBranchFunctionDeploymentRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -7201,8 +7201,6 @@ func (s *Server) handleCreateProjectTransferRequestRequest(args [1]string, argsE
 //
 // Creates a snapshot from the specified branch. This operation may initiate an asynchronous process.
 //
-// Note: This endpoint is currently in Beta.
-//
 // POST /projects/{project_id}/branches/{branch_id}/snapshot
 func (s *Server) handleCreateSnapshotRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
@@ -7459,7 +7457,7 @@ func (s *Server) handleCreateSnapshotRequest(args [2]string, argsEscaped bool, w
 
 // handleDeleteBranchNeonAuthOauthProviderRequest handles deleteBranchNeonAuthOauthProvider operation.
 //
-// Deletes a OAuth provider from the specified project.
+// Deletes an OAuth provider from the specified project.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/auth/oauth_providers/{oauth_provider_id}
 func (s *Server) handleDeleteBranchNeonAuthOauthProviderRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -8210,8 +8208,8 @@ func (s *Server) handleDeleteBranchNeonAuthUserRequest(args [3]string, argsEscap
 
 // handleDeleteNeonAuthDomainFromRedirectURIWhitelistRequest handles deleteNeonAuthDomainFromRedirectURIWhitelist operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Deletes a domain
-// from the redirect_uri whitelist for the specified project.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Removal
+// scheduled for March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -8466,7 +8464,8 @@ func (s *Server) handleDeleteNeonAuthDomainFromRedirectURIWhitelistRequest(args 
 
 // handleDeleteNeonAuthIntegrationRequest handles deleteNeonAuthIntegration operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth` instead.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth` instead. Removal scheduled for
+// March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -8725,9 +8724,9 @@ func (s *Server) handleDeleteNeonAuthIntegrationRequest(args [2]string, argsEsca
 
 // handleDeleteNeonAuthOauthProviderRequest handles deleteNeonAuthOauthProvider operation.
 //
-// DEPRECATED, use
+// Deprecated. Use
 // `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers/{oauth_provider_id}` instead.
-// Deletes a OAuth provider from the specified project.
+// Removal scheduled for March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -8971,8 +8970,8 @@ func (s *Server) handleDeleteNeonAuthOauthProviderRequest(args [2]string, argsEs
 
 // handleDeleteNeonAuthUserRequest handles deleteNeonAuthUser operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/users/{auth_user_id}` instead.
-// Deletes the auth user for the specified project.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/users/{auth_user_id}` instead.
+// Removal scheduled for March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -10201,7 +10200,7 @@ func (s *Server) handleDeleteProjectBranchRequest(args [2]string, argsEscaped bo
 //
 // Deletes the named bucket from the specified branch.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}
 func (s *Server) handleDeleteProjectBranchBucketRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -10450,7 +10449,7 @@ func (s *Server) handleDeleteProjectBranchBucketRequest(args [3]string, argsEsca
 // Deletes the named object from the bucket on the specified branch. Served by the user's session (no
 // customer S3 credentials required).
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects/{object_key}
 func (s *Server) handleDeleteProjectBranchBucketObjectRequest(args [4]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -10712,7 +10711,7 @@ func (s *Server) handleDeleteProjectBranchBucketObjectRequest(args [4]string, ar
 // Only objects physically present on this branch are tombstoned; objects inherited from an ancestor
 // branch via copy-on-write (not materialized on this branch) are out of scope.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects-by-prefix
 func (s *Server) handleDeleteProjectBranchBucketObjectsByPrefixRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -11459,7 +11458,7 @@ func (s *Server) handleDeleteProjectBranchDatabaseRequest(args [3]string, argsEs
 //
 // Deletes the function identified by its slug.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/functions/{slug}
 func (s *Server) handleDeleteProjectBranchFunctionRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -12689,8 +12688,6 @@ func (s *Server) handleDeleteProjectVPCEndpointRequest(args [2]string, argsEscap
 //
 // Deletes the specified snapshot.
 //
-// Note: This endpoint is currently in Beta.
-//
 // DELETE /projects/{project_id}/snapshots/{snapshot_id}
 func (s *Server) handleDeleteSnapshotRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
@@ -13201,8 +13198,6 @@ func (s *Server) handleDisableNeonAuthRequest(args [2]string, argsEscaped bool, 
 //
 // This operation only applies to branches created using the `restoreSnapshot` endpoint with
 // `finalize_restore: false`.
-//
-// Note: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/finalize_restore
 func (s *Server) handleFinalizeRestoreBranchRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -17102,7 +17097,7 @@ func (s *Server) handleGetNeonAuthEmailProviderRequest(args [2]string, argsEscap
 
 	var rawBody []byte
 
-	var response *NeonAuthEmailServerConfig
+	var response *NeonAuthEmailServerConfigResponse
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -17127,7 +17122,7 @@ func (s *Server) handleGetNeonAuthEmailProviderRequest(args [2]string, argsEscap
 		type (
 			Request  = struct{}
 			Params   = GetNeonAuthEmailProviderParams
-			Response = *NeonAuthEmailServerConfig
+			Response = *NeonAuthEmailServerConfigResponse
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -17173,8 +17168,8 @@ func (s *Server) handleGetNeonAuthEmailProviderRequest(args [2]string, argsEscap
 
 // handleGetNeonAuthEmailServerRequest handles getNeonAuthEmailServer operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/email_provider` instead. Gets the
-// email server configuration for the specified project.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/email_provider` instead. Removal
+// scheduled for March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -17347,7 +17342,7 @@ func (s *Server) handleGetNeonAuthEmailServerRequest(args [1]string, argsEscaped
 
 	var rawBody []byte
 
-	var response *NeonAuthEmailServerConfig
+	var response *NeonAuthEmailServerConfigResponse
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -17368,7 +17363,7 @@ func (s *Server) handleGetNeonAuthEmailServerRequest(args [1]string, argsEscaped
 		type (
 			Request  = struct{}
 			Params   = GetNeonAuthEmailServerParams
-			Response = *NeonAuthEmailServerConfig
+			Response = *NeonAuthEmailServerConfigResponse
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -20349,7 +20344,7 @@ func (s *Server) handleGetProjectBranchRequest(args [2]string, argsEscaped bool,
 // URLs. A 200 response means the branch is registered and this region serves the AI gateway. A 404
 // response includes a `reason` field indicating why the gateway is unavailable.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/ai_gateway
 func (s *Server) handleGetProjectBranchAiGatewayRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -20599,11 +20594,11 @@ func (s *Server) handleGetProjectBranchAiGatewayRequest(args [2]string, argsEsca
 // `Content-Length` and `ETag` response headers echo the stored object metadata.
 //
 // BINARY-STREAM EXCEPTION TO THE BUILD-GENERATED-TYPES RULE (#7029): the successful 200 body is the
-// raw object stream, proxied verbatim from the platform storage admin endpoint. It is modeled as an
-// `application/octet-stream` binary body (not a JSON response schema) and is streamed without
+// raw object stream, proxied verbatim from the platform object storage admin endpoint. It is modeled
+// as an `application/octet-stream` binary body (not a JSON response schema) and is streamed without
 // buffering the whole object in memory. Error responses still use the generated `GeneralError` shape.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects/{object_key}/download
 func (s *Server) handleGetProjectBranchBucketObjectRequest(args [4]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -21350,7 +21345,7 @@ func (s *Server) handleGetProjectBranchDatabaseRequest(args [3]string, argsEscap
 //
 // Returns the function identified by its slug.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/functions/{slug}
 func (s *Server) handleGetProjectBranchFunctionRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -22094,9 +22089,8 @@ func (s *Server) handleGetProjectBranchRolePasswordRequest(args [3]string, argsE
 
 // handleGetProjectBranchSchemaRequest handles getProjectBranchSchema operation.
 //
-// Retrieves the schema from the specified database. The `lsn` and `timestamp` values cannot be
-// specified at the same time. If both are omitted, the database schema is retrieved from database's
-// head.
+// Retrieves the database schema. Specify `lsn` or `timestamp` (not both) to read at a point in time;
+// omit both to read from the database's head.
 //
 // GET /projects/{project_id}/branches/{branch_id}/schema
 func (s *Server) handleGetProjectBranchSchemaRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -22620,11 +22614,11 @@ func (s *Server) handleGetProjectBranchSchemaComparisonRequest(args [2]string, a
 
 // handleGetProjectBranchStorageRequest handles getProjectBranchStorage operation.
 //
-// Returns whether branchable object-storage is usable for the specified branch. A 200 response means
-// the branch is registered in the storage service and the S3 data plane will accept requests for it. A
-// 404 response includes a `reason` field indicating why storage is unavailable.
+// Returns whether branchable object storage is usable for the specified branch. A 200 response means
+// the branch is registered in the object storage service and the S3 data plane will accept requests
+// for it. A 404 response includes a `reason` field indicating why object storage is unavailable.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/storage
 func (s *Server) handleGetProjectBranchStorageRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -22800,7 +22794,7 @@ func (s *Server) handleGetProjectBranchStorageRequest(args [2]string, argsEscape
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    GetProjectBranchStorageOperation,
-			OperationSummary: "Get branch storage state",
+			OperationSummary: "Get branch object storage state",
 			OperationID:      "getProjectBranchStorage",
 			Body:             nil,
 			RawBody:          rawBody,
@@ -23595,8 +23589,6 @@ func (s *Server) handleGetProjectOperationRequest(args [2]string, argsEscaped bo
 // handleGetSnapshotScheduleRequest handles getSnapshotSchedule operation.
 //
 // Returns the backup schedule for the specified branch, including the configured snapshot frequencies.
-//
-// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/backup_schedule
 func (s *Server) handleGetSnapshotScheduleRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -24805,7 +24797,7 @@ func (s *Server) handleListBranchNeonAuthTrustedDomainsRequest(args [2]string, a
 //
 // Returns metadata for customer-issued credentials on the branch. Secrets are never included.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/credentials
 func (s *Server) handleListCredentialsRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -25047,7 +25039,8 @@ func (s *Server) handleListCredentialsRequest(args [2]string, argsEscaped bool, 
 
 // handleListNeonAuthIntegrationsRequest handles listNeonAuthIntegrations operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth` instead.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth` instead. Removal scheduled for
+// March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -25287,8 +25280,8 @@ func (s *Server) handleListNeonAuthIntegrationsRequest(args [1]string, argsEscap
 
 // handleListNeonAuthOauthProvidersRequest handles listNeonAuthOauthProviders operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead. Lists
-// the OAuth providers for the specified project.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead. Removal
+// scheduled for March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -25528,8 +25521,8 @@ func (s *Server) handleListNeonAuthOauthProvidersRequest(args [1]string, argsEsc
 
 // handleListNeonAuthRedirectURIWhitelistDomainsRequest handles listNeonAuthRedirectURIWhitelistDomains operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Lists the
-// domains in the redirect_uri whitelist for the specified project.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/domains` instead. Removal
+// scheduled for March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -26498,7 +26491,7 @@ func (s *Server) handleListOrganizationVPCEndpointsAllRegionsRequest(args [1]str
 // callers can render a folder-style browser; keys that do not contain the delimiter after `prefix` are
 // returned as `objects`.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects
 func (s *Server) handleListProjectBranchBucketObjectsRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -26760,10 +26753,10 @@ func (s *Server) handleListProjectBranchBucketObjectsRequest(args [3]string, arg
 
 // handleListProjectBranchBucketsRequest handles listProjectBranchBuckets operation.
 //
-// Lists branchable object-storage buckets visible on the specified branch, including those inherited
+// Lists branchable object storage buckets visible on the specified branch, including those inherited
 // from ancestor branches.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/buckets
 func (s *Server) handleListProjectBranchBucketsRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -27495,7 +27488,7 @@ func (s *Server) handleListProjectBranchEndpointsRequest(args [2]string, argsEsc
 //
 // Lists functions on the specified branch.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // GET /projects/{project_id}/branches/{branch_id}/functions
 func (s *Server) handleListProjectBranchFunctionsRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -30517,8 +30510,6 @@ func (s *Server) handleListSharedProjectsRequest(args [0]string, argsEscaped boo
 // Lists the snapshots for the specified project. Each snapshot represents a point-in-time backup of
 // the project data.
 //
-// Note: This endpoint is currently in Beta.
-//
 // GET /projects/{project_id}/snapshots
 func (s *Server) handleListSnapshotsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
@@ -30770,7 +30761,7 @@ func (s *Server) handleListSnapshotsRequest(args [1]string, argsEscaped bool, w 
 //
 // Served by the user's session (no customer S3 credentials required).
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // POST /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects/{object_key}/presign
 func (s *Server) handlePresignProjectBranchBucketObjectRequest(args [4]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -31543,254 +31534,6 @@ func (s *Server) handleRecoverProjectRequest(args [1]string, argsEscaped bool, w
 	}
 
 	if err := encodeRecoverProjectResponse(response, w, span); err != nil {
-		defer recordError("EncodeResponse", err)
-		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-		}
-		return
-	}
-}
-
-// handleRecoverProjectBranchRequest handles recoverProjectBranch operation.
-//
-// Recovers a deleted branch within the 7-day deletion recovery period. The branch must have been soft
-// deleted and not yet permanently deleted. Recovery restores the branch and its endpoints to an idle
-// state. Connection strings remain valid after recovery. TTL branches become non-TTL branches after
-// recovery.
-//
-// To list deleted branches available for recovery, use
-// `GET /projects/{project_id}/branches?include_deleted=true`.
-//
-// POST /projects/{project_id}/branches/{branch_id}/recover
-func (s *Server) handleRecoverProjectBranchRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
-	statusWriter := &codeRecorder{ResponseWriter: w}
-	w = statusWriter
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("recoverProjectBranch"),
-		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/projects/{project_id}/branches/{branch_id}/recover"),
-	}
-	// Add attributes from config.
-	otelAttrs = append(otelAttrs, s.cfg.Attributes...)
-
-	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), RecoverProjectBranchOperation,
-		trace.WithAttributes(otelAttrs...),
-		serverSpanKind,
-	)
-	defer span.End()
-
-	// Add Labeler to context.
-	labeler := &Labeler{attrs: otelAttrs}
-	ctx = contextWithLabeler(ctx, labeler)
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		elapsedDuration := time.Since(startTime)
-
-		attrSet := labeler.AttributeSet()
-		attrs := attrSet.ToSlice()
-		code := statusWriter.status
-		if code != 0 {
-			codeAttr := semconv.HTTPResponseStatusCode(code)
-			attrs = append(attrs, codeAttr)
-			span.SetAttributes(attrs...)
-		}
-		attrOpt := metric.WithAttributes(attrs...)
-
-		// Increment request counter.
-		s.requests.Add(ctx, 1, attrOpt)
-
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		s.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), attrOpt)
-	}()
-
-	var (
-		recordError = func(stage string, err error) {
-			span.RecordError(err)
-
-			// https://opentelemetry.io/docs/specs/semconv/http/http-spans/#status
-			// Span Status MUST be left unset if HTTP status code was in the 1xx, 2xx or 3xx ranges,
-			// unless there was another error (e.g., network error receiving the response body; or 3xx codes with
-			// max redirects exceeded), in which case status MUST be set to Error.
-			code := statusWriter.status
-			if code < 100 || code >= 500 {
-				span.SetStatus(codes.Error, stage)
-			}
-
-			attrSet := labeler.AttributeSet()
-			attrs := attrSet.ToSlice()
-			if code != 0 {
-				attrs = append(attrs, semconv.HTTPResponseStatusCode(code))
-			}
-
-			s.errors.Add(ctx, 1, metric.WithAttributes(attrs...))
-		}
-		err          error
-		opErrContext = ogenerrors.OperationContext{
-			Name: RecoverProjectBranchOperation,
-			ID:   "recoverProjectBranch",
-		}
-	)
-	{
-		type bitset = [1]uint8
-		var satisfied bitset
-		{
-			sctx, ok, err := s.securityBearerAuth(ctx, RecoverProjectBranchOperation, r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "BearerAuth",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 0
-				ctx = sctx
-			}
-		}
-		{
-			sctx, ok, err := s.securityCookieAuth(ctx, RecoverProjectBranchOperation, r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "CookieAuth",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:CookieAuth", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 1
-				ctx = sctx
-			}
-		}
-		{
-			sctx, ok, err := s.securityTokenCookieAuth(ctx, RecoverProjectBranchOperation, r)
-			if err != nil {
-				err = &ogenerrors.SecurityError{
-					OperationContext: opErrContext,
-					Security:         "TokenCookieAuth",
-					Err:              err,
-				}
-				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-					defer recordError("Security:TokenCookieAuth", err)
-				}
-				return
-			}
-			if ok {
-				satisfied[0] |= 1 << 2
-				ctx = sctx
-			}
-		}
-
-		if ok := func() bool {
-		nextRequirement:
-			for _, requirement := range []bitset{
-				{0b00000001},
-				{0b00000010},
-				{0b00000100},
-			} {
-				for i, mask := range requirement {
-					if satisfied[i]&mask != mask {
-						continue nextRequirement
-					}
-				}
-				return true
-			}
-			return false
-		}(); !ok {
-			err = &ogenerrors.SecurityError{
-				OperationContext: opErrContext,
-				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
-			}
-			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w, span); encodeErr != nil {
-				defer recordError("Security", err)
-			}
-			return
-		}
-	}
-	params, err := decodeRecoverProjectBranchParams(args, argsEscaped, r)
-	if err != nil {
-		err = &ogenerrors.DecodeParamsError{
-			OperationContext: opErrContext,
-			Err:              err,
-		}
-		defer recordError("DecodeParams", err)
-		s.cfg.ErrorHandler(ctx, w, r, err)
-		return
-	}
-
-	var rawBody []byte
-
-	var response *BranchRecoverResponse
-	if m := s.cfg.Middleware; m != nil {
-		mreq := middleware.Request{
-			Context:          ctx,
-			OperationName:    RecoverProjectBranchOperation,
-			OperationSummary: "Recover a deleted branch",
-			OperationID:      "recoverProjectBranch",
-			Body:             nil,
-			RawBody:          rawBody,
-			Params: middleware.Parameters{
-				{
-					Name: "project_id",
-					In:   "path",
-				}: params.ProjectID,
-				{
-					Name: "branch_id",
-					In:   "path",
-				}: params.BranchID,
-			},
-			Raw: r,
-		}
-
-		type (
-			Request  = struct{}
-			Params   = RecoverProjectBranchParams
-			Response = *BranchRecoverResponse
-		)
-		response, err = middleware.HookMiddleware[
-			Request,
-			Params,
-			Response,
-		](
-			m,
-			mreq,
-			unpackRecoverProjectBranchParams,
-			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.RecoverProjectBranch(ctx, params)
-				return response, err
-			},
-		)
-	} else {
-		response, err = s.h.RecoverProjectBranch(ctx, params)
-	}
-	if err != nil {
-		if errRes, ok := errors.Into[*GeneralErrorStatusCode](err); ok {
-			if err := encodeErrorResponse(errRes, w, span); err != nil {
-				defer recordError("Internal", err)
-			}
-			return
-		}
-		if errors.Is(err, ht.ErrNotImplemented) {
-			s.cfg.ErrorHandler(ctx, w, r, err)
-			return
-		}
-		if err := encodeErrorResponse(s.h.NewError(ctx, err), w, span); err != nil {
-			defer recordError("Internal", err)
-		}
-		return
-	}
-
-	if err := encodeRecoverProjectBranchResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -33051,8 +32794,6 @@ func (s *Server) handleRestoreProjectBranchRequest(args [2]string, argsEscaped b
 // Restores the specified snapshot to a new branch, and optionally finalizes the restore operation to
 // replace the original branch.
 //
-// Note: This endpoint is currently in Beta.
-//
 // POST /projects/{project_id}/snapshots/{snapshot_id}/restore
 func (s *Server) handleRestoreSnapshotRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
@@ -33555,7 +33296,7 @@ func (s *Server) handleRevokeApiKeyRequest(args [1]string, argsEscaped bool, w h
 //
 // Soft-deletes the credential. Idempotent.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // DELETE /projects/{project_id}/branches/{branch_id}/credentials/{token_id}
 func (s *Server) handleRevokeCredentialRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -35312,9 +35053,7 @@ func (s *Server) handleSetProjectMemberRoleRequest(args [2]string, argsEscaped b
 // handleSetSnapshotScheduleRequest handles setSnapshotSchedule operation.
 //
 // Updates the backup schedule for the specified branch. The schedule defines how often automatic
-// snapshots are created (e.g., `daily`, `weekly`).
-//
-// Note: This endpoint is currently in Beta.
+// snapshots are created (for example, `daily` or `weekly`). Requires a paid plan.
 //
 // PUT /projects/{project_id}/branches/{branch_id}/backup_schedule
 func (s *Server) handleSetSnapshotScheduleRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -36802,8 +36541,8 @@ func (s *Server) handleTransferProjectsFromOrgToOrgRequest(args [1]string, argsE
 
 // handleTransferProjectsFromUserToOrgRequest handles transferProjectsFromUserToOrg operation.
 //
-// DEPRECATED. Personal accounts have been migrated to organizations, making this operation no longer
-// applicable.
+// Deprecated. Personal accounts have been migrated to organizations, so this operation no longer
+// applies. Removal scheduled for July 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -37043,7 +36782,7 @@ func (s *Server) handleTransferProjectsFromUserToOrgRequest(args [0]string, args
 
 // handleUpdateBranchNeonAuthOauthProviderRequest handles updateBranchNeonAuthOauthProvider operation.
 //
-// Updates a OAuth provider for the specified project.
+// Updates an OAuth provider for the specified project.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/oauth_providers/{oauth_provider_id}
 func (s *Server) handleUpdateBranchNeonAuthOauthProviderRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -38341,6 +38080,11 @@ func (s *Server) handleUpdateNeonAuthEmailAndPasswordConfigRequest(args [2]strin
 // Updates the email provider configuration for the specified branch's Neon Auth integration. The email
 // provider handles transactional messages such as verification emails and password reset links.
 //
+// Partial `standard` updates — omitting fields to keep their stored values — are supported only
+// for Better Auth integrations, which merge omitted fields server-side. Legacy Stack Auth integrations
+// do not merge and require all six `standard` fields (`host`, `port`, `username`, `password`,
+// `sender_email`, `sender_name`) on every update; a partial `standard` body is rejected with 400.
+//
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/email_provider
 func (s *Server) handleUpdateNeonAuthEmailProviderRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
@@ -38525,7 +38269,7 @@ func (s *Server) handleUpdateNeonAuthEmailProviderRequest(args [2]string, argsEs
 		}
 	}()
 
-	var response *NeonAuthEmailServerConfig
+	var response *NeonAuthEmailServerConfigResponse
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -38550,7 +38294,7 @@ func (s *Server) handleUpdateNeonAuthEmailProviderRequest(args [2]string, argsEs
 		type (
 			Request  = *NeonAuthEmailServerConfig
 			Params   = UpdateNeonAuthEmailProviderParams
-			Response = *NeonAuthEmailServerConfig
+			Response = *NeonAuthEmailServerConfigResponse
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -38596,8 +38340,8 @@ func (s *Server) handleUpdateNeonAuthEmailProviderRequest(args [2]string, argsEs
 
 // handleUpdateNeonAuthEmailServerRequest handles updateNeonAuthEmailServer operation.
 //
-// DEPRECATED, use `/projects/{project_id}/branches/{branch_id}/auth/email_provider` instead. Updates
-// the email server configuration for the specified project.
+// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/email_provider` instead. Removal
+// scheduled for March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -38785,7 +38529,7 @@ func (s *Server) handleUpdateNeonAuthEmailServerRequest(args [1]string, argsEsca
 		}
 	}()
 
-	var response *NeonAuthEmailServerConfig
+	var response *NeonAuthEmailServerConfigResponse
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -38806,7 +38550,7 @@ func (s *Server) handleUpdateNeonAuthEmailServerRequest(args [1]string, argsEsca
 		type (
 			Request  = *NeonAuthEmailServerConfig
 			Params   = UpdateNeonAuthEmailServerParams
-			Response = *NeonAuthEmailServerConfig
+			Response = *NeonAuthEmailServerConfigResponse
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -39110,9 +38854,9 @@ func (s *Server) handleUpdateNeonAuthMagicLinkPluginRequest(args [2]string, args
 
 // handleUpdateNeonAuthOauthProviderRequest handles updateNeonAuthOauthProvider operation.
 //
-// DEPRECATED, use
+// Deprecated. Use
 // `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers/{oauth_provider_id}` instead.
-// Updates a OAuth provider for the specified project.
+// Removal scheduled for March 1, 2026.
 //
 // Deprecated: schema marks this operation as deprecated.
 //
@@ -41714,7 +41458,7 @@ func (s *Server) handleUpdateProjectBranchDatabaseRequest(args [3]string, argsEs
 // on the branch that owns it. Like every other change on a branch, a rename is isolated per branch: a
 // branch forked before the rename keeps the name it had at fork time.
 //
-// Note: This endpoint is currently in Private Beta.
+// Note: This endpoint is currently in Beta.
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/functions/{slug}
 func (s *Server) handleUpdateProjectBranchFunctionRequest(args [3]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -42243,8 +41987,6 @@ func (s *Server) handleUpdateProjectEndpointRequest(args [2]string, argsEscaped 
 // handleUpdateSnapshotRequest handles updateSnapshot operation.
 //
 // Updates the specified snapshot.
-//
-// Note: This endpoint is currently in Beta.
 //
 // PATCH /projects/{project_id}/snapshots/{snapshot_id}
 func (s *Server) handleUpdateSnapshotRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {

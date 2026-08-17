@@ -3134,6 +3134,7 @@ func (s *BackupScheduleItem) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode BackupScheduleItem to nil")
 	}
 	var requiredBitSet [1]uint8
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -4755,6 +4756,7 @@ func (s *BranchAnonymizedCreateRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode BranchAnonymizedCreateRequest to nil")
 	}
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -4995,6 +4997,7 @@ func (s *BranchCreateRequestBranch) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode BranchCreateRequestBranch to nil")
 	}
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -5478,128 +5481,6 @@ func (s *BranchOperations) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *BranchOperations) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *BranchRecoverResponse) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *BranchRecoverResponse) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("branch")
-		s.Branch.Encode(e)
-	}
-	{
-		if s.Endpoints != nil {
-			e.FieldStart("endpoints")
-			e.ArrStart()
-			for _, elem := range s.Endpoints {
-				elem.Encode(e)
-			}
-			e.ArrEnd()
-		}
-	}
-}
-
-var jsonFieldsNameOfBranchRecoverResponse = [2]string{
-	0: "branch",
-	1: "endpoints",
-}
-
-// Decode decodes BranchRecoverResponse from json.
-func (s *BranchRecoverResponse) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode BranchRecoverResponse to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "branch":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				if err := s.Branch.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"branch\"")
-			}
-		case "endpoints":
-			if err := func() error {
-				s.Endpoints = make([]Endpoint, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem Endpoint
-					if err := elem.Decode(d); err != nil {
-						return err
-					}
-					s.Endpoints = append(s.Endpoints, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"endpoints\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode BranchRecoverResponse")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000001,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfBranchRecoverResponse) {
-					name = jsonFieldsNameOfBranchRecoverResponse[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *BranchRecoverResponse) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *BranchRecoverResponse) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -10848,6 +10729,7 @@ func (s *CreateProjectBranchReqBranch) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode CreateProjectBranchReqBranch to nil")
 	}
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -10981,6 +10863,7 @@ func (s *CreateProjectTransferRequestReq) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode CreateProjectTransferRequestReq to nil")
 	}
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -22936,20 +22819,70 @@ func (s *NeonAuthEmailServerConfig) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes NeonAuthEmailServerConfigSum as json.
-func (s NeonAuthEmailServerConfigSum) Encode(e *jx.Encoder) {
+// Encode implements json.Marshaler.
+func (s *NeonAuthEmailServerConfigResponse) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-func (s NeonAuthEmailServerConfigSum) encodeFields(e *jx.Encoder) {
+// encodeFields encodes fields.
+func (s *NeonAuthEmailServerConfigResponse) encodeFields(e *jx.Encoder) {
+	s.OneOf.encodeFields(e)
+}
+
+var jsonFieldsNameOfNeonAuthEmailServerConfigResponse = [0]string{}
+
+// Decode decodes NeonAuthEmailServerConfigResponse from json.
+func (s *NeonAuthEmailServerConfigResponse) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NeonAuthEmailServerConfigResponse to nil")
+	}
+	if err := d.Capture(func(d *jx.Decoder) error {
+		return s.OneOf.Decode(d)
+	}); err != nil {
+		return errors.Wrap(err, "decode field OneOf")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		default:
+			return d.Skip()
+		}
+	}); err != nil {
+		return errors.Wrap(err, "decode NeonAuthEmailServerConfigResponse")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NeonAuthEmailServerConfigResponse) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NeonAuthEmailServerConfigResponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes NeonAuthEmailServerConfigResponseSum as json.
+func (s NeonAuthEmailServerConfigResponseSum) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+func (s NeonAuthEmailServerConfigResponseSum) encodeFields(e *jx.Encoder) {
 	switch s.Type {
-	case StandardEmailServerNeonAuthEmailServerConfigSum:
+	case StandardEmailServerResponseNeonAuthEmailServerConfigResponseSum:
 		e.FieldStart("type")
 		e.Str("standard")
 		{
-			s := s.StandardEmailServer
+			s := s.StandardEmailServerResponse
 			{
 				e.FieldStart("host")
 				e.Str(s.Host)
@@ -22973,6 +22906,148 @@ func (s NeonAuthEmailServerConfigSum) encodeFields(e *jx.Encoder) {
 			{
 				e.FieldStart("sender_name")
 				e.Str(s.SenderName)
+			}
+		}
+	case SharedEmailServerNeonAuthEmailServerConfigResponseSum:
+		e.FieldStart("type")
+		e.Str("shared")
+		{
+			s := s.SharedEmailServer
+			{
+				if s.SenderEmail.Set {
+					e.FieldStart("sender_email")
+					s.SenderEmail.Encode(e)
+				}
+			}
+			{
+				if s.SenderName.Set {
+					e.FieldStart("sender_name")
+					s.SenderName.Encode(e)
+				}
+			}
+		}
+	}
+}
+
+// Decode decodes NeonAuthEmailServerConfigResponseSum from json.
+func (s *NeonAuthEmailServerConfigResponseSum) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NeonAuthEmailServerConfigResponseSum to nil")
+	}
+	// Sum type discriminator.
+	if typ := d.Next(); typ != jx.Object {
+		return errors.Errorf("unexpected json type %q", typ)
+	}
+
+	var found bool
+	if err := d.Capture(func(d *jx.Decoder) error {
+		return d.ObjBytes(func(d *jx.Decoder, key []byte) error {
+			if found {
+				return d.Skip()
+			}
+			switch string(key) {
+			case "type":
+				typ, err := d.Str()
+				if err != nil {
+					return err
+				}
+				switch typ {
+				case "standard":
+					s.Type = StandardEmailServerResponseNeonAuthEmailServerConfigResponseSum
+					found = true
+				case "shared":
+					s.Type = SharedEmailServerNeonAuthEmailServerConfigResponseSum
+					found = true
+				default:
+					return errors.Errorf("unknown type %s", typ)
+				}
+				return nil
+			}
+			return d.Skip()
+		})
+	}); err != nil {
+		return errors.Wrap(err, "capture")
+	}
+	if !found {
+		return errors.New("unable to detect sum type variant")
+	}
+	switch s.Type {
+	case StandardEmailServerResponseNeonAuthEmailServerConfigResponseSum:
+		if err := s.StandardEmailServerResponse.Decode(d); err != nil {
+			return err
+		}
+	case SharedEmailServerNeonAuthEmailServerConfigResponseSum:
+		if err := s.SharedEmailServer.Decode(d); err != nil {
+			return err
+		}
+	default:
+		return errors.Errorf("inferred invalid type: %s", s.Type)
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s NeonAuthEmailServerConfigResponseSum) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NeonAuthEmailServerConfigResponseSum) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes NeonAuthEmailServerConfigSum as json.
+func (s NeonAuthEmailServerConfigSum) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+func (s NeonAuthEmailServerConfigSum) encodeFields(e *jx.Encoder) {
+	switch s.Type {
+	case StandardEmailServerNeonAuthEmailServerConfigSum:
+		e.FieldStart("type")
+		e.Str("standard")
+		{
+			s := s.StandardEmailServer
+			{
+				if s.Host.Set {
+					e.FieldStart("host")
+					s.Host.Encode(e)
+				}
+			}
+			{
+				if s.Port.Set {
+					e.FieldStart("port")
+					s.Port.Encode(e)
+				}
+			}
+			{
+				if s.Username.Set {
+					e.FieldStart("username")
+					s.Username.Encode(e)
+				}
+			}
+			{
+				if s.Password.Set {
+					e.FieldStart("password")
+					s.Password.Encode(e)
+				}
+			}
+			{
+				if s.SenderEmail.Set {
+					e.FieldStart("sender_email")
+					s.SenderEmail.Encode(e)
+				}
+			}
+			{
+				if s.SenderName.Set {
+					e.FieldStart("sender_name")
+					s.SenderName.Encode(e)
+				}
 			}
 		}
 	case SharedEmailServerNeonAuthEmailServerConfigSum:
@@ -28100,18 +28175,18 @@ func (s *OptNeonAuthEmailAndPasswordConfig) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes NeonAuthEmailServerConfig as json.
-func (o OptNeonAuthEmailServerConfig) Encode(e *jx.Encoder) {
+// Encode encodes NeonAuthEmailServerConfigResponse as json.
+func (o OptNeonAuthEmailServerConfigResponse) Encode(e *jx.Encoder) {
 	if !o.Set {
 		return
 	}
 	o.Value.Encode(e)
 }
 
-// Decode decodes NeonAuthEmailServerConfig from json.
-func (o *OptNeonAuthEmailServerConfig) Decode(d *jx.Decoder) error {
+// Decode decodes NeonAuthEmailServerConfigResponse from json.
+func (o *OptNeonAuthEmailServerConfigResponse) Decode(d *jx.Decoder) error {
 	if o == nil {
-		return errors.New("invalid: unable to decode OptNeonAuthEmailServerConfig to nil")
+		return errors.New("invalid: unable to decode OptNeonAuthEmailServerConfigResponse to nil")
 	}
 	o.Set = true
 	if err := o.Value.Decode(d); err != nil {
@@ -28121,14 +28196,14 @@ func (o *OptNeonAuthEmailServerConfig) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s OptNeonAuthEmailServerConfig) MarshalJSON() ([]byte, error) {
+func (s OptNeonAuthEmailServerConfigResponse) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptNeonAuthEmailServerConfig) UnmarshalJSON(data []byte) error {
+func (s *OptNeonAuthEmailServerConfigResponse) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -40331,6 +40406,154 @@ func (s *StandardEmailServer) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *StandardEmailServer) encodeFields(e *jx.Encoder) {
 	{
+		if s.Host.Set {
+			e.FieldStart("host")
+			s.Host.Encode(e)
+		}
+	}
+	{
+		if s.Port.Set {
+			e.FieldStart("port")
+			s.Port.Encode(e)
+		}
+	}
+	{
+		if s.Username.Set {
+			e.FieldStart("username")
+			s.Username.Encode(e)
+		}
+	}
+	{
+		if s.Password.Set {
+			e.FieldStart("password")
+			s.Password.Encode(e)
+		}
+	}
+	{
+		if s.SenderEmail.Set {
+			e.FieldStart("sender_email")
+			s.SenderEmail.Encode(e)
+		}
+	}
+	{
+		if s.SenderName.Set {
+			e.FieldStart("sender_name")
+			s.SenderName.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfStandardEmailServer = [6]string{
+	0: "host",
+	1: "port",
+	2: "username",
+	3: "password",
+	4: "sender_email",
+	5: "sender_name",
+}
+
+// Decode decodes StandardEmailServer from json.
+func (s *StandardEmailServer) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode StandardEmailServer to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "host":
+			if err := func() error {
+				s.Host.Reset()
+				if err := s.Host.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"host\"")
+			}
+		case "port":
+			if err := func() error {
+				s.Port.Reset()
+				if err := s.Port.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"port\"")
+			}
+		case "username":
+			if err := func() error {
+				s.Username.Reset()
+				if err := s.Username.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"username\"")
+			}
+		case "password":
+			if err := func() error {
+				s.Password.Reset()
+				if err := s.Password.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"password\"")
+			}
+		case "sender_email":
+			if err := func() error {
+				s.SenderEmail.Reset()
+				if err := s.SenderEmail.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"sender_email\"")
+			}
+		case "sender_name":
+			if err := func() error {
+				s.SenderName.Reset()
+				if err := s.SenderName.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"sender_name\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode StandardEmailServer")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *StandardEmailServer) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *StandardEmailServer) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *StandardEmailServerResponse) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *StandardEmailServerResponse) encodeFields(e *jx.Encoder) {
+	{
 		e.FieldStart("host")
 		e.Str(s.Host)
 	}
@@ -40356,7 +40579,7 @@ func (s *StandardEmailServer) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfStandardEmailServer = [6]string{
+var jsonFieldsNameOfStandardEmailServerResponse = [6]string{
 	0: "host",
 	1: "port",
 	2: "username",
@@ -40365,10 +40588,10 @@ var jsonFieldsNameOfStandardEmailServer = [6]string{
 	5: "sender_name",
 }
 
-// Decode decodes StandardEmailServer from json.
-func (s *StandardEmailServer) Decode(d *jx.Decoder) error {
+// Decode decodes StandardEmailServerResponse from json.
+func (s *StandardEmailServerResponse) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode StandardEmailServer to nil")
+		return errors.New("invalid: unable to decode StandardEmailServerResponse to nil")
 	}
 	var requiredBitSet [1]uint8
 
@@ -40451,7 +40674,7 @@ func (s *StandardEmailServer) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode StandardEmailServer")
+		return errors.Wrap(err, "decode StandardEmailServerResponse")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -40468,8 +40691,8 @@ func (s *StandardEmailServer) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfStandardEmailServer) {
-					name = jsonFieldsNameOfStandardEmailServer[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfStandardEmailServerResponse) {
+					name = jsonFieldsNameOfStandardEmailServerResponse[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -40490,14 +40713,14 @@ func (s *StandardEmailServer) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *StandardEmailServer) MarshalJSON() ([]byte, error) {
+func (s *StandardEmailServerResponse) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *StandardEmailServer) UnmarshalJSON(data []byte) error {
+func (s *StandardEmailServerResponse) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

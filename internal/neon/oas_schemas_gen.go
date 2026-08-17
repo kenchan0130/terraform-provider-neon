@@ -41,6 +41,8 @@ func (s *AcceptProjectTransferRequestReq) SetOrgID(val OptString) {
 
 // Ref: #/components/schemas/AcceptProjectTransferRequestSatisfiesPlanError
 type AcceptProjectTransferRequestSatisfiesPlanError struct {
+	// List of reasons why the target account's plan cannot satisfy the transfer requirements. Each item
+	// contains a `code` identifying the constraint and a `message` with a human-readable explanation.
 	Reasons []AcceptProjectTransferRequestSatisfiesPlanErrorReasonsItem `json:"reasons"`
 }
 
@@ -108,21 +110,21 @@ type AddNeonAuthDomainToRedirectURIWhitelistCreated struct{}
 // Add a new JWKS to a specific endpoint of a project.
 // Ref: #/components/schemas/AddProjectJWKSRequest
 type AddProjectJWKSRequest struct {
-	// The URL that lists the JWKS.
+	// URL of the provider's JWKS endpoint used to verify JWTs.
 	JwksURL string `json:"jwks_url"`
 	// The name of the authentication provider (e.g., Clerk, Stytch, Auth0).
 	ProviderName string `json:"provider_name"`
-	// Branch ID.
+	// The Neon branch ID. Returned as `id` from `GET /projects/{project_id}/branches`.
 	BranchID OptString `json:"branch_id"`
-	// The name of the required JWT Audience to be used.
+	// Expected `aud` claim in incoming JWTs. When set, tokens with a different audience are rejected;
+	// tokens with no audience are still accepted. Omit to skip audience validation.
 	JwtAudience OptString `json:"jwt_audience"`
-	// DEPRECATED. This field should only be used when using Neon RLS. The roles the JWKS should be mapped
-	// to. By default, the JWKS is mapped to the `authenticator`, `authenticated` and `anonymous` roles.
+	// Deprecated. The roles the JWKS should be mapped to. By default, the JWKS is mapped to the
+	// `authenticator`, `authenticated`, and `anonymous` roles.
 	//
 	// Deprecated: schema marks this property as deprecated.
 	RoleNames []string `json:"role_names"`
-	// DEPRECATED. This field should only be used when using Neon RLS. If true, the role creation will be
-	// skipped.
+	// Deprecated. Only used with Neon RLS. If true, role creation is skipped.
 	SkipRoleCreation OptBool `json:"skip_role_creation"`
 }
 
@@ -440,10 +442,13 @@ func (s *AllowedIps) SetProtectedBranchesOnly(val OptBool) {
 
 // Ref: #/components/schemas/AnnotationData
 type AnnotationData struct {
-	Object    AnnotationObjectData `json:"object"`
-	Value     AnnotationValueData  `json:"value"`
-	CreatedAt OptDateTime          `json:"created_at"`
-	UpdatedAt OptDateTime          `json:"updated_at"`
+	// Resource that this annotation is attached to.
+	Object AnnotationObjectData `json:"object"`
+	Value  AnnotationValueData  `json:"value"`
+	// Timestamp when the annotation was created, in RFC 3339 format (UTC).
+	CreatedAt OptDateTime `json:"created_at"`
+	// Timestamp of the most recent update to the annotation, in RFC 3339 format (UTC).
+	UpdatedAt OptDateTime `json:"updated_at"`
 }
 
 // GetObject returns the value of Object.
@@ -488,8 +493,10 @@ func (s *AnnotationData) SetUpdatedAt(val OptDateTime) {
 
 // Ref: #/components/schemas/AnnotationObjectData
 type AnnotationObjectData struct {
+	// Kind of resource the annotation is attached to, for example "branch" or "endpoint".
 	Type string `json:"type"`
-	ID   string `json:"id"`
+	// The annotated object's ID.
+	ID string `json:"id"`
 }
 
 // GetType returns the value of Type.
@@ -512,7 +519,8 @@ func (s *AnnotationObjectData) SetID(val string) {
 	s.ID = val
 }
 
-// Annotation properties.
+// A free-form map of string key-value pairs for attaching metadata to a resource (for example, a git
+// commit reference). Maximum 50 entries.
 // Ref: #/components/schemas/AnnotationValueData
 type AnnotationValueData map[string]string
 
@@ -593,12 +601,15 @@ func (s *AnonymizationRunMetadata) SetMaskedColumns(val OptInt) {
 
 // Ref: #/components/schemas/AnonymizedBranchStatusResponse
 type AnonymizedBranchStatusResponse struct {
-	// The ID of the project.
+	// The ID of the project this branch belongs to.
 	ProjectID string `json:"project_id"`
 	// The ID of the anonymized branch.
 	BranchID string `json:"branch_id"`
-	// The current state of the anonymized branch. Possible values: created, initialized,
-	// initialization_error, anonymizing, anonymized, error.
+	// The current state of the anonymized branch. `created`: branch record exists but setup has not
+	// started. `initialized`: setup is complete and the branch is ready for anonymization.
+	// `initialization_error`: an error occurred during setup. `anonymizing`: the anonymization process is
+	// currently running. `anonymized`: anonymization completed successfully. `error`: an error occurred
+	// during anonymization.
 	State string `json:"state"`
 	// A descriptive message about the current status or any errors.
 	StatusMessage OptString `json:"status_message"`
@@ -709,7 +720,7 @@ func (s *ApiKeyCreateRequest) SetKeyName(val string) {
 
 // Ref: #/components/schemas/ApiKeyCreateResponse
 type ApiKeyCreateResponse struct {
-	// The API key ID.
+	// The API key's unique numeric ID. Distinct from the API key token (`key`).
 	ID int64 `json:"id"`
 	// The generated 64-bit token required to access the Neon API.
 	Key string `json:"key"`
@@ -776,7 +787,7 @@ func (s *ApiKeyCreateResponse) SetCreatedBy(val uuid.UUID) {
 type ApiKeyCreatorData struct {
 	// ID of the user who created this API key.
 	ID uuid.UUID `json:"id"`
-	// The name of the user.
+	// Display name of the user who created the API key.
 	Name string `json:"name"`
 	// The URL to the user's avatar image.
 	Image string `json:"image"`
@@ -814,7 +825,7 @@ func (s *ApiKeyCreatorData) SetImage(val string) {
 
 // Ref: #/components/schemas/ApiKeyRevokeResponse
 type ApiKeyRevokeResponse struct {
-	// The API key ID.
+	// The API key's unique numeric ID. Distinct from the API key token (`key`).
 	ID int64 `json:"id"`
 	// The user-specified API key name.
 	Name string `json:"name"`
@@ -902,7 +913,7 @@ func (s *ApiKeyRevokeResponse) SetRevoked(val bool) {
 
 // Ref: #/components/schemas/ApiKeysListResponseItem
 type ApiKeysListResponseItem struct {
-	// The API key ID.
+	// The API key's unique numeric ID. Distinct from the API key token (`key`).
 	ID int64 `json:"id"`
 	// The user-specified API key name.
 	Name string `json:"name"`
@@ -1040,7 +1051,15 @@ type AssignProjectVPCEndpointOK struct{}
 
 // Ref: #/components/schemas/AuthDetailsResponse
 type AuthDetailsResponse struct {
-	AccountID  string                        `json:"account_id"`
+	// The ID of the account associated with this authentication record.
+	AccountID string `json:"account_id"`
+	// Authentication method used for the request:
+	//
+	//  - `keycloak`: Keycloak identity provider authentication.
+	//  - `session_cookie`: Browser session cookie authentication.
+	//  - `api_key_user`: API key scoped to a user account.
+	//  - `api_key_org`: API key scoped to an organization.
+	//  - `oauth`: OAuth-based authentication.
 	AuthMethod AuthDetailsResponseAuthMethod `json:"auth_method"`
 	AuthData   OptString                     `json:"auth_data"`
 }
@@ -1075,6 +1094,13 @@ func (s *AuthDetailsResponse) SetAuthData(val OptString) {
 	s.AuthData = val
 }
 
+// Authentication method used for the request:
+//
+//   - `keycloak`: Keycloak identity provider authentication.
+//   - `session_cookie`: Browser session cookie authentication.
+//   - `api_key_user`: API key scoped to a user account.
+//   - `api_key_org`: API key scoped to an organization.
+//   - `oauth`: OAuth-based authentication.
 type AuthDetailsResponseAuthMethod string
 
 const (
@@ -1139,6 +1165,8 @@ func (s *AuthDetailsResponseAuthMethod) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/AvailablePreloadLibraries
 type AvailablePreloadLibraries struct {
+	// Preload libraries available for the project's Postgres version. Each entry includes `library_name`,
+	// `description`, `is_default`, `is_experimental`, and `version`.
 	Libraries []AvailablePreloadLibrary `json:"libraries"`
 }
 
@@ -1154,11 +1182,19 @@ func (s *AvailablePreloadLibraries) SetLibraries(val []AvailablePreloadLibrary) 
 
 // Ref: #/components/schemas/AvailablePreloadLibrary
 type AvailablePreloadLibrary struct {
-	LibraryName    string `json:"library_name"`
-	Description    string `json:"description"`
-	IsDefault      bool   `json:"is_default"`
-	IsExperimental bool   `json:"is_experimental"`
-	Version        string `json:"version"`
+	// Name of the Postgres shared preload library as it appears in the `shared_preload_libraries`
+	// parameter (for example, `pg_stat_statements`).
+	LibraryName string `json:"library_name"`
+	// Human-readable explanation of the library's purpose and behavior.
+	Description string `json:"description"`
+	// Whether this library is loaded by default in the `shared_preload_libraries` configuration for new
+	// compute endpoints.
+	IsDefault bool `json:"is_default"`
+	// Marks the library as experimental. Experimental libraries may be unstable, subject to breaking
+	// changes, or not recommended for production use.
+	IsExperimental bool `json:"is_experimental"`
+	// Version of the preload library.
+	Version string `json:"version"`
 }
 
 // GetLibraryName returns the value of LibraryName.
@@ -1213,6 +1249,7 @@ func (s *AvailablePreloadLibrary) SetVersion(val string) {
 
 // Ref: #/components/schemas/BackupSchedule
 type BackupSchedule struct {
+	// List of schedule entries defining the backup frequency. At least one entry is required.
 	Schedule []BackupScheduleItem `json:"schedule"`
 }
 
@@ -1228,11 +1265,7 @@ func (s *BackupSchedule) SetSchedule(val []BackupScheduleItem) {
 
 // Ref: #/components/schemas/BackupScheduleItem
 type BackupScheduleItem struct {
-	// How often to take snapshots. Must be one of the following values:
-	//
-	//  - `daily`
-	//  - `weekly`
-	//  - `monthly`
+	// How often to take snapshots. Known values: `daily`, `weekly`, `monthly`.
 	Frequency string `json:"frequency"`
 	// The hour of the day to take the snapshot (if applicable).
 	Hour OptInt `json:"hour"`
@@ -1240,8 +1273,9 @@ type BackupScheduleItem struct {
 	Day OptInt `json:"day"`
 	// The month of the year to take the snapshot (if applicable).
 	Month OptInt `json:"month"`
-	// How long to keep a snapshot (in seconds) before it's automatically deleted. If not set, the snapshot
-	// is kept indefinitely.
+	// How long to keep a scheduled snapshot (in seconds) before it's automatically deleted. The default is
+	// 3024000 seconds (35 days), which is also the maximum. Manually created snapshots have no maximum
+	// retention: set their `expires_at` instead.
 	RetentionSeconds OptInt `json:"retention_seconds"`
 }
 
@@ -1322,11 +1356,16 @@ func (s *BearerAuth) SetRoles(val []string) {
 
 // Ref: #/components/schemas/BillingAccount
 type BillingAccount struct {
-	State            BillingAccountState     `json:"state"`
+	// State of the billing account. `UNKNOWN`: state is not determined. `active`: the account is active
+	// and in normal operation. `suspended`: the account has been suspended. `deactivated`: the account has
+	// been deactivated. `deleted`: the account has been deleted.
+	State BillingAccountState `json:"state"`
+	// Payment source attached to the billing account, such as a credit card on file.
 	PaymentSource    PaymentSource           `json:"payment_source"`
 	SubscriptionType BillingSubscriptionType `json:"subscription_type"`
 	PaymentMethod    BillingPaymentMethod    `json:"payment_method"`
-	// The last time the quota was reset. Defaults to the date-time the account is created.
+	// Timestamp of the last quota reset. Set to the account creation time when the account is first
+	// created.
 	QuotaResetAtLast time.Time `json:"quota_reset_at_last"`
 	// The full name of the individual or entity that owns the billing account. This name appears on
 	// invoices.
@@ -1352,7 +1391,8 @@ type BillingAccount struct {
 	// The tax identification number for the billing account, displayed on invoices.
 	TaxID OptString `json:"tax_id"`
 	// The type of the tax identification number based on the country.
-	TaxIDType   OptString      `json:"tax_id_type"`
+	TaxIDType OptString `json:"tax_id_type"`
+	// Details of the subscription plan associated with the billing account.
 	PlanDetails OptPlanDetails `json:"plan_details"`
 	// Monthly spending cap in cents for V3 paid plans. When set, notifications are sent at 80% and 100% of
 	// this limit. `null` means no limit is configured.
@@ -1838,7 +1878,7 @@ type Branch struct {
 	// The branch ID. This value is generated when a branch is created. A `branch_id` value has a `br`
 	// prefix. For example: `br-small-term-683261`.
 	ID string `json:"id"`
-	// The ID of the project to which the branch belongs.
+	// The ID of the project this branch belongs to.
 	ProjectID string `json:"project_id"`
 	// The `branch_id` of the parent branch.
 	ParentID OptString `json:"parent_id"`
@@ -1862,26 +1902,30 @@ type Branch struct {
 	LogicalSize OptInt64 `json:"logical_size"`
 	// The branch creation source.
 	CreationSource string `json:"creation_source"`
-	// DEPRECATED. Use `default` field. Whether the branch is the project's primary branch.
+	// Deprecated. Use the `default` field. Whether the branch is the project's primary branch.
 	//
 	// Deprecated: schema marks this property as deprecated.
 	Primary OptBool `json:"primary"`
 	// Whether the branch is the project's default branch.
 	Default bool `json:"default"`
-	// Whether the branch is protected.
+	// Whether the branch is protected. Protected branches (and their computes) cannot be deleted,
+	// archived, or reset, and block deletion of the project.
 	Protected bool `json:"protected"`
-	// CPU seconds used by all of the branch's compute endpoints, including deleted ones. This value is
-	// reset at the beginning of each billing period. Examples:
-	//
-	// 1. A branch that uses 1 CPU for 1 second is equal to `cpu_used_sec=1`.
-	// 2. A branch that uses 2 CPUs simultaneously for 1 second is equal to `cpu_used_sec=2`.
+	// Deprecated. Use `compute_time_seconds` instead. CPU seconds used by all of the branch's compute
+	// endpoints, including deleted ones. This value is reset at the beginning of each billing period.
 	//
 	// Deprecated: schema marks this property as deprecated.
-	CPUUsedSec         int64 `json:"cpu_used_sec"`
+	CPUUsedSec int64 `json:"cpu_used_sec"`
+	// Total Postgres compute time consumed by this branch during the current billing period, in CU-seconds
+	// (weighted by compute size). Divide by 3600 for CU-hours.
 	ComputeTimeSeconds int64 `json:"compute_time_seconds"`
-	ActiveTimeSeconds  int64 `json:"active_time_seconds"`
-	WrittenDataBytes   int64 `json:"written_data_bytes"`
-	DataTransferBytes  int64 `json:"data_transfer_bytes"`
+	// Total time this branch's compute has been active during the current billing period, in seconds (not
+	// weighted by compute size). Distinct from `compute_time_seconds`, which is CU-weighted.
+	ActiveTimeSeconds int64 `json:"active_time_seconds"`
+	// Data written by this branch during the current billing period, in bytes.
+	WrittenDataBytes int64 `json:"written_data_bytes"`
+	// Total data transferred out of the branch, in bytes. Used as a consumption metric.
+	DataTransferBytes int64 `json:"data_transfer_bytes"`
 	// A timestamp indicating when the branch was created.
 	CreatedAt time.Time `json:"created_at"`
 	// A timestamp indicating when the branch was last updated.
@@ -1908,15 +1952,9 @@ type Branch struct {
 	// creation. This field is filled only in listing/get/create/get/update/delete methods, if it is empty
 	// when calling other handlers, it does not mean that it is empty in the system.
 	CreatedBy OptBranchCreatedBy `json:"created_by"`
-	// The source of initialization for the branch. Valid values are `schema-only` and `parent-data`
-	// (default).
-	//
-	//  - `schema-only` - creates a new root branch containing only the schema. Use `parent_id` to specify
-	//    the source branch. Optionally, you can provide `parent_lsn` or `parent_timestamp` to branch from
-	//    a specific point in time or LSN. These fields define which branch to copy the schema from and at
-	//    what point—they do not establish a parent-child relationship between the `parent_id` branch and
-	//    the new schema-only branch.
-	//  - `parent-data` - creates the branch with both schema and data from the parent.
+	// Source of initialization for the branch. `parent-data` (default) copies schema and data from the
+	// parent. `parent-schema` copies schema only from the parent. `schema-only` creates a root branch with
+	// schema only. `import` initializes from an external import.
 	InitSource    OptString              `json:"init_source"`
 	RestoreStatus OptBranchRestoreStatus `json:"restore_status"`
 	// ID of the snapshot that was the restore source for this branch.
@@ -2412,8 +2450,12 @@ func (s *BranchAnonymizedCreateRequest) SetStartAnonymization(val OptBool) {
 
 // Ref: #/components/schemas/BranchCreateRequest
 type BranchCreateRequest struct {
+	// Compute endpoints to create together with the branch. If omitted, the branch is created without any
+	// compute endpoint. Endpoints can be added to the branch separately after creation.
 	Endpoints []BranchCreateRequestEndpointOptions `json:"endpoints"`
-	Branch    OptBranchCreateRequestBranch         `json:"branch"`
+	// Optional configuration for the new branch, for example `name`, `parent_id` (fork from a branch),
+	// `parent_lsn` or `parent_timestamp` (point-in-time branching), and `protected`.
+	Branch OptBranchCreateRequestBranch `json:"branch"`
 }
 
 // GetEndpoints returns the value of Endpoints.
@@ -2436,6 +2478,8 @@ func (s *BranchCreateRequest) SetBranch(val OptBranchCreateRequestBranch) {
 	s.Branch = val
 }
 
+// Optional configuration for the new branch, for example `name`, `parent_id` (fork from a branch),
+// `parent_lsn` or `parent_timestamp` (point-in-time branching), and `protected`.
 type BranchCreateRequestBranch struct {
 	// The `branch_id` of the parent branch. If omitted or empty, the branch will be created from the
 	// project's default branch.
@@ -2446,22 +2490,20 @@ type BranchCreateRequestBranch struct {
 	// LSN.
 	ParentLsn OptString `json:"parent_lsn"`
 	// A timestamp identifying a point in time on the parent branch. The branch will be created with data
-	// starting from this point in time. The timestamp must be provided in ISO 8601 format; for example:
-	// `2024-02-26T12:00:00Z`.
+	// starting from this point in time. RFC 3339 format.
 	ParentTimestamp OptDateTime `json:"parent_timestamp"`
-	// Whether the branch is protected.
+	// Whether the branch is protected. Protected branches (and their computes) cannot be deleted,
+	// archived, or reset, and block deletion of the project. Can be gated by `protected_branches_only` in
+	// the IP allowlist. Paid plans only.
 	Protected OptBool `json:"protected"`
-	// Whether to create the branch as archived.
+	// Whether to create the branch in the archived state. When omitted, the branch is created as a normal
+	// (non-archived) branch.
 	Archived OptBool `json:"archived"`
-	// The source of initialization for the branch. Valid values are `schema-only` and `parent-data`
-	// (default).
-	//
-	//  - `schema-only` - creates a new root branch containing only the schema. Use `parent_id` to specify
-	//    the source branch. Optionally, you can provide `parent_lsn` or `parent_timestamp` to branch from
-	//    a specific point in time or LSN. These fields define which branch to copy the schema from and at
-	//    what point—they do not establish a parent-child relationship between the `parent_id` branch and
-	//    the new schema-only branch.
-	//  - `parent-data` - creates the branch with both schema and data from the parent.
+	// Source of initialization for the branch. `parent-data` copies schema and data from the parent
+	// branch. `parent-schema` copies schema only from the parent branch. `schema-only` creates a new root
+	// branch containing schema only, using `parent_id` as the source; optionally, `parent_lsn` or
+	// `parent_timestamp` can narrow the source point. `import` initializes the branch from an external
+	// import.
 	InitSource OptString `json:"init_source"`
 	// The timestamp when the branch is scheduled to expire and be automatically deleted. Must be set by
 	// the client following the [RFC 3339, section 5.6] format with precision up to seconds (such as
@@ -2556,19 +2598,20 @@ func (s *BranchCreateRequestBranch) SetExpiresAt(val OptDateTime) {
 
 // Ref: #/components/schemas/BranchCreateRequestEndpointOptions
 type BranchCreateRequestEndpointOptions struct {
-	Type     EndpointType            `json:"type"`
+	Type EndpointType `json:"type"`
+	// Compute endpoint settings: `pg_settings` (Postgres parameter overrides such as `work_mem`,
+	// `max_connections`) and `preload_libraries`.
 	Settings OptEndpointSettingsData `json:"settings"`
-	// The minimum number of Compute Units. The minimum value is `0.25`. See
-	// [Compute size and Autoscaling configuration] for more information.
-	//
-	// [Compute size and Autoscaling configuration]: https://neon.com/docs/manage/endpoints#compute-size-and-autoscaling-configuration
+	// Minimum number of Compute Units the endpoint can scale down to. Minimum 0.25.
 	AutoscalingLimitMinCu OptComputeUnit `json:"autoscaling_limit_min_cu"`
-	// The maximum number of Compute Units. See [Compute size and Autoscaling configuration] for more
-	// information.
-	//
-	// [Compute size and Autoscaling configuration]: https://neon.com/docs/manage/endpoints#compute-size-and-autoscaling-configuration
-	AutoscalingLimitMaxCu OptComputeUnit           `json:"autoscaling_limit_max_cu"`
-	Provisioner           OptProvisioner           `json:"provisioner"`
+	// Maximum number of Compute Units the endpoint can scale up to. Minimum 0.25.
+	AutoscalingLimitMaxCu OptComputeUnit `json:"autoscaling_limit_max_cu"`
+	// Compute provisioner. `k8s-neonvm` (default) supports Autoscaling; `k8s-pod` is fixed-size compute.
+	// Also `docker` and `serverless-platform`.
+	Provisioner OptProvisioner `json:"provisioner"`
+	// Scale-to-zero idle timeout, in seconds, before the compute suspends. `0` uses the plan default; `-1`
+	// disables scale-to-zero (never suspends). Minimum is plan-dependent (Scale: 60); maximum 604800 (one
+	// week). Free cannot change it; Launch can only enable or disable; Scale can set any value.
 	SuspendTimeoutSeconds OptSuspendTimeoutSeconds `json:"suspend_timeout_seconds"`
 }
 
@@ -2636,7 +2679,7 @@ func (s *BranchCreateRequestEndpointOptions) SetSuspendTimeoutSeconds(val OptSus
 // creation. This field is filled only in listing/get/create/get/update/delete methods, if it is empty
 // when calling other handlers, it does not mean that it is empty in the system.
 type BranchCreatedBy struct {
-	// The name of the user.
+	// Display name of the user who created the branch.
 	Name OptString `json:"name"`
 	// The URL to the user's avatar image.
 	Image OptString `json:"image"`
@@ -2665,6 +2708,7 @@ func (s *BranchCreatedBy) SetImage(val OptString) {
 // Merged schema.
 // Ref: #/components/schemas/BranchOperations
 type BranchOperations struct {
+	// Branch returned by the request.
 	Branch     Branch      `json:"branch"`
 	Operations []Operation `json:"operations"`
 }
@@ -2690,33 +2734,6 @@ func (s *BranchOperations) SetOperations(val []Operation) {
 }
 
 func (*BranchOperations) deleteProjectBranchRes() {}
-
-// Merged schema.
-// Ref: #/components/schemas/BranchRecoverResponse
-type BranchRecoverResponse struct {
-	Branch    Branch     `json:"branch"`
-	Endpoints []Endpoint `json:"endpoints"`
-}
-
-// GetBranch returns the value of Branch.
-func (s *BranchRecoverResponse) GetBranch() Branch {
-	return s.Branch
-}
-
-// GetEndpoints returns the value of Endpoints.
-func (s *BranchRecoverResponse) GetEndpoints() []Endpoint {
-	return s.Endpoints
-}
-
-// SetBranch sets the value of Branch.
-func (s *BranchRecoverResponse) SetBranch(val Branch) {
-	s.Branch = val
-}
-
-// SetEndpoints sets the value of Endpoints.
-func (s *BranchRecoverResponse) SetEndpoints(val []Endpoint) {
-	s.Endpoints = val
-}
 
 // Recovery information for a deleted branch. Only present when listing deleted branches with
 // `include_deleted=true`.
@@ -2810,17 +2827,16 @@ type BranchRestoreRequest struct {
 	// the branch will be restored to head. If `source_branch_id` is equal to the branch's id,
 	// `source_timestamp` or `source_lsn` is required.
 	SourceBranchID string `json:"source_branch_id"`
-	// A Log Sequence Number (LSN) on the source branch. The branch will be restored with data from this
-	// LSN.
+	// A Postgres LSN (for example, `0/1A2B3C4`) on the source branch to restore from. Mutually exclusive
+	// with `source_timestamp`. Omit both to restore to head.
 	SourceLsn OptString `json:"source_lsn"`
-	// A timestamp identifying a point in time on the source branch. The branch will be restored with data
-	// starting from this point in time. The timestamp must be provided in ISO 8601 format; for example:
-	// `2024-02-26T12:00:00Z`.
+	// A point in time on the source branch to restore from, in RFC 3339 format. When omitted alongside
+	// `source_lsn`, the branch is restored to the latest available state of the source branch.
 	SourceTimestamp OptDateTime `json:"source_timestamp"`
-	// If not empty, the previous state of the branch will be saved to a branch with this name. If the
-	// branch has children or the `source_branch_id` is equal to the branch id, this field is required. All
-	// existing child branches will be moved to the newly created branch under the name
-	// `preserve_under_name`.
+	// Name under which to save the current branch state before restoring. Required when the branch has
+	// children or when `source_branch_id` equals the branch being restored; in those cases all existing
+	// child branches are moved to the newly created branch. If omitted and not required, the previous
+	// state is not preserved.
 	PreserveUnderName OptString `json:"preserve_under_name"`
 }
 
@@ -2869,7 +2885,8 @@ type BranchRestoreStatus string
 // An action that is currently restricted for the branch and the reason why.
 // Ref: #/components/schemas/BranchRestrictedAction
 type BranchRestrictedAction struct {
-	// The name of a restricted action. Possible values include `restore`, `delete-rw-endpoint`.
+	// The name of a restricted action on a branch. `restore`: the branch cannot be used as a restore
+	// target. `delete-rw-endpoint`: the read-write endpoint for the branch cannot be deleted.
 	Name string `json:"name"`
 	// A human-readable explanation of why the action is restricted.
 	Reason string `json:"reason"`
@@ -2897,6 +2914,7 @@ func (s *BranchRestrictedAction) SetReason(val string) {
 
 // Ref: #/components/schemas/BranchSchemaCompareResponse
 type BranchSchemaCompareResponse struct {
+	// Unified diff of the SQL schema changes between the compared branches.
 	Diff OptString `json:"diff"`
 }
 
@@ -2912,6 +2930,7 @@ func (s *BranchSchemaCompareResponse) SetDiff(val OptString) {
 
 // Ref: #/components/schemas/BranchSchemaJSON
 type BranchSchemaJSON struct {
+	// Tables present in the branch schema.
 	Tables []BranchSchemaJSONTablesItem `json:"tables"`
 }
 
@@ -2926,9 +2945,14 @@ func (s *BranchSchemaJSON) SetTables(val []BranchSchemaJSONTablesItem) {
 }
 
 type BranchSchemaJSONTablesItem struct {
-	Schema      string                                      `json:"schema"`
-	Name        string                                      `json:"name"`
-	Columns     []BranchSchemaJSONTablesItemColumnsItem     `json:"columns"`
+	// Postgres schema (namespace) that contains the table, for example `public`.
+	Schema string `json:"schema"`
+	// Name of the table within the schema.
+	Name string `json:"name"`
+	// Columns belonging to this table, each describing a column's name and attributes.
+	Columns []BranchSchemaJSONTablesItemColumnsItem `json:"columns"`
+	// Table constraints defined in the branch schema, such as primary key, foreign key, unique, and check
+	// constraints.
 	Constraints []BranchSchemaJSONTablesItemConstraintsItem `json:"constraints"`
 }
 
@@ -2973,7 +2997,9 @@ func (s *BranchSchemaJSONTablesItem) SetConstraints(val []BranchSchemaJSONTables
 }
 
 type BranchSchemaJSONTablesItemColumnsItem struct {
+	// Name of the column.
 	Name string `json:"name"`
+	// Postgres data type of the column, for example "integer" or "text".
 	Type string `json:"type"`
 	// Whether the column allows NULL values.
 	Nullable OptBool `json:"nullable"`
@@ -3114,7 +3140,9 @@ func (s *BranchSchemaJSONTablesItemConstraintsItemReferencedTable) SetColumns(va
 
 // Ref: #/components/schemas/BranchSchemaResponse
 type BranchSchemaResponse struct {
-	SQL  OptString           `json:"sql"`
+	// Branch schema expressed as SQL DDL statements.
+	SQL OptString `json:"sql"`
+	// Branch schema represented as a structured JSON object, parallel to the SQL DDL in `sql`.
 	JSON OptBranchSchemaJSON `json:"json"`
 }
 
@@ -3143,11 +3171,12 @@ type BranchState string
 // Ref: #/components/schemas/BranchStorage
 type BranchStorage struct {
 	// Always `true` in 200 responses. Present for forward compatibility: a future version may add
-	// intermediate states; callers should treat `true` as "storage is usable for this branch right now.".
+	// intermediate states; callers should treat `true` as "object storage is usable for this branch right
+	// now.".
 	Enabled bool `json:"enabled"`
 	// The S3-compatible endpoint URL for this branch.
 	S3Endpoint url.URL `json:"s3_endpoint"`
-	// The AWS region for this branch's storage. The platform normalizes the us-east-1 convention
+	// The AWS region for this branch's object storage. The platform normalizes the us-east-1 convention
 	// server-side: a non-empty region string is always returned in 200 responses (e.g. `"us-east-1"` for
 	// the S3 default region).
 	Region string `json:"region"`
@@ -3204,11 +3233,11 @@ func (*BranchStorage) getProjectBranchStorageRes() {}
 type BranchStorageNotEnabled struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
-	// Machine-readable reason why storage is unavailable:
+	// Machine-readable reason why object storage is unavailable:
 	//
 	//  - `org_not_entitled`: the org's `PlatformBranchableStorage` feature flag is off.
-	//  - `region_unavailable`: the project's region has no storage admin service wired.
-	//  - `branch_directory_missing`: the branch is not registered in the storage service.
+	//  - `region_unavailable`: the project's region has no object storage admin service wired.
+	//  - `branch_directory_missing`: the branch is not registered in the object storage service.
 	//  - `branch_not_found`: the project or branch does not exist, or the caller does not have access to
 	//    it.
 	Reason BranchStorageNotEnabledReason `json:"reason"`
@@ -3246,11 +3275,11 @@ func (s *BranchStorageNotEnabled) SetReason(val BranchStorageNotEnabledReason) {
 
 func (*BranchStorageNotEnabled) getProjectBranchStorageRes() {}
 
-// Machine-readable reason why storage is unavailable:
+// Machine-readable reason why object storage is unavailable:
 //
 //   - `org_not_entitled`: the org's `PlatformBranchableStorage` feature flag is off.
-//   - `region_unavailable`: the project's region has no storage admin service wired.
-//   - `branch_directory_missing`: the branch is not registered in the storage service.
+//   - `region_unavailable`: the project's region has no object storage admin service wired.
+//   - `branch_directory_missing`: the branch is not registered in the object storage service.
 //   - `branch_not_found`: the project or branch does not exist, or the caller does not have access to
 //     it.
 type BranchStorageNotEnabledReason string
@@ -3310,6 +3339,8 @@ func (s *BranchStorageNotEnabledReason) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/BranchUpdateRequest
 type BranchUpdateRequest struct {
+	// Branch attributes to update. Supply only the fields you want to change, for example `name` or
+	// `protected`.
 	Branch BranchUpdateRequestBranch `json:"branch"`
 }
 
@@ -3323,9 +3354,15 @@ func (s *BranchUpdateRequest) SetBranch(val BranchUpdateRequestBranch) {
 	s.Branch = val
 }
 
+// Branch attributes to update. Supply only the fields you want to change, for example `name` or
+// `protected`.
 type BranchUpdateRequestBranch struct {
-	Name      OptString `json:"name"`
-	Protected OptBool   `json:"protected"`
+	// New display name for the branch.
+	Name OptString `json:"name"`
+	// Whether the branch is protected. Protected branches (and their computes) cannot be deleted,
+	// archived, or reset, and block deletion of the project. Can be gated by `protected_branches_only` in
+	// the IP allowlist. Paid plans only.
+	Protected OptBool `json:"protected"`
 	// The timestamp when the branch is scheduled to expire and be automatically deleted. Must be set by
 	// the client following the [RFC 3339, section 5.6] format with precision up to seconds (such as
 	// 2025-06-09T18:02:16Z). Deletion is performed by a background job and may not occur exactly at the
@@ -3369,6 +3406,7 @@ func (s *BranchUpdateRequestBranch) SetExpiresAt(val OptNilDateTime) {
 
 // Ref: #/components/schemas/BranchesCountResponse
 type BranchesCountResponse struct {
+	// Total number of branches in the project.
 	Count int `json:"count"`
 }
 
@@ -3720,7 +3758,9 @@ type ConnectionDetails struct {
 	// include a connection URI.
 	//
 	// [Connection URIs]: https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS
-	ConnectionURI        string               `json:"connection_uri"`
+	ConnectionURI string `json:"connection_uri"`
+	// Individual components of the connection URI (host, port, database, role, and password) as discrete
+	// fields, for programmatic use rather than parsing the sibling `connection_uri` string.
 	ConnectionParameters ConnectionParameters `json:"connection_parameters"`
 }
 
@@ -3746,15 +3786,16 @@ func (s *ConnectionDetails) SetConnectionParameters(val ConnectionParameters) {
 
 // Ref: #/components/schemas/ConnectionParameters
 type ConnectionParameters struct {
-	// Database name.
+	// Name of the Postgres database used in the connection URI.
 	Database string `json:"database"`
-	// Password for the role.
+	// Authentication password for the role, used in the connection URI.
 	Password string `json:"password"`
-	// Role name.
+	// Postgres role used to authenticate the database connection.
 	Role string `json:"role"`
-	// Hostname.
+	// Hostname of the compute endpoint. Use `pooler_host` for the pooled connection hostname.
 	Host string `json:"host"`
-	// Pooler hostname.
+	// PgBouncer (transaction mode) pooled host, the `-pooler` variant of `host`. Connect through it to
+	// work around the Postgres `max_connections` limit for serverless or connection-per-request workloads.
 	PoolerHost string `json:"pooler_host"`
 }
 
@@ -3875,11 +3916,12 @@ func (s *ConsumptionHistoryGranularity) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/ConsumptionHistoryPerBranchV2
 type ConsumptionHistoryPerBranchV2 struct {
-	// The project that owns the branch.
+	// The ID of the project that owns this branch.
 	ProjectID string `json:"project_id"`
-	// The branch ID.
-	BranchID string                          `json:"branch_id"`
-	Periods  []ConsumptionHistoryPerPeriodV2 `json:"periods"`
+	// The Neon branch ID. Returned as `id` from `GET /projects/{project_id}/branches`.
+	BranchID string `json:"branch_id"`
+	// Consumption history records for the branch, grouped by billing period.
+	Periods []ConsumptionHistoryPerPeriodV2 `json:"periods"`
 }
 
 // GetProjectID returns the value of ProjectID.
@@ -3921,7 +3963,8 @@ type ConsumptionHistoryPerPeriod struct {
 	// The start date-time of the billing period.
 	PeriodStart time.Time `json:"period_start"`
 	// The end date-time of the billing period, available for the past periods only.
-	PeriodEnd   OptDateTime                      `json:"period_end"`
+	PeriodEnd OptDateTime `json:"period_end"`
+	// Consumption metric records for the billing period.
 	Consumption []ConsumptionHistoryPerTimeframe `json:"consumption"`
 }
 
@@ -3984,7 +4027,8 @@ type ConsumptionHistoryPerPeriodV2 struct {
 	// The start date-time of the billing period.
 	PeriodStart time.Time `json:"period_start"`
 	// The end date-time of the billing period, available for the past periods only.
-	PeriodEnd   OptDateTime                        `json:"period_end"`
+	PeriodEnd OptDateTime `json:"period_end"`
+	// Consumption metric records for the billing period.
 	Consumption []ConsumptionHistoryPerTimeframeV2 `json:"consumption"`
 }
 
@@ -4040,9 +4084,10 @@ func (s *ConsumptionHistoryPerPeriodV2) SetConsumption(val []ConsumptionHistoryP
 
 // Ref: #/components/schemas/ConsumptionHistoryPerProject
 type ConsumptionHistoryPerProject struct {
-	// The project ID.
-	ProjectID string                        `json:"project_id"`
-	Periods   []ConsumptionHistoryPerPeriod `json:"periods"`
+	// The Neon project ID. Returned as `id` from `GET /projects`.
+	ProjectID string `json:"project_id"`
+	// Consumption periods for the project, each covering a discrete billing interval.
+	Periods []ConsumptionHistoryPerPeriod `json:"periods"`
 }
 
 // GetProjectID returns the value of ProjectID.
@@ -4067,9 +4112,10 @@ func (s *ConsumptionHistoryPerProject) SetPeriods(val []ConsumptionHistoryPerPer
 
 // Ref: #/components/schemas/ConsumptionHistoryPerProjectV2
 type ConsumptionHistoryPerProjectV2 struct {
-	// The project ID.
-	ProjectID string                          `json:"project_id"`
-	Periods   []ConsumptionHistoryPerPeriodV2 `json:"periods"`
+	// The Neon project ID. Returned as `id` from `GET /projects`.
+	ProjectID string `json:"project_id"`
+	// Consumption periods recorded for this project.
+	Periods []ConsumptionHistoryPerPeriodV2 `json:"periods"`
 }
 
 // GetProjectID returns the value of ProjectID.
@@ -4105,10 +4151,10 @@ type ConsumptionHistoryPerTimeframe struct {
 	ComputeTimeSeconds uint64 `json:"compute_time_seconds"`
 	// Bytes. The amount of written data for all branches.
 	WrittenDataBytes uint64 `json:"written_data_bytes"`
-	// Bytes. The space occupied in storage. Synthetic storage size combines the logical data size and
-	// Write-Ahead Log (WAL) size for all branches.
+	// Bytes. The space occupied in Postgres storage. Synthetic Postgres storage size combines the logical
+	// data size and Write-Ahead Log (WAL) size for all branches.
 	SyntheticStorageSizeBytes uint64 `json:"synthetic_storage_size_bytes"`
-	// Bytes-Hour. The amount of storage consumed hourly.
+	// Bytes-Hour. The amount of Postgres storage consumed hourly.
 	DataStorageBytesHour OptUint64 `json:"data_storage_bytes_hour"`
 	// Bytes. The amount of logical size consumed.
 	LogicalSizeBytes OptUint64 `json:"logical_size_bytes"`
@@ -4211,8 +4257,9 @@ type ConsumptionHistoryPerTimeframeV2 struct {
 	// The specified start date-time for the reported consumption.
 	TimeframeStart OptDateTime `json:"timeframe_start"`
 	// The specified end date-time for the reported consumption.
-	TimeframeEnd OptDateTime              `json:"timeframe_end"`
-	Metrics      []ConsumptionMetricValue `json:"metrics"`
+	TimeframeEnd OptDateTime `json:"timeframe_end"`
+	// Consumption metric values recorded for the timeframe.
+	Metrics []ConsumptionMetricValue `json:"metrics"`
 }
 
 // GetTimeframeStart returns the value of TimeframeStart.
@@ -4249,8 +4296,10 @@ type ConsumptionHistoryQueryMetrics []string
 
 // Ref: #/components/schemas/ConsumptionMetricValue
 type ConsumptionMetricValue struct {
+	// Name of the consumption metric, such as compute_time or data_storage_bytes_hour.
 	MetricName string `json:"metric_name"`
-	Value      int    `json:"value"`
+	// Measured quantity for the metric named by `metric_name`.
+	Value int `json:"value"`
 }
 
 // GetMetricName returns the value of MetricName.
@@ -4300,8 +4349,11 @@ func (s *CookieAuth) SetRoles(val []string) {
 
 // Ref: #/components/schemas/CreateBranchNeonAuthNewUserRequest
 type CreateBranchNeonAuthNewUserRequest struct {
-	Email string    `json:"email"`
-	Name  OptString `json:"name"`
+	// Email address of the new Neon Auth user to create.
+	Email string `json:"email"`
+	// Display name for the new user. Optional. Pair with the required email field when creating a new
+	// user.
+	Name OptString `json:"name"`
 }
 
 // GetEmail returns the value of Email.
@@ -4513,9 +4565,13 @@ func (s *CreateCredentialResponse) SetExpiresAt(val OptDateTime) {
 
 // Merged schema.
 type CreateProjectBranchReq struct {
-	Endpoints       []BranchCreateRequestEndpointOptions `json:"endpoints"`
-	Branch          OptCreateProjectBranchReqBranch      `json:"branch"`
-	AnnotationValue OptAnnotationValueData               `json:"annotation_value"`
+	// Compute endpoints to create together with the branch. If omitted, the branch is created without any
+	// compute endpoint. Endpoints can be added to the branch separately after creation.
+	Endpoints []BranchCreateRequestEndpointOptions `json:"endpoints"`
+	// Optional configuration for the new branch, for example `name`, `parent_id` (fork from a branch),
+	// `parent_lsn` or `parent_timestamp` (point-in-time branching), and `protected`.
+	Branch          OptCreateProjectBranchReqBranch `json:"branch"`
+	AnnotationValue OptAnnotationValueData          `json:"annotation_value"`
 }
 
 // GetEndpoints returns the value of Endpoints.
@@ -4548,6 +4604,8 @@ func (s *CreateProjectBranchReq) SetAnnotationValue(val OptAnnotationValueData) 
 	s.AnnotationValue = val
 }
 
+// Optional configuration for the new branch, for example `name`, `parent_id` (fork from a branch),
+// `parent_lsn` or `parent_timestamp` (point-in-time branching), and `protected`.
 type CreateProjectBranchReqBranch struct {
 	// The `branch_id` of the parent branch. If omitted or empty, the branch will be created from the
 	// project's default branch.
@@ -4558,22 +4616,20 @@ type CreateProjectBranchReqBranch struct {
 	// LSN.
 	ParentLsn OptString `json:"parent_lsn"`
 	// A timestamp identifying a point in time on the parent branch. The branch will be created with data
-	// starting from this point in time. The timestamp must be provided in ISO 8601 format; for example:
-	// `2024-02-26T12:00:00Z`.
+	// starting from this point in time. RFC 3339 format.
 	ParentTimestamp OptDateTime `json:"parent_timestamp"`
-	// Whether the branch is protected.
+	// Whether the branch is protected. Protected branches (and their computes) cannot be deleted,
+	// archived, or reset, and block deletion of the project. Can be gated by `protected_branches_only` in
+	// the IP allowlist. Paid plans only.
 	Protected OptBool `json:"protected"`
-	// Whether to create the branch as archived.
+	// Whether to create the branch in the archived state. When omitted, the branch is created as a normal
+	// (non-archived) branch.
 	Archived OptBool `json:"archived"`
-	// The source of initialization for the branch. Valid values are `schema-only` and `parent-data`
-	// (default).
-	//
-	//  - `schema-only` - creates a new root branch containing only the schema. Use `parent_id` to specify
-	//    the source branch. Optionally, you can provide `parent_lsn` or `parent_timestamp` to branch from
-	//    a specific point in time or LSN. These fields define which branch to copy the schema from and at
-	//    what point—they do not establish a parent-child relationship between the `parent_id` branch and
-	//    the new schema-only branch.
-	//  - `parent-data` - creates the branch with both schema and data from the parent.
+	// Source of initialization for the branch. `parent-data` copies schema and data from the parent
+	// branch. `parent-schema` copies schema only from the parent branch. `schema-only` creates a new root
+	// branch containing schema only, using `parent_id` as the source; optionally, `parent_lsn` or
+	// `parent_timestamp` can narrow the source point. `import` initializes the branch from an external
+	// import.
 	InitSource OptString `json:"init_source"`
 	// The timestamp when the branch is scheduled to expire and be automatically deleted. Must be set by
 	// the client following the [RFC 3339, section 5.6] format with precision up to seconds (such as
@@ -4667,8 +4723,7 @@ func (s *CreateProjectBranchReqBranch) SetExpiresAt(val OptDateTime) {
 }
 
 type CreateProjectTransferRequestReq struct {
-	// Specifies the validity duration of the transfer request in seconds. If not provided, the request
-	// will expire after 24 hours (86,400 seconds).
+	// Number of seconds the transfer request stays valid before it expires. Defaults to 86400 (24 hours).
 	TTLSeconds OptInt64 `json:"ttl_seconds"`
 }
 
@@ -4709,11 +4764,17 @@ func (s *CreateSnapshotOK) SetOperations(val []Operation) {
 
 // Merged schema.
 type CreatedBranch struct {
-	Branch         Branch              `json:"branch"`
-	Endpoints      []Endpoint          `json:"endpoints"`
-	Operations     []Operation         `json:"operations"`
-	Roles          []Role              `json:"roles"`
-	Databases      []Database          `json:"databases"`
+	// Branch returned by the request.
+	Branch Branch `json:"branch"`
+	// Compute endpoints in the project. Each includes `id`, `branch_id`, `host`, and `type`.
+	Endpoints  []Endpoint  `json:"endpoints"`
+	Operations []Operation `json:"operations"`
+	// Roles belonging to the branch. Each role includes fields such as `branch_id`, `name`, `protected`,
+	// `created_at`, and `updated_at`.
+	Roles []Role `json:"roles"`
+	// Databases on the branch. Each includes `id`, `name`, `owner_name`, and `created_at`.
+	Databases []Database `json:"databases"`
+	// Connection URIs for the compute endpoint, including credentials.
 	ConnectionUris []ConnectionDetails `json:"connection_uris"`
 }
 
@@ -4779,13 +4840,20 @@ func (s *CreatedBranch) SetConnectionUris(val []ConnectionDetails) {
 
 // Merged schema.
 type CreatedProject struct {
-	Project        Project             `json:"project"`
+	// Full details of the project, including configuration, consumption metrics, and ownership.
+	Project Project `json:"project"`
+	// Connection URIs for the project. Each entry contains credentials and should be treated as sensitive.
 	ConnectionUris []ConnectionDetails `json:"connection_uris"`
-	Roles          []Role              `json:"roles"`
-	Databases      []Database          `json:"databases"`
-	Operations     []Operation         `json:"operations"`
-	Branch         Branch              `json:"branch"`
-	Endpoints      []Endpoint          `json:"endpoints"`
+	// Roles belonging to the branch. Each role includes fields such as `branch_id`, `name`, `protected`,
+	// `created_at`, and `updated_at`.
+	Roles []Role `json:"roles"`
+	// Databases on the branch. Each includes `id`, `name`, `owner_name`, and `created_at`.
+	Databases  []Database  `json:"databases"`
+	Operations []Operation `json:"operations"`
+	// Branch returned by the request.
+	Branch Branch `json:"branch"`
+	// Compute endpoints in the project. Each includes `id`, `branch_id`, `host`, and `type`.
+	Endpoints []Endpoint `json:"endpoints"`
 }
 
 // GetProject returns the value of Project.
@@ -5047,12 +5115,15 @@ func (s *CredentialScope) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/CurrentUserAuthAccount
 type CurrentUserAuthAccount struct {
+	// Email address associated with this auth account.
 	Email string `json:"email"`
+	// URL of the user's profile picture as provided by the identity provider.
 	Image string `json:"image"`
-	// DEPRECATED. Use `email` field.
+	// Deprecated. Use the `email` field.
 	//
 	// Deprecated: schema marks this property as deprecated.
-	Login    string             `json:"login"`
+	Login string `json:"login"`
+	// Display name of the account as provided by the identity provider.
 	Name     string             `json:"name"`
 	Provider IdentityProviderId `json:"provider"`
 }
@@ -5110,24 +5181,35 @@ func (s *CurrentUserAuthAccount) SetProvider(val IdentityProviderId) {
 // Ref: #/components/schemas/CurrentUserInfoResponse
 type CurrentUserInfoResponse struct {
 	// Control plane observes active endpoints of a user this amount of wall-clock time.
-	ActiveSecondsLimit int64                    `json:"active_seconds_limit"`
-	BillingAccount     OptBillingAccount        `json:"billing_account"`
-	AuthAccounts       []CurrentUserAuthAccount `json:"auth_accounts"`
-	Email              string                   `json:"email"`
-	ID                 string                   `json:"id"`
-	Image              string                   `json:"image"`
-	// DEPRECATED. Use `email` field.
+	ActiveSecondsLimit int64 `json:"active_seconds_limit"`
+	// Billing account associated with the current user, including plan and subscription details.
+	BillingAccount OptBillingAccount `json:"billing_account"`
+	// Authentication provider accounts linked to the current user.
+	AuthAccounts []CurrentUserAuthAccount `json:"auth_accounts"`
+	// Email address of the authenticated user.
+	Email string `json:"email"`
+	// The Neon user ID.
+	ID string `json:"id"`
+	// URL of the user's profile avatar image.
+	Image string `json:"image"`
+	// Deprecated. Use the `email` field.
 	//
 	// Deprecated: schema marks this property as deprecated.
-	Login         string `json:"login"`
-	Name          string `json:"name"`
-	LastName      string `json:"last_name"`
-	ProjectsLimit int64  `json:"projects_limit"`
-	BranchesLimit int64  `json:"branches_limit"`
+	Login string `json:"login"`
+	// First name of the current user.
+	Name string `json:"name"`
+	// Last name of the current user.
+	LastName string `json:"last_name"`
+	// Maximum number of projects the account is allowed to create under the current plan.
+	ProjectsLimit int64 `json:"projects_limit"`
+	// Maximum number of branches allowed for the account under the current plan.
+	BranchesLimit int64 `json:"branches_limit"`
 	// The maximum autoscaling limit in Compute Units. A value of 0 indicates no limit is configured.
-	MaxAutoscalingLimit float64  `json:"max_autoscaling_limit"`
+	MaxAutoscalingLimit float64 `json:"max_autoscaling_limit"`
+	// Maximum Postgres compute time, in seconds, allowed under the account's current plan.
 	ComputeSecondsLimit OptInt64 `json:"compute_seconds_limit"`
-	Plan                string   `json:"plan"`
+	// Current billing plan for the user's account.
+	Plan string `json:"plan"`
 }
 
 // GetActiveSecondsLimit returns the value of ActiveSecondsLimit.
@@ -5277,8 +5359,13 @@ func (s *CurrentUserInfoResponse) SetPlan(val string) {
 // cursor.
 // Ref: #/components/schemas/CursorPagination
 type CursorPagination struct {
-	Next      OptString `json:"next"`
-	SortBy    OptString `json:"sort_by"`
+	// Cursor for the next page of results. Pass it as the `cursor` query parameter on the next request.
+	// Absent on the last page.
+	Next OptString `json:"next"`
+	// Field by which the results were sorted, echoing the request's sort_by parameter.
+	SortBy OptString `json:"sort_by"`
+	// Sort order active for this page. Pass back as `sort_order` in the next request to maintain
+	// consistent ordering. Valid values are `asc` and `desc`.
 	SortOrder OptString `json:"sort_order"`
 }
 
@@ -5315,20 +5402,24 @@ func (s *CursorPagination) SetSortOrder(val OptString) {
 // Create Neon Data API.
 // Ref: #/components/schemas/DataAPICreateRequest
 type DataAPICreateRequest struct {
-	// The authentication provider to use for the Neon Data API.
+	// Authentication provider for the Neon Data API. `neon_auth`: use Neon's built-in managed
+	// authentication (no JWKS configuration required). `external`: use an external JWT provider, which
+	// requires `jwks_url`. When omitted, no auth provider is configured (existing setup is kept).
 	AuthProvider OptDataAPICreateRequestAuthProvider `json:"auth_provider"`
-	// The URL that lists the JWKS.
+	// URL of the JWKS endpoint used to verify JWTs for this Data API. Required when configuring JWT-based
+	// authentication; omit when using a non-JWT auth provider.
 	JwksURL OptURI `json:"jwks_url"`
-	// The name of the authentication provider (e.g., Clerk, Stytch, Auth0).
+	// Display name for the authentication provider. Accepted values include "Clerk", "Stytch", and
+	// "Auth0", but any non-empty string is valid. Optional field.
 	ProviderName OptString `json:"provider_name"`
-	// WARNING - using this setting will only reject tokens with a different audience claim. Tokens without
-	// audience claim will still be accepted.
+	// Expected `aud` claim in incoming JWTs. When set, tokens with a different audience are rejected;
+	// tokens with no audience are still accepted. Omit to skip audience validation.
 	JwtAudience OptString `json:"jwt_audience"`
 	// Grant all permissions to the tables in the public schema to authenticated users.
 	AddDefaultGrants OptBool `json:"add_default_grants"`
 	// Skip creating the auth schema and RLS functions.
 	SkipAuthSchema OptBool `json:"skip_auth_schema"`
-	// Configuration settings for the Data API.
+	// Auth and schema configuration for the Data API.
 	Settings OptDataAPISettings `json:"settings"`
 }
 
@@ -5402,7 +5493,9 @@ func (s *DataAPICreateRequest) SetSettings(val OptDataAPISettings) {
 	s.Settings = val
 }
 
-// The authentication provider to use for the Neon Data API.
+// Authentication provider for the Neon Data API. `neon_auth`: use Neon's built-in managed
+// authentication (no JWKS configuration required). `external`: use an external JWT provider, which
+// requires `jwks_url`. When omitted, no auth provider is configured (existing setup is kept).
 type DataAPICreateRequestAuthProvider string
 
 const (
@@ -5447,6 +5540,7 @@ func (s *DataAPICreateRequestAuthProvider) UnmarshalText(data []byte) error {
 // Neon Data API created successfully.
 // Ref: #/components/schemas/DataAPICreateResponse
 type DataAPICreateResponse struct {
+	// URL of the created Data API endpoint.
 	URL url.URL `json:"url"`
 }
 
@@ -5522,19 +5616,20 @@ type DataAPISettings struct {
 	DbAnonRole OptString `json:"db_anon_role"`
 	// Extra schemas to add to the search path.
 	DbExtraSearchPath OptString `json:"db_extra_search_path"`
-	// Maximum number of rows that can be returned in a single request.
+	// Hard limit on the number of rows returned in a single Data API response. No limit when unset.
 	DbMaxRows OptInt `json:"db_max_rows"`
 	// List of schemas to expose via the API. Default: ["public"].
 	DbSchemas []string `json:"db_schemas"`
 	// JWT claim key to use for role extraction.
 	JwtRoleClaimKey OptString `json:"jwt_role_claim_key"`
-	// Maximum lifetime for JWT cache in seconds.
+	// Maximum lifetime of the Data API's JWT cache, in seconds.
 	JwtCacheMaxLifetime OptInt `json:"jwt_cache_max_lifetime"`
 	// OpenAPI specification mode (ignore-privileges, disabled).
 	OpenapiMode OptString `json:"openapi_mode"`
 	// CORS allowed origins.
 	ServerCorsAllowedOrigins OptString `json:"server_cors_allowed_origins"`
-	// Enable server timing headers.
+	// When enabled, the Data API adds `Server-Timing` headers to each response showing database execution
+	// and internal processing time. Default: disabled.
 	ServerTimingEnabled OptBool `json:"server_timing_enabled"`
 }
 
@@ -5641,7 +5736,7 @@ func (s *DataAPISettings) SetServerTimingEnabled(val OptBool) {
 // Update Neon Data API.
 // Ref: #/components/schemas/DataAPIUpdateRequest
 type DataAPIUpdateRequest struct {
-	// Configuration settings for the Data API.
+	// Configuration settings for the Neon Data API.
 	Settings OptDataAPISettings `json:"settings"`
 }
 
@@ -5659,7 +5754,7 @@ func (s *DataAPIUpdateRequest) SetSettings(val OptDataAPISettings) {
 type Database struct {
 	// The database ID.
 	ID int64 `json:"id"`
-	// The ID of the branch to which the database belongs.
+	// The ID of the branch this database belongs to.
 	BranchID string `json:"branch_id"`
 	// The database name.
 	Name string `json:"name"`
@@ -5733,6 +5828,7 @@ func (s *Database) SetUpdatedAt(val time.Time) {
 
 // Ref: #/components/schemas/DatabaseCreateRequest
 type DatabaseCreateRequest struct {
+	// Configuration for the new Postgres database.
 	Database DatabaseCreateRequestDatabase `json:"database"`
 }
 
@@ -5746,8 +5842,9 @@ func (s *DatabaseCreateRequest) SetDatabase(val DatabaseCreateRequestDatabase) {
 	s.Database = val
 }
 
+// Configuration for the new Postgres database.
 type DatabaseCreateRequestDatabase struct {
-	// The name of the database.
+	// Name of the database to create.
 	Name string `json:"name"`
 	// The name of the role that owns the database.
 	OwnerName string `json:"owner_name"`
@@ -5776,6 +5873,7 @@ func (s *DatabaseCreateRequestDatabase) SetOwnerName(val string) {
 // Merged schema.
 // Ref: #/components/schemas/DatabaseOperations
 type DatabaseOperations struct {
+	// Database object returned by the operation.
 	Database   Database    `json:"database"`
 	Operations []Operation `json:"operations"`
 }
@@ -5804,6 +5902,7 @@ func (*DatabaseOperations) deleteProjectBranchDatabaseRes() {}
 
 // Ref: #/components/schemas/DatabaseResponse
 type DatabaseResponse struct {
+	// Database object returned by the operation.
 	Database Database `json:"database"`
 }
 
@@ -5819,6 +5918,7 @@ func (s *DatabaseResponse) SetDatabase(val Database) {
 
 // Ref: #/components/schemas/DatabaseUpdateRequest
 type DatabaseUpdateRequest struct {
+	// Properties to update on the database.
 	Database DatabaseUpdateRequestDatabase `json:"database"`
 }
 
@@ -5832,8 +5932,9 @@ func (s *DatabaseUpdateRequest) SetDatabase(val DatabaseUpdateRequestDatabase) {
 	s.Database = val
 }
 
+// Properties to update on the database.
 type DatabaseUpdateRequestDatabase struct {
-	// The name of the database.
+	// Name of the database to update.
 	Name OptString `json:"name"`
 	// The name of the role that owns the database.
 	OwnerName OptString `json:"owner_name"`
@@ -5861,6 +5962,7 @@ func (s *DatabaseUpdateRequestDatabase) SetOwnerName(val OptString) {
 
 // Ref: #/components/schemas/DatabasesResponse
 type DatabasesResponse struct {
+	// Databases on the branch. Each includes `id`, `name`, `owner_name`, and `created_at`.
 	Databases []Database `json:"databases"`
 }
 
@@ -5878,21 +5980,19 @@ func (s *DatabasesResponse) SetDatabases(val []Database) {
 // Ref: #/components/schemas/DefaultEndpointSettings
 type DefaultEndpointSettings struct {
 	PgSettings OptPgSettingsData `json:"pg_settings"`
-	// DEPRECATED. PgBouncer settings for the compute endpoint. This field is deprecated and will be
-	// removed after 2026-06-20.
+	// Deprecated. Use the endpoint-level connection pooler configuration instead. Removal scheduled for
+	// June 20, 2026.
 	//
 	// Deprecated: schema marks this property as deprecated.
 	PgbouncerSettings OptPgbouncerSettingsData `json:"pgbouncer_settings"`
-	// The minimum number of Compute Units. The minimum value is `0.25`. See
-	// [Compute size and Autoscaling configuration] for more information.
-	//
-	// [Compute size and Autoscaling configuration]: https://neon.com/docs/manage/endpoints#compute-size-and-autoscaling-configuration
+	// Minimum number of Compute Units for this endpoint. At least 0.25 and no greater than
+	// `autoscaling_limit_max_cu`.
 	AutoscalingLimitMinCu OptComputeUnit `json:"autoscaling_limit_min_cu"`
-	// The maximum number of Compute Units. See [Compute size and Autoscaling configuration] for more
-	// information.
-	//
-	// [Compute size and Autoscaling configuration]: https://neon.com/docs/manage/endpoints#compute-size-and-autoscaling-configuration
-	AutoscalingLimitMaxCu OptComputeUnit           `json:"autoscaling_limit_max_cu"`
+	// Default maximum number of Compute Units for endpoints created under this account. At least 0.25.
+	AutoscalingLimitMaxCu OptComputeUnit `json:"autoscaling_limit_max_cu"`
+	// Scale-to-zero idle timeout, in seconds, before the compute suspends. `0` uses the plan default; `-1`
+	// disables scale-to-zero (never suspends). Minimum is plan-dependent (Scale: 60); maximum 604800 (one
+	// week). Free cannot change it; Launch can only enable or disable; Scale can set any value.
 	SuspendTimeoutSeconds OptSuspendTimeoutSeconds `json:"suspend_timeout_seconds"`
 }
 
@@ -6049,7 +6149,9 @@ func (*EmptyResponse) transferProjectsFromUserToOrgRes() {}
 // Ref: #/components/schemas/EnableNeonAuthIntegrationRequest
 type EnableNeonAuthIntegrationRequest struct {
 	AuthProvider NeonAuthSupportedAuthProvider `json:"auth_provider"`
-	DatabaseName OptString                     `json:"database_name"`
+	// Name of the database to enable Neon Auth on. When omitted, the integration uses the project's
+	// default database.
+	DatabaseName OptString `json:"database_name"`
 }
 
 // GetAuthProvider returns the value of AuthProvider.
@@ -6082,30 +6184,27 @@ type Endpoint struct {
 	ID string `json:"id"`
 	// Optional name of the compute endpoint.
 	Name OptString `json:"name"`
-	// The ID of the project to which the compute endpoint belongs.
+	// The ID of the project this compute endpoint belongs to.
 	ProjectID string `json:"project_id"`
-	// The ID of the branch that the compute endpoint is associated with.
+	// The ID of the branch this compute endpoint belongs to.
 	BranchID string `json:"branch_id"`
 	// The minimum number of Compute Units.
 	AutoscalingLimitMinCu ComputeUnit `json:"autoscaling_limit_min_cu"`
 	// The maximum number of Compute Units.
 	AutoscalingLimitMaxCu ComputeUnit `json:"autoscaling_limit_max_cu"`
-	// The region identifier.
-	RegionID     string               `json:"region_id"`
-	Type         EndpointType         `json:"type"`
-	CurrentState EndpointState        `json:"current_state"`
+	// Cloud region where the resource's Postgres compute and storage reside (for example,
+	// `aws-us-east-1`). Valid values are returned by `GET /regions`.
+	RegionID     string        `json:"region_id"`
+	Type         EndpointType  `json:"type"`
+	CurrentState EndpointState `json:"current_state"`
+	// Target state the compute endpoint is transitioning to. Omitted when no transition is in progress.
 	PendingState OptEndpointState     `json:"pending_state"`
 	Settings     EndpointSettingsData `json:"settings"`
-	// DEPRECATED. Whether to enable connection pooling for the compute endpoint. The recommended way to
-	// enable connection pooling is to append `-pooler` to the endpoint ID in the connection string. See
-	// [How to use connection pooling].
-	//
-	// [How to use connection pooling]: https://neon.com/docs/connect/connection-pooling#how-to-use-connection-pooling
+	// Deprecated. To use connection pooling, append `-pooler` to the endpoint ID in the connection string.
 	//
 	// Deprecated: schema marks this property as deprecated.
 	PoolerEnabled bool `json:"pooler_enabled"`
-	// DEPRECATED. The connection pooler mode. This field is deprecated and will be removed after
-	// 2026-06-20.
+	// Deprecated. The connection pooler mode. Removal scheduled for June 20, 2026.
 	//
 	// Deprecated: schema marks this property as deprecated.
 	PoolerMode EndpointPoolerMode `json:"pooler_mode"`
@@ -6126,10 +6225,14 @@ type Endpoint struct {
 	StartedAt OptDateTime `json:"started_at"`
 	// A timestamp indicating when the compute endpoint was last suspended.
 	SuspendedAt OptDateTime `json:"suspended_at"`
-	// DEPRECATED. Use the "host" property instead.
-	ProxyHost             string                `json:"proxy_host"`
+	// Deprecated. Use the `host` property instead.
+	ProxyHost string `json:"proxy_host"`
+	// Scale-to-zero idle timeout, in seconds, before the compute suspends. `0` means the plan default
+	// applies; `-1` means scale-to-zero is disabled (never suspends).
 	SuspendTimeoutSeconds SuspendTimeoutSeconds `json:"suspend_timeout_seconds"`
-	Provisioner           Provisioner           `json:"provisioner"`
+	// Compute provisioner. `k8s-neonvm` (default) supports Autoscaling; `k8s-pod` is fixed-size compute.
+	// Also `docker` and `serverless-platform`.
+	Provisioner Provisioner `json:"provisioner"`
 	// Attached compute's release version number.
 	ComputeReleaseVersion OptString `json:"compute_release_version"`
 }
@@ -6396,6 +6499,7 @@ func (s *Endpoint) SetComputeReleaseVersion(val OptString) {
 
 // Ref: #/components/schemas/EndpointCreateRequest
 type EndpointCreateRequest struct {
+	// Configuration for the compute endpoint to create.
 	Endpoint EndpointCreateRequestEndpoint `json:"endpoint"`
 }
 
@@ -6409,6 +6513,7 @@ func (s *EndpointCreateRequest) SetEndpoint(val EndpointCreateRequestEndpoint) {
 	s.Endpoint = val
 }
 
+// Configuration for the compute endpoint to create.
 type EndpointCreateRequestEndpoint struct {
 	// The ID of the branch the compute endpoint will be associated with.
 	BranchID string `json:"branch_id"`
@@ -6426,17 +6531,17 @@ type EndpointCreateRequestEndpoint struct {
 	//
 	// [Compute size and Autoscaling configuration]: https://neon.com/docs/manage/endpoints#compute-size-and-autoscaling-configuration
 	AutoscalingLimitMaxCu OptComputeUnit `json:"autoscaling_limit_max_cu"`
-	Provisioner           OptProvisioner `json:"provisioner"`
-	// DEPRECATED. Whether to enable connection pooling for the compute endpoint. The recommended way to
-	// enable connection pooling is to append `-pooler` to the endpoint ID in the connection string. See
-	// [How to use connection pooling].
+	// Compute provisioner. `k8s-neonvm` (default) supports Autoscaling; `k8s-pod` is fixed-size compute.
+	// Also `docker` and `serverless-platform`.
+	Provisioner OptProvisioner `json:"provisioner"`
+	// Deprecated. To enable connection pooling, append `-pooler` to the endpoint ID in the connection
+	// string. See [How to use connection pooling].
 	//
 	// [How to use connection pooling]: https://neon.com/docs/connect/connection-pooling#how-to-use-connection-pooling
 	//
 	// Deprecated: schema marks this property as deprecated.
 	PoolerEnabled OptBool `json:"pooler_enabled"`
-	// DEPRECATED. The connection pooler mode. This field is deprecated and will be removed after
-	// 2026-06-20.
+	// Deprecated. The connection pooler mode. Removal scheduled for June 20, 2026.
 	//
 	// Deprecated: schema marks this property as deprecated.
 	PoolerMode OptEndpointPoolerMode `json:"pooler_mode"`
@@ -6445,7 +6550,10 @@ type EndpointCreateRequestEndpoint struct {
 	// However, the compute endpoint is periodically enabled by check_availability operations.
 	Disabled OptBool `json:"disabled"`
 	// NOT YET IMPLEMENTED. Whether to permit passwordless access to the compute endpoint.
-	PasswordlessAccess    OptBool                  `json:"passwordless_access"`
+	PasswordlessAccess OptBool `json:"passwordless_access"`
+	// Scale-to-zero idle timeout, in seconds, before the compute suspends. `0` uses the plan default; `-1`
+	// disables scale-to-zero (never suspends). Minimum is plan-dependent (Scale: 60); maximum 604800 (one
+	// week). Free cannot change it; Launch can only enable or disable; Scale can set any value.
 	SuspendTimeoutSeconds OptSuspendTimeoutSeconds `json:"suspend_timeout_seconds"`
 	// Optional name of the compute endpoint.
 	Name OptString `json:"name"`
@@ -6584,6 +6692,7 @@ func (s *EndpointCreateRequestEndpoint) SetName(val OptString) {
 // Merged schema.
 // Ref: #/components/schemas/EndpointOperations
 type EndpointOperations struct {
+	// Compute endpoint created or retrieved, including its current lifecycle state.
 	Endpoint   Endpoint    `json:"endpoint"`
 	Operations []Operation `json:"operations"`
 }
@@ -6610,8 +6719,8 @@ func (s *EndpointOperations) SetOperations(val []Operation) {
 
 func (*EndpointOperations) deleteProjectEndpointRes() {}
 
-// DEPRECATED. The connection pooler mode. Neon supports PgBouncer in `transaction` mode only. This
-// schema is deprecated and will be removed after 2026-06-20.
+// Deprecated. The connection pooler mode. Neon supports PgBouncer in `transaction` mode only. Removal
+// scheduled for June 20, 2026.
 //
 // Deprecated: schema marks this type as deprecated.
 // Ref: #/components/schemas/EndpointPoolerMode
@@ -6651,6 +6760,7 @@ func (s *EndpointPoolerMode) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/EndpointResponse
 type EndpointResponse struct {
+	// Compute endpoint created or retrieved, including its current lifecycle state.
 	Endpoint Endpoint `json:"endpoint"`
 }
 
@@ -6668,8 +6778,7 @@ func (s *EndpointResponse) SetEndpoint(val Endpoint) {
 // Ref: #/components/schemas/EndpointSettingsData
 type EndpointSettingsData struct {
 	PgSettings OptPgSettingsData `json:"pg_settings"`
-	// DEPRECATED. PgBouncer settings for the compute endpoint. This field is deprecated and will be
-	// removed after 2026-06-20.
+	// Deprecated. PgBouncer settings for the compute endpoint. Removal scheduled for June 20, 2026.
 	//
 	// Deprecated: schema marks this property as deprecated.
 	PgbouncerSettings OptPgbouncerSettingsData `json:"pgbouncer_settings"`
@@ -6706,7 +6815,8 @@ func (s *EndpointSettingsData) SetPreloadLibraries(val OptPreloadLibraries) {
 	s.PreloadLibraries = val
 }
 
-// The state of the compute endpoint.
+// Lifecycle state of the compute endpoint. `init`: being initialized. `active`: running and accepting
+// connections. `idle`: suspended (scaled to zero).
 // Ref: #/components/schemas/EndpointState
 type EndpointState string
 
@@ -6756,7 +6866,8 @@ func (s *EndpointState) UnmarshalText(data []byte) error {
 	}
 }
 
-// The compute endpoint type. Either `read_write` or `read_only`.
+// Compute endpoint type. `read_write`: the primary read-write endpoint (one per branch). `read_only`:
+// a read replica endpoint (multiple allowed per branch).
 // Ref: #/components/schemas/EndpointType
 type EndpointType string
 
@@ -6801,6 +6912,7 @@ func (s *EndpointType) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/EndpointUpdateRequest
 type EndpointUpdateRequest struct {
+	// Parameters for the compute endpoint update.
 	Endpoint EndpointUpdateRequestEndpoint `json:"endpoint"`
 }
 
@@ -6814,9 +6926,9 @@ func (s *EndpointUpdateRequest) SetEndpoint(val EndpointUpdateRequestEndpoint) {
 	s.Endpoint = val
 }
 
+// Parameters for the compute endpoint update.
 type EndpointUpdateRequestEndpoint struct {
-	// DEPRECATED: This field will be removed in a future release. The destination branch ID. The
-	// destination branch must not have an existing read-write endpoint.
+	// Deprecated. The destination branch ID; must not have an existing read-write endpoint.
 	//
 	// Deprecated: schema marks this property as deprecated.
 	BranchID OptString `json:"branch_id"`
@@ -6829,19 +6941,19 @@ type EndpointUpdateRequestEndpoint struct {
 	// information.
 	//
 	// [Compute size and Autoscaling configuration]: https://neon.com/docs/manage/endpoints#compute-size-and-autoscaling-configuration
-	AutoscalingLimitMaxCu OptComputeUnit          `json:"autoscaling_limit_max_cu"`
-	Provisioner           OptProvisioner          `json:"provisioner"`
-	Settings              OptEndpointSettingsData `json:"settings"`
-	// DEPRECATED. Whether to enable connection pooling for the compute endpoint. The recommended way to
-	// enable connection pooling is to append `-pooler` to the endpoint ID in the connection string. See
-	// [How to use connection pooling].
+	AutoscalingLimitMaxCu OptComputeUnit `json:"autoscaling_limit_max_cu"`
+	// Compute provisioner. `k8s-neonvm` (default) supports Autoscaling; `k8s-pod` is fixed-size compute.
+	// Also `docker` and `serverless-platform`.
+	Provisioner OptProvisioner          `json:"provisioner"`
+	Settings    OptEndpointSettingsData `json:"settings"`
+	// Deprecated. To enable connection pooling, append `-pooler` to the endpoint ID in the connection
+	// string. See [How to use connection pooling].
 	//
 	// [How to use connection pooling]: https://neon.com/docs/connect/connection-pooling#how-to-use-connection-pooling
 	//
 	// Deprecated: schema marks this property as deprecated.
 	PoolerEnabled OptBool `json:"pooler_enabled"`
-	// DEPRECATED. The connection pooler mode. This field is deprecated and will be removed after
-	// 2026-06-20.
+	// Deprecated. The connection pooler mode. Removal scheduled for June 20, 2026.
 	//
 	// Deprecated: schema marks this property as deprecated.
 	PoolerMode OptEndpointPoolerMode `json:"pooler_mode"`
@@ -6850,7 +6962,10 @@ type EndpointUpdateRequestEndpoint struct {
 	// However, the compute endpoint is periodically enabled by check_availability operations.
 	Disabled OptBool `json:"disabled"`
 	// NOT YET IMPLEMENTED. Whether to permit passwordless access to the compute endpoint.
-	PasswordlessAccess    OptBool                  `json:"passwordless_access"`
+	PasswordlessAccess OptBool `json:"passwordless_access"`
+	// Scale-to-zero idle timeout, in seconds, before the compute suspends. `0` uses the plan default; `-1`
+	// disables scale-to-zero (never suspends). Minimum is plan-dependent (Scale: 60); maximum 604800 (one
+	// week). Free cannot change it; Launch can only enable or disable; Scale can set any value.
 	SuspendTimeoutSeconds OptSuspendTimeoutSeconds `json:"suspend_timeout_seconds"`
 	// Optional name of the compute endpoint.
 	Name OptString `json:"name"`
@@ -6968,6 +7083,7 @@ func (s *EndpointUpdateRequestEndpoint) SetName(val OptString) {
 
 // Ref: #/components/schemas/EndpointsResponse
 type EndpointsResponse struct {
+	// Compute endpoints in the project. Each includes `id`, `branch_id`, `host`, and `type`.
 	Endpoints []Endpoint `json:"endpoints"`
 }
 
@@ -6984,8 +7100,7 @@ func (s *EndpointsResponse) SetEndpoints(val []Endpoint) {
 type ErrorCode string
 
 type FinalizeRestoreBranchReq struct {
-	// Used to rename the existing branch when it is replaced. if omitted, a default name is generated and
-	// used.
+	// Name for the replaced branch. If omitted, a unique name is generated.
 	Name OptString `json:"name"`
 }
 
@@ -7084,7 +7199,8 @@ type GeneralError struct {
 	// including an `X-Request-ID` header in the request. If not provided, the value will be generated
 	// automatically.
 	RequestID OptString `json:"request_id"`
-	Code      ErrorCode `json:"code"`
+	// Machine-readable code classifying the error type. See `message` for a human-readable explanation.
+	Code ErrorCode `json:"code"`
 	// Error message.
 	Message string `json:"message"`
 }
@@ -7167,6 +7283,7 @@ func (*GetConsumptionHistoryPerBranchV2NotFound) getConsumptionHistoryPerBranchV
 
 // Merged schema.
 type GetConsumptionHistoryPerBranchV2OK struct {
+	// Per-branch consumption history records returned for the requested time range.
 	Branches   []ConsumptionHistoryPerBranchV2 `json:"branches"`
 	Pagination OptPagination                   `json:"pagination"`
 }
@@ -7211,6 +7328,7 @@ func (*GetConsumptionHistoryPerProjectNotFound) getConsumptionHistoryPerProjectR
 
 // Merged schema.
 type GetConsumptionHistoryPerProjectOK struct {
+	// Per-project consumption history records included in the response.
 	Projects   []ConsumptionHistoryPerProject `json:"projects"`
 	Pagination OptPagination                  `json:"pagination"`
 }
@@ -7255,6 +7373,7 @@ func (*GetConsumptionHistoryPerProjectV2NotFound) getConsumptionHistoryPerProjec
 
 // Merged schema.
 type GetConsumptionHistoryPerProjectV2OK struct {
+	// Per-project consumption history entries for the requested time range.
 	Projects   []ConsumptionHistoryPerProjectV2 `json:"projects"`
 	Pagination OptPagination                    `json:"pagination"`
 }
@@ -7287,6 +7406,8 @@ func (*GetConsumptionHistoryPerProjectV2TooManyRequests) getConsumptionHistoryPe
 
 // Merged schema.
 type GetOrganizationMembersOK struct {
+	// Members of the organization, each combining membership details (role, status) with the associated
+	// user's identity.
 	Members    []MemberWithUser    `json:"members"`
 	Pagination OptCursorPagination `json:"pagination"`
 }
@@ -7498,7 +7619,9 @@ func (*GetProjectBranchBucketObjectOKHeaders) getProjectBranchBucketObjectRes() 
 
 // Merged schema.
 type GetProjectBranchOK struct {
-	Branch     Branch         `json:"branch"`
+	// Branch returned by the request.
+	Branch Branch `json:"branch"`
+	// Annotation data associated with the annotated object.
 	Annotation AnnotationData `json:"annotation"`
 }
 
@@ -7532,6 +7655,7 @@ func (*GetProjectBranchRolePasswordPreconditionFailed) getProjectBranchRolePassw
 
 // Ref: #/components/schemas/GrantPermissionToProjectRequest
 type GrantPermissionToProjectRequest struct {
+	// Email address of the user to grant project access to.
 	Email string `json:"email"`
 }
 
@@ -7625,6 +7749,7 @@ func (s *IdentityProviderId) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/Invitation
 type Invitation struct {
+	// The invitation ID.
 	ID uuid.UUID `json:"id"`
 	// Email of the invited user.
 	Email string `json:"email"`
@@ -7699,13 +7824,13 @@ func (s *Invitation) SetRole(val MemberRole) {
 
 // Ref: #/components/schemas/JWKS
 type JWKS struct {
-	// JWKS ID.
+	// The JWKS configuration's ID.
 	ID string `json:"id"`
-	// Project ID.
+	// The Neon project ID. Returned as `id` from `GET /projects`.
 	ProjectID string `json:"project_id"`
-	// Branch ID.
+	// The Neon branch ID. Returned as `id` from `GET /projects/{project_id}/branches`.
 	BranchID OptString `json:"branch_id"`
-	// The URL that lists the JWKS.
+	// URL of the provider's JWKS endpoint used to verify JWTs.
 	JwksURL string `json:"jwks_url"`
 	// The name of the authentication provider (e.g., Clerk, Stytch, Auth0).
 	ProviderName string `json:"provider_name"`
@@ -7713,9 +7838,10 @@ type JWKS struct {
 	CreatedAt time.Time `json:"created_at"`
 	// The date and time when the JWKS was last modified.
 	UpdatedAt time.Time `json:"updated_at"`
-	// The name of the required JWT Audience to be used.
+	// Expected JWT `aud` claim value configured for this JWKS.
 	JwtAudience OptString `json:"jwt_audience"`
-	RoleNames   []string  `json:"role_names"`
+	// Database role names that are permitted to authenticate using this JWKS configuration.
+	RoleNames []string `json:"role_names"`
 }
 
 // GetID returns the value of ID.
@@ -7811,6 +7937,7 @@ func (s *JWKS) SetRoleNames(val []string) {
 // Merged schema.
 // Ref: #/components/schemas/JWKSCreationOperation
 type JWKSCreationOperation struct {
+	// JWKS configuration associated with the project.
 	Jwks       JWKS        `json:"jwks"`
 	Operations []Operation `json:"operations"`
 }
@@ -7837,6 +7964,7 @@ func (s *JWKSCreationOperation) SetOperations(val []Operation) {
 
 // Ref: #/components/schemas/LimitsUnsatisfiedResponse
 type LimitsUnsatisfiedResponse struct {
+	// Plan limits that were not satisfied by the request.
 	Limits []LimitsUnsatisfiedResponseLimitsItem `json:"limits"`
 }
 
@@ -7859,9 +7987,11 @@ type LimitsUnsatisfiedResponseLimitsItem struct {
 	//  - subscription_type
 	//  - projects_count
 	//  - project_region
-	Name     string `json:"name"`
+	Name string `json:"name"`
+	// Required value for the limit named by `name`. Compare with `actual` to determine the shortfall.
 	Expected string `json:"expected"`
-	Actual   string `json:"actual"`
+	// Current value of the named limit, which does not satisfy the required `expected` value.
+	Actual string `json:"actual"`
 }
 
 // GetName returns the value of Name.
@@ -7911,6 +8041,7 @@ func (s *ListCredentialsResponse) SetCredentials(val []CredentialMeta) {
 
 // Ref: #/components/schemas/ListNeonAuthIntegrationsResponse
 type ListNeonAuthIntegrationsResponse struct {
+	// Neon Auth integrations configured for the project.
 	Data []NeonAuthIntegration `json:"data"`
 }
 
@@ -7926,6 +8057,7 @@ func (s *ListNeonAuthIntegrationsResponse) SetData(val []NeonAuthIntegration) {
 
 // Ref: #/components/schemas/ListNeonAuthOauthProvidersResponse
 type ListNeonAuthOauthProvidersResponse struct {
+	// OAuth providers configured for Neon Auth on the project.
 	Providers []NeonAuthOauthProvider `json:"providers"`
 }
 
@@ -7993,7 +8125,10 @@ func (s *ListProjectBranchFunctionsOK) SetPagination(val OptCursorPagination) {
 
 // Merged schema.
 type ListProjectBranchesOK struct {
-	Branches    []Branch                         `json:"branches"`
+	// Branches in the project. Each includes `id`, `name`, `current_state`, and `created_at`.
+	Branches []Branch `json:"branches"`
+	// Map of annotations keyed by resource identifier, where each value contains the annotation data for
+	// that resource.
 	Annotations ListProjectBranchesOKAnnotations `json:"annotations"`
 	Pagination  OptCursorPagination              `json:"pagination"`
 }
@@ -8028,6 +8163,8 @@ func (s *ListProjectBranchesOK) SetPagination(val OptCursorPagination) {
 	s.Pagination = val
 }
 
+// Map of annotations keyed by resource identifier, where each value contains the annotation data for
+// that resource.
 type ListProjectBranchesOKAnnotations map[string]AnnotationData
 
 func (s *ListProjectBranchesOKAnnotations) init() ListProjectBranchesOKAnnotations {
@@ -8089,13 +8226,18 @@ func (s *ListProjectBranchesSortBy) UnmarshalText(data []byte) error {
 
 // Merged schema.
 type ListProjectsOK struct {
+	// List of projects accessible to the caller. Projects that exist but could not be retrieved are
+	// identified in `unavailable_project_ids`.
 	Projects []ProjectListItem `json:"projects"`
 	// A list of project IDs indicating which projects are known to exist, but whose details could not be
 	// fetched within the requested (or implicit) time limit.
-	UnavailableProjectIds []string                   `json:"unavailable_project_ids"`
-	Pagination            OptPagination              `json:"pagination"`
-	Applications          ListProjectsOKApplications `json:"applications"`
-	Integrations          ListProjectsOKIntegrations `json:"integrations"`
+	UnavailableProjectIds []string      `json:"unavailable_project_ids"`
+	Pagination            OptPagination `json:"pagination"`
+	// Map of project IDs to their installed applications. Each key is a project ID; each value is an array
+	// of application types (for example, `vercel`, `github`).
+	Applications ListProjectsOKApplications `json:"applications"`
+	// Map of project IDs to their associated integration details.
+	Integrations ListProjectsOKIntegrations `json:"integrations"`
 }
 
 // GetProjects returns the value of Projects.
@@ -8148,6 +8290,8 @@ func (s *ListProjectsOK) SetIntegrations(val ListProjectsOKIntegrations) {
 	s.Integrations = val
 }
 
+// Map of project IDs to their installed applications. Each key is a project ID; each value is an array
+// of application types (for example, `vercel`, `github`).
 type ListProjectsOKApplications map[string][]ApplicationType
 
 func (s *ListProjectsOKApplications) init() ListProjectsOKApplications {
@@ -8159,6 +8303,7 @@ func (s *ListProjectsOKApplications) init() ListProjectsOKApplications {
 	return m
 }
 
+// Map of project IDs to their associated integration details.
 type ListProjectsOKIntegrations map[string][]ApplicationType
 
 func (s *ListProjectsOKIntegrations) init() ListProjectsOKIntegrations {
@@ -8172,6 +8317,8 @@ func (s *ListProjectsOKIntegrations) init() ListProjectsOKIntegrations {
 
 // Merged schema.
 type ListSharedProjectsOK struct {
+	// List of projects accessible to the caller. Projects that exist but could not be retrieved are
+	// identified in `unavailable_project_ids`.
 	Projects []ProjectListItem `json:"projects"`
 	// A list of project IDs indicating which projects are known to exist, but whose details could not be
 	// fetched within the requested (or implicit) time limit.
@@ -8380,10 +8527,14 @@ func (s *MaskingRulesUpdateRequest) SetMaskingRules(val []MaskingRule) {
 
 // Ref: #/components/schemas/Member
 type Member struct {
-	ID       uuid.UUID   `json:"id"`
-	UserID   uuid.UUID   `json:"user_id"`
-	OrgID    string      `json:"org_id"`
-	Role     MemberRole  `json:"role"`
+	// The organization member's ID.
+	ID uuid.UUID `json:"id"`
+	// The Neon user ID.
+	UserID uuid.UUID `json:"user_id"`
+	// The Neon organization ID. Returned as `id` from `GET /users/me/organizations`.
+	OrgID string     `json:"org_id"`
+	Role  MemberRole `json:"role"`
+	// Timestamp when the user joined the organization.
 	JoinedAt OptDateTime `json:"joined_at"`
 }
 
@@ -8437,7 +8588,9 @@ func (s *Member) SetJoinedAt(val OptDateTime) {
 	s.JoinedAt = val
 }
 
-// The role of the organization member. Some role values may not be available for all organizations.
+// Organization member's role. `admin`: full administrative access. `editor` (and its legacy alias
+// `member`): standard access governed by project permissions. `viewer` and `collaborator`: additional
+// scoped project roles. Some values may not be available for all organizations.
 // Ref: #/components/schemas/MemberRole
 type MemberRole string
 
@@ -8503,6 +8656,7 @@ func (s *MemberRole) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/MemberUserInfo
 type MemberUserInfo struct {
+	// Email address of the organization member's user account.
 	Email string `json:"email"`
 	// Whether the member has MFA (TOTP) enabled.
 	HasMfa OptBool `json:"has_mfa"`
@@ -8543,8 +8697,10 @@ func (s *MemberUserInfo) SetDeactivatedAt(val OptDateTime) {
 
 // Ref: #/components/schemas/MemberWithUser
 type MemberWithUser struct {
-	Member Member         `json:"member"`
-	User   MemberUserInfo `json:"user"`
+	// Membership record for the user in the organization.
+	Member Member `json:"member"`
+	// Profile information for the organization member.
+	User MemberUserInfo `json:"user"`
 }
 
 // GetMember returns the value of Member.
@@ -8569,6 +8725,7 @@ func (s *MemberWithUser) SetUser(val MemberUserInfo) {
 
 // Ref: #/components/schemas/NeonAuthAddDomainToRedirectURIWhitelistRequest
 type NeonAuthAddDomainToRedirectURIWhitelistRequest struct {
+	// URI to add to the redirect URI allowlist for the auth provider.
 	Domain       url.URL                       `json:"domain"`
 	AuthProvider NeonAuthSupportedAuthProvider `json:"auth_provider"`
 }
@@ -8595,10 +8752,16 @@ func (s *NeonAuthAddDomainToRedirectURIWhitelistRequest) SetAuthProvider(val Neo
 
 // Ref: #/components/schemas/NeonAuthAddOAuthProviderRequest
 type NeonAuthAddOAuthProviderRequest struct {
-	ID                NeonAuthOauthProviderId `json:"id"`
-	ClientID          OptString               `json:"client_id"`
-	ClientSecret      OptString               `json:"client_secret"`
-	MicrosoftTenantID OptString               `json:"microsoft_tenant_id"`
+	// OAuth provider to configure for Neon Auth. Known values: `google`, `github`, `microsoft`, `vercel`.
+	ID NeonAuthOauthProviderId `json:"id"`
+	// The client ID issued by the OAuth provider for your application. Used to identify the application
+	// during the OAuth flow.
+	ClientID OptString `json:"client_id"`
+	// OAuth client secret for the provider.
+	ClientSecret OptString `json:"client_secret"`
+	// Tenant ID for the Microsoft OAuth provider. Only relevant when the OAuth provider is Microsoft; omit
+	// or leave blank for other providers.
+	MicrosoftTenantID OptString `json:"microsoft_tenant_id"`
 }
 
 // GetID returns the value of ID.
@@ -8691,6 +8854,7 @@ func (s *NeonAuthConfigUpdate) SetName(val string) {
 
 // Ref: #/components/schemas/NeonAuthCreateAuthProviderSDKKeysRequest
 type NeonAuthCreateAuthProviderSDKKeysRequest struct {
+	// The Neon project ID. Returned as `id` from `GET /projects`.
 	ProjectID    string                        `json:"project_id"`
 	AuthProvider NeonAuthSupportedAuthProvider `json:"auth_provider"`
 }
@@ -8718,9 +8882,15 @@ func (s *NeonAuthCreateAuthProviderSDKKeysRequest) SetAuthProvider(val NeonAuthS
 // Ref: #/components/schemas/NeonAuthCreateIntegrationRequest
 type NeonAuthCreateIntegrationRequest struct {
 	AuthProvider NeonAuthSupportedAuthProvider `json:"auth_provider"`
-	ProjectID    string                        `json:"project_id"`
-	BranchID     string                        `json:"branch_id"`
-	DatabaseName OptString                     `json:"database_name"`
+	// The Neon project ID. Returned as `id` from `GET /projects`.
+	ProjectID string `json:"project_id"`
+	// The Neon branch ID. Returned as `id` from `GET /projects/{project_id}/branches`.
+	BranchID string `json:"branch_id"`
+	// Name of the database to associate with the Neon Auth integration. When omitted, the integration uses
+	// the project's default database.
+	DatabaseName OptString `json:"database_name"`
+	// Deprecated. The database role for the auth integration. Omit this field; it is ignored.
+	//
 	// Deprecated: schema marks this property as deprecated.
 	RoleName OptString `json:"role_name"`
 }
@@ -8777,14 +8947,24 @@ func (s *NeonAuthCreateIntegrationRequest) SetRoleName(val OptString) {
 
 // Ref: #/components/schemas/NeonAuthCreateIntegrationResponse
 type NeonAuthCreateIntegrationResponse struct {
-	AuthProvider          NeonAuthSupportedAuthProvider `json:"auth_provider"`
-	AuthProviderProjectID string                        `json:"auth_provider_project_id"`
-	PubClientKey          string                        `json:"pub_client_key"`
-	SecretServerKey       string                        `json:"secret_server_key"`
-	JwksURL               string                        `json:"jwks_url"`
-	SchemaName            string                        `json:"schema_name"`
-	TableName             string                        `json:"table_name"`
-	BaseURL               OptString                     `json:"base_url"`
+	AuthProvider NeonAuthSupportedAuthProvider `json:"auth_provider"`
+	// Project ID assigned by the auth provider for this integration.
+	AuthProviderProjectID string `json:"auth_provider_project_id"`
+	// Publishable SDK key from the auth provider. Populated only for Stack Auth (deprecated); empty for
+	// Better Auth.
+	PubClientKey string `json:"pub_client_key"`
+	// Secret server-side SDK key from the auth provider. Populated only for Stack Auth (deprecated); empty
+	// for Better Auth. Treat as a credential.
+	SecretServerKey string `json:"secret_server_key"`
+	// URL of the provider's JWKS endpoint used to verify JWTs.
+	JwksURL string `json:"jwks_url"`
+	// Postgres schema containing the auth integration tables. Defaults to `neon_auth`.
+	SchemaName string `json:"schema_name"`
+	// Postgres table in the integration schema where synced user records are stored.
+	TableName string `json:"table_name"`
+	// Base URL of the Neon Auth service for this integration. Set as the NEON_AUTH_BASE_URL environment
+	// variable in your application.
+	BaseURL OptString `json:"base_url"`
 }
 
 // GetAuthProvider returns the value of AuthProvider.
@@ -8869,10 +9049,13 @@ func (s *NeonAuthCreateIntegrationResponse) SetBaseURL(val OptString) {
 
 // Ref: #/components/schemas/NeonAuthCreateNewUserRequest
 type NeonAuthCreateNewUserRequest struct {
+	// The Neon project ID. Returned as `id` from `GET /projects`.
 	ProjectID    string                        `json:"project_id"`
 	AuthProvider NeonAuthSupportedAuthProvider `json:"auth_provider"`
-	Email        string                        `json:"email"`
-	Name         OptString                     `json:"name"`
+	// Email address of the new user.
+	Email string `json:"email"`
+	// Display name for the new user. When omitted, the created user has no display name.
+	Name OptString `json:"name"`
 }
 
 // GetProjectID returns the value of ProjectID.
@@ -8933,6 +9116,7 @@ func (s *NeonAuthCreateNewUserResponse) SetID(val string) {
 
 // Ref: #/components/schemas/NeonAuthDeleteDomainFromRedirectURIWhitelistItem
 type NeonAuthDeleteDomainFromRedirectURIWhitelistItem struct {
+	// URI to remove from the redirect URI whitelist.
 	Domain url.URL `json:"domain"`
 }
 
@@ -8948,8 +9132,9 @@ func (s *NeonAuthDeleteDomainFromRedirectURIWhitelistItem) SetDomain(val url.URL
 
 // Ref: #/components/schemas/NeonAuthDeleteDomainFromRedirectURIWhitelistRequest
 type NeonAuthDeleteDomainFromRedirectURIWhitelistRequest struct {
-	AuthProvider NeonAuthSupportedAuthProvider                      `json:"auth_provider"`
-	Domains      []NeonAuthDeleteDomainFromRedirectURIWhitelistItem `json:"domains"`
+	AuthProvider NeonAuthSupportedAuthProvider `json:"auth_provider"`
+	// Domain names to remove from the redirect URI whitelist for the specified auth provider.
+	Domains []NeonAuthDeleteDomainFromRedirectURIWhitelistItem `json:"domains"`
 }
 
 // GetAuthProvider returns the value of AuthProvider.
@@ -8976,7 +9161,10 @@ func (s *NeonAuthDeleteDomainFromRedirectURIWhitelistRequest) SetDomains(val []N
 type NeonAuthEmailAndPasswordConfig struct {
 	// Whether email and password authentication is enabled.
 	Enabled bool `json:"enabled"`
-	// The email verification method to use.
+	// Controls how email addresses are verified during sign-up or sign-in.
+	//
+	//  - `link`: sends a verification link to the user's email address
+	//  - `otp`: sends a one-time password to the user's email address
 	EmailVerificationMethod NeonAuthEmailVerificationMethod `json:"email_verification_method"`
 	// Whether email verification is required before users can sign in.
 	RequireEmailVerification bool `json:"require_email_verification"`
@@ -9062,19 +9250,21 @@ func (s *NeonAuthEmailAndPasswordConfig) SetDisableSignUp(val bool) {
 
 // Ref: #/components/schemas/NeonAuthEmailAndPasswordConfigUpdate
 type NeonAuthEmailAndPasswordConfigUpdate struct {
-	// Whether email and password authentication is enabled.
+	// Controls whether email and password authentication is enabled for this project. When omitted from an
+	// update request, the current value is unchanged.
 	Enabled OptBool `json:"enabled"`
-	// The email verification method to use.
+	// Email verification method. `link`: sends a verification link. `otp`: sends a one-time password.
 	EmailVerificationMethod OptNeonAuthEmailVerificationMethod `json:"email_verification_method"`
-	// Whether email verification is required before users can sign in.
+	// When true, users must verify their email address before they can sign in. Omitting this field from
+	// an update request leaves the current value unchanged.
 	RequireEmailVerification OptBool `json:"require_email_verification"`
 	// Whether users are automatically signed in after verifying their email.
 	AutoSignInAfterVerification OptBool `json:"auto_sign_in_after_verification"`
 	// Whether to send a verification email when users sign up.
 	SendVerificationEmailOnSignUp OptBool `json:"send_verification_email_on_sign_up"`
-	// Whether to send a verification email when users sign in.
+	// Whether to send a verification email when a user with an unverified email signs in.
 	SendVerificationEmailOnSignIn OptBool `json:"send_verification_email_on_sign_in"`
-	// Whether to disable new user sign ups.
+	// Whether to disable new user sign ups. When omitted, the current setting is not changed.
 	DisableSignUp OptBool `json:"disable_sign_up"`
 }
 
@@ -9161,6 +9351,90 @@ func (s *NeonAuthEmailServerConfig) GetOneOf() NeonAuthEmailServerConfigSum {
 // SetOneOf sets the value of OneOf.
 func (s *NeonAuthEmailServerConfig) SetOneOf(val NeonAuthEmailServerConfigSum) {
 	s.OneOf = val
+}
+
+// Ref: #/components/schemas/NeonAuthEmailServerConfigResponse
+type NeonAuthEmailServerConfigResponse struct {
+	OneOf NeonAuthEmailServerConfigResponseSum
+}
+
+// GetOneOf returns the value of OneOf.
+func (s *NeonAuthEmailServerConfigResponse) GetOneOf() NeonAuthEmailServerConfigResponseSum {
+	return s.OneOf
+}
+
+// SetOneOf sets the value of OneOf.
+func (s *NeonAuthEmailServerConfigResponse) SetOneOf(val NeonAuthEmailServerConfigResponseSum) {
+	s.OneOf = val
+}
+
+// NeonAuthEmailServerConfigResponseSum represents sum type.
+type NeonAuthEmailServerConfigResponseSum struct {
+	// Type selects the active sum variant, switch on this field.
+	Type                        NeonAuthEmailServerConfigResponseSumType
+	StandardEmailServerResponse StandardEmailServerResponse
+	SharedEmailServer           SharedEmailServer
+}
+
+// NeonAuthEmailServerConfigResponseSumType is oneOf type of NeonAuthEmailServerConfigResponseSum.
+type NeonAuthEmailServerConfigResponseSumType string
+
+// Possible values for NeonAuthEmailServerConfigResponseSumType.
+const (
+	StandardEmailServerResponseNeonAuthEmailServerConfigResponseSum NeonAuthEmailServerConfigResponseSumType = "standard"
+	SharedEmailServerNeonAuthEmailServerConfigResponseSum           NeonAuthEmailServerConfigResponseSumType = "shared"
+)
+
+// IsStandardEmailServerResponse reports whether NeonAuthEmailServerConfigResponseSum is StandardEmailServerResponse.
+func (s NeonAuthEmailServerConfigResponseSum) IsStandardEmailServerResponse() bool {
+	return s.Type == StandardEmailServerResponseNeonAuthEmailServerConfigResponseSum
+}
+
+// IsSharedEmailServer reports whether NeonAuthEmailServerConfigResponseSum is SharedEmailServer.
+func (s NeonAuthEmailServerConfigResponseSum) IsSharedEmailServer() bool {
+	return s.Type == SharedEmailServerNeonAuthEmailServerConfigResponseSum
+}
+
+// SetStandardEmailServerResponse sets NeonAuthEmailServerConfigResponseSum to StandardEmailServerResponse.
+func (s *NeonAuthEmailServerConfigResponseSum) SetStandardEmailServerResponse(v StandardEmailServerResponse) {
+	s.Type = StandardEmailServerResponseNeonAuthEmailServerConfigResponseSum
+	s.StandardEmailServerResponse = v
+}
+
+// GetStandardEmailServerResponse returns StandardEmailServerResponse and true boolean if NeonAuthEmailServerConfigResponseSum is StandardEmailServerResponse.
+func (s NeonAuthEmailServerConfigResponseSum) GetStandardEmailServerResponse() (v StandardEmailServerResponse, ok bool) {
+	if !s.IsStandardEmailServerResponse() {
+		return v, false
+	}
+	return s.StandardEmailServerResponse, true
+}
+
+// NewStandardEmailServerResponseNeonAuthEmailServerConfigResponseSum returns new NeonAuthEmailServerConfigResponseSum from StandardEmailServerResponse.
+func NewStandardEmailServerResponseNeonAuthEmailServerConfigResponseSum(v StandardEmailServerResponse) NeonAuthEmailServerConfigResponseSum {
+	var s NeonAuthEmailServerConfigResponseSum
+	s.SetStandardEmailServerResponse(v)
+	return s
+}
+
+// SetSharedEmailServer sets NeonAuthEmailServerConfigResponseSum to SharedEmailServer.
+func (s *NeonAuthEmailServerConfigResponseSum) SetSharedEmailServer(v SharedEmailServer) {
+	s.Type = SharedEmailServerNeonAuthEmailServerConfigResponseSum
+	s.SharedEmailServer = v
+}
+
+// GetSharedEmailServer returns SharedEmailServer and true boolean if NeonAuthEmailServerConfigResponseSum is SharedEmailServer.
+func (s NeonAuthEmailServerConfigResponseSum) GetSharedEmailServer() (v SharedEmailServer, ok bool) {
+	if !s.IsSharedEmailServer() {
+		return v, false
+	}
+	return s.SharedEmailServer, true
+}
+
+// NewSharedEmailServerNeonAuthEmailServerConfigResponseSum returns new NeonAuthEmailServerConfigResponseSum from SharedEmailServer.
+func NewSharedEmailServerNeonAuthEmailServerConfigResponseSum(v SharedEmailServer) NeonAuthEmailServerConfigResponseSum {
+	var s NeonAuthEmailServerConfigResponseSum
+	s.SetSharedEmailServer(v)
+	return s
 }
 
 // NeonAuthEmailServerConfigSum represents sum type.
@@ -9281,16 +9555,27 @@ func (s *NeonAuthEmailVerificationMethod) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/NeonAuthIntegration
 type NeonAuthIntegration struct {
-	AuthProvider          NeonAuthSupportedAuthProvider            `json:"auth_provider"`
-	AuthProviderProjectID string                                   `json:"auth_provider_project_id"`
-	BranchID              string                                   `json:"branch_id"`
-	DbName                string                                   `json:"db_name"`
-	CreatedAt             time.Time                                `json:"created_at"`
-	OwnedBy               NeonAuthProviderProjectOwnedBy           `json:"owned_by"`
-	TransferStatus        OptNeonAuthProviderProjectTransferStatus `json:"transfer_status"`
-	JwksURL               string                                   `json:"jwks_url"`
-	BaseURL               OptString                                `json:"base_url"`
-	// The application name used in auth emails and communications. Defaults to the Neon project name.
+	AuthProvider NeonAuthSupportedAuthProvider `json:"auth_provider"`
+	// Project identifier assigned by the auth provider for this integration.
+	AuthProviderProjectID string `json:"auth_provider_project_id"`
+	// The Neon branch ID. Returned as `id` from `GET /projects/{project_id}/branches`.
+	BranchID string `json:"branch_id"`
+	// Name of the database used by the Neon Auth integration.
+	DbName string `json:"db_name"`
+	// Timestamp when the Neon Auth integration was created, in RFC 3339 format (UTC).
+	CreatedAt time.Time `json:"created_at"`
+	// Owner of the auth provider project. `neon` means the project is created and managed by Neon on your
+	// behalf. `user` means the project was created in your own auth provider account and is self-managed.
+	OwnedBy NeonAuthProviderProjectOwnedBy `json:"owned_by"`
+	// Ownership transfer state for the auth provider project. `initiated` means a transfer was requested
+	// but not completed. `finished` means it completed successfully.
+	TransferStatus OptNeonAuthProviderProjectTransferStatus `json:"transfer_status"`
+	// URL of the provider's JWKS endpoint used to verify JWTs.
+	JwksURL string `json:"jwks_url"`
+	// Base URL of the Neon Auth service endpoint for this integration. Injected into the project
+	// environment as `NEON_AUTH_BASE_URL`.
+	BaseURL OptString `json:"base_url"`
+	// Application name shown in auth emails and communications. Defaults to the project name.
 	Name OptString `json:"name"`
 }
 
@@ -9398,7 +9683,7 @@ func (s *NeonAuthIntegration) SetName(val OptString) {
 type NeonAuthMagicLinkConfig struct {
 	// Whether the magic link plugin is enabled.
 	Enabled bool `json:"enabled"`
-	// Time in minutes before the magic link expires.
+	// Minutes until the magic link expires.
 	ExpiresIn int32 `json:"expires_in"`
 	// Whether to disable sign-up via magic link.
 	DisableSignUp bool `json:"disable_sign_up"`
@@ -9436,11 +9721,11 @@ func (s *NeonAuthMagicLinkConfig) SetDisableSignUp(val bool) {
 
 // Ref: #/components/schemas/NeonAuthMagicLinkConfigUpdate
 type NeonAuthMagicLinkConfigUpdate struct {
-	// Whether the magic link plugin is enabled.
+	// Whether to enable the magic link plugin.
 	Enabled OptBool `json:"enabled"`
-	// Time in minutes before the magic link expires.
+	// Minutes until the magic link expires.
 	ExpiresIn OptInt32 `json:"expires_in"`
-	// Whether to disable sign-up via magic link.
+	// When true, sign-up via magic link is disabled.
 	DisableSignUp OptBool `json:"disable_sign_up"`
 }
 
@@ -9476,10 +9761,17 @@ func (s *NeonAuthMagicLinkConfigUpdate) SetDisableSignUp(val OptBool) {
 
 // Ref: #/components/schemas/NeonAuthOauthProvider
 type NeonAuthOauthProvider struct {
-	ID           NeonAuthOauthProviderId   `json:"id"`
-	Type         NeonAuthOauthProviderType `json:"type"`
-	ClientID     OptString                 `json:"client_id"`
-	ClientSecret OptString                 `json:"client_secret"`
+	// The OAuth provider's ID.
+	ID NeonAuthOauthProviderId `json:"id"`
+	// OAuth provider key type. `standard` uses your own OAuth credentials. `shared` uses Neon-managed keys
+	// intended for development only; they display Neon branding on the OAuth consent screen and must not
+	// be used in production.
+	Type NeonAuthOauthProviderType `json:"type"`
+	// Public identifier for the OAuth application, issued by the provider when the application is
+	// registered.
+	ClientID OptString `json:"client_id"`
+	// OAuth client secret for the provider.
+	ClientSecret OptString `json:"client_secret"`
 }
 
 // GetID returns the value of ID.
@@ -9624,11 +9916,13 @@ func (s *NeonAuthOauthProviderType) UnmarshalText(data []byte) error {
 type NeonAuthOrganizationConfig struct {
 	// Whether the organization plugin is enabled.
 	Enabled bool `json:"enabled"`
-	// Maximum number of organizations a user can create.
+	// Maximum organizations a user can belong to (created or joined). At the limit, the user cannot create
+	// or join more.
 	OrganizationLimit int32 `json:"organization_limit"`
 	// Maximum number of members per organization.
 	MembershipLimit int32 `json:"membership_limit"`
-	// The role assigned to the user who creates an organization.
+	// Role of the organization's creator. `owner`: full control, including deleting the org and
+	// transferring ownership. `admin`: manage members and settings only.
 	CreatorRole NeonAuthOrganizationConfigCreatorRole `json:"creator_role"`
 	// Whether to send invitation emails when inviting members to an organization.
 	SendInvitationEmail bool `json:"send_invitation_email"`
@@ -9684,7 +9978,8 @@ func (s *NeonAuthOrganizationConfig) SetSendInvitationEmail(val bool) {
 	s.SendInvitationEmail = val
 }
 
-// The role assigned to the user who creates an organization.
+// Role of the organization's creator. `owner`: full control, including deleting the org and
+// transferring ownership. `admin`: manage members and settings only.
 type NeonAuthOrganizationConfigCreatorRole string
 
 const (
@@ -9728,15 +10023,18 @@ func (s *NeonAuthOrganizationConfigCreatorRole) UnmarshalText(data []byte) error
 
 // Ref: #/components/schemas/NeonAuthOrganizationConfigUpdate
 type NeonAuthOrganizationConfigUpdate struct {
-	// Whether the organization plugin is enabled.
+	// Controls whether the organization plugin is active for the organization.
 	Enabled OptBool `json:"enabled"`
-	// Maximum number of organizations a user can create.
+	// Maximum organizations a user can belong to (created or joined). At the limit, the user cannot create
+	// or join more.
 	OrganizationLimit OptInt32 `json:"organization_limit"`
-	// Maximum number of members per organization.
+	// Maximum members per organization.
 	MembershipLimit OptInt32 `json:"membership_limit"`
-	// The role assigned to the user who creates an organization.
+	// Role of the organization's creator. `owner`: full control, including deleting the org and
+	// transferring ownership. `admin`: manage members and settings only.
 	CreatorRole OptNeonAuthOrganizationConfigUpdateCreatorRole `json:"creator_role"`
-	// Whether to send invitation emails when inviting members to an organization.
+	// When true, invited users receive an email containing an accept link. Requires that the invited user
+	// has a verified email address.
 	SendInvitationEmail OptBool `json:"send_invitation_email"`
 }
 
@@ -9790,7 +10088,8 @@ func (s *NeonAuthOrganizationConfigUpdate) SetSendInvitationEmail(val OptBool) {
 	s.SendInvitationEmail = val
 }
 
-// The role assigned to the user who creates an organization.
+// Role of the organization's creator. `owner`: full control, including deleting the org and
+// transferring ownership. `admin`: manage members and settings only.
 type NeonAuthOrganizationConfigUpdateCreatorRole string
 
 const (
@@ -9891,13 +10190,22 @@ func (s *NeonAuthPhoneNumberConfigUpdate) SetOtpExpiresIn(val OptInt) {
 // Aggregated plugin configurations for Neon Auth.
 // Ref: #/components/schemas/NeonAuthPluginConfigs
 type NeonAuthPluginConfigs struct {
-	Organization     OptNeonAuthOrganizationConfig     `json:"organization"`
-	MagicLink        OptNeonAuthMagicLinkConfig        `json:"magic_link"`
-	PhoneNumber      OptNeonAuthPhoneNumberConfig      `json:"phone_number"`
-	EmailProvider    OptNeonAuthEmailServerConfig      `json:"email_provider"`
+	// Configuration for the Neon Auth organization plugin, which enables user organizations within the
+	// authentication system. This is distinct from a Neon platform organization.
+	Organization OptNeonAuthOrganizationConfig `json:"organization"`
+	// Configuration for passwordless magic-link email authentication.
+	MagicLink OptNeonAuthMagicLinkConfig `json:"magic_link"`
+	// Configuration for the phone number authentication plugin.
+	PhoneNumber OptNeonAuthPhoneNumberConfig `json:"phone_number"`
+	// Email server configuration used to send authentication emails.
+	EmailProvider OptNeonAuthEmailServerConfigResponse `json:"email_provider"`
+	// Configuration for email and password authentication.
 	EmailAndPassword OptNeonAuthEmailAndPasswordConfig `json:"email_and_password"`
-	OAuthProviders   []NeonAuthOauthProvider           `json:"oauth_providers"`
-	AllowLocalhost   OptBool                           `json:"allow_localhost"`
+	// OAuth provider configurations enabled for this auth setup.
+	OAuthProviders []NeonAuthOauthProvider `json:"oauth_providers"`
+	// Permits authentication requests from localhost origins when true. Intended for local development;
+	// disable in production environments.
+	AllowLocalhost OptBool `json:"allow_localhost"`
 }
 
 // GetOrganization returns the value of Organization.
@@ -9916,7 +10224,7 @@ func (s *NeonAuthPluginConfigs) GetPhoneNumber() OptNeonAuthPhoneNumberConfig {
 }
 
 // GetEmailProvider returns the value of EmailProvider.
-func (s *NeonAuthPluginConfigs) GetEmailProvider() OptNeonAuthEmailServerConfig {
+func (s *NeonAuthPluginConfigs) GetEmailProvider() OptNeonAuthEmailServerConfigResponse {
 	return s.EmailProvider
 }
 
@@ -9951,7 +10259,7 @@ func (s *NeonAuthPluginConfigs) SetPhoneNumber(val OptNeonAuthPhoneNumberConfig)
 }
 
 // SetEmailProvider sets the value of EmailProvider.
-func (s *NeonAuthPluginConfigs) SetEmailProvider(val OptNeonAuthEmailServerConfig) {
+func (s *NeonAuthPluginConfigs) SetEmailProvider(val OptNeonAuthEmailServerConfigResponse) {
 	s.EmailProvider = val
 }
 
@@ -10056,6 +10364,7 @@ func (s *NeonAuthProviderProjectTransferStatus) UnmarshalText(data []byte) error
 
 // Ref: #/components/schemas/NeonAuthRedirectURIWhitelistDomain
 type NeonAuthRedirectURIWhitelistDomain struct {
+	// Allowed redirect URI domain for the auth provider.
 	Domain       string                        `json:"domain"`
 	AuthProvider NeonAuthSupportedAuthProvider `json:"auth_provider"`
 }
@@ -10082,6 +10391,7 @@ func (s *NeonAuthRedirectURIWhitelistDomain) SetAuthProvider(val NeonAuthSupport
 
 // Ref: #/components/schemas/NeonAuthRedirectURIWhitelistResponse
 type NeonAuthRedirectURIWhitelistResponse struct {
+	// Domains permitted as redirect URI targets in the whitelist.
 	Domains []NeonAuthRedirectURIWhitelistDomain `json:"domains"`
 }
 
@@ -10095,6 +10405,9 @@ func (s *NeonAuthRedirectURIWhitelistResponse) SetDomains(val []NeonAuthRedirect
 	s.Domains = val
 }
 
+// Authentication provider integrated with this Neon Auth configuration. `better_auth` integrates with
+// Better Auth (the current, recommended provider). `stack` integrates with Stack Auth (deprecated).
+// `mock` is a simulated provider for local development and testing only.
 // Ref: #/components/schemas/NeonAuthSupportedAuthProvider
 type NeonAuthSupportedAuthProvider string
 
@@ -10146,6 +10459,7 @@ func (s *NeonAuthSupportedAuthProvider) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/NeonAuthTransferAuthProviderProjectRequest
 type NeonAuthTransferAuthProviderProjectRequest struct {
+	// The Neon project ID. Returned as `id` from `GET /projects`.
 	ProjectID    string                        `json:"project_id"`
 	AuthProvider NeonAuthSupportedAuthProvider `json:"auth_provider"`
 }
@@ -10188,8 +10502,12 @@ func (s *NeonAuthTransferAuthProviderProjectResponse) SetURL(val string) {
 
 // Ref: #/components/schemas/NeonAuthUpdateOAuthProviderRequest
 type NeonAuthUpdateOAuthProviderRequest struct {
-	ClientID          OptString `json:"client_id"`
-	ClientSecret      OptString `json:"client_secret"`
+	// The OAuth client ID registered with the provider. Omit to keep the currently configured value.
+	ClientID OptString `json:"client_id"`
+	// OAuth client secret for the provider. Omit to leave the existing secret unchanged.
+	ClientSecret OptString `json:"client_secret"`
+	// The tenant ID scoping the Microsoft OAuth provider. Supply this field when the provider type is
+	// microsoft; it has no effect for other provider types.
 	MicrosoftTenantID OptString `json:"microsoft_tenant_id"`
 }
 
@@ -10225,10 +10543,15 @@ func (s *NeonAuthUpdateOAuthProviderRequest) SetMicrosoftTenantID(val OptString)
 
 // Ref: #/components/schemas/NeonAuthWebhookConfig
 type NeonAuthWebhookConfig struct {
-	Enabled        bool                                     `json:"enabled"`
-	WebhookURL     OptString                                `json:"webhook_url"`
-	EnabledEvents  []NeonAuthWebhookConfigEnabledEventsItem `json:"enabled_events"`
-	TimeoutSeconds OptInt                                   `json:"timeout_seconds"`
+	// Whether the webhook is active.
+	Enabled bool `json:"enabled"`
+	// Destination URL that receives webhook event payloads.
+	WebhookURL OptString `json:"webhook_url"`
+	// Event types that trigger this webhook. Covers user lifecycle, email/OTP delivery, organization
+	// invitations, and phone verification events; see the enum for exact values.
+	EnabledEvents []NeonAuthWebhookConfigEnabledEventsItem `json:"enabled_events"`
+	// Maximum time, in seconds, to wait for a response from the webhook endpoint.
+	TimeoutSeconds OptInt `json:"timeout_seconds"`
 }
 
 // GetEnabled returns the value of Enabled.
@@ -10720,19 +11043,24 @@ func (o NilString) Or(d string) string {
 	return d
 }
 
+// An asynchronous action Neon performs on your resources (for example, starting a compute or creating
+// a branch). Fields such as `action`, `status`, and `total_duration_ms` describe the operation and its
+// progress.
 // Ref: #/components/schemas/Operation
 type Operation struct {
 	// The operation ID.
 	ID uuid.UUID `json:"id"`
-	// The Neon project ID.
+	// The ID of the project this operation ran on.
 	ProjectID string `json:"project_id"`
-	// The branch ID.
+	// The ID of the branch this operation ran on.
 	BranchID OptString `json:"branch_id"`
-	// The endpoint ID.
+	// The ID of the compute endpoint this operation ran on.
 	EndpointID OptString       `json:"endpoint_id"`
 	Action     OperationAction `json:"action"`
-	Status     OperationStatus `json:"status"`
-	// The error that occurred.
+	// Current lifecycle state of the operation. On `failed`, see `failures_count` and `retry_at` for retry
+	// detail.
+	Status OperationStatus `json:"status"`
+	// Human-readable message describing why the operation failed.
 	Error OptString `json:"error"`
 	// The number of times the operation failed.
 	FailuresCount int32 `json:"failures_count"`
@@ -11162,7 +11490,10 @@ func (s *OperationResponse) SetOperation(val Operation) {
 	s.Operation = val
 }
 
-// The status of the operation.
+// Lifecycle state of the operation. `scheduling`: queued, not yet started. `running`: actively
+// executing. `finished`: completed successfully. `failed`: ended with a failure. `error`: ended with a
+// terminal error. `cancelling`: cancellation requested but not yet complete. `cancelled`: stopped
+// before completion. `skipped`: bypassed without executing.
 // Ref: #/components/schemas/OperationStatus
 type OperationStatus string
 
@@ -13240,38 +13571,38 @@ func (o OptNeonAuthEmailAndPasswordConfig) Or(d NeonAuthEmailAndPasswordConfig) 
 	return d
 }
 
-// NewOptNeonAuthEmailServerConfig returns new OptNeonAuthEmailServerConfig with value set to v.
-func NewOptNeonAuthEmailServerConfig(v NeonAuthEmailServerConfig) OptNeonAuthEmailServerConfig {
-	return OptNeonAuthEmailServerConfig{
+// NewOptNeonAuthEmailServerConfigResponse returns new OptNeonAuthEmailServerConfigResponse with value set to v.
+func NewOptNeonAuthEmailServerConfigResponse(v NeonAuthEmailServerConfigResponse) OptNeonAuthEmailServerConfigResponse {
+	return OptNeonAuthEmailServerConfigResponse{
 		Value: v,
 		Set:   true,
 	}
 }
 
-// OptNeonAuthEmailServerConfig is optional NeonAuthEmailServerConfig.
-type OptNeonAuthEmailServerConfig struct {
-	Value NeonAuthEmailServerConfig
+// OptNeonAuthEmailServerConfigResponse is optional NeonAuthEmailServerConfigResponse.
+type OptNeonAuthEmailServerConfigResponse struct {
+	Value NeonAuthEmailServerConfigResponse
 	Set   bool
 }
 
-// IsSet returns true if OptNeonAuthEmailServerConfig was set.
-func (o OptNeonAuthEmailServerConfig) IsSet() bool { return o.Set }
+// IsSet returns true if OptNeonAuthEmailServerConfigResponse was set.
+func (o OptNeonAuthEmailServerConfigResponse) IsSet() bool { return o.Set }
 
 // Reset unsets value.
-func (o *OptNeonAuthEmailServerConfig) Reset() {
-	var v NeonAuthEmailServerConfig
+func (o *OptNeonAuthEmailServerConfigResponse) Reset() {
+	var v NeonAuthEmailServerConfigResponse
 	o.Value = v
 	o.Set = false
 }
 
 // SetTo sets value to v.
-func (o *OptNeonAuthEmailServerConfig) SetTo(v NeonAuthEmailServerConfig) {
+func (o *OptNeonAuthEmailServerConfigResponse) SetTo(v NeonAuthEmailServerConfigResponse) {
 	o.Set = true
 	o.Value = v
 }
 
 // Get returns value and boolean that denotes whether value was set.
-func (o OptNeonAuthEmailServerConfig) Get() (v NeonAuthEmailServerConfig, ok bool) {
+func (o OptNeonAuthEmailServerConfigResponse) Get() (v NeonAuthEmailServerConfigResponse, ok bool) {
 	if !o.Set {
 		return v, false
 	}
@@ -13279,7 +13610,7 @@ func (o OptNeonAuthEmailServerConfig) Get() (v NeonAuthEmailServerConfig, ok boo
 }
 
 // Or returns value if set, or given parameter if does not.
-func (o OptNeonAuthEmailServerConfig) Or(d NeonAuthEmailServerConfig) NeonAuthEmailServerConfig {
+func (o OptNeonAuthEmailServerConfigResponse) Or(d NeonAuthEmailServerConfigResponse) NeonAuthEmailServerConfigResponse {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -15314,7 +15645,7 @@ func (s *OrgApiKeyCreateRequest) SetProjectID(val OptString) {
 // Merged schema.
 // Ref: #/components/schemas/OrgApiKeyCreateResponse
 type OrgApiKeyCreateResponse struct {
-	// The API key ID.
+	// The API key's unique numeric ID. Distinct from the API key token (`key`).
 	ID int64 `json:"id"`
 	// The generated 64-bit token required to access the Neon API.
 	Key string `json:"key"`
@@ -15391,7 +15722,7 @@ func (s *OrgApiKeyCreateResponse) SetProjectID(val OptString) {
 // Merged schema.
 // Ref: #/components/schemas/OrgApiKeyRevokeResponse
 type OrgApiKeyRevokeResponse struct {
-	// The API key ID.
+	// The API key's unique numeric ID. Distinct from the API key token (`key`).
 	ID int64 `json:"id"`
 	// The user-specified API key name.
 	Name string `json:"name"`
@@ -15492,7 +15823,7 @@ func (s *OrgApiKeyRevokeResponse) SetProjectID(val OptString) {
 // Merged schema.
 // Ref: #/components/schemas/OrgApiKeysListResponseItem
 type OrgApiKeysListResponseItem struct {
-	// The API key ID.
+	// The API key's unique numeric ID. Distinct from the API key token (`key`).
 	ID int64 `json:"id"`
 	// The user-specified API key name.
 	Name string `json:"name"`
@@ -15579,10 +15910,14 @@ func (s *OrgApiKeysListResponseItem) SetProjectID(val OptString) {
 
 // Ref: #/components/schemas/Organization
 type Organization struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
+	// The Neon organization ID. Use as the `org_id` path parameter in other endpoints.
+	ID string `json:"id"`
+	// Human-readable display name of the organization.
+	Name string `json:"name"`
+	// URL-safe identifier for the organization, used in API paths. Distinct from the display name.
 	Handle string `json:"handle"`
-	Plan   string `json:"plan"`
+	// Billing plan for the organization, for example `free`, `launch`, or `scale`.
+	Plan string `json:"plan"`
 	// A timestamp indicting when the organization was created.
 	CreatedAt time.Time `json:"created_at"`
 	// Organizations created via the Console or the API are managed by `console`. Organizations created by
@@ -15688,6 +16023,7 @@ func (s *Organization) SetRequireMfa(val OptBool) {
 
 // Ref: #/components/schemas/OrganizationInvitationsResponse
 type OrganizationInvitationsResponse struct {
+	// List of pending invitations for the organization.
 	Invitations []Invitation `json:"invitations"`
 }
 
@@ -15703,6 +16039,7 @@ func (s *OrganizationInvitationsResponse) SetInvitations(val []Invitation) {
 
 // Ref: #/components/schemas/OrganizationInviteCreateRequest
 type OrganizationInviteCreateRequest struct {
+	// Email address of the person to invite to the organization.
 	Email string     `json:"email"`
 	Role  MemberRole `json:"role"`
 }
@@ -15729,6 +16066,7 @@ func (s *OrganizationInviteCreateRequest) SetRole(val MemberRole) {
 
 // Ref: #/components/schemas/OrganizationInvitesCreateRequest
 type OrganizationInvitesCreateRequest struct {
+	// Invitations to create for the organization.
 	Invitations []OrganizationInviteCreateRequest `json:"invitations"`
 }
 
@@ -15759,6 +16097,7 @@ func (s *OrganizationMemberUpdateRequest) SetRole(val MemberRole) {
 
 // Ref: #/components/schemas/OrganizationsResponse
 type OrganizationsResponse struct {
+	// Organizations returned by the request. Each includes `id`, `name`, `handle`, and `plan`.
 	Organizations []Organization `json:"organizations"`
 }
 
@@ -15772,11 +16111,12 @@ func (s *OrganizationsResponse) SetOrganizations(val []Organization) {
 	s.Organizations = val
 }
 
-// Cursor based pagination is used. The user must pass the cursor as is to the backend. For more
-// information about cursor based pagination, see
-// https://learn.microsoft.com/en-us/ef/core/querying/pagination#keyset-pagination.
+// Cursor-based pagination. The `cursor` value reflects the endpoint's sort field (for example, an ID
+// or timestamp), so pass it back unchanged.
 // Ref: #/components/schemas/Pagination
 type Pagination struct {
+	// Cursor marking the last item in this response. Pass it unchanged as the `cursor` query parameter to
+	// fetch the next page.
 	Cursor string `json:"cursor"`
 }
 
@@ -15793,7 +16133,8 @@ func (s *Pagination) SetCursor(val string) {
 // Ref: #/components/schemas/PaymentSource
 type PaymentSource struct {
 	// Type of payment source. E.g. "card".
-	Type string                   `json:"type"`
+	Type string `json:"type"`
+	// Bank card details for this payment source.
 	Card OptPaymentSourceBankCard `json:"card"`
 }
 
@@ -15821,7 +16162,8 @@ func (s *PaymentSource) SetCard(val OptPaymentSourceBankCard) {
 type PaymentSourceBankCard struct {
 	// Last 4 digits of the card.
 	Last4 string `json:"last4"`
-	// Brand of credit card.
+	// Card network reported by the payment processor. Set to `unknown` when the network cannot be
+	// determined.
 	Brand OptPaymentSourceBankCardBrand `json:"brand"`
 	// Credit card expiration month.
 	ExpMonth OptInt64 `json:"exp_month"`
@@ -15869,7 +16211,8 @@ func (s *PaymentSourceBankCard) SetExpYear(val OptInt64) {
 	s.ExpYear = val
 }
 
-// Brand of credit card.
+// Card network reported by the payment processor. Set to `unknown` when the network cannot be
+// determined.
 type PaymentSourceBankCardBrand string
 
 const (
@@ -15968,8 +16311,7 @@ func (s *PgSettingsData) init() PgSettingsData {
 
 type PgVersion int
 
-// DEPRECATED. A raw representation of PgBouncer settings. This schema is deprecated and will be
-// removed after 2026-06-20.
+// Deprecated. A raw representation of PgBouncer settings. Removal scheduled for June 20, 2026.
 //
 // Deprecated: schema marks this type as deprecated.
 // Ref: #/components/schemas/PgbouncerSettingsData
@@ -15986,7 +16328,9 @@ func (s *PgbouncerSettingsData) init() PgbouncerSettingsData {
 
 // Ref: #/components/schemas/PlanDetails
 type PlanDetails struct {
-	Name    string         `json:"name"`
+	// Plan name, for example `free`, `launch`, or `scale`.
+	Name string `json:"name"`
+	// Version of the plan, expressed as `major` and `minor` components.
 	Version OptPlanVersion `json:"version"`
 }
 
@@ -16039,7 +16383,10 @@ func (s *PlanVersion) SetMinor(val int) {
 // The shared libraries to preload into the project's compute instances.
 // Ref: #/components/schemas/PreloadLibraries
 type PreloadLibraries struct {
-	UseDefaults      OptBool  `json:"use_defaults"`
+	// When true, the project's preload libraries include the platform default set in addition to any
+	// libraries listed in `enabled_libraries`.
+	UseDefaults OptBool `json:"use_defaults"`
+	// Names of shared preload libraries to enable for the project.
 	EnabledLibraries []string `json:"enabled_libraries"`
 }
 
@@ -16222,15 +16569,15 @@ func (s *PresignResponseHeaders) init() PresignResponseHeaders {
 
 // Ref: #/components/schemas/Project
 type Project struct {
-	// Bytes-Hour. Project consumed that much storage hourly during the billing period. The value has some
-	// lag. The value is reset at the beginning of each billing period.
+	// Bytes-Hour. Project consumed that much Postgres storage hourly during the billing period. The value
+	// has some lag. The value is reset at the beginning of each billing period.
 	DataStorageBytesHour int64 `json:"data_storage_bytes_hour"`
 	// Bytes. Egress traffic from the Neon cloud to the client for given project over the billing period.
 	// Includes deleted endpoints. The value has some lag. The value is reset at the beginning of each
 	// billing period.
 	DataTransferBytes int64 `json:"data_transfer_bytes"`
-	// Bytes. Amount of WAL that travelled through storage for given project across all branches. The value
-	// has some lag. The value is reset at the beginning of each billing period.
+	// Bytes. Amount of WAL that travelled through Postgres storage for given project across all branches.
+	// The value has some lag. The value is reset at the beginning of each billing period.
 	WrittenDataBytes int64 `json:"written_data_bytes"`
 	// Seconds. The number of CPU seconds used by the project's compute endpoints, including compute
 	// endpoints that have been deleted. The value has some lag. The value is reset at the beginning of
@@ -16242,22 +16589,27 @@ type Project struct {
 	// Seconds. Control plane observed endpoints of this project being active this amount of wall-clock
 	// time. The value has some lag. The value is reset at the beginning of each billing period.
 	ActiveTimeSeconds int64 `json:"active_time_seconds"`
-	// DEPRECATED, use compute_time instead.
+	// Deprecated. Use `compute_time_seconds` instead.
 	//
 	// Deprecated: schema marks this property as deprecated.
 	CPUUsedSec int64 `json:"cpu_used_sec"`
-	// The project ID.
+	// The Neon project ID. Use as the `project_id` path parameter in other endpoints.
 	ID string `json:"id"`
 	// The cloud platform identifier. Currently, only AWS is supported, for which the identifier is `aws`.
 	PlatformID string `json:"platform_id"`
-	// The region identifier.
+	// Cloud region where the resource's Postgres compute and storage reside (for example,
+	// `aws-us-east-1`). Valid values are returned by `GET /regions`.
 	RegionID string `json:"region_id"`
 	// The project name.
-	Name                    string                     `json:"name"`
+	Name string `json:"name"`
+	// Compute provisioner. `k8s-neonvm` (default) supports Autoscaling; `k8s-pod` is fixed-size compute.
+	// Also `docker` and `serverless-platform`.
 	Provisioner             Provisioner                `json:"provisioner"`
 	DefaultEndpointSettings OptDefaultEndpointSettings `json:"default_endpoint_settings"`
-	Settings                OptProjectSettingsData     `json:"settings"`
-	PgVersion               PgVersion                  `json:"pg_version"`
+	// Project-level settings, for example `quota`, `allowed_ips`, `enable_logical_replication`, and
+	// `maintenance_window`.
+	Settings  OptProjectSettingsData `json:"settings"`
+	PgVersion PgVersion              `json:"pg_version"`
 	// The proxy host for the project. This value combines the `region_id`, the `platform_id`, and the Neon
 	// domain (`neon.tech`).
 	ProxyHost string `json:"proxy_host"`
@@ -16279,26 +16631,29 @@ type Project struct {
 	CreatedAt time.Time `json:"created_at"`
 	// A timestamp indicating when the project was last updated.
 	UpdatedAt time.Time `json:"updated_at"`
-	// The current space occupied by the project in storage, in bytes. Synthetic storage size combines the
-	// logical data size and Write-Ahead Log (WAL) size for all branches in a project.
+	// The current space occupied by the project in Postgres storage, in bytes. Synthetic Postgres storage
+	// size combines the logical data size and Write-Ahead Log (WAL) size for all branches in a project.
 	SyntheticStorageSize OptInt64 `json:"synthetic_storage_size"`
 	// A date-time indicating when Neon Cloud started measuring consumption for current consumption period.
 	ConsumptionPeriodStart time.Time `json:"consumption_period_start"`
 	// A date-time indicating when Neon Cloud plans to stop measuring consumption for current consumption
 	// period.
 	ConsumptionPeriodEnd time.Time `json:"consumption_period_end"`
-	// DEPRECATED. Use `consumption_period_end` from the getProject endpoint instead. A timestamp
-	// indicating when the project quota resets.
+	// Deprecated. Use the `consumption_period_end` field instead. A timestamp indicating when the project
+	// quota resets.
 	//
 	// Deprecated: schema marks this property as deprecated.
-	QuotaResetAt OptDateTime         `json:"quota_reset_at"`
-	OwnerID      string              `json:"owner_id"`
-	Owner        OptProjectOwnerData `json:"owner"`
+	QuotaResetAt OptDateTime `json:"quota_reset_at"`
+	// ID of the organization that owns the project.
+	OwnerID string `json:"owner_id"`
+	// Ownership details for the project, including the owner's name and email.
+	Owner OptProjectOwnerData `json:"owner"`
 	// The most recent time when any endpoint of this project was active.
 	//
 	// Omitted when observed no activity for endpoints of this project.
 	ComputeLastActiveAt OptDateTime `json:"compute_last_active_at"`
-	OrgID               OptString   `json:"org_id"`
+	// The Neon organization ID. Returned as `id` from `GET /users/me/organizations`.
+	OrgID OptString `json:"org_id"`
 	// A timestamp indicating when project update begins. If set, computes might experience a brief restart
 	// around this time.
 	MaintenanceScheduledFor OptDateTime `json:"maintenance_scheduled_for"`
@@ -17531,6 +17886,8 @@ func (*ProjectBranchLogsQueryResponse) queryProjectBranchLogsRes() {}
 
 // Ref: #/components/schemas/ProjectCreateRequest
 type ProjectCreateRequest struct {
+	// Configuration for the new project, including name, region, and Postgres compute and storage
+	// settings.
 	Project ProjectCreateRequestProject `json:"project"`
 }
 
@@ -17544,26 +17901,32 @@ func (s *ProjectCreateRequest) SetProject(val ProjectCreateRequestProject) {
 	s.Project = val
 }
 
+// Configuration for the new project, including name, region, and Postgres compute and storage
+// settings.
 type ProjectCreateRequestProject struct {
+	// Project-level settings applied at creation.
 	Settings OptProjectSettingsData `json:"settings"`
 	// The project name. If not specified, the name will be identical to the generated project ID.
-	Name   OptString                            `json:"name"`
+	Name OptString `json:"name"`
+	// Configuration for the initial branch created with the project.
 	Branch OptProjectCreateRequestProjectBranch `json:"branch"`
-	// DEPRECATED, use default_endpoint_settings.autoscaling_limit_min_cu instead.
+	// Deprecated. Use `default_endpoint_settings.autoscaling_limit_min_cu` instead.
 	//
 	// The minimum number of Compute Units. The minimum value is `0.25`. See
 	// [Compute size and Autoscaling configuration] for more information.
 	//
 	// [Compute size and Autoscaling configuration]: https://neon.com/docs/manage/endpoints#compute-size-and-autoscaling-configuration
 	AutoscalingLimitMinCu OptComputeUnit `json:"autoscaling_limit_min_cu"`
-	// DEPRECATED, use default_endpoint_settings.autoscaling_limit_max_cu instead.
+	// Deprecated. Use `default_endpoint_settings.autoscaling_limit_max_cu` instead.
 	//
 	// The maximum number of Compute Units. See [Compute size and Autoscaling configuration] for more
 	// information.
 	//
 	// [Compute size and Autoscaling configuration]: https://neon.com/docs/manage/endpoints#compute-size-and-autoscaling-configuration
 	AutoscalingLimitMaxCu OptComputeUnit `json:"autoscaling_limit_max_cu"`
-	Provisioner           OptProvisioner `json:"provisioner"`
+	// Compute provisioner. `k8s-neonvm` (default) supports Autoscaling; `k8s-pod` is fixed-size compute.
+	// Also `docker` and `serverless-platform`.
+	Provisioner OptProvisioner `json:"provisioner"`
 	// The region identifier. Refer to our [Regions] documentation for supported regions. Values are
 	// specified in this format: `aws-us-east-1`.
 	//
@@ -17574,11 +17937,12 @@ type ProjectCreateRequestProject struct {
 	// Whether or not passwords are stored for roles in the Neon project. Storing passwords facilitates
 	// access to Neon features that require authorization.
 	StorePasswords OptBool `json:"store_passwords"`
-	// The number of seconds to retain the shared history for all branches in this project. The default is
-	// 1 day (86400 seconds).
+	// History window (point-in-time restore range) for all branches, in seconds. `0` disables it. Default
+	// 1 day (Free: 6 hours). Maximum depends on plan: Free 6 hours (21600), Launch 7 days (604800), Scale
+	// 30 days (2592000).
 	HistoryRetentionSeconds OptInt32 `json:"history_retention_seconds"`
-	// Organization id in case the project created belongs to an organization. If not present, project is
-	// owned by a user and not by org.
+	// ID of the organization that will own the project. If omitted when using an organization API key, it
+	// is inferred from the key.
 	OrgID OptString `json:"org_id"`
 }
 
@@ -17702,6 +18066,7 @@ func (s *ProjectCreateRequestProject) SetOrgID(val OptString) {
 	s.OrgID = val
 }
 
+// Configuration for the initial branch created with the project.
 type ProjectCreateRequestProjectBranch struct {
 	// The default branch name. If not specified, the default branch name, `main`, will be used.
 	Name OptString `json:"name"`
@@ -17709,7 +18074,7 @@ type ProjectCreateRequestProjectBranch struct {
 	RoleName OptString `json:"role_name"`
 	// The database name. If not specified, the default database name, `neondb`, will be used.
 	DatabaseName OptString `json:"database_name"`
-	// The annotations for the branch.
+	// Arbitrary key-value metadata to attach to the branch.
 	Annotations OptAnnotationValueData `json:"annotations"`
 }
 
@@ -17756,6 +18121,7 @@ func (s *ProjectCreateRequestProjectBranch) SetAnnotations(val OptAnnotationValu
 // The list of configured JWKS definitions for a project.
 // Ref: #/components/schemas/ProjectJWKSResponse
 type ProjectJWKSResponse struct {
+	// JWKS configurations associated with the project.
 	Jwks []JWKS `json:"jwks"`
 }
 
@@ -17769,21 +18135,26 @@ func (s *ProjectJWKSResponse) SetJwks(val []JWKS) {
 	s.Jwks = val
 }
 
-// Essential data about the project. Full data is available at the getProject endpoint.
+// Essential data about the project. Full data is available at `GET /projects/{project_id}`.
 // Ref: #/components/schemas/ProjectListItem
 type ProjectListItem struct {
-	// The project ID.
+	// The Neon project ID. Use as the `project_id` path parameter in other endpoints.
 	ID string `json:"id"`
 	// The cloud platform identifier. Currently, only AWS is supported, for which the identifier is `aws`.
 	PlatformID string `json:"platform_id"`
-	// The region identifier.
+	// Cloud region where the project's Postgres compute and storage reside (for example, `aws-us-east-2`).
+	// Valid values are returned by `GET /regions`.
 	RegionID string `json:"region_id"`
 	// The project name.
-	Name                    string                     `json:"name"`
+	Name string `json:"name"`
+	// Compute provisioner. `k8s-neonvm` (default) supports Autoscaling; `k8s-pod` is fixed-size compute.
+	// Also `docker` and `serverless-platform`.
 	Provisioner             Provisioner                `json:"provisioner"`
 	DefaultEndpointSettings OptDefaultEndpointSettings `json:"default_endpoint_settings"`
-	Settings                OptProjectSettingsData     `json:"settings"`
-	PgVersion               PgVersion                  `json:"pg_version"`
+	// Project-level settings, for example `quota`, `allowed_ips`, `enable_logical_replication`, and
+	// `maintenance_window`.
+	Settings  OptProjectSettingsData `json:"settings"`
+	PgVersion PgVersion              `json:"pg_version"`
 	// The proxy host for the project. This value combines the `region_id`, the `platform_id`, and the Neon
 	// domain (`neon.tech`).
 	ProxyHost string `json:"proxy_host"`
@@ -17796,7 +18167,7 @@ type ProjectListItem struct {
 	StorePasswords bool `json:"store_passwords"`
 	// Control plane observed endpoints of this project being active this amount of wall-clock time.
 	ActiveTime int64 `json:"active_time"`
-	// DEPRECATED. Use data from the getProject endpoint instead.
+	// Deprecated. Use `compute_time_seconds` from `GET /projects/{project_id}` instead.
 	//
 	// Deprecated: schema marks this property as deprecated.
 	CPUUsedSec int64 `json:"cpu_used_sec"`
@@ -17809,24 +18180,24 @@ type ProjectListItem struct {
 	CreatedAt time.Time `json:"created_at"`
 	// A timestamp indicating when the project was last updated.
 	UpdatedAt time.Time `json:"updated_at"`
-	// The current space occupied by the project in storage, in bytes. Synthetic storage size combines the
-	// logical data size and Write-Ahead Log (WAL) size for all branches in a project.
+	// The current space occupied by the project in Postgres storage, in bytes. Synthetic Postgres storage
+	// size combines the logical data size and Write-Ahead Log (WAL) size for all branches in a project.
 	SyntheticStorageSize OptInt64 `json:"synthetic_storage_size"`
-	// DEPRECATED. Use `consumption_period_end` from the getProject endpoint instead. A timestamp
+	// Deprecated. Use `consumption_period_end` from `GET /projects/{project_id}` instead. A timestamp
 	// indicating when the project quota resets.
 	//
 	// Deprecated: schema marks this property as deprecated.
 	QuotaResetAt OptDateTime `json:"quota_reset_at"`
-	OwnerID      string      `json:"owner_id"`
+	// ID of the organization that owns the project.
+	OwnerID string `json:"owner_id"`
 	// The most recent time when any endpoint of this project was active.
 	//
 	// Omitted when observed no activity for endpoints of this project.
 	ComputeLastActiveAt OptDateTime `json:"compute_last_active_at"`
-	// Organization id if the project belongs to an organization. Permissions for the project will be given
-	// to organization members as defined by the organization admins. The permissions of the project do not
-	// depend on the user that created the project if a project belongs to an organization.
+	// ID of the organization that owns the project. Project permissions are granted to organization
+	// members as configured by the organization's admins, independent of which member created the project.
 	OrgID OptString `json:"org_id"`
-	// Organization name if the project belongs to an organization.
+	// Name of the organization that owns the project.
 	OrgName OptString `json:"org_name"`
 	// The number of seconds to retain the shared history for all branches in this project.
 	HistoryRetentionSeconds OptInt32 `json:"history_retention_seconds"`
@@ -18135,7 +18506,8 @@ type ProjectMember struct {
 	MemberID uuid.UUID `json:"member_id"`
 	// The user ID for the organization member.
 	UserID uuid.UUID `json:"user_id"`
-	Email  OptString `json:"email"`
+	// Email address of the user who has been granted access to the project.
+	Email OptString `json:"email"`
 	// The user's display name.
 	Name                        OptString                   `json:"name"`
 	OrgRole                     ProjectMemberOrgRole        `json:"org_role"`
@@ -18372,7 +18744,8 @@ type ProjectMemberRoleResponse struct {
 	ProjectID string    `json:"project_id"`
 	MemberID  uuid.UUID `json:"member_id"`
 	UserID    uuid.UUID `json:"user_id"`
-	Email     OptString `json:"email"`
+	// Email address of the user who has been granted access to the project.
+	Email OptString `json:"email"`
 	// The user's display name.
 	Name    OptString            `json:"name"`
 	OrgRole ProjectMemberOrgRole `json:"org_role"`
@@ -18536,8 +18909,11 @@ func (s *ProjectMembers) SetPagination(val OptCursorPagination) {
 
 // Ref: #/components/schemas/ProjectOwnerData
 type ProjectOwnerData struct {
-	Email            string                  `json:"email"`
-	Name             string                  `json:"name"`
+	// Email address of the project owner.
+	Email string `json:"email"`
+	// Display name of the project owner.
+	Name string `json:"name"`
+	// Maximum number of branches the owner is allowed to create across their projects.
 	BranchesLimit    int                     `json:"branches_limit"`
 	SubscriptionType BillingSubscriptionType `json:"subscription_type"`
 }
@@ -18584,10 +18960,14 @@ func (s *ProjectOwnerData) SetSubscriptionType(val BillingSubscriptionType) {
 
 // Ref: #/components/schemas/ProjectPermission
 type ProjectPermission struct {
-	ID             string      `json:"id"`
-	GrantedToEmail string      `json:"granted_to_email"`
-	GrantedAt      time.Time   `json:"granted_at"`
-	RevokedAt      OptDateTime `json:"revoked_at"`
+	// The project permission's ID.
+	ID string `json:"id"`
+	// Email address of the user who has been granted access to the project.
+	GrantedToEmail string `json:"granted_to_email"`
+	// Timestamp when the permission was granted.
+	GrantedAt time.Time `json:"granted_at"`
+	// Timestamp when the permission was revoked. Null if the permission is still active.
+	RevokedAt OptDateTime `json:"revoked_at"`
 }
 
 // GetID returns the value of ID.
@@ -18786,7 +19166,9 @@ func (s *ProjectQuota) SetLogicalSizeBytes(val OptInt64) {
 // Merged schema.
 // Ref: #/components/schemas/ProjectRecoverResponse
 type ProjectRecoverResponse struct {
-	Project  Project  `json:"project"`
+	// Full details of the project, including configuration, consumption metrics, and ownership.
+	Project Project `json:"project"`
+	// Branches in the project. Each includes `id`, `name`, `current_state`, and `created_at`.
 	Branches []Branch `json:"branches"`
 }
 
@@ -18812,6 +19194,7 @@ func (s *ProjectRecoverResponse) SetBranches(val []Branch) {
 
 // Ref: #/components/schemas/ProjectResponse
 type ProjectResponse struct {
+	// Full details of the project, including configuration, consumption metrics, and ownership.
 	Project Project `json:"project"`
 }
 
@@ -18888,10 +19271,14 @@ type ProjectSettingsData struct {
 	BlockPublicConnections OptBool `json:"block_public_connections"`
 	// When set, connections using VPC endpoints are disallowed. This parameter is under active development
 	// and its semantics may change in the future.
-	BlockVpcConnections OptBool                 `json:"block_vpc_connections"`
-	AuditLogLevel       OptProjectAuditLogLevel `json:"audit_log_level"`
-	Hipaa               OptBool                 `json:"hipaa"`
-	PreloadLibraries    OptPreloadLibraries     `json:"preload_libraries"`
+	BlockVpcConnections OptBool `json:"block_vpc_connections"`
+	// Audit logging level, set only on HIPAA-enabled organizations (absent otherwise). Values: `base`,
+	// `extended`, `full`; HIPAA defaults to `extended`. Cannot be lowered back to `base` once `extended`
+	// or `full`.
+	AuditLogLevel OptProjectAuditLogLevel `json:"audit_log_level"`
+	// Enables HIPAA compliance mode for the project, including audit logging.
+	Hipaa            OptBool             `json:"hipaa"`
+	PreloadLibraries OptPreloadLibraries `json:"preload_libraries"`
 }
 
 // GetQuota returns the value of Quota.
@@ -19052,12 +19439,15 @@ func (s *ProjectUpdateRequest) SetProject(val ProjectUpdateRequestProject) {
 }
 
 type ProjectUpdateRequestProject struct {
+	// Project-level settings, for example `quota`, `allowed_ips`, `enable_logical_replication`, and
+	// `maintenance_window`.
 	Settings OptProjectSettingsData `json:"settings"`
 	// The project name.
 	Name                    OptString                  `json:"name"`
 	DefaultEndpointSettings OptDefaultEndpointSettings `json:"default_endpoint_settings"`
-	// The number of seconds to retain the shared history for all branches in this project. The default is
-	// 1 day (604800 seconds).
+	// History window (point-in-time restore range) for all branches, in seconds. `0` disables it. Default
+	// 1 day (Free: 6 hours). Maximum depends on plan: Free 6 hours (21600), Launch 7 days (604800), Scale
+	// 30 days (2592000).
 	HistoryRetentionSeconds OptInt32 `json:"history_retention_seconds"`
 }
 
@@ -19103,6 +19493,8 @@ func (s *ProjectUpdateRequestProject) SetHistoryRetentionSeconds(val OptInt32) {
 
 // Ref: #/components/schemas/ProjectsWithIntegrationResponse
 type ProjectsWithIntegrationResponse struct {
+	// Projects that have the requested integration, each including the project details and associated
+	// integration metadata.
 	Projects []ProjectsWithIntegrationResponseProjectsItem `json:"projects"`
 }
 
@@ -19120,7 +19512,9 @@ func (*ProjectsWithIntegrationResponse) transferProjectsFromOrgToOrgRes()  {}
 func (*ProjectsWithIntegrationResponse) transferProjectsFromUserToOrgRes() {}
 
 type ProjectsWithIntegrationResponseProjectsItem struct {
-	ID          string `json:"id"`
+	// The Neon project ID. Use as the `project_id` path parameter in other endpoints.
+	ID string `json:"id"`
+	// Name of the external integration associated with the project.
 	Integration string `json:"integration"`
 }
 
@@ -19148,11 +19542,12 @@ type Provisioner string
 
 // Ref: #/components/schemas/RegionResponse
 type RegionResponse struct {
-	// The region ID as used in other API endpoints.
+	// Cloud region where the resource's Postgres compute and storage reside (for example,
+	// `aws-us-east-1`). Valid values are returned by `GET /regions`.
 	RegionID string `json:"region_id"`
 	// A short description of the region.
 	Name string `json:"name"`
-	// Whether this region is used by default in new projects.
+	// True if this region is selected by default when no region is specified during project creation.
 	Default bool `json:"default"`
 	// The geographical latitude (approximate) for the region. Empty if unknown.
 	GeoLat string `json:"geo_lat"`
@@ -19211,10 +19606,11 @@ func (s *RegionResponse) SetGeoLong(val string) {
 }
 
 type RestoreSnapshotReq struct {
-	// A name for the newly restored branch. If omitted, a default name will be generated.
+	// A name for the newly restored branch. If not provided, the server generates a unique name for the
+	// branch automatically.
 	Name OptString `json:"name"`
-	// The ID of the branch to restore the snapshot into. If not specified, the branch from which the
-	// snapshot was originally created (`snapshot.source_branch_id`) will be used.
+	// ID of the branch to restore the snapshot into. Defaults to the snapshot's source branch
+	// (`snapshot.source_branch_id`); fails if that cannot be determined.
 	TargetBranchID OptString `json:"target_branch_id"`
 	// Set to `true` to finalize the restore operation immediately. This will complete the restore and move
 	// any associated computes to the new branch, similar to the `finalizeRestoreBranch` operation.
@@ -19254,7 +19650,9 @@ func (s *RestoreSnapshotReq) SetFinalizeRestore(val OptBool) {
 
 // Merged schema.
 type RestoredSnapshot struct {
-	Branch     Branch      `json:"branch"`
+	// Branch returned by the request.
+	Branch Branch `json:"branch"`
+	// Compute endpoints associated with the project.
 	Endpoints  []Endpoint  `json:"endpoints"`
 	Operations []Operation `json:"operations"`
 }
@@ -19296,15 +19694,15 @@ func (*RevokeCredentialNoContent) revokeCredentialRes() {}
 
 // Ref: #/components/schemas/Role
 type Role struct {
-	// The ID of the branch to which the role belongs.
+	// The ID of the branch this role belongs to.
 	BranchID string `json:"branch_id"`
-	// The role name.
+	// Postgres role name within the branch.
 	Name string `json:"name"`
 	// The role password.
 	Password OptString `json:"password"`
 	// Whether or not the role is system-protected.
 	Protected OptBool `json:"protected"`
-	// Authentication method configured for this role. Valid options: `password`, `oauth`, `no_login`.
+	// Authentication method configured for this role: `password`, `oauth`, or `no_login`.
 	AuthenticationMethod OptString `json:"authentication_method"`
 	// A timestamp indicating when the role was created.
 	CreatedAt time.Time `json:"created_at"`
@@ -19384,6 +19782,7 @@ func (s *Role) SetUpdatedAt(val time.Time) {
 
 // Ref: #/components/schemas/RoleCreateRequest
 type RoleCreateRequest struct {
+	// Properties of the role to create.
 	Role RoleCreateRequestRole `json:"role"`
 }
 
@@ -19397,6 +19796,7 @@ func (s *RoleCreateRequest) SetRole(val RoleCreateRequestRole) {
 	s.Role = val
 }
 
+// Properties of the role to create.
 type RoleCreateRequestRole struct {
 	// The role name. Cannot exceed 63 bytes in length.
 	Name string `json:"name"`
@@ -19427,6 +19827,9 @@ func (s *RoleCreateRequestRole) SetNoLogin(val OptBool) {
 // Merged schema.
 // Ref: #/components/schemas/RoleOperations
 type RoleOperations struct {
+	// Role details for the requested database role. The `password` field is included in the response when
+	// a role is created or its password is reset, and is not returned in subsequent read requests. Store
+	// it securely at that time.
 	Role       Role        `json:"role"`
 	Operations []Operation `json:"operations"`
 }
@@ -19473,6 +19876,9 @@ func (*RolePasswordResponse) getProjectBranchRolePasswordRes() {}
 
 // Ref: #/components/schemas/RoleResponse
 type RoleResponse struct {
+	// Role details for the requested database role. The `password` field is included in the response when
+	// a role is created or its password is reset, and is not returned in subsequent read requests. Store
+	// it securely at that time.
 	Role Role `json:"role"`
 }
 
@@ -19488,6 +19894,8 @@ func (s *RoleResponse) SetRole(val Role) {
 
 // Ref: #/components/schemas/RolesResponse
 type RolesResponse struct {
+	// Roles belonging to the branch. Each role includes fields such as `branch_id`, `name`, `protected`,
+	// `created_at`, and `updated_at`.
 	Roles []Role `json:"roles"`
 }
 
@@ -19501,15 +19909,20 @@ func (s *RolesResponse) SetRoles(val []Role) {
 	s.Roles = val
 }
 
-// Merged schema.
 // Ref: #/components/schemas/SendNeonAuthTestEmailRequest
 type SendNeonAuthTestEmailRequest struct {
-	Host        string `json:"host"`
-	Port        int    `json:"port"`
-	Username    string `json:"username"`
-	Password    string `json:"password"`
+	// Hostname of the email server.
+	Host string `json:"host"`
+	// TCP port of the SMTP server. Common values: 25 (SMTP), 465 (SMTPS), 587 (submission).
+	Port int `json:"port"`
+	// Username for authenticating with the SMTP server.
+	Username string `json:"username"`
+	// Password for authenticating with the SMTP server.
+	Password string `json:"password"`
+	// Email address used as the From address on outgoing auth emails.
 	SenderEmail string `json:"sender_email"`
-	SenderName  string `json:"sender_name"`
+	// Display name shown as the sender in outgoing emails.
+	SenderName string `json:"sender_name"`
 	// The email address to send the test email to.
 	RecipientEmail string `json:"recipient_email"`
 }
@@ -19629,8 +20042,10 @@ func (s *SetProjectMemberRoleRequest) SetRole(val ProjectRole) {
 
 // Ref: #/components/schemas/SharedEmailServer
 type SharedEmailServer struct {
+	// Email address used as the sender for outgoing messages from this shared email server.
 	SenderEmail OptString `json:"sender_email"`
-	SenderName  OptString `json:"sender_name"`
+	// Display name shown as the sender in outgoing emails.
+	SenderName OptString `json:"sender_name"`
 }
 
 // GetSenderEmail returns the value of SenderEmail.
@@ -19655,22 +20070,32 @@ func (s *SharedEmailServer) SetSenderName(val OptString) {
 
 // Ref: #/components/schemas/Snapshot
 type Snapshot struct {
-	ID             string    `json:"id"`
-	Name           string    `json:"name"`
-	Lsn            OptString `json:"lsn"`
-	Timestamp      OptString `json:"timestamp"`
+	// The snapshot ID.
+	ID string `json:"id"`
+	// Human-readable label for the snapshot.
+	Name string `json:"name"`
+	// WAL position (Log Sequence Number) at which the snapshot was captured, in Postgres LSN format (for
+	// example, `0/3000000`).
+	Lsn OptString `json:"lsn"`
+	// Point in time captured by the snapshot, in RFC 3339 format (UTC).
+	Timestamp OptString `json:"timestamp"`
+	// Branch from which this snapshot was created.
 	SourceBranchID OptString `json:"source_branch_id"`
-	CreatedAt      string    `json:"created_at"`
-	ExpiresAt      OptString `json:"expires_at"`
-	Manual         OptBool   `json:"manual"`
+	// Timestamp when the snapshot was created, in RFC 3339 format (UTC).
+	CreatedAt string `json:"created_at"`
+	// RFC 3339 timestamp when the snapshot expires and is eligible for deletion. Null if the snapshot does
+	// not have an expiry.
+	ExpiresAt OptString `json:"expires_at"`
+	// True if the snapshot was created manually rather than by a schedule.
+	Manual OptBool `json:"manual"`
 	// Full logical size of the snapshot in bytes at the time it was taken.
 	//
 	// When absent, the logical size has not been calculated yet and the snapshot is not being charged.
 	//
 	// When present, a value of 0 means the snapshot is not being charged.
 	FullSize OptInt64 `json:"full_size"`
-	// Incremental storage size in bytes since the previous scheduled snapshot, when the snapshot is billed
-	// on incremental (diff) usage.
+	// Incremental Postgres storage size in bytes since the previous scheduled snapshot, when the snapshot
+	// is billed on incremental (diff) usage.
 	//
 	// When absent, either the incremental size has not been calculated yet and the snapshot is not being
 	// charged, or the snapshot is charged at full logical size (in that case `full_size` is set).
@@ -19779,6 +20204,7 @@ func (s *Snapshot) SetDiffSize(val OptInt64) {
 
 // Ref: #/components/schemas/SnapshotUpdateRequest
 type SnapshotUpdateRequest struct {
+	// Fields to update on the snapshot. Updatable fields include `name` and `expires_at`.
 	Snapshot SnapshotUpdateRequestSnapshot `json:"snapshot"`
 }
 
@@ -19792,7 +20218,9 @@ func (s *SnapshotUpdateRequest) SetSnapshot(val SnapshotUpdateRequestSnapshot) {
 	s.Snapshot = val
 }
 
+// Fields to update on the snapshot. Updatable fields include `name` and `expires_at`.
 type SnapshotUpdateRequestSnapshot struct {
+	// Human-readable label for the snapshot.
 	Name OptString `json:"name"`
 	// The date and time when the snapshot will expire.
 	//
@@ -19900,71 +20328,156 @@ func (s *SpendingLimitUpdateRequest) SetSpendingLimitCents(val int64) {
 
 // Ref: #/components/schemas/StandardEmailServer
 type StandardEmailServer struct {
-	Host        string `json:"host"`
-	Port        int    `json:"port"`
-	Username    string `json:"username"`
-	Password    string `json:"password"`
-	SenderEmail string `json:"sender_email"`
-	SenderName  string `json:"sender_name"`
+	// Hostname of the email server.
+	Host OptString `json:"host"`
+	// TCP port of the SMTP server. Common values: 25 (SMTP), 465 (SMTPS), 587 (submission).
+	Port OptInt `json:"port"`
+	// Username for authenticating with the SMTP server.
+	Username OptString `json:"username"`
+	// Password for authenticating with the SMTP server.
+	Password OptString `json:"password"`
+	// Email address used as the From address on outgoing auth emails.
+	SenderEmail OptString `json:"sender_email"`
+	// Display name shown as the sender in outgoing emails.
+	SenderName OptString `json:"sender_name"`
 }
 
 // GetHost returns the value of Host.
-func (s *StandardEmailServer) GetHost() string {
+func (s *StandardEmailServer) GetHost() OptString {
 	return s.Host
 }
 
 // GetPort returns the value of Port.
-func (s *StandardEmailServer) GetPort() int {
+func (s *StandardEmailServer) GetPort() OptInt {
 	return s.Port
 }
 
 // GetUsername returns the value of Username.
-func (s *StandardEmailServer) GetUsername() string {
+func (s *StandardEmailServer) GetUsername() OptString {
 	return s.Username
 }
 
 // GetPassword returns the value of Password.
-func (s *StandardEmailServer) GetPassword() string {
+func (s *StandardEmailServer) GetPassword() OptString {
 	return s.Password
 }
 
 // GetSenderEmail returns the value of SenderEmail.
-func (s *StandardEmailServer) GetSenderEmail() string {
+func (s *StandardEmailServer) GetSenderEmail() OptString {
 	return s.SenderEmail
 }
 
 // GetSenderName returns the value of SenderName.
-func (s *StandardEmailServer) GetSenderName() string {
+func (s *StandardEmailServer) GetSenderName() OptString {
 	return s.SenderName
 }
 
 // SetHost sets the value of Host.
-func (s *StandardEmailServer) SetHost(val string) {
+func (s *StandardEmailServer) SetHost(val OptString) {
 	s.Host = val
 }
 
 // SetPort sets the value of Port.
-func (s *StandardEmailServer) SetPort(val int) {
+func (s *StandardEmailServer) SetPort(val OptInt) {
 	s.Port = val
 }
 
 // SetUsername sets the value of Username.
-func (s *StandardEmailServer) SetUsername(val string) {
+func (s *StandardEmailServer) SetUsername(val OptString) {
 	s.Username = val
 }
 
 // SetPassword sets the value of Password.
-func (s *StandardEmailServer) SetPassword(val string) {
+func (s *StandardEmailServer) SetPassword(val OptString) {
 	s.Password = val
 }
 
 // SetSenderEmail sets the value of SenderEmail.
-func (s *StandardEmailServer) SetSenderEmail(val string) {
+func (s *StandardEmailServer) SetSenderEmail(val OptString) {
 	s.SenderEmail = val
 }
 
 // SetSenderName sets the value of SenderName.
-func (s *StandardEmailServer) SetSenderName(val string) {
+func (s *StandardEmailServer) SetSenderName(val OptString) {
+	s.SenderName = val
+}
+
+// Ref: #/components/schemas/StandardEmailServerResponse
+type StandardEmailServerResponse struct {
+	// Hostname of the email server.
+	Host string `json:"host"`
+	// TCP port of the SMTP server. Common values: 25 (SMTP), 465 (SMTPS), 587 (submission).
+	Port int `json:"port"`
+	// Username for authenticating with the SMTP server.
+	Username string `json:"username"`
+	// On GET, returned redacted (empty) for ordinary callers, while callers with project-credential read
+	// permission receive the stored password — do not assume this field is empty. Update (PATCH)
+	// responses always return it redacted (empty) regardless of permission. Provide a value on update to
+	// set or rotate the password.
+	Password string `json:"password"`
+	// Email address used as the From address on outgoing auth emails.
+	SenderEmail string `json:"sender_email"`
+	// Display name shown as the sender in outgoing emails.
+	SenderName string `json:"sender_name"`
+}
+
+// GetHost returns the value of Host.
+func (s *StandardEmailServerResponse) GetHost() string {
+	return s.Host
+}
+
+// GetPort returns the value of Port.
+func (s *StandardEmailServerResponse) GetPort() int {
+	return s.Port
+}
+
+// GetUsername returns the value of Username.
+func (s *StandardEmailServerResponse) GetUsername() string {
+	return s.Username
+}
+
+// GetPassword returns the value of Password.
+func (s *StandardEmailServerResponse) GetPassword() string {
+	return s.Password
+}
+
+// GetSenderEmail returns the value of SenderEmail.
+func (s *StandardEmailServerResponse) GetSenderEmail() string {
+	return s.SenderEmail
+}
+
+// GetSenderName returns the value of SenderName.
+func (s *StandardEmailServerResponse) GetSenderName() string {
+	return s.SenderName
+}
+
+// SetHost sets the value of Host.
+func (s *StandardEmailServerResponse) SetHost(val string) {
+	s.Host = val
+}
+
+// SetPort sets the value of Port.
+func (s *StandardEmailServerResponse) SetPort(val int) {
+	s.Port = val
+}
+
+// SetUsername sets the value of Username.
+func (s *StandardEmailServerResponse) SetUsername(val string) {
+	s.Username = val
+}
+
+// SetPassword sets the value of Password.
+func (s *StandardEmailServerResponse) SetPassword(val string) {
+	s.Password = val
+}
+
+// SetSenderEmail sets the value of SenderEmail.
+func (s *StandardEmailServerResponse) SetSenderEmail(val string) {
+	s.SenderEmail = val
+}
+
+// SetSenderName sets the value of SenderName.
+func (s *StandardEmailServerResponse) SetSenderName(val string) {
 	s.SenderName = val
 }
 
@@ -20041,7 +20554,8 @@ func (s *UpdateNeonAuthAllowLocalhostRequest) SetAllowLocalhost(val bool) {
 
 // Ref: #/components/schemas/UpdateNeonAuthUserRoleRequest
 type UpdateNeonAuthUserRoleRequest struct {
-	// Array of roles to assign to the user.
+	// Roles to assign to the user in the Neon Auth (Better Auth) directory. `user` and `admin` are the
+	// built-in roles; custom role strings are also supported.
 	Roles []string `json:"roles"`
 }
 
@@ -20073,6 +20587,7 @@ func (s *UpdateNeonAuthUserRoleResponse) SetID(val string) {
 
 // Merged schema.
 type UpdateProjectOK struct {
+	// Full details of the project, including configuration, consumption metrics, and ownership.
 	Project    Project     `json:"project"`
 	Operations []Operation `json:"operations"`
 }
@@ -20113,7 +20628,7 @@ func (s *UpdateSnapshotOK) SetSnapshot(val Snapshot) {
 
 // Ref: #/components/schemas/VPCEndpoint
 type VPCEndpoint struct {
-	// The VPC endpoint ID.
+	// Cloud provider identifier for the VPC endpoint.
 	VpcEndpointID string `json:"vpc_endpoint_id"`
 	// A descriptive label for the VPC endpoint.
 	Label string `json:"label"`
@@ -20141,6 +20656,7 @@ func (s *VPCEndpoint) SetLabel(val string) {
 
 // Ref: #/components/schemas/VPCEndpointAssignment
 type VPCEndpointAssignment struct {
+	// Human-readable name for the VPC endpoint assignment, used to identify it within the organization.
 	Label string `json:"label"`
 }
 
@@ -20156,12 +20672,12 @@ func (s *VPCEndpointAssignment) SetLabel(val string) {
 
 // Ref: #/components/schemas/VPCEndpointDetails
 type VPCEndpointDetails struct {
-	// The VPC endpoint ID.
+	// Cloud provider identifier for the VPC endpoint.
 	VpcEndpointID string `json:"vpc_endpoint_id"`
 	// A descriptive label for the VPC endpoint.
 	Label string `json:"label"`
-	// The current state of the VPC endpoint. Possible values are `new` (just configured, pending
-	// acceptance) or `accepted` (VPC connection was accepted by Neon).
+	// The current state of the VPC endpoint. `new` means the endpoint has just been configured and is
+	// pending acceptance by Neon. `accepted` means the VPC connection has been accepted by Neon.
 	State string `json:"state"`
 	// The number of projects that are restricted to use this VPC endpoint.
 	NumRestrictedProjects int `json:"num_restricted_projects"`
@@ -20223,7 +20739,7 @@ func (s *VPCEndpointDetails) SetExampleRestrictedProjects(val []string) {
 // Merged schema.
 // Ref: #/components/schemas/VPCEndpointWithRegion
 type VPCEndpointWithRegion struct {
-	// The VPC endpoint ID.
+	// Cloud provider identifier for the VPC endpoint.
 	VpcEndpointID string `json:"vpc_endpoint_id"`
 	// A descriptive label for the VPC endpoint.
 	Label string `json:"label"`
@@ -20263,6 +20779,7 @@ func (s *VPCEndpointWithRegion) SetRegionID(val string) {
 
 // Ref: #/components/schemas/VPCEndpointsResponse
 type VPCEndpointsResponse struct {
+	// List of VPC endpoints returned by the request.
 	Endpoints []VPCEndpoint `json:"endpoints"`
 }
 
@@ -20278,6 +20795,7 @@ func (s *VPCEndpointsResponse) SetEndpoints(val []VPCEndpoint) {
 
 // Ref: #/components/schemas/VPCEndpointsWithRegionResponse
 type VPCEndpointsWithRegionResponse struct {
+	// VPC endpoints associated with the region.
 	Endpoints []VPCEndpointWithRegion `json:"endpoints"`
 }
 

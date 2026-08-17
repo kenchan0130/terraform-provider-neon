@@ -132,7 +132,6 @@ const (
 	PresignProjectBranchBucketObjectOperation             OperationName = "PresignProjectBranchBucketObject"
 	QueryProjectBranchLogsOperation                       OperationName = "QueryProjectBranchLogs"
 	RecoverProjectOperation                               OperationName = "RecoverProject"
-	RecoverProjectBranchOperation                         OperationName = "RecoverProjectBranch"
 	RemoveOrganizationMemberOperation                     OperationName = "RemoveOrganizationMember"
 	RemoveProjectMemberRoleOperation                      OperationName = "RemoveProjectMemberRole"
 	ResetProjectBranchRolePasswordOperation               OperationName = "ResetProjectBranchRolePassword"
