@@ -622,6 +622,20 @@ func encodeRestoreSnapshotRequest(
 	return nil
 }
 
+func encodeSendNeonAuthEmailProviderTestRequest(
+	req *SendNeonAuthEmailProviderTestRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeSendNeonAuthTestEmailRequest(
 	req *SendNeonAuthTestEmailRequest,
 	r *http.Request,
