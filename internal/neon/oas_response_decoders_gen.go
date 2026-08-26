@@ -5960,7 +5960,7 @@ func decodeGetNeonAuthEmailAndPasswordConfigResponse(resp *http.Response) (res *
 	return res, errors.Wrap(defRes, "error")
 }
 
-func decodeGetNeonAuthEmailProviderResponse(resp *http.Response) (res *NeonAuthEmailServerConfig, _ error) {
+func decodeGetNeonAuthEmailProviderResponse(resp *http.Response) (res *NeonAuthEmailServerConfigResponse, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -5976,7 +5976,7 @@ func decodeGetNeonAuthEmailProviderResponse(resp *http.Response) (res *NeonAuthE
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response NeonAuthEmailServerConfig
+			var response NeonAuthEmailServerConfigResponse
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -6043,7 +6043,7 @@ func decodeGetNeonAuthEmailProviderResponse(resp *http.Response) (res *NeonAuthE
 	return res, errors.Wrap(defRes, "error")
 }
 
-func decodeGetNeonAuthEmailServerResponse(resp *http.Response) (res *NeonAuthEmailServerConfig, _ error) {
+func decodeGetNeonAuthEmailServerResponse(resp *http.Response) (res *NeonAuthEmailServerConfigResponse, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -6059,7 +6059,7 @@ func decodeGetNeonAuthEmailServerResponse(resp *http.Response) (res *NeonAuthEma
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response NeonAuthEmailServerConfig
+			var response NeonAuthEmailServerConfigResponse
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -11923,98 +11923,6 @@ func decodeRecoverProjectResponse(resp *http.Response) (res *ProjectRecoverRespo
 	return res, errors.Wrap(defRes, "error")
 }
 
-func decodeRecoverProjectBranchResponse(resp *http.Response) (res *BranchRecoverResponse, _ error) {
-	switch resp.StatusCode {
-	case 200:
-		// Code 200.
-		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
-		if err != nil {
-			return res, errors.Wrap(err, "parse media type")
-		}
-		switch {
-		case ct == "application/json":
-			buf, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return res, err
-			}
-			d := jx.DecodeBytes(buf)
-
-			var response BranchRecoverResponse
-			if err := func() error {
-				if err := response.Decode(d); err != nil {
-					return err
-				}
-				if err := d.Skip(); err != io.EOF {
-					return errors.New("unexpected trailing data")
-				}
-				return nil
-			}(); err != nil {
-				err = &ogenerrors.DecodeBodyError{
-					ContentType: ct,
-					Body:        buf,
-					Err:         err,
-				}
-				return res, err
-			}
-			// Validate response.
-			if err := func() error {
-				if err := response.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return res, errors.Wrap(err, "validate")
-			}
-			return &response, nil
-		default:
-			return res, validate.InvalidContentType(ct)
-		}
-	}
-	// Convenient error response.
-	defRes, err := func() (res *GeneralErrorStatusCode, err error) {
-		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
-		if err != nil {
-			return res, errors.Wrap(err, "parse media type")
-		}
-		switch {
-		case ct == "application/json":
-			buf, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return res, err
-			}
-			d := jx.DecodeBytes(buf)
-
-			var response GeneralError
-			if err := func() error {
-				if err := response.Decode(d); err != nil {
-					return err
-				}
-				if err := d.Skip(); err != io.EOF {
-					return errors.New("unexpected trailing data")
-				}
-				return nil
-			}(); err != nil {
-				err = &ogenerrors.DecodeBodyError{
-					ContentType: ct,
-					Body:        buf,
-					Err:         err,
-				}
-				return res, err
-			}
-			return &GeneralErrorStatusCode{
-				StatusCode: resp.StatusCode,
-				Response:   response,
-			}, nil
-		default:
-			return res, validate.InvalidContentType(ct)
-		}
-	}()
-	if err != nil {
-		return res, errors.Wrapf(err, "default (code %d)", resp.StatusCode)
-	}
-	return res, errors.Wrap(defRes, "error")
-}
-
 func decodeRemoveOrganizationMemberResponse(resp *http.Response) (res *EmptyResponse, _ error) {
 	switch resp.StatusCode {
 	case 200:
@@ -12860,6 +12768,89 @@ func decodeRevokePermissionFromProjectResponse(resp *http.Response) (res *Projec
 				return nil
 			}(); err != nil {
 				return res, errors.Wrap(err, "validate")
+			}
+			return &response, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	}
+	// Convenient error response.
+	defRes, err := func() (res *GeneralErrorStatusCode, err error) {
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			buf, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+			d := jx.DecodeBytes(buf)
+
+			var response GeneralError
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				if err := d.Skip(); err != io.EOF {
+					return errors.New("unexpected trailing data")
+				}
+				return nil
+			}(); err != nil {
+				err = &ogenerrors.DecodeBodyError{
+					ContentType: ct,
+					Body:        buf,
+					Err:         err,
+				}
+				return res, err
+			}
+			return &GeneralErrorStatusCode{
+				StatusCode: resp.StatusCode,
+				Response:   response,
+			}, nil
+		default:
+			return res, validate.InvalidContentType(ct)
+		}
+	}()
+	if err != nil {
+		return res, errors.Wrapf(err, "default (code %d)", resp.StatusCode)
+	}
+	return res, errors.Wrap(defRes, "error")
+}
+
+func decodeSendNeonAuthEmailProviderTestResponse(resp *http.Response) (res *SendNeonAuthTestEmailResponse, _ error) {
+	switch resp.StatusCode {
+	case 200:
+		// Code 200.
+		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+		if err != nil {
+			return res, errors.Wrap(err, "parse media type")
+		}
+		switch {
+		case ct == "application/json":
+			buf, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return res, err
+			}
+			d := jx.DecodeBytes(buf)
+
+			var response SendNeonAuthTestEmailResponse
+			if err := func() error {
+				if err := response.Decode(d); err != nil {
+					return err
+				}
+				if err := d.Skip(); err != io.EOF {
+					return errors.New("unexpected trailing data")
+				}
+				return nil
+			}(); err != nil {
+				err = &ogenerrors.DecodeBodyError{
+					ContentType: ct,
+					Body:        buf,
+					Err:         err,
+				}
+				return res, err
 			}
 			return &response, nil
 		default:
@@ -14487,7 +14478,7 @@ func decodeUpdateNeonAuthEmailAndPasswordConfigResponse(resp *http.Response) (re
 	return res, errors.Wrap(defRes, "error")
 }
 
-func decodeUpdateNeonAuthEmailProviderResponse(resp *http.Response) (res *NeonAuthEmailServerConfig, _ error) {
+func decodeUpdateNeonAuthEmailProviderResponse(resp *http.Response) (res *NeonAuthEmailServerConfigResponse, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -14503,7 +14494,7 @@ func decodeUpdateNeonAuthEmailProviderResponse(resp *http.Response) (res *NeonAu
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response NeonAuthEmailServerConfig
+			var response NeonAuthEmailServerConfigResponse
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -14570,7 +14561,7 @@ func decodeUpdateNeonAuthEmailProviderResponse(resp *http.Response) (res *NeonAu
 	return res, errors.Wrap(defRes, "error")
 }
 
-func decodeUpdateNeonAuthEmailServerResponse(resp *http.Response) (res *NeonAuthEmailServerConfig, _ error) {
+func decodeUpdateNeonAuthEmailServerResponse(resp *http.Response) (res *NeonAuthEmailServerConfigResponse, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -14586,7 +14577,7 @@ func decodeUpdateNeonAuthEmailServerResponse(resp *http.Response) (res *NeonAuth
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response NeonAuthEmailServerConfig
+			var response NeonAuthEmailServerConfigResponse
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
