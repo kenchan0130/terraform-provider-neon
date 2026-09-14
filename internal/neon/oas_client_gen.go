@@ -277,6 +277,20 @@ type Invoker interface {
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/roles
 	CreateProjectBranchRole(ctx context.Context, request *RoleCreateRequest, params CreateProjectBranchRoleParams) (*RoleOperations, error)
+	// CreateProjectBranchTrigger invokes createProjectBranchTrigger operation.
+	//
+	// Creates a trigger for a Function visible on the branch. The required `type` discriminator selects
+	// the trigger-specific configuration. The supported types are `schedule` and `storage_object_created`.
+	// A schedule trigger uses a numeric five-field cron expression interpreted in UTC. A
+	// storage-object-created trigger fires only after a successful upload to one exact bucket and may
+	// narrow matches to an object-key prefix.
+	//
+	// The name must be unique among triggers visible on the branch, including inherited triggers.
+	//
+	// Note: This endpoint is currently in Beta.
+	//
+	// POST /projects/{project_id}/branches/{branch_id}/triggers
+	CreateProjectBranchTrigger(ctx context.Context, request *TriggerCreateRequest, params CreateProjectBranchTriggerParams) (*TriggerResponse, error)
 	// CreateProjectEndpoint invokes createProjectEndpoint operation.
 	//
 	// Creates a compute endpoint for the specified branch. A compute endpoint is a Neon compute instance.
@@ -393,9 +407,7 @@ type Invoker interface {
 	// The deletion completes after all operations finish. You cannot delete a project's root or default
 	// branch, or a branch that has a child branch. A project must have at least one branch.
 	//
-	// By default, deleted branches can be recovered within a 7-day grace period. Use the `hard_delete`
-	// parameter to permanently delete the branch immediately. For related information, see
-	// [Manage branches].
+	// For related information, see [Manage branches].
 	//
 	// [Manage branches]: https://neon.com/docs/manage/branches/
 	//
@@ -436,6 +448,14 @@ type Invoker interface {
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects-by-prefix
 	DeleteProjectBranchBucketObjectsByPrefix(ctx context.Context, params DeleteProjectBranchBucketObjectsByPrefixParams) (DeleteProjectBranchBucketObjectsByPrefixRes, error)
+	// DeleteProjectBranchCustomDomain invokes deleteProjectBranchCustomDomain operation.
+	//
+	// Removes a custom domain registered on the branch and stops routing it.
+	//
+	// Note: This endpoint is currently in Beta.
+	//
+	// DELETE /projects/{project_id}/branches/{branch_id}/custom-domains/{domain}
+	DeleteProjectBranchCustomDomain(ctx context.Context, params DeleteProjectBranchCustomDomainParams) error
 	// DeleteProjectBranchDataAPI invokes deleteProjectBranchDataAPI operation.
 	//
 	// Deletes the Neon Data API for the specified branch. Existing connections using the Data API endpoint
@@ -467,6 +487,17 @@ type Invoker interface {
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/roles/{role_name}
 	DeleteProjectBranchRole(ctx context.Context, params DeleteProjectBranchRoleParams) (DeleteProjectBranchRoleRes, error)
+	// DeleteProjectBranchTrigger invokes deleteProjectBranchTrigger operation.
+	//
+	// Deletes a branch-local trigger or writes a branch-local tombstone for an inherited trigger so it
+	// does not reappear. Deletion stops future scheduling or storage-event matching but does not cancel
+	// invocations already committed for delivery. The supported trigger types are `schedule` and
+	// `storage_object_created`.
+	//
+	// Note: This endpoint is currently in Beta.
+	//
+	// DELETE /projects/{project_id}/branches/{branch_id}/triggers/{trigger_id}
+	DeleteProjectBranchTrigger(ctx context.Context, params DeleteProjectBranchTriggerParams) error
 	// DeleteProjectEndpoint invokes deleteProjectEndpoint operation.
 	//
 	// Deletes the specified compute endpoint. A compute endpoint is a Neon compute instance. Deleting a
@@ -854,6 +885,15 @@ type Invoker interface {
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/storage
 	GetProjectBranchStorage(ctx context.Context, params GetProjectBranchStorageParams) (GetProjectBranchStorageRes, error)
+	// GetProjectBranchTrigger invokes getProjectBranchTrigger operation.
+	//
+	// Returns the trigger visible on the branch. The supported trigger types are `schedule` and
+	// `storage_object_created`.
+	//
+	// Note: This endpoint is currently in Beta.
+	//
+	// GET /projects/{project_id}/branches/{branch_id}/triggers/{trigger_id}
+	GetProjectBranchTrigger(ctx context.Context, params GetProjectBranchTriggerParams) (*TriggerResponse, error)
 	// GetProjectEndpoint invokes getProjectEndpoint operation.
 	//
 	// Retrieves information about the specified compute endpoint. A compute endpoint is a Neon compute
@@ -992,6 +1032,14 @@ type Invoker interface {
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/buckets
 	ListProjectBranchBuckets(ctx context.Context, params ListProjectBranchBucketsParams) (*BucketsListResponse, error)
+	// ListProjectBranchCustomDomains invokes listProjectBranchCustomDomains operation.
+	//
+	// Lists all custom domains registered on the branch, across every target entity.
+	//
+	// Note: This endpoint is currently in Beta.
+	//
+	// GET /projects/{project_id}/branches/{branch_id}/custom-domains
+	ListProjectBranchCustomDomains(ctx context.Context, params ListProjectBranchCustomDomainsParams) (*ListProjectBranchCustomDomainsOK, error)
 	// ListProjectBranchDatabases invokes listProjectBranchDatabases operation.
 	//
 	// Retrieves a list of databases for the specified branch. A branch can have multiple databases. For
@@ -1050,6 +1098,19 @@ type Invoker interface {
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/roles
 	ListProjectBranchRoles(ctx context.Context, params ListProjectBranchRolesParams) (*RolesResponse, error)
+	// ListProjectBranchTriggers invokes listProjectBranchTriggers operation.
+	//
+	// Lists the complete project-bounded set of triggers visible on the branch, ordered by `trigger_id`.
+	// An inherited trigger keeps its project-wide ID and source branch, and is disabled on the child until
+	// explicitly enabled there.
+	//
+	// The supported trigger types are `schedule` and `storage_object_created`. A storage-object-created
+	// trigger watches one exact bucket and fires only after an object upload succeeds.
+	//
+	// Note: This endpoint is currently in Beta.
+	//
+	// GET /projects/{project_id}/branches/{branch_id}/triggers
+	ListProjectBranchTriggers(ctx context.Context, params ListProjectBranchTriggersParams) (*TriggersListResponse, error)
 	// ListProjectBranches invokes listProjectBranches operation.
 	//
 	// Retrieves a list of branches for the specified project.
@@ -1188,6 +1249,22 @@ type Invoker interface {
 	//
 	// POST /projects/{project_id}/recover
 	RecoverProject(ctx context.Context, params RecoverProjectParams) (*ProjectRecoverResponse, error)
+	// RegisterProjectBranchCustomDomain invokes registerProjectBranchCustomDomain operation.
+	//
+	// Registers a customer-owned domain (for example `dashboard.acme.com`) on the branch and points it at
+	// a target entity, chosen by `entity_type` + `entity_id`. In v1 only `entity_type: function` is
+	// supported (an unsupported type is rejected with `400`), where `entity_id` is the function slug and
+	// the function must already exist on the branch (else `404`).
+	//
+	// The response includes the `cname_target` the customer must point their domain at with a CNAME
+	// record; the domain goes live only once that DNS resolves and a certificate is issued on the first
+	// request. A domain already registered to another resource is rejected with `409` and no detail about
+	// the owner. Re-registering the same domain for the same entity is idempotent.
+	//
+	// Note: This endpoint is currently in Beta.
+	//
+	// POST /projects/{project_id}/branches/{branch_id}/custom-domains
+	RegisterProjectBranchCustomDomain(ctx context.Context, request *CustomDomainRegisterRequest, params RegisterProjectBranchCustomDomainParams) (*CustomDomain, error)
 	// RemoveOrganizationMember invokes removeOrganizationMember operation.
 	//
 	// Removes the specified member from the organization. Only organization admins can perform this
@@ -1239,6 +1316,22 @@ type Invoker interface {
 	//
 	// POST /projects/{project_id}/snapshots/{snapshot_id}/restore
 	RestoreSnapshot(ctx context.Context, request OptRestoreSnapshotReq, params RestoreSnapshotParams) (*RestoredSnapshot, error)
+	// RevealCredential invokes revealCredential operation.
+	//
+	// Returns the live `api_token` and `s3_secret_access_key` of an existing credential, so a credential
+	// whose issuance response was lost can be recovered without minting a new one.
+	//
+	// This is a POST with an explicit `/reveal` verb so the secrets never ride a GET, where they would
+	// land in access logs, browser history and proxy caches. Revoked and expired credentials return 404,
+	// as does a `token_id` that does not belong to this project.
+	//
+	// A credential issued before secret retrieval was supported has no recoverable secret and returns 409
+	// — rotate it to obtain one.
+	//
+	// Note: This endpoint is currently in Beta.
+	//
+	// POST /projects/{project_id}/branches/{branch_id}/credentials/{token_id}/reveal
+	RevealCredential(ctx context.Context, params RevealCredentialParams) (RevealCredentialRes, error)
 	// RevokeApiKey invokes revokeApiKey operation.
 	//
 	// Revokes the specified API key. An API key that is no longer needed can be revoked. This action
@@ -1272,6 +1365,34 @@ type Invoker interface {
 	//
 	// DELETE /projects/{project_id}/permissions/{permission_id}
 	RevokePermissionFromProject(ctx context.Context, params RevokePermissionFromProjectParams) (*ProjectPermission, error)
+	// RotateCredential invokes rotateCredential operation.
+	//
+	// Replaces the secret material on an existing scoped credential in place. `token_id` is preserved —
+	// it is the `AWS_ACCESS_KEY_ID` for S3-compatible clients, so the access key id your application
+	// already holds keeps working and only the secret changes. This is the analog of resetting a Postgres
+	// password, not of issuing a second credential.
+	//
+	// The response carries the new `api_token` and `s3_secret_access_key` exactly once. Rotation is not
+	// idempotent: retrying after an ambiguous timeout mints another secret and supersedes the previous
+	// replacement, so a retry does not recover a lost response — it only invalidates the secret you did
+	// not receive. If you lose the response, issue a replacement credential and revoke this one.
+	//
+	// The old secret stops authenticating as soon as the rotation commits. Where a region caches
+	// credentials on its data-plane verifiers, a replica may briefly keep accepting the old secret — and
+	// rejecting the new one — until its cache entry expires; where it does not, the cutover is immediate
+	// apart from requests already in flight. Either way the changeover is not atomic across replicas, so
+	// retry an unexpected authentication failure right after rotating rather than treating the new secret
+	// as bad. `last_used_at` continues to report the logical credential's prior usage and says nothing
+	// about whether the new secret has been used yet.
+	//
+	// Only a live, unexpired, unrevoked customer-managed (`user`) credential on a live project and live
+	// branch is eligible. Anything else — including the platform-internal `function` and `system`
+	// credentials — is reported as not found, indistinguishable from an unknown `token_id`.
+	//
+	// Note: This endpoint is currently in Beta.
+	//
+	// POST /projects/{project_id}/branches/{branch_id}/credentials/{token_id}/rotate
+	RotateCredential(ctx context.Context, params RotateCredentialParams) (*RotateCredentialResponse, error)
 	// SendNeonAuthEmailProviderTest invokes sendNeonAuthEmailProviderTest operation.
 	//
 	// Sends a test email using the branch's already-saved custom SMTP configuration. Only the
@@ -1540,6 +1661,23 @@ type Invoker interface {
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/functions/{slug}
 	UpdateProjectBranchFunction(ctx context.Context, request *NeonFunctionUpdateRequest, params UpdateProjectBranchFunctionParams) (*NeonFunctionResponse, error)
+	// UpdateProjectBranchTrigger invokes updateProjectBranchTrigger operation.
+	//
+	// Applies a partial update. The required `type` discriminator must identify the existing trigger kind.
+	// The supported types are `schedule` and `storage_object_created`. Editing an inherited trigger
+	// creates a child-local shadow with the same `trigger_id`; it remains disabled unless this request
+	// explicitly enables it. For a schedule trigger, updating the schedule or enabled state increments
+	// `version` and recomputes `next_run_at`.
+	//
+	// Disabling stops future scheduling but does not cancel occurrences already committed for delivery.
+	// For `storage_object_created`, the configuration selects one exact bucket. An omitted object-key
+	// prefix matches every key in that bucket; a present prefix is matched byte-for-byte and
+	// case-sensitively against the full key, without path normalization or a path-segment boundary.
+	//
+	// Note: This endpoint is currently in Beta.
+	//
+	// PATCH /projects/{project_id}/branches/{branch_id}/triggers/{trigger_id}
+	UpdateProjectBranchTrigger(ctx context.Context, request *TriggerUpdateRequest, params UpdateProjectBranchTriggerParams) (*TriggerResponse, error)
 	// UpdateProjectEndpoint invokes updateProjectEndpoint operation.
 	//
 	// Updates the specified compute endpoint.
@@ -6054,6 +6192,192 @@ func (c *Client) sendCreateProjectBranchRole(ctx context.Context, request *RoleC
 	return result, nil
 }
 
+// CreateProjectBranchTrigger invokes createProjectBranchTrigger operation.
+//
+// Creates a trigger for a Function visible on the branch. The required `type` discriminator selects
+// the trigger-specific configuration. The supported types are `schedule` and `storage_object_created`.
+// A schedule trigger uses a numeric five-field cron expression interpreted in UTC. A
+// storage-object-created trigger fires only after a successful upload to one exact bucket and may
+// narrow matches to an object-key prefix.
+//
+// The name must be unique among triggers visible on the branch, including inherited triggers.
+//
+// Note: This endpoint is currently in Beta.
+//
+// POST /projects/{project_id}/branches/{branch_id}/triggers
+func (c *Client) CreateProjectBranchTrigger(ctx context.Context, request *TriggerCreateRequest, params CreateProjectBranchTriggerParams) (*TriggerResponse, error) {
+	res, err := c.sendCreateProjectBranchTrigger(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendCreateProjectBranchTrigger(ctx context.Context, request *TriggerCreateRequest, params CreateProjectBranchTriggerParams) (res *TriggerResponse, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("createProjectBranchTrigger"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/triggers"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CreateProjectBranchTriggerOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/triggers"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateProjectBranchTriggerRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, CreateProjectBranchTriggerOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, CreateProjectBranchTriggerOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, CreateProjectBranchTriggerOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeCreateProjectBranchTriggerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // CreateProjectEndpoint invokes createProjectEndpoint operation.
 //
 // Creates a compute endpoint for the specified branch. A compute endpoint is a Neon compute instance.
@@ -8409,9 +8733,7 @@ func (c *Client) sendDeleteProject(ctx context.Context, params DeleteProjectPara
 // The deletion completes after all operations finish. You cannot delete a project's root or default
 // branch, or a branch that has a child branch. A project must have at least one branch.
 //
-// By default, deleted branches can be recovered within a 7-day grace period. Use the `hard_delete`
-// parameter to permanently delete the branch immediately. For related information, see
-// [Manage branches].
+// For related information, see [Manage branches].
 //
 // DELETE /projects/{project_id}/branches/{branch_id}
 //
@@ -8498,27 +8820,6 @@ func (c *Client) sendDeleteProjectBranch(ctx context.Context, params DeleteProje
 		pathParts[3] = encoded
 	}
 	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeQueryParams"
-	q := uri.NewQueryEncoder()
-	{
-		// Encode "hard_delete" parameter.
-		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "hard_delete",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.HardDelete.Get(); ok {
-				return e.EncodeValue(conv.BoolToString(val))
-			}
-			return nil
-		}); err != nil {
-			return res, errors.Wrap(err, "encode query")
-		}
-	}
-	u.RawQuery = q.Values().Encode()
 
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "DELETE", u)
@@ -9233,6 +9534,201 @@ func (c *Client) sendDeleteProjectBranchBucketObjectsByPrefix(ctx context.Contex
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteProjectBranchBucketObjectsByPrefixResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DeleteProjectBranchCustomDomain invokes deleteProjectBranchCustomDomain operation.
+//
+// Removes a custom domain registered on the branch and stops routing it.
+//
+// Note: This endpoint is currently in Beta.
+//
+// DELETE /projects/{project_id}/branches/{branch_id}/custom-domains/{domain}
+func (c *Client) DeleteProjectBranchCustomDomain(ctx context.Context, params DeleteProjectBranchCustomDomainParams) error {
+	_, err := c.sendDeleteProjectBranchCustomDomain(ctx, params)
+	return err
+}
+
+func (c *Client) sendDeleteProjectBranchCustomDomain(ctx context.Context, params DeleteProjectBranchCustomDomainParams) (res *DeleteProjectBranchCustomDomainNoContent, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("deleteProjectBranchCustomDomain"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/custom-domains/{domain}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DeleteProjectBranchCustomDomainOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [6]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/custom-domains/"
+	{
+		// Encode "domain" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "domain",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Domain))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DeleteProjectBranchCustomDomainOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, DeleteProjectBranchCustomDomainOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, DeleteProjectBranchCustomDomainOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeDeleteProjectBranchCustomDomainResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -10012,6 +10508,207 @@ func (c *Client) sendDeleteProjectBranchRole(ctx context.Context, params DeleteP
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteProjectBranchRoleResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DeleteProjectBranchTrigger invokes deleteProjectBranchTrigger operation.
+//
+// Deletes a branch-local trigger or writes a branch-local tombstone for an inherited trigger so it
+// does not reappear. Deletion stops future scheduling or storage-event matching but does not cancel
+// invocations already committed for delivery. The supported trigger types are `schedule` and
+// `storage_object_created`.
+//
+// Note: This endpoint is currently in Beta.
+//
+// DELETE /projects/{project_id}/branches/{branch_id}/triggers/{trigger_id}
+func (c *Client) DeleteProjectBranchTrigger(ctx context.Context, params DeleteProjectBranchTriggerParams) error {
+	_, err := c.sendDeleteProjectBranchTrigger(ctx, params)
+	return err
+}
+
+func (c *Client) sendDeleteProjectBranchTrigger(ctx context.Context, params DeleteProjectBranchTriggerParams) (res *DeleteProjectBranchTriggerNoContent, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("deleteProjectBranchTrigger"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/triggers/{trigger_id}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DeleteProjectBranchTriggerOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [6]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/triggers/"
+	{
+		// Encode "trigger_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "trigger_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.TriggerID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DeleteProjectBranchTriggerOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, DeleteProjectBranchTriggerOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, DeleteProjectBranchTriggerOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeDeleteProjectBranchTriggerResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -18460,6 +19157,205 @@ func (c *Client) sendGetProjectBranchStorage(ctx context.Context, params GetProj
 	return result, nil
 }
 
+// GetProjectBranchTrigger invokes getProjectBranchTrigger operation.
+//
+// Returns the trigger visible on the branch. The supported trigger types are `schedule` and
+// `storage_object_created`.
+//
+// Note: This endpoint is currently in Beta.
+//
+// GET /projects/{project_id}/branches/{branch_id}/triggers/{trigger_id}
+func (c *Client) GetProjectBranchTrigger(ctx context.Context, params GetProjectBranchTriggerParams) (*TriggerResponse, error) {
+	res, err := c.sendGetProjectBranchTrigger(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetProjectBranchTrigger(ctx context.Context, params GetProjectBranchTriggerParams) (res *TriggerResponse, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getProjectBranchTrigger"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/triggers/{trigger_id}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetProjectBranchTriggerOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [6]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/triggers/"
+	{
+		// Encode "trigger_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "trigger_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.TriggerID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, GetProjectBranchTriggerOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, GetProjectBranchTriggerOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, GetProjectBranchTriggerOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetProjectBranchTriggerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetProjectEndpoint invokes getProjectEndpoint operation.
 //
 // Retrieves information about the specified compute endpoint. A compute endpoint is a Neon compute
@@ -21392,6 +22288,221 @@ func (c *Client) sendListProjectBranchBuckets(ctx context.Context, params ListPr
 	return result, nil
 }
 
+// ListProjectBranchCustomDomains invokes listProjectBranchCustomDomains operation.
+//
+// Lists all custom domains registered on the branch, across every target entity.
+//
+// Note: This endpoint is currently in Beta.
+//
+// GET /projects/{project_id}/branches/{branch_id}/custom-domains
+func (c *Client) ListProjectBranchCustomDomains(ctx context.Context, params ListProjectBranchCustomDomainsParams) (*ListProjectBranchCustomDomainsOK, error) {
+	res, err := c.sendListProjectBranchCustomDomains(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendListProjectBranchCustomDomains(ctx context.Context, params ListProjectBranchCustomDomainsParams) (res *ListProjectBranchCustomDomainsOK, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("listProjectBranchCustomDomains"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/custom-domains"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ListProjectBranchCustomDomainsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/custom-domains"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "cursor" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "cursor",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Cursor.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Limit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, ListProjectBranchCustomDomainsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, ListProjectBranchCustomDomainsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, ListProjectBranchCustomDomainsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeListProjectBranchCustomDomainsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // ListProjectBranchDatabases invokes listProjectBranchDatabases operation.
 //
 // Retrieves a list of databases for the specified branch. A branch can have multiple databases. For
@@ -22606,6 +23717,188 @@ func (c *Client) sendListProjectBranchRoles(ctx context.Context, params ListProj
 
 	stage = "DecodeResponse"
 	result, err := decodeListProjectBranchRolesResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ListProjectBranchTriggers invokes listProjectBranchTriggers operation.
+//
+// Lists the complete project-bounded set of triggers visible on the branch, ordered by `trigger_id`.
+// An inherited trigger keeps its project-wide ID and source branch, and is disabled on the child until
+// explicitly enabled there.
+//
+// The supported trigger types are `schedule` and `storage_object_created`. A storage-object-created
+// trigger watches one exact bucket and fires only after an object upload succeeds.
+//
+// Note: This endpoint is currently in Beta.
+//
+// GET /projects/{project_id}/branches/{branch_id}/triggers
+func (c *Client) ListProjectBranchTriggers(ctx context.Context, params ListProjectBranchTriggersParams) (*TriggersListResponse, error) {
+	res, err := c.sendListProjectBranchTriggers(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendListProjectBranchTriggers(ctx context.Context, params ListProjectBranchTriggersParams) (res *TriggersListResponse, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("listProjectBranchTriggers"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/triggers"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ListProjectBranchTriggersOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/triggers"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, ListProjectBranchTriggersOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, ListProjectBranchTriggersOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, ListProjectBranchTriggersOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeListProjectBranchTriggersResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -24955,6 +26248,194 @@ func (c *Client) sendRecoverProject(ctx context.Context, params RecoverProjectPa
 	return result, nil
 }
 
+// RegisterProjectBranchCustomDomain invokes registerProjectBranchCustomDomain operation.
+//
+// Registers a customer-owned domain (for example `dashboard.acme.com`) on the branch and points it at
+// a target entity, chosen by `entity_type` + `entity_id`. In v1 only `entity_type: function` is
+// supported (an unsupported type is rejected with `400`), where `entity_id` is the function slug and
+// the function must already exist on the branch (else `404`).
+//
+// The response includes the `cname_target` the customer must point their domain at with a CNAME
+// record; the domain goes live only once that DNS resolves and a certificate is issued on the first
+// request. A domain already registered to another resource is rejected with `409` and no detail about
+// the owner. Re-registering the same domain for the same entity is idempotent.
+//
+// Note: This endpoint is currently in Beta.
+//
+// POST /projects/{project_id}/branches/{branch_id}/custom-domains
+func (c *Client) RegisterProjectBranchCustomDomain(ctx context.Context, request *CustomDomainRegisterRequest, params RegisterProjectBranchCustomDomainParams) (*CustomDomain, error) {
+	res, err := c.sendRegisterProjectBranchCustomDomain(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendRegisterProjectBranchCustomDomain(ctx context.Context, request *CustomDomainRegisterRequest, params RegisterProjectBranchCustomDomainParams) (res *CustomDomain, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("registerProjectBranchCustomDomain"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/custom-domains"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, RegisterProjectBranchCustomDomainOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/custom-domains"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeRegisterProjectBranchCustomDomainRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, RegisterProjectBranchCustomDomainOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, RegisterProjectBranchCustomDomainOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, RegisterProjectBranchCustomDomainOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeRegisterProjectBranchCustomDomainResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // RemoveOrganizationMember invokes removeOrganizationMember operation.
 //
 // Removes the specified member from the organization. Only organization admins can perform this
@@ -26086,6 +27567,210 @@ func (c *Client) sendRestoreSnapshot(ctx context.Context, request OptRestoreSnap
 	return result, nil
 }
 
+// RevealCredential invokes revealCredential operation.
+//
+// Returns the live `api_token` and `s3_secret_access_key` of an existing credential, so a credential
+// whose issuance response was lost can be recovered without minting a new one.
+//
+// This is a POST with an explicit `/reveal` verb so the secrets never ride a GET, where they would
+// land in access logs, browser history and proxy caches. Revoked and expired credentials return 404,
+// as does a `token_id` that does not belong to this project.
+//
+// A credential issued before secret retrieval was supported has no recoverable secret and returns 409
+// — rotate it to obtain one.
+//
+// Note: This endpoint is currently in Beta.
+//
+// POST /projects/{project_id}/branches/{branch_id}/credentials/{token_id}/reveal
+func (c *Client) RevealCredential(ctx context.Context, params RevealCredentialParams) (RevealCredentialRes, error) {
+	res, err := c.sendRevealCredential(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendRevealCredential(ctx context.Context, params RevealCredentialParams) (res RevealCredentialRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("revealCredential"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/credentials/{token_id}/reveal"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, RevealCredentialOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [7]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/credentials/"
+	{
+		// Encode "token_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "token_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.TokenID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	pathParts[6] = "/reveal"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, RevealCredentialOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, RevealCredentialOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, RevealCredentialOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeRevealCredentialResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // RevokeApiKey invokes revokeApiKey operation.
 //
 // Revokes the specified API key. An API key that is no longer needed can be revoked. This action
@@ -26784,6 +28469,222 @@ func (c *Client) sendRevokePermissionFromProject(ctx context.Context, params Rev
 
 	stage = "DecodeResponse"
 	result, err := decodeRevokePermissionFromProjectResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// RotateCredential invokes rotateCredential operation.
+//
+// Replaces the secret material on an existing scoped credential in place. `token_id` is preserved —
+// it is the `AWS_ACCESS_KEY_ID` for S3-compatible clients, so the access key id your application
+// already holds keeps working and only the secret changes. This is the analog of resetting a Postgres
+// password, not of issuing a second credential.
+//
+// The response carries the new `api_token` and `s3_secret_access_key` exactly once. Rotation is not
+// idempotent: retrying after an ambiguous timeout mints another secret and supersedes the previous
+// replacement, so a retry does not recover a lost response — it only invalidates the secret you did
+// not receive. If you lose the response, issue a replacement credential and revoke this one.
+//
+// The old secret stops authenticating as soon as the rotation commits. Where a region caches
+// credentials on its data-plane verifiers, a replica may briefly keep accepting the old secret — and
+// rejecting the new one — until its cache entry expires; where it does not, the cutover is immediate
+// apart from requests already in flight. Either way the changeover is not atomic across replicas, so
+// retry an unexpected authentication failure right after rotating rather than treating the new secret
+// as bad. `last_used_at` continues to report the logical credential's prior usage and says nothing
+// about whether the new secret has been used yet.
+//
+// Only a live, unexpired, unrevoked customer-managed (`user`) credential on a live project and live
+// branch is eligible. Anything else — including the platform-internal `function` and `system`
+// credentials — is reported as not found, indistinguishable from an unknown `token_id`.
+//
+// Note: This endpoint is currently in Beta.
+//
+// POST /projects/{project_id}/branches/{branch_id}/credentials/{token_id}/rotate
+func (c *Client) RotateCredential(ctx context.Context, params RotateCredentialParams) (*RotateCredentialResponse, error) {
+	res, err := c.sendRotateCredential(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendRotateCredential(ctx context.Context, params RotateCredentialParams) (res *RotateCredentialResponse, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("rotateCredential"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/credentials/{token_id}/rotate"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, RotateCredentialOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [7]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/credentials/"
+	{
+		// Encode "token_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "token_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.TokenID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	pathParts[6] = "/rotate"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, RotateCredentialOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, RotateCredentialOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, RotateCredentialOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeRotateCredentialResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -32328,6 +34229,216 @@ func (c *Client) sendUpdateProjectBranchFunction(ctx context.Context, request *N
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateProjectBranchFunctionResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateProjectBranchTrigger invokes updateProjectBranchTrigger operation.
+//
+// Applies a partial update. The required `type` discriminator must identify the existing trigger kind.
+// The supported types are `schedule` and `storage_object_created`. Editing an inherited trigger
+// creates a child-local shadow with the same `trigger_id`; it remains disabled unless this request
+// explicitly enables it. For a schedule trigger, updating the schedule or enabled state increments
+// `version` and recomputes `next_run_at`.
+//
+// Disabling stops future scheduling but does not cancel occurrences already committed for delivery.
+// For `storage_object_created`, the configuration selects one exact bucket. An omitted object-key
+// prefix matches every key in that bucket; a present prefix is matched byte-for-byte and
+// case-sensitively against the full key, without path normalization or a path-segment boundary.
+//
+// Note: This endpoint is currently in Beta.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/triggers/{trigger_id}
+func (c *Client) UpdateProjectBranchTrigger(ctx context.Context, request *TriggerUpdateRequest, params UpdateProjectBranchTriggerParams) (*TriggerResponse, error) {
+	res, err := c.sendUpdateProjectBranchTrigger(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateProjectBranchTrigger(ctx context.Context, request *TriggerUpdateRequest, params UpdateProjectBranchTriggerParams) (res *TriggerResponse, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateProjectBranchTrigger"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/triggers/{trigger_id}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateProjectBranchTriggerOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [6]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/triggers/"
+	{
+		// Encode "trigger_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "trigger_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := string(params.TriggerID); true {
+				return e.EncodeValue(conv.StringToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateProjectBranchTriggerRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, UpdateProjectBranchTriggerOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, UpdateProjectBranchTriggerOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, UpdateProjectBranchTriggerOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateProjectBranchTriggerResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

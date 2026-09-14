@@ -4465,10 +4465,10 @@ type CreateCredentialResponse struct {
 	// Bearer token; returned exactly once.
 	APIToken string `json:"api_token"`
 	// Nsk_live_<64 hex>; the AWS_SECRET_ACCESS_KEY, returned exactly once.
-	S3SecretAccessKey string            `json:"s3_secret_access_key"`
-	Scopes            []CredentialScope `json:"scopes"`
-	BranchID          string            `json:"branch_id"`
-	CreatedAt         time.Time         `json:"created_at"`
+	S3SecretAccessKey string                   `json:"s3_secret_access_key"`
+	Scopes            []GrantedCredentialScope `json:"scopes"`
+	BranchID          string                   `json:"branch_id"`
+	CreatedAt         time.Time                `json:"created_at"`
 	// When the credential expires; absent means never expires.
 	ExpiresAt OptDateTime `json:"expires_at"`
 }
@@ -4499,7 +4499,7 @@ func (s *CreateCredentialResponse) GetS3SecretAccessKey() string {
 }
 
 // GetScopes returns the value of Scopes.
-func (s *CreateCredentialResponse) GetScopes() []CredentialScope {
+func (s *CreateCredentialResponse) GetScopes() []GrantedCredentialScope {
 	return s.Scopes
 }
 
@@ -4544,7 +4544,7 @@ func (s *CreateCredentialResponse) SetS3SecretAccessKey(val string) {
 }
 
 // SetScopes sets the value of Scopes.
-func (s *CreateCredentialResponse) SetScopes(val []CredentialScope) {
+func (s *CreateCredentialResponse) SetScopes(val []GrantedCredentialScope) {
 	s.Scopes = val
 }
 
@@ -4932,14 +4932,14 @@ type CredentialMeta struct {
 	TokenID      string `json:"token_id"`
 	TokenIDShort string `json:"token_id_short"`
 	// Customer-supplied label; absent when not provided at issuance.
-	Name          OptString         `json:"name"`
-	Scopes        []CredentialScope `json:"scopes"`
-	BranchID      OptString         `json:"branch_id"`
-	PrincipalType string            `json:"principal_type"`
-	FunctionID    OptString         `json:"function_id"`
-	CreatedAt     time.Time         `json:"created_at"`
-	LastUsedAt    OptDateTime       `json:"last_used_at"`
-	RevokedAt     OptDateTime       `json:"revoked_at"`
+	Name          OptString                `json:"name"`
+	Scopes        []GrantedCredentialScope `json:"scopes"`
+	BranchID      OptString                `json:"branch_id"`
+	PrincipalType string                   `json:"principal_type"`
+	FunctionID    OptString                `json:"function_id"`
+	CreatedAt     time.Time                `json:"created_at"`
+	LastUsedAt    OptDateTime              `json:"last_used_at"`
+	RevokedAt     OptDateTime              `json:"revoked_at"`
 	// When the credential expires; absent means never expires. The verifier refuses to authenticate after
 	// `expires_at <= now()`.
 	ExpiresAt OptDateTime `json:"expires_at"`
@@ -4961,7 +4961,7 @@ func (s *CredentialMeta) GetName() OptString {
 }
 
 // GetScopes returns the value of Scopes.
-func (s *CredentialMeta) GetScopes() []CredentialScope {
+func (s *CredentialMeta) GetScopes() []GrantedCredentialScope {
 	return s.Scopes
 }
 
@@ -5016,7 +5016,7 @@ func (s *CredentialMeta) SetName(val OptString) {
 }
 
 // SetScopes sets the value of Scopes.
-func (s *CredentialMeta) SetScopes(val []CredentialScope) {
+func (s *CredentialMeta) SetScopes(val []GrantedCredentialScope) {
 	s.Scopes = val
 }
 
@@ -5055,8 +5055,12 @@ func (s *CredentialMeta) SetExpiresAt(val OptDateTime) {
 	s.ExpiresAt = val
 }
 
-// A single capability a credential may exercise. A credential is granted a set of these; it may only
-// perform actions explicitly listed in its scopes.
+// A single capability you may request when issuing a credential. A credential is granted a set of
+// these; it may only perform actions explicitly listed in its scopes.
+//
+// This is the requestable set. Responses describing an existing credential use
+// `GrantedCredentialScope`, which is deliberately wider: a credential may have been granted a scope
+// that this endpoint does not offer, and a response must be able to report it.
 // Ref: #/components/schemas/CredentialScope
 type CredentialScope string
 
@@ -5112,6 +5116,59 @@ func (s *CredentialScope) UnmarshalText(data []byte) error {
 		return errors.Errorf("invalid value: %q", data)
 	}
 }
+
+// The live secrets of an existing credential, recovered on demand by the reveal endpoint. `api_token`
+// and `s3_secret_access_key` are the same values handed back once at issuance.
+//
+// The field set is deliberately narrower than `CreateCredentialResponse`: it carries only what reveal
+// can actually recover. `token_id_short`, `scopes`, `principal_type`, `created_at` and `expires_at`
+// are metadata, not secrets — read them from the list endpoint instead.
+//
+// No `branch_id` is returned. Reveal is scoped by `(project_id, token_id)`, so the branch in the
+// request path authorizes the call but is not proven to be the branch the credential was issued on.
+// Echoing it back would assert an anchor this endpoint never verified. For a credential's true anchor
+// branch, read `branch_id` from the list endpoint, which is branch-exact.
+// Ref: #/components/schemas/CredentialSecret
+type CredentialSecret struct {
+	// Opaque credential id (e.g. nak_live_<32hex>).
+	TokenID string `json:"token_id"`
+	// Bearer token.
+	APIToken string `json:"api_token"`
+	// Nsk_live_<64 hex>; the AWS_SECRET_ACCESS_KEY.
+	S3SecretAccessKey string `json:"s3_secret_access_key"`
+}
+
+// GetTokenID returns the value of TokenID.
+func (s *CredentialSecret) GetTokenID() string {
+	return s.TokenID
+}
+
+// GetAPIToken returns the value of APIToken.
+func (s *CredentialSecret) GetAPIToken() string {
+	return s.APIToken
+}
+
+// GetS3SecretAccessKey returns the value of S3SecretAccessKey.
+func (s *CredentialSecret) GetS3SecretAccessKey() string {
+	return s.S3SecretAccessKey
+}
+
+// SetTokenID sets the value of TokenID.
+func (s *CredentialSecret) SetTokenID(val string) {
+	s.TokenID = val
+}
+
+// SetAPIToken sets the value of APIToken.
+func (s *CredentialSecret) SetAPIToken(val string) {
+	s.APIToken = val
+}
+
+// SetS3SecretAccessKey sets the value of S3SecretAccessKey.
+func (s *CredentialSecret) SetS3SecretAccessKey(val string) {
+	s.S3SecretAccessKey = val
+}
+
+func (*CredentialSecret) revealCredentialRes() {}
 
 // Ref: #/components/schemas/CurrentUserAuthAccount
 type CurrentUserAuthAccount struct {
@@ -5397,6 +5454,162 @@ func (s *CursorPagination) SetSortBy(val OptString) {
 // SetSortOrder sets the value of SortOrder.
 func (s *CursorPagination) SetSortOrder(val OptString) {
 	s.SortOrder = val
+}
+
+// Ref: #/components/schemas/CustomDomain
+type CustomDomain struct {
+	// The registered custom domain (normalized, lowercase).
+	Domain string `json:"domain"`
+	// The kind of branch entity the domain targets. Possible values: `function` (v1 supports only
+	// `function`). Not an `enum`: new values may ship in later spec versions — treat any undocumented
+	// value as unknown.
+	EntityType string `json:"entity_type"`
+	// The target entity's identifier within the branch. For `function` this is the function slug.
+	EntityID string `json:"entity_id"`
+	// The hostname the customer must point their custom domain at with a CNAME record. Empty when the
+	// serving region has no custom-domains front door configured. This is the activation input: point DNS
+	// here and the domain goes live (see `status`) once a certificate is issued on the first request.
+	CnameTarget string `json:"cname_target"`
+	// The domain's current validity, computed by a background check: `pending` (still converging — point
+	// your CNAME at `cname_target` and wait), `active` (live: DNS resolves to the edge, the CA is
+	// authorized, and routing is published), or `error` (a fixable problem — see `status_reason`). Not
+	// an `enum`: treat any undocumented value as unknown. May be absent briefly right after registration.
+	Status OptString `json:"status"`
+	// The DNS + CAA portion of the check: `pending` (no records yet), `ok` (resolves to our edge and the
+	// CA is authorized), `misconfigured` (your CNAME does not resolve to our edge), or `caa_blocked` (your
+	// CAA records forbid Let's Encrypt). Not an `enum`.
+	DNSStatus OptString `json:"dns_status"`
+	// Whether Neon's internal routing for the domain is published: `pending`, `present`, or `missing`.
+	// `missing` is an internal fault surfaced for support. Not an `enum`.
+	BindingStatus OptString `json:"binding_status"`
+	// A short, stable machine-readable reason for a non-active `status` (e.g.
+	// `cname-not-pointing-at-edge`, `caa-blocks-lets-encrypt`, `binding-missing`), suitable for keying an
+	// actionable hint. Empty when active or pending.
+	StatusReason OptString `json:"status_reason"`
+}
+
+// GetDomain returns the value of Domain.
+func (s *CustomDomain) GetDomain() string {
+	return s.Domain
+}
+
+// GetEntityType returns the value of EntityType.
+func (s *CustomDomain) GetEntityType() string {
+	return s.EntityType
+}
+
+// GetEntityID returns the value of EntityID.
+func (s *CustomDomain) GetEntityID() string {
+	return s.EntityID
+}
+
+// GetCnameTarget returns the value of CnameTarget.
+func (s *CustomDomain) GetCnameTarget() string {
+	return s.CnameTarget
+}
+
+// GetStatus returns the value of Status.
+func (s *CustomDomain) GetStatus() OptString {
+	return s.Status
+}
+
+// GetDNSStatus returns the value of DNSStatus.
+func (s *CustomDomain) GetDNSStatus() OptString {
+	return s.DNSStatus
+}
+
+// GetBindingStatus returns the value of BindingStatus.
+func (s *CustomDomain) GetBindingStatus() OptString {
+	return s.BindingStatus
+}
+
+// GetStatusReason returns the value of StatusReason.
+func (s *CustomDomain) GetStatusReason() OptString {
+	return s.StatusReason
+}
+
+// SetDomain sets the value of Domain.
+func (s *CustomDomain) SetDomain(val string) {
+	s.Domain = val
+}
+
+// SetEntityType sets the value of EntityType.
+func (s *CustomDomain) SetEntityType(val string) {
+	s.EntityType = val
+}
+
+// SetEntityID sets the value of EntityID.
+func (s *CustomDomain) SetEntityID(val string) {
+	s.EntityID = val
+}
+
+// SetCnameTarget sets the value of CnameTarget.
+func (s *CustomDomain) SetCnameTarget(val string) {
+	s.CnameTarget = val
+}
+
+// SetStatus sets the value of Status.
+func (s *CustomDomain) SetStatus(val OptString) {
+	s.Status = val
+}
+
+// SetDNSStatus sets the value of DNSStatus.
+func (s *CustomDomain) SetDNSStatus(val OptString) {
+	s.DNSStatus = val
+}
+
+// SetBindingStatus sets the value of BindingStatus.
+func (s *CustomDomain) SetBindingStatus(val OptString) {
+	s.BindingStatus = val
+}
+
+// SetStatusReason sets the value of StatusReason.
+func (s *CustomDomain) SetStatusReason(val OptString) {
+	s.StatusReason = val
+}
+
+// Ref: #/components/schemas/CustomDomainRegisterRequest
+type CustomDomainRegisterRequest struct {
+	// The custom domain to register (for example `dashboard.acme.com`). Case-insensitive; normalized to
+	// lowercase (a trailing root dot is stripped, so the 254-char bound admits a fully-qualified name
+	// whose normalized form is 253 chars). Neon-managed and internal hostnames are rejected.
+	Domain string `json:"domain"`
+	// The kind of branch entity to point the domain at. v1 supports only `function`; any other value is
+	// rejected with `invalid_entity_type`.
+	EntityType string `json:"entity_type"`
+	// The target entity's identifier within the branch. For `function` this is the function slug (which
+	// must already exist on the branch).
+	EntityID string `json:"entity_id"`
+}
+
+// GetDomain returns the value of Domain.
+func (s *CustomDomainRegisterRequest) GetDomain() string {
+	return s.Domain
+}
+
+// GetEntityType returns the value of EntityType.
+func (s *CustomDomainRegisterRequest) GetEntityType() string {
+	return s.EntityType
+}
+
+// GetEntityID returns the value of EntityID.
+func (s *CustomDomainRegisterRequest) GetEntityID() string {
+	return s.EntityID
+}
+
+// SetDomain sets the value of Domain.
+func (s *CustomDomainRegisterRequest) SetDomain(val string) {
+	s.Domain = val
+}
+
+// SetEntityType sets the value of EntityType.
+func (s *CustomDomainRegisterRequest) SetEntityType(val string) {
+	s.EntityType = val
+}
+
+// SetEntityID sets the value of EntityID.
+func (s *CustomDomainRegisterRequest) SetEntityID(val string) {
+	s.EntityID = val
 }
 
 // Create Neon Data API.
@@ -6095,6 +6308,9 @@ type DeleteProjectBranchBucketObjectNoContent struct{}
 
 func (*DeleteProjectBranchBucketObjectNoContent) deleteProjectBranchBucketObjectRes() {}
 
+// DeleteProjectBranchCustomDomainNoContent is response for DeleteProjectBranchCustomDomain operation.
+type DeleteProjectBranchCustomDomainNoContent struct{}
+
 // DeleteProjectBranchDatabaseNoContent is response for DeleteProjectBranchDatabase operation.
 type DeleteProjectBranchDatabaseNoContent struct{}
 
@@ -6112,6 +6328,9 @@ func (*DeleteProjectBranchNoContent) deleteProjectBranchRes() {}
 type DeleteProjectBranchRoleNoContent struct{}
 
 func (*DeleteProjectBranchRoleNoContent) deleteProjectBranchRoleRes() {}
+
+// DeleteProjectBranchTriggerNoContent is response for DeleteProjectBranchTrigger operation.
+type DeleteProjectBranchTriggerNoContent struct{}
 
 // DeleteProjectEndpointNoContent is response for DeleteProjectEndpoint operation.
 type DeleteProjectEndpointNoContent struct{}
@@ -7193,6 +7412,57 @@ func (s *FunctionDeployRequestMultipartRuntime) UnmarshalText(data []byte) error
 	}
 }
 
+// A numeric five-field cron schedule interpreted in UTC.
+// Ref: #/components/schemas/FunctionTriggerSchedule
+type FunctionTriggerSchedule struct {
+	// Numeric five-field cron expression (minute through day-of-week), interpreted in UTC.
+	Cron string `json:"cron"`
+}
+
+// GetCron returns the value of Cron.
+func (s *FunctionTriggerSchedule) GetCron() string {
+	return s.Cron
+}
+
+// SetCron sets the value of Cron.
+func (s *FunctionTriggerSchedule) SetCron(val string) {
+	s.Cron = val
+}
+
+// Matches successful uploads to one exact bucket and, when configured, an object-key prefix. The
+// Function receives a JSON request body with `type` set to `storage_object_created` and a `data`
+// object containing exactly `bucket_name` and `object_key`.
+// Ref: #/components/schemas/FunctionTriggerStorageObjectCreated
+type FunctionTriggerStorageObjectCreated struct {
+	// The exact object-storage bucket name to watch.
+	BucketName string `json:"bucket_name"`
+	// Optional object-key prefix of at most 1024 UTF-8 bytes. When omitted, every key in the bucket
+	// matches. When present, the full object key must start with these exact bytes; matching is
+	// case-sensitive and does not normalize paths or require a path-segment boundary. Match-all responses
+	// omit this field rather than returning an empty string.
+	Prefix OptString `json:"prefix"`
+}
+
+// GetBucketName returns the value of BucketName.
+func (s *FunctionTriggerStorageObjectCreated) GetBucketName() string {
+	return s.BucketName
+}
+
+// GetPrefix returns the value of Prefix.
+func (s *FunctionTriggerStorageObjectCreated) GetPrefix() OptString {
+	return s.Prefix
+}
+
+// SetBucketName sets the value of BucketName.
+func (s *FunctionTriggerStorageObjectCreated) SetBucketName(val string) {
+	s.BucketName = val
+}
+
+// SetPrefix sets the value of Prefix.
+func (s *FunctionTriggerStorageObjectCreated) SetPrefix(val OptString) {
+	s.Prefix = val
+}
+
 // Ref: #/components/schemas/GeneralError
 type GeneralError struct {
 	// Unique identifier for the request, useful for debugging. You can set this value manually by
@@ -7669,6 +7939,78 @@ func (s *GrantPermissionToProjectRequest) SetEmail(val string) {
 	s.Email = val
 }
 
+// A single capability a credential actually carries, as reported by responses that describe an
+// existing credential.
+//
+// This set is a superset of `CredentialScope` (the requestable set) because a credential's scopes are
+// not limited to what this API offers: the platform accepts additional scopes for customer-managed
+// (`user`) credentials, so one may exist on your branch that was not issued through this endpoint.
+// Responses must be able to report such a credential rather than fail to describe it — a client that
+// rejected the value would, on rotate, discard the replacement secret after the rotation had already
+// committed. Treat unknown values as opaque.
+// Ref: #/components/schemas/GrantedCredentialScope
+type GrantedCredentialScope string
+
+const (
+	GrantedCredentialScopeStorageRead     GrantedCredentialScope = "storage:read"
+	GrantedCredentialScopeStorageWrite    GrantedCredentialScope = "storage:write"
+	GrantedCredentialScopeAiGatewayInvoke GrantedCredentialScope = "ai_gateway:invoke"
+	GrantedCredentialScopeTelemetryWrite  GrantedCredentialScope = "telemetry:write"
+	GrantedCredentialScopeFunctionsInvoke GrantedCredentialScope = "functions:invoke"
+)
+
+// AllValues returns all GrantedCredentialScope values.
+func (GrantedCredentialScope) AllValues() []GrantedCredentialScope {
+	return []GrantedCredentialScope{
+		GrantedCredentialScopeStorageRead,
+		GrantedCredentialScopeStorageWrite,
+		GrantedCredentialScopeAiGatewayInvoke,
+		GrantedCredentialScopeTelemetryWrite,
+		GrantedCredentialScopeFunctionsInvoke,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s GrantedCredentialScope) MarshalText() ([]byte, error) {
+	switch s {
+	case GrantedCredentialScopeStorageRead:
+		return []byte(s), nil
+	case GrantedCredentialScopeStorageWrite:
+		return []byte(s), nil
+	case GrantedCredentialScopeAiGatewayInvoke:
+		return []byte(s), nil
+	case GrantedCredentialScopeTelemetryWrite:
+		return []byte(s), nil
+	case GrantedCredentialScopeFunctionsInvoke:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *GrantedCredentialScope) UnmarshalText(data []byte) error {
+	switch GrantedCredentialScope(data) {
+	case GrantedCredentialScopeStorageRead:
+		*s = GrantedCredentialScopeStorageRead
+		return nil
+	case GrantedCredentialScopeStorageWrite:
+		*s = GrantedCredentialScopeStorageWrite
+		return nil
+	case GrantedCredentialScopeAiGatewayInvoke:
+		*s = GrantedCredentialScopeAiGatewayInvoke
+		return nil
+	case GrantedCredentialScopeTelemetryWrite:
+		*s = GrantedCredentialScopeTelemetryWrite
+		return nil
+	case GrantedCredentialScopeFunctionsInvoke:
+		*s = GrantedCredentialScopeFunctionsInvoke
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Identity provider id from keycloak.
 // Ref: #/components/schemas/IdentityProviderId
 type IdentityProviderId string
@@ -8094,6 +8436,32 @@ func (s *ListOperations) SetOperations(val []Operation) {
 
 // SetPagination sets the value of Pagination.
 func (s *ListOperations) SetPagination(val OptPagination) {
+	s.Pagination = val
+}
+
+// Merged schema.
+type ListProjectBranchCustomDomainsOK struct {
+	CustomDomains []CustomDomain      `json:"custom_domains"`
+	Pagination    OptCursorPagination `json:"pagination"`
+}
+
+// GetCustomDomains returns the value of CustomDomains.
+func (s *ListProjectBranchCustomDomainsOK) GetCustomDomains() []CustomDomain {
+	return s.CustomDomains
+}
+
+// GetPagination returns the value of Pagination.
+func (s *ListProjectBranchCustomDomainsOK) GetPagination() OptCursorPagination {
+	return s.Pagination
+}
+
+// SetCustomDomains sets the value of CustomDomains.
+func (s *ListProjectBranchCustomDomainsOK) SetCustomDomains(val []CustomDomain) {
+	s.CustomDomains = val
+}
+
+// SetPagination sets the value of Pagination.
+func (s *ListProjectBranchCustomDomainsOK) SetPagination(val OptCursorPagination) {
 	s.Pagination = val
 }
 
@@ -13151,6 +13519,98 @@ func (o OptFunctionDeployRequestMultipartRuntime) Get() (v FunctionDeployRequest
 
 // Or returns value if set, or given parameter if does not.
 func (o OptFunctionDeployRequestMultipartRuntime) Or(d FunctionDeployRequestMultipartRuntime) FunctionDeployRequestMultipartRuntime {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptFunctionTriggerSchedule returns new OptFunctionTriggerSchedule with value set to v.
+func NewOptFunctionTriggerSchedule(v FunctionTriggerSchedule) OptFunctionTriggerSchedule {
+	return OptFunctionTriggerSchedule{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptFunctionTriggerSchedule is optional FunctionTriggerSchedule.
+type OptFunctionTriggerSchedule struct {
+	Value FunctionTriggerSchedule
+	Set   bool
+}
+
+// IsSet returns true if OptFunctionTriggerSchedule was set.
+func (o OptFunctionTriggerSchedule) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptFunctionTriggerSchedule) Reset() {
+	var v FunctionTriggerSchedule
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptFunctionTriggerSchedule) SetTo(v FunctionTriggerSchedule) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptFunctionTriggerSchedule) Get() (v FunctionTriggerSchedule, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptFunctionTriggerSchedule) Or(d FunctionTriggerSchedule) FunctionTriggerSchedule {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptFunctionTriggerStorageObjectCreated returns new OptFunctionTriggerStorageObjectCreated with value set to v.
+func NewOptFunctionTriggerStorageObjectCreated(v FunctionTriggerStorageObjectCreated) OptFunctionTriggerStorageObjectCreated {
+	return OptFunctionTriggerStorageObjectCreated{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptFunctionTriggerStorageObjectCreated is optional FunctionTriggerStorageObjectCreated.
+type OptFunctionTriggerStorageObjectCreated struct {
+	Value FunctionTriggerStorageObjectCreated
+	Set   bool
+}
+
+// IsSet returns true if OptFunctionTriggerStorageObjectCreated was set.
+func (o OptFunctionTriggerStorageObjectCreated) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptFunctionTriggerStorageObjectCreated) Reset() {
+	var v FunctionTriggerStorageObjectCreated
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptFunctionTriggerStorageObjectCreated) SetTo(v FunctionTriggerStorageObjectCreated) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptFunctionTriggerStorageObjectCreated) Get() (v FunctionTriggerStorageObjectCreated, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptFunctionTriggerStorageObjectCreated) Or(d FunctionTriggerStorageObjectCreated) FunctionTriggerStorageObjectCreated {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -19687,6 +20147,14 @@ func (s *RestoredSnapshot) SetOperations(val []Operation) {
 	s.Operations = val
 }
 
+type RevealCredentialConflict GeneralError
+
+func (*RevealCredentialConflict) revealCredentialRes() {}
+
+type RevealCredentialNotFound GeneralError
+
+func (*RevealCredentialNotFound) revealCredentialRes() {}
+
 // RevokeCredentialNoContent is response for RevokeCredential operation.
 type RevokeCredentialNoContent struct{}
 
@@ -19907,6 +20375,556 @@ func (s *RolesResponse) GetRoles() []Role {
 // SetRoles sets the value of Roles.
 func (s *RolesResponse) SetRoles(val []Role) {
 	s.Roles = val
+}
+
+// The replacement secret material for an existing credential, returned exactly once. `token_id`,
+// `scopes`, `branch_id` and `created_at` are unchanged by the rotation — only `api_token` and
+// `s3_secret_access_key` are new.
+// Ref: #/components/schemas/RotateCredentialResponse
+type RotateCredentialResponse struct {
+	// Opaque credential id (e.g. nak_live_<32hex>), unchanged by the rotation. Doubles as the
+	// `AWS_ACCESS_KEY_ID` for SigV4.
+	TokenID string `json:"token_id"`
+	// First 12 hex chars of token_id; safe to log.
+	TokenIDShort string `json:"token_id_short"`
+	// Customer-supplied label carried on the credential. Absent when none was set at issuance.
+	Name OptString `json:"name"`
+	// The new Bearer token; returned exactly once.
+	APIToken string `json:"api_token"`
+	// The new nsk_live_<64 hex> AWS_SECRET_ACCESS_KEY; returned exactly once.
+	S3SecretAccessKey string                   `json:"s3_secret_access_key"`
+	Scopes            []GrantedCredentialScope `json:"scopes"`
+	BranchID          string                   `json:"branch_id"`
+	// Always `user`: only customer-managed credentials are rotatable through this endpoint.
+	PrincipalType RotateCredentialResponsePrincipalType `json:"principal_type"`
+	// When the credential was originally issued. Rotation replaces the secrets in place and does not reset
+	// this.
+	CreatedAt time.Time `json:"created_at"`
+	// When the credential expires; absent means never expires. Rotation does not extend it.
+	ExpiresAt OptDateTime `json:"expires_at"`
+}
+
+// GetTokenID returns the value of TokenID.
+func (s *RotateCredentialResponse) GetTokenID() string {
+	return s.TokenID
+}
+
+// GetTokenIDShort returns the value of TokenIDShort.
+func (s *RotateCredentialResponse) GetTokenIDShort() string {
+	return s.TokenIDShort
+}
+
+// GetName returns the value of Name.
+func (s *RotateCredentialResponse) GetName() OptString {
+	return s.Name
+}
+
+// GetAPIToken returns the value of APIToken.
+func (s *RotateCredentialResponse) GetAPIToken() string {
+	return s.APIToken
+}
+
+// GetS3SecretAccessKey returns the value of S3SecretAccessKey.
+func (s *RotateCredentialResponse) GetS3SecretAccessKey() string {
+	return s.S3SecretAccessKey
+}
+
+// GetScopes returns the value of Scopes.
+func (s *RotateCredentialResponse) GetScopes() []GrantedCredentialScope {
+	return s.Scopes
+}
+
+// GetBranchID returns the value of BranchID.
+func (s *RotateCredentialResponse) GetBranchID() string {
+	return s.BranchID
+}
+
+// GetPrincipalType returns the value of PrincipalType.
+func (s *RotateCredentialResponse) GetPrincipalType() RotateCredentialResponsePrincipalType {
+	return s.PrincipalType
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *RotateCredentialResponse) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetExpiresAt returns the value of ExpiresAt.
+func (s *RotateCredentialResponse) GetExpiresAt() OptDateTime {
+	return s.ExpiresAt
+}
+
+// SetTokenID sets the value of TokenID.
+func (s *RotateCredentialResponse) SetTokenID(val string) {
+	s.TokenID = val
+}
+
+// SetTokenIDShort sets the value of TokenIDShort.
+func (s *RotateCredentialResponse) SetTokenIDShort(val string) {
+	s.TokenIDShort = val
+}
+
+// SetName sets the value of Name.
+func (s *RotateCredentialResponse) SetName(val OptString) {
+	s.Name = val
+}
+
+// SetAPIToken sets the value of APIToken.
+func (s *RotateCredentialResponse) SetAPIToken(val string) {
+	s.APIToken = val
+}
+
+// SetS3SecretAccessKey sets the value of S3SecretAccessKey.
+func (s *RotateCredentialResponse) SetS3SecretAccessKey(val string) {
+	s.S3SecretAccessKey = val
+}
+
+// SetScopes sets the value of Scopes.
+func (s *RotateCredentialResponse) SetScopes(val []GrantedCredentialScope) {
+	s.Scopes = val
+}
+
+// SetBranchID sets the value of BranchID.
+func (s *RotateCredentialResponse) SetBranchID(val string) {
+	s.BranchID = val
+}
+
+// SetPrincipalType sets the value of PrincipalType.
+func (s *RotateCredentialResponse) SetPrincipalType(val RotateCredentialResponsePrincipalType) {
+	s.PrincipalType = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *RotateCredentialResponse) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetExpiresAt sets the value of ExpiresAt.
+func (s *RotateCredentialResponse) SetExpiresAt(val OptDateTime) {
+	s.ExpiresAt = val
+}
+
+// Always `user`: only customer-managed credentials are rotatable through this endpoint.
+type RotateCredentialResponsePrincipalType string
+
+const (
+	RotateCredentialResponsePrincipalTypeUser RotateCredentialResponsePrincipalType = "user"
+)
+
+// AllValues returns all RotateCredentialResponsePrincipalType values.
+func (RotateCredentialResponsePrincipalType) AllValues() []RotateCredentialResponsePrincipalType {
+	return []RotateCredentialResponsePrincipalType{
+		RotateCredentialResponsePrincipalTypeUser,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s RotateCredentialResponsePrincipalType) MarshalText() ([]byte, error) {
+	switch s {
+	case RotateCredentialResponsePrincipalTypeUser:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *RotateCredentialResponsePrincipalType) UnmarshalText(data []byte) error {
+	switch RotateCredentialResponsePrincipalType(data) {
+	case RotateCredentialResponsePrincipalTypeUser:
+		*s = RotateCredentialResponsePrincipalTypeUser
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// A branch-effective schedule trigger for a Function.
+// Ref: #/components/schemas/ScheduleTrigger
+type ScheduleTrigger struct {
+	// Trigger type discriminator.
+	Type      ScheduleTriggerType `json:"type"`
+	TriggerID TriggerID           `json:"trigger_id"`
+	// The branch-local Function slug resolved when an occurrence is consumed.
+	FunctionSlug string `json:"function_slug"`
+	// Human-readable trigger name.
+	Name string `json:"name"`
+	// Path passed to the target Function.
+	FunctionPath string                  `json:"function_path"`
+	Schedule     FunctionTriggerSchedule `json:"schedule"`
+	Enabled      bool                    `json:"enabled"`
+	// Monotonic configuration version.
+	Version int64 `json:"version"`
+	// Next scheduled occurrence as an RFC 3339 UTC timestamp, or null while disabled or inherited and not
+	// explicitly enabled on this branch.
+	NextRunAt NilString `json:"next_run_at"`
+	// The public `branch_id` of the branch that authored the effective configuration.
+	SourceBranchID string `json:"source_branch_id"`
+	// True when the effective configuration was authored on an ancestor branch.
+	Inherited bool `json:"inherited"`
+}
+
+// GetType returns the value of Type.
+func (s *ScheduleTrigger) GetType() ScheduleTriggerType {
+	return s.Type
+}
+
+// GetTriggerID returns the value of TriggerID.
+func (s *ScheduleTrigger) GetTriggerID() TriggerID {
+	return s.TriggerID
+}
+
+// GetFunctionSlug returns the value of FunctionSlug.
+func (s *ScheduleTrigger) GetFunctionSlug() string {
+	return s.FunctionSlug
+}
+
+// GetName returns the value of Name.
+func (s *ScheduleTrigger) GetName() string {
+	return s.Name
+}
+
+// GetFunctionPath returns the value of FunctionPath.
+func (s *ScheduleTrigger) GetFunctionPath() string {
+	return s.FunctionPath
+}
+
+// GetSchedule returns the value of Schedule.
+func (s *ScheduleTrigger) GetSchedule() FunctionTriggerSchedule {
+	return s.Schedule
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *ScheduleTrigger) GetEnabled() bool {
+	return s.Enabled
+}
+
+// GetVersion returns the value of Version.
+func (s *ScheduleTrigger) GetVersion() int64 {
+	return s.Version
+}
+
+// GetNextRunAt returns the value of NextRunAt.
+func (s *ScheduleTrigger) GetNextRunAt() NilString {
+	return s.NextRunAt
+}
+
+// GetSourceBranchID returns the value of SourceBranchID.
+func (s *ScheduleTrigger) GetSourceBranchID() string {
+	return s.SourceBranchID
+}
+
+// GetInherited returns the value of Inherited.
+func (s *ScheduleTrigger) GetInherited() bool {
+	return s.Inherited
+}
+
+// SetType sets the value of Type.
+func (s *ScheduleTrigger) SetType(val ScheduleTriggerType) {
+	s.Type = val
+}
+
+// SetTriggerID sets the value of TriggerID.
+func (s *ScheduleTrigger) SetTriggerID(val TriggerID) {
+	s.TriggerID = val
+}
+
+// SetFunctionSlug sets the value of FunctionSlug.
+func (s *ScheduleTrigger) SetFunctionSlug(val string) {
+	s.FunctionSlug = val
+}
+
+// SetName sets the value of Name.
+func (s *ScheduleTrigger) SetName(val string) {
+	s.Name = val
+}
+
+// SetFunctionPath sets the value of FunctionPath.
+func (s *ScheduleTrigger) SetFunctionPath(val string) {
+	s.FunctionPath = val
+}
+
+// SetSchedule sets the value of Schedule.
+func (s *ScheduleTrigger) SetSchedule(val FunctionTriggerSchedule) {
+	s.Schedule = val
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *ScheduleTrigger) SetEnabled(val bool) {
+	s.Enabled = val
+}
+
+// SetVersion sets the value of Version.
+func (s *ScheduleTrigger) SetVersion(val int64) {
+	s.Version = val
+}
+
+// SetNextRunAt sets the value of NextRunAt.
+func (s *ScheduleTrigger) SetNextRunAt(val NilString) {
+	s.NextRunAt = val
+}
+
+// SetSourceBranchID sets the value of SourceBranchID.
+func (s *ScheduleTrigger) SetSourceBranchID(val string) {
+	s.SourceBranchID = val
+}
+
+// SetInherited sets the value of Inherited.
+func (s *ScheduleTrigger) SetInherited(val bool) {
+	s.Inherited = val
+}
+
+// Ref: #/components/schemas/ScheduleTriggerCreateRequest
+type ScheduleTriggerCreateRequest struct {
+	// Trigger type discriminator.
+	Type ScheduleTriggerCreateRequestType `json:"type"`
+	// The branch-local Function slug to invoke.
+	FunctionSlug string `json:"function_slug"`
+	// Human-readable name, unique among triggers visible on the branch.
+	Name string `json:"name"`
+	// Path passed to the target Function. Defaults to `/`.
+	FunctionPath OptString               `json:"function_path"`
+	Schedule     FunctionTriggerSchedule `json:"schedule"`
+	// Whether future occurrences should be scheduled.
+	Enabled OptBool `json:"enabled"`
+}
+
+// GetType returns the value of Type.
+func (s *ScheduleTriggerCreateRequest) GetType() ScheduleTriggerCreateRequestType {
+	return s.Type
+}
+
+// GetFunctionSlug returns the value of FunctionSlug.
+func (s *ScheduleTriggerCreateRequest) GetFunctionSlug() string {
+	return s.FunctionSlug
+}
+
+// GetName returns the value of Name.
+func (s *ScheduleTriggerCreateRequest) GetName() string {
+	return s.Name
+}
+
+// GetFunctionPath returns the value of FunctionPath.
+func (s *ScheduleTriggerCreateRequest) GetFunctionPath() OptString {
+	return s.FunctionPath
+}
+
+// GetSchedule returns the value of Schedule.
+func (s *ScheduleTriggerCreateRequest) GetSchedule() FunctionTriggerSchedule {
+	return s.Schedule
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *ScheduleTriggerCreateRequest) GetEnabled() OptBool {
+	return s.Enabled
+}
+
+// SetType sets the value of Type.
+func (s *ScheduleTriggerCreateRequest) SetType(val ScheduleTriggerCreateRequestType) {
+	s.Type = val
+}
+
+// SetFunctionSlug sets the value of FunctionSlug.
+func (s *ScheduleTriggerCreateRequest) SetFunctionSlug(val string) {
+	s.FunctionSlug = val
+}
+
+// SetName sets the value of Name.
+func (s *ScheduleTriggerCreateRequest) SetName(val string) {
+	s.Name = val
+}
+
+// SetFunctionPath sets the value of FunctionPath.
+func (s *ScheduleTriggerCreateRequest) SetFunctionPath(val OptString) {
+	s.FunctionPath = val
+}
+
+// SetSchedule sets the value of Schedule.
+func (s *ScheduleTriggerCreateRequest) SetSchedule(val FunctionTriggerSchedule) {
+	s.Schedule = val
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *ScheduleTriggerCreateRequest) SetEnabled(val OptBool) {
+	s.Enabled = val
+}
+
+// Trigger type discriminator.
+type ScheduleTriggerCreateRequestType string
+
+const (
+	ScheduleTriggerCreateRequestTypeSchedule ScheduleTriggerCreateRequestType = "schedule"
+)
+
+// AllValues returns all ScheduleTriggerCreateRequestType values.
+func (ScheduleTriggerCreateRequestType) AllValues() []ScheduleTriggerCreateRequestType {
+	return []ScheduleTriggerCreateRequestType{
+		ScheduleTriggerCreateRequestTypeSchedule,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ScheduleTriggerCreateRequestType) MarshalText() ([]byte, error) {
+	switch s {
+	case ScheduleTriggerCreateRequestTypeSchedule:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ScheduleTriggerCreateRequestType) UnmarshalText(data []byte) error {
+	switch ScheduleTriggerCreateRequestType(data) {
+	case ScheduleTriggerCreateRequestTypeSchedule:
+		*s = ScheduleTriggerCreateRequestTypeSchedule
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Trigger type discriminator.
+type ScheduleTriggerType string
+
+const (
+	ScheduleTriggerTypeSchedule ScheduleTriggerType = "schedule"
+)
+
+// AllValues returns all ScheduleTriggerType values.
+func (ScheduleTriggerType) AllValues() []ScheduleTriggerType {
+	return []ScheduleTriggerType{
+		ScheduleTriggerTypeSchedule,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ScheduleTriggerType) MarshalText() ([]byte, error) {
+	switch s {
+	case ScheduleTriggerTypeSchedule:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ScheduleTriggerType) UnmarshalText(data []byte) error {
+	switch ScheduleTriggerType(data) {
+	case ScheduleTriggerTypeSchedule:
+		*s = ScheduleTriggerTypeSchedule
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/ScheduleTriggerUpdateRequest
+type ScheduleTriggerUpdateRequest struct {
+	// Trigger type discriminator; it does not change the trigger type.
+	Type ScheduleTriggerUpdateRequestType `json:"type"`
+	// Replacement branch-local Function slug.
+	FunctionSlug OptString                  `json:"function_slug"`
+	Name         OptString                  `json:"name"`
+	FunctionPath OptString                  `json:"function_path"`
+	Schedule     OptFunctionTriggerSchedule `json:"schedule"`
+	// True enables and false disables future scheduling.
+	Enabled OptBool `json:"enabled"`
+}
+
+// GetType returns the value of Type.
+func (s *ScheduleTriggerUpdateRequest) GetType() ScheduleTriggerUpdateRequestType {
+	return s.Type
+}
+
+// GetFunctionSlug returns the value of FunctionSlug.
+func (s *ScheduleTriggerUpdateRequest) GetFunctionSlug() OptString {
+	return s.FunctionSlug
+}
+
+// GetName returns the value of Name.
+func (s *ScheduleTriggerUpdateRequest) GetName() OptString {
+	return s.Name
+}
+
+// GetFunctionPath returns the value of FunctionPath.
+func (s *ScheduleTriggerUpdateRequest) GetFunctionPath() OptString {
+	return s.FunctionPath
+}
+
+// GetSchedule returns the value of Schedule.
+func (s *ScheduleTriggerUpdateRequest) GetSchedule() OptFunctionTriggerSchedule {
+	return s.Schedule
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *ScheduleTriggerUpdateRequest) GetEnabled() OptBool {
+	return s.Enabled
+}
+
+// SetType sets the value of Type.
+func (s *ScheduleTriggerUpdateRequest) SetType(val ScheduleTriggerUpdateRequestType) {
+	s.Type = val
+}
+
+// SetFunctionSlug sets the value of FunctionSlug.
+func (s *ScheduleTriggerUpdateRequest) SetFunctionSlug(val OptString) {
+	s.FunctionSlug = val
+}
+
+// SetName sets the value of Name.
+func (s *ScheduleTriggerUpdateRequest) SetName(val OptString) {
+	s.Name = val
+}
+
+// SetFunctionPath sets the value of FunctionPath.
+func (s *ScheduleTriggerUpdateRequest) SetFunctionPath(val OptString) {
+	s.FunctionPath = val
+}
+
+// SetSchedule sets the value of Schedule.
+func (s *ScheduleTriggerUpdateRequest) SetSchedule(val OptFunctionTriggerSchedule) {
+	s.Schedule = val
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *ScheduleTriggerUpdateRequest) SetEnabled(val OptBool) {
+	s.Enabled = val
+}
+
+// Trigger type discriminator; it does not change the trigger type.
+type ScheduleTriggerUpdateRequestType string
+
+const (
+	ScheduleTriggerUpdateRequestTypeSchedule ScheduleTriggerUpdateRequestType = "schedule"
+)
+
+// AllValues returns all ScheduleTriggerUpdateRequestType values.
+func (ScheduleTriggerUpdateRequestType) AllValues() []ScheduleTriggerUpdateRequestType {
+	return []ScheduleTriggerUpdateRequestType{
+		ScheduleTriggerUpdateRequestTypeSchedule,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ScheduleTriggerUpdateRequestType) MarshalText() ([]byte, error) {
+	switch s {
+	case ScheduleTriggerUpdateRequestTypeSchedule:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ScheduleTriggerUpdateRequestType) UnmarshalText(data []byte) error {
+	switch ScheduleTriggerUpdateRequestType(data) {
+	case ScheduleTriggerUpdateRequestTypeSchedule:
+		*s = ScheduleTriggerUpdateRequestTypeSchedule
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Request to test the branch's saved email provider. Only the recipient is supplied; the stored SMTP
@@ -20499,6 +21517,382 @@ func (s *StandardEmailServerResponse) SetSenderName(val string) {
 	s.SenderName = val
 }
 
+// A branch-effective trigger that invokes a Function after a successful upload matching its exact
+// bucket and optional object-key prefix.
+// Ref: #/components/schemas/StorageObjectCreatedTrigger
+type StorageObjectCreatedTrigger struct {
+	// Trigger type discriminator.
+	Type      StorageObjectCreatedTriggerType `json:"type"`
+	TriggerID TriggerID                       `json:"trigger_id"`
+	// The branch-local Function slug resolved when an invocation is consumed.
+	FunctionSlug string `json:"function_slug"`
+	// Human-readable trigger name.
+	Name string `json:"name"`
+	// Path passed to the target Function.
+	FunctionPath         string                              `json:"function_path"`
+	StorageObjectCreated FunctionTriggerStorageObjectCreated `json:"storage_object_created"`
+	Enabled              bool                                `json:"enabled"`
+	// Monotonic configuration version.
+	Version int64 `json:"version"`
+	// The public `branch_id` of the branch that authored the effective configuration.
+	SourceBranchID string `json:"source_branch_id"`
+	// True when the effective configuration was authored on an ancestor branch.
+	Inherited bool `json:"inherited"`
+}
+
+// GetType returns the value of Type.
+func (s *StorageObjectCreatedTrigger) GetType() StorageObjectCreatedTriggerType {
+	return s.Type
+}
+
+// GetTriggerID returns the value of TriggerID.
+func (s *StorageObjectCreatedTrigger) GetTriggerID() TriggerID {
+	return s.TriggerID
+}
+
+// GetFunctionSlug returns the value of FunctionSlug.
+func (s *StorageObjectCreatedTrigger) GetFunctionSlug() string {
+	return s.FunctionSlug
+}
+
+// GetName returns the value of Name.
+func (s *StorageObjectCreatedTrigger) GetName() string {
+	return s.Name
+}
+
+// GetFunctionPath returns the value of FunctionPath.
+func (s *StorageObjectCreatedTrigger) GetFunctionPath() string {
+	return s.FunctionPath
+}
+
+// GetStorageObjectCreated returns the value of StorageObjectCreated.
+func (s *StorageObjectCreatedTrigger) GetStorageObjectCreated() FunctionTriggerStorageObjectCreated {
+	return s.StorageObjectCreated
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *StorageObjectCreatedTrigger) GetEnabled() bool {
+	return s.Enabled
+}
+
+// GetVersion returns the value of Version.
+func (s *StorageObjectCreatedTrigger) GetVersion() int64 {
+	return s.Version
+}
+
+// GetSourceBranchID returns the value of SourceBranchID.
+func (s *StorageObjectCreatedTrigger) GetSourceBranchID() string {
+	return s.SourceBranchID
+}
+
+// GetInherited returns the value of Inherited.
+func (s *StorageObjectCreatedTrigger) GetInherited() bool {
+	return s.Inherited
+}
+
+// SetType sets the value of Type.
+func (s *StorageObjectCreatedTrigger) SetType(val StorageObjectCreatedTriggerType) {
+	s.Type = val
+}
+
+// SetTriggerID sets the value of TriggerID.
+func (s *StorageObjectCreatedTrigger) SetTriggerID(val TriggerID) {
+	s.TriggerID = val
+}
+
+// SetFunctionSlug sets the value of FunctionSlug.
+func (s *StorageObjectCreatedTrigger) SetFunctionSlug(val string) {
+	s.FunctionSlug = val
+}
+
+// SetName sets the value of Name.
+func (s *StorageObjectCreatedTrigger) SetName(val string) {
+	s.Name = val
+}
+
+// SetFunctionPath sets the value of FunctionPath.
+func (s *StorageObjectCreatedTrigger) SetFunctionPath(val string) {
+	s.FunctionPath = val
+}
+
+// SetStorageObjectCreated sets the value of StorageObjectCreated.
+func (s *StorageObjectCreatedTrigger) SetStorageObjectCreated(val FunctionTriggerStorageObjectCreated) {
+	s.StorageObjectCreated = val
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *StorageObjectCreatedTrigger) SetEnabled(val bool) {
+	s.Enabled = val
+}
+
+// SetVersion sets the value of Version.
+func (s *StorageObjectCreatedTrigger) SetVersion(val int64) {
+	s.Version = val
+}
+
+// SetSourceBranchID sets the value of SourceBranchID.
+func (s *StorageObjectCreatedTrigger) SetSourceBranchID(val string) {
+	s.SourceBranchID = val
+}
+
+// SetInherited sets the value of Inherited.
+func (s *StorageObjectCreatedTrigger) SetInherited(val bool) {
+	s.Inherited = val
+}
+
+// Ref: #/components/schemas/StorageObjectCreatedTriggerCreateRequest
+type StorageObjectCreatedTriggerCreateRequest struct {
+	// Trigger type discriminator.
+	Type StorageObjectCreatedTriggerCreateRequestType `json:"type"`
+	// The branch-local Function slug to invoke.
+	FunctionSlug string `json:"function_slug"`
+	// Human-readable name, unique among triggers visible on the branch.
+	Name string `json:"name"`
+	// Path passed to the target Function. Defaults to `/`.
+	FunctionPath         OptString                           `json:"function_path"`
+	StorageObjectCreated FunctionTriggerStorageObjectCreated `json:"storage_object_created"`
+	// Whether successful matching uploads should invoke the Function.
+	Enabled OptBool `json:"enabled"`
+}
+
+// GetType returns the value of Type.
+func (s *StorageObjectCreatedTriggerCreateRequest) GetType() StorageObjectCreatedTriggerCreateRequestType {
+	return s.Type
+}
+
+// GetFunctionSlug returns the value of FunctionSlug.
+func (s *StorageObjectCreatedTriggerCreateRequest) GetFunctionSlug() string {
+	return s.FunctionSlug
+}
+
+// GetName returns the value of Name.
+func (s *StorageObjectCreatedTriggerCreateRequest) GetName() string {
+	return s.Name
+}
+
+// GetFunctionPath returns the value of FunctionPath.
+func (s *StorageObjectCreatedTriggerCreateRequest) GetFunctionPath() OptString {
+	return s.FunctionPath
+}
+
+// GetStorageObjectCreated returns the value of StorageObjectCreated.
+func (s *StorageObjectCreatedTriggerCreateRequest) GetStorageObjectCreated() FunctionTriggerStorageObjectCreated {
+	return s.StorageObjectCreated
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *StorageObjectCreatedTriggerCreateRequest) GetEnabled() OptBool {
+	return s.Enabled
+}
+
+// SetType sets the value of Type.
+func (s *StorageObjectCreatedTriggerCreateRequest) SetType(val StorageObjectCreatedTriggerCreateRequestType) {
+	s.Type = val
+}
+
+// SetFunctionSlug sets the value of FunctionSlug.
+func (s *StorageObjectCreatedTriggerCreateRequest) SetFunctionSlug(val string) {
+	s.FunctionSlug = val
+}
+
+// SetName sets the value of Name.
+func (s *StorageObjectCreatedTriggerCreateRequest) SetName(val string) {
+	s.Name = val
+}
+
+// SetFunctionPath sets the value of FunctionPath.
+func (s *StorageObjectCreatedTriggerCreateRequest) SetFunctionPath(val OptString) {
+	s.FunctionPath = val
+}
+
+// SetStorageObjectCreated sets the value of StorageObjectCreated.
+func (s *StorageObjectCreatedTriggerCreateRequest) SetStorageObjectCreated(val FunctionTriggerStorageObjectCreated) {
+	s.StorageObjectCreated = val
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *StorageObjectCreatedTriggerCreateRequest) SetEnabled(val OptBool) {
+	s.Enabled = val
+}
+
+// Trigger type discriminator.
+type StorageObjectCreatedTriggerCreateRequestType string
+
+const (
+	StorageObjectCreatedTriggerCreateRequestTypeStorageObjectCreated StorageObjectCreatedTriggerCreateRequestType = "storage_object_created"
+)
+
+// AllValues returns all StorageObjectCreatedTriggerCreateRequestType values.
+func (StorageObjectCreatedTriggerCreateRequestType) AllValues() []StorageObjectCreatedTriggerCreateRequestType {
+	return []StorageObjectCreatedTriggerCreateRequestType{
+		StorageObjectCreatedTriggerCreateRequestTypeStorageObjectCreated,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s StorageObjectCreatedTriggerCreateRequestType) MarshalText() ([]byte, error) {
+	switch s {
+	case StorageObjectCreatedTriggerCreateRequestTypeStorageObjectCreated:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *StorageObjectCreatedTriggerCreateRequestType) UnmarshalText(data []byte) error {
+	switch StorageObjectCreatedTriggerCreateRequestType(data) {
+	case StorageObjectCreatedTriggerCreateRequestTypeStorageObjectCreated:
+		*s = StorageObjectCreatedTriggerCreateRequestTypeStorageObjectCreated
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Trigger type discriminator.
+type StorageObjectCreatedTriggerType string
+
+const (
+	StorageObjectCreatedTriggerTypeStorageObjectCreated StorageObjectCreatedTriggerType = "storage_object_created"
+)
+
+// AllValues returns all StorageObjectCreatedTriggerType values.
+func (StorageObjectCreatedTriggerType) AllValues() []StorageObjectCreatedTriggerType {
+	return []StorageObjectCreatedTriggerType{
+		StorageObjectCreatedTriggerTypeStorageObjectCreated,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s StorageObjectCreatedTriggerType) MarshalText() ([]byte, error) {
+	switch s {
+	case StorageObjectCreatedTriggerTypeStorageObjectCreated:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *StorageObjectCreatedTriggerType) UnmarshalText(data []byte) error {
+	switch StorageObjectCreatedTriggerType(data) {
+	case StorageObjectCreatedTriggerTypeStorageObjectCreated:
+		*s = StorageObjectCreatedTriggerTypeStorageObjectCreated
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/StorageObjectCreatedTriggerUpdateRequest
+type StorageObjectCreatedTriggerUpdateRequest struct {
+	// Trigger type discriminator; it does not change the trigger type.
+	Type StorageObjectCreatedTriggerUpdateRequestType `json:"type"`
+	// Replacement branch-local Function slug.
+	FunctionSlug         OptString                              `json:"function_slug"`
+	Name                 OptString                              `json:"name"`
+	FunctionPath         OptString                              `json:"function_path"`
+	StorageObjectCreated OptFunctionTriggerStorageObjectCreated `json:"storage_object_created"`
+	// True enables and false disables future matching uploads.
+	Enabled OptBool `json:"enabled"`
+}
+
+// GetType returns the value of Type.
+func (s *StorageObjectCreatedTriggerUpdateRequest) GetType() StorageObjectCreatedTriggerUpdateRequestType {
+	return s.Type
+}
+
+// GetFunctionSlug returns the value of FunctionSlug.
+func (s *StorageObjectCreatedTriggerUpdateRequest) GetFunctionSlug() OptString {
+	return s.FunctionSlug
+}
+
+// GetName returns the value of Name.
+func (s *StorageObjectCreatedTriggerUpdateRequest) GetName() OptString {
+	return s.Name
+}
+
+// GetFunctionPath returns the value of FunctionPath.
+func (s *StorageObjectCreatedTriggerUpdateRequest) GetFunctionPath() OptString {
+	return s.FunctionPath
+}
+
+// GetStorageObjectCreated returns the value of StorageObjectCreated.
+func (s *StorageObjectCreatedTriggerUpdateRequest) GetStorageObjectCreated() OptFunctionTriggerStorageObjectCreated {
+	return s.StorageObjectCreated
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *StorageObjectCreatedTriggerUpdateRequest) GetEnabled() OptBool {
+	return s.Enabled
+}
+
+// SetType sets the value of Type.
+func (s *StorageObjectCreatedTriggerUpdateRequest) SetType(val StorageObjectCreatedTriggerUpdateRequestType) {
+	s.Type = val
+}
+
+// SetFunctionSlug sets the value of FunctionSlug.
+func (s *StorageObjectCreatedTriggerUpdateRequest) SetFunctionSlug(val OptString) {
+	s.FunctionSlug = val
+}
+
+// SetName sets the value of Name.
+func (s *StorageObjectCreatedTriggerUpdateRequest) SetName(val OptString) {
+	s.Name = val
+}
+
+// SetFunctionPath sets the value of FunctionPath.
+func (s *StorageObjectCreatedTriggerUpdateRequest) SetFunctionPath(val OptString) {
+	s.FunctionPath = val
+}
+
+// SetStorageObjectCreated sets the value of StorageObjectCreated.
+func (s *StorageObjectCreatedTriggerUpdateRequest) SetStorageObjectCreated(val OptFunctionTriggerStorageObjectCreated) {
+	s.StorageObjectCreated = val
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *StorageObjectCreatedTriggerUpdateRequest) SetEnabled(val OptBool) {
+	s.Enabled = val
+}
+
+// Trigger type discriminator; it does not change the trigger type.
+type StorageObjectCreatedTriggerUpdateRequestType string
+
+const (
+	StorageObjectCreatedTriggerUpdateRequestTypeStorageObjectCreated StorageObjectCreatedTriggerUpdateRequestType = "storage_object_created"
+)
+
+// AllValues returns all StorageObjectCreatedTriggerUpdateRequestType values.
+func (StorageObjectCreatedTriggerUpdateRequestType) AllValues() []StorageObjectCreatedTriggerUpdateRequestType {
+	return []StorageObjectCreatedTriggerUpdateRequestType{
+		StorageObjectCreatedTriggerUpdateRequestTypeStorageObjectCreated,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s StorageObjectCreatedTriggerUpdateRequestType) MarshalText() ([]byte, error) {
+	switch s {
+	case StorageObjectCreatedTriggerUpdateRequestTypeStorageObjectCreated:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *StorageObjectCreatedTriggerUpdateRequestType) UnmarshalText(data []byte) error {
+	switch StorageObjectCreatedTriggerUpdateRequestType(data) {
+	case StorageObjectCreatedTriggerUpdateRequestTypeStorageObjectCreated:
+		*s = StorageObjectCreatedTriggerUpdateRequestTypeStorageObjectCreated
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 type SuspendTimeoutSeconds int64
 
 type TokenCookieAuth struct {
@@ -20552,6 +21946,294 @@ func (s *TransferProjectsToOrganizationRequest) SetDestinationOrgID(val string) 
 // SetProjectIds sets the value of ProjectIds.
 func (s *TransferProjectsToOrganizationRequest) SetProjectIds(val []string) {
 	s.ProjectIds = val
+}
+
+// A branch-effective trigger discriminated by `type`. The supported trigger types are `schedule` and
+// `storage_object_created`.
+// Ref: #/components/schemas/Trigger
+type Trigger struct {
+	OneOf TriggerSum
+}
+
+// GetOneOf returns the value of OneOf.
+func (s *Trigger) GetOneOf() TriggerSum {
+	return s.OneOf
+}
+
+// SetOneOf sets the value of OneOf.
+func (s *Trigger) SetOneOf(val TriggerSum) {
+	s.OneOf = val
+}
+
+// Trigger creation payload discriminated by `type`. The supported trigger types are `schedule` and
+// `storage_object_created`.
+// Ref: #/components/schemas/TriggerCreateRequest
+type TriggerCreateRequest struct {
+	OneOf TriggerCreateRequestSum
+}
+
+// GetOneOf returns the value of OneOf.
+func (s *TriggerCreateRequest) GetOneOf() TriggerCreateRequestSum {
+	return s.OneOf
+}
+
+// SetOneOf sets the value of OneOf.
+func (s *TriggerCreateRequest) SetOneOf(val TriggerCreateRequestSum) {
+	s.OneOf = val
+}
+
+// TriggerCreateRequestSum represents sum type.
+type TriggerCreateRequestSum struct {
+	// Type selects the active sum variant, switch on this field.
+	Type                                     TriggerCreateRequestSumType
+	ScheduleTriggerCreateRequest             ScheduleTriggerCreateRequest
+	StorageObjectCreatedTriggerCreateRequest StorageObjectCreatedTriggerCreateRequest
+}
+
+// TriggerCreateRequestSumType is oneOf type of TriggerCreateRequestSum.
+type TriggerCreateRequestSumType string
+
+// Possible values for TriggerCreateRequestSumType.
+const (
+	ScheduleTriggerCreateRequestTriggerCreateRequestSum             TriggerCreateRequestSumType = "schedule"
+	StorageObjectCreatedTriggerCreateRequestTriggerCreateRequestSum TriggerCreateRequestSumType = "storage_object_created"
+)
+
+// IsScheduleTriggerCreateRequest reports whether TriggerCreateRequestSum is ScheduleTriggerCreateRequest.
+func (s TriggerCreateRequestSum) IsScheduleTriggerCreateRequest() bool {
+	return s.Type == ScheduleTriggerCreateRequestTriggerCreateRequestSum
+}
+
+// IsStorageObjectCreatedTriggerCreateRequest reports whether TriggerCreateRequestSum is StorageObjectCreatedTriggerCreateRequest.
+func (s TriggerCreateRequestSum) IsStorageObjectCreatedTriggerCreateRequest() bool {
+	return s.Type == StorageObjectCreatedTriggerCreateRequestTriggerCreateRequestSum
+}
+
+// SetScheduleTriggerCreateRequest sets TriggerCreateRequestSum to ScheduleTriggerCreateRequest.
+func (s *TriggerCreateRequestSum) SetScheduleTriggerCreateRequest(v ScheduleTriggerCreateRequest) {
+	s.Type = ScheduleTriggerCreateRequestTriggerCreateRequestSum
+	s.ScheduleTriggerCreateRequest = v
+}
+
+// GetScheduleTriggerCreateRequest returns ScheduleTriggerCreateRequest and true boolean if TriggerCreateRequestSum is ScheduleTriggerCreateRequest.
+func (s TriggerCreateRequestSum) GetScheduleTriggerCreateRequest() (v ScheduleTriggerCreateRequest, ok bool) {
+	if !s.IsScheduleTriggerCreateRequest() {
+		return v, false
+	}
+	return s.ScheduleTriggerCreateRequest, true
+}
+
+// NewScheduleTriggerCreateRequestTriggerCreateRequestSum returns new TriggerCreateRequestSum from ScheduleTriggerCreateRequest.
+func NewScheduleTriggerCreateRequestTriggerCreateRequestSum(v ScheduleTriggerCreateRequest) TriggerCreateRequestSum {
+	var s TriggerCreateRequestSum
+	s.SetScheduleTriggerCreateRequest(v)
+	return s
+}
+
+// SetStorageObjectCreatedTriggerCreateRequest sets TriggerCreateRequestSum to StorageObjectCreatedTriggerCreateRequest.
+func (s *TriggerCreateRequestSum) SetStorageObjectCreatedTriggerCreateRequest(v StorageObjectCreatedTriggerCreateRequest) {
+	s.Type = StorageObjectCreatedTriggerCreateRequestTriggerCreateRequestSum
+	s.StorageObjectCreatedTriggerCreateRequest = v
+}
+
+// GetStorageObjectCreatedTriggerCreateRequest returns StorageObjectCreatedTriggerCreateRequest and true boolean if TriggerCreateRequestSum is StorageObjectCreatedTriggerCreateRequest.
+func (s TriggerCreateRequestSum) GetStorageObjectCreatedTriggerCreateRequest() (v StorageObjectCreatedTriggerCreateRequest, ok bool) {
+	if !s.IsStorageObjectCreatedTriggerCreateRequest() {
+		return v, false
+	}
+	return s.StorageObjectCreatedTriggerCreateRequest, true
+}
+
+// NewStorageObjectCreatedTriggerCreateRequestTriggerCreateRequestSum returns new TriggerCreateRequestSum from StorageObjectCreatedTriggerCreateRequest.
+func NewStorageObjectCreatedTriggerCreateRequestTriggerCreateRequestSum(v StorageObjectCreatedTriggerCreateRequest) TriggerCreateRequestSum {
+	var s TriggerCreateRequestSum
+	s.SetStorageObjectCreatedTriggerCreateRequest(v)
+	return s
+}
+
+type TriggerID string
+
+// Ref: #/components/schemas/TriggerResponse
+type TriggerResponse struct {
+	Trigger Trigger `json:"trigger"`
+}
+
+// GetTrigger returns the value of Trigger.
+func (s *TriggerResponse) GetTrigger() Trigger {
+	return s.Trigger
+}
+
+// SetTrigger sets the value of Trigger.
+func (s *TriggerResponse) SetTrigger(val Trigger) {
+	s.Trigger = val
+}
+
+// TriggerSum represents sum type.
+type TriggerSum struct {
+	// Type selects the active sum variant, switch on this field.
+	Type                        TriggerSumType
+	ScheduleTrigger             ScheduleTrigger
+	StorageObjectCreatedTrigger StorageObjectCreatedTrigger
+}
+
+// TriggerSumType is oneOf type of TriggerSum.
+type TriggerSumType string
+
+// Possible values for TriggerSumType.
+const (
+	ScheduleTriggerTriggerSum             TriggerSumType = "schedule"
+	StorageObjectCreatedTriggerTriggerSum TriggerSumType = "storage_object_created"
+)
+
+// IsScheduleTrigger reports whether TriggerSum is ScheduleTrigger.
+func (s TriggerSum) IsScheduleTrigger() bool { return s.Type == ScheduleTriggerTriggerSum }
+
+// IsStorageObjectCreatedTrigger reports whether TriggerSum is StorageObjectCreatedTrigger.
+func (s TriggerSum) IsStorageObjectCreatedTrigger() bool {
+	return s.Type == StorageObjectCreatedTriggerTriggerSum
+}
+
+// SetScheduleTrigger sets TriggerSum to ScheduleTrigger.
+func (s *TriggerSum) SetScheduleTrigger(v ScheduleTrigger) {
+	s.Type = ScheduleTriggerTriggerSum
+	s.ScheduleTrigger = v
+}
+
+// GetScheduleTrigger returns ScheduleTrigger and true boolean if TriggerSum is ScheduleTrigger.
+func (s TriggerSum) GetScheduleTrigger() (v ScheduleTrigger, ok bool) {
+	if !s.IsScheduleTrigger() {
+		return v, false
+	}
+	return s.ScheduleTrigger, true
+}
+
+// NewScheduleTriggerTriggerSum returns new TriggerSum from ScheduleTrigger.
+func NewScheduleTriggerTriggerSum(v ScheduleTrigger) TriggerSum {
+	var s TriggerSum
+	s.SetScheduleTrigger(v)
+	return s
+}
+
+// SetStorageObjectCreatedTrigger sets TriggerSum to StorageObjectCreatedTrigger.
+func (s *TriggerSum) SetStorageObjectCreatedTrigger(v StorageObjectCreatedTrigger) {
+	s.Type = StorageObjectCreatedTriggerTriggerSum
+	s.StorageObjectCreatedTrigger = v
+}
+
+// GetStorageObjectCreatedTrigger returns StorageObjectCreatedTrigger and true boolean if TriggerSum is StorageObjectCreatedTrigger.
+func (s TriggerSum) GetStorageObjectCreatedTrigger() (v StorageObjectCreatedTrigger, ok bool) {
+	if !s.IsStorageObjectCreatedTrigger() {
+		return v, false
+	}
+	return s.StorageObjectCreatedTrigger, true
+}
+
+// NewStorageObjectCreatedTriggerTriggerSum returns new TriggerSum from StorageObjectCreatedTrigger.
+func NewStorageObjectCreatedTriggerTriggerSum(v StorageObjectCreatedTrigger) TriggerSum {
+	var s TriggerSum
+	s.SetStorageObjectCreatedTrigger(v)
+	return s
+}
+
+// Partial trigger update discriminated by `type`. The supported trigger types are `schedule` and
+// `storage_object_created`.
+// Ref: #/components/schemas/TriggerUpdateRequest
+type TriggerUpdateRequest struct {
+	OneOf TriggerUpdateRequestSum
+}
+
+// GetOneOf returns the value of OneOf.
+func (s *TriggerUpdateRequest) GetOneOf() TriggerUpdateRequestSum {
+	return s.OneOf
+}
+
+// SetOneOf sets the value of OneOf.
+func (s *TriggerUpdateRequest) SetOneOf(val TriggerUpdateRequestSum) {
+	s.OneOf = val
+}
+
+// TriggerUpdateRequestSum represents sum type.
+type TriggerUpdateRequestSum struct {
+	// Type selects the active sum variant, switch on this field.
+	Type                                     TriggerUpdateRequestSumType
+	ScheduleTriggerUpdateRequest             ScheduleTriggerUpdateRequest
+	StorageObjectCreatedTriggerUpdateRequest StorageObjectCreatedTriggerUpdateRequest
+}
+
+// TriggerUpdateRequestSumType is oneOf type of TriggerUpdateRequestSum.
+type TriggerUpdateRequestSumType string
+
+// Possible values for TriggerUpdateRequestSumType.
+const (
+	ScheduleTriggerUpdateRequestTriggerUpdateRequestSum             TriggerUpdateRequestSumType = "schedule"
+	StorageObjectCreatedTriggerUpdateRequestTriggerUpdateRequestSum TriggerUpdateRequestSumType = "storage_object_created"
+)
+
+// IsScheduleTriggerUpdateRequest reports whether TriggerUpdateRequestSum is ScheduleTriggerUpdateRequest.
+func (s TriggerUpdateRequestSum) IsScheduleTriggerUpdateRequest() bool {
+	return s.Type == ScheduleTriggerUpdateRequestTriggerUpdateRequestSum
+}
+
+// IsStorageObjectCreatedTriggerUpdateRequest reports whether TriggerUpdateRequestSum is StorageObjectCreatedTriggerUpdateRequest.
+func (s TriggerUpdateRequestSum) IsStorageObjectCreatedTriggerUpdateRequest() bool {
+	return s.Type == StorageObjectCreatedTriggerUpdateRequestTriggerUpdateRequestSum
+}
+
+// SetScheduleTriggerUpdateRequest sets TriggerUpdateRequestSum to ScheduleTriggerUpdateRequest.
+func (s *TriggerUpdateRequestSum) SetScheduleTriggerUpdateRequest(v ScheduleTriggerUpdateRequest) {
+	s.Type = ScheduleTriggerUpdateRequestTriggerUpdateRequestSum
+	s.ScheduleTriggerUpdateRequest = v
+}
+
+// GetScheduleTriggerUpdateRequest returns ScheduleTriggerUpdateRequest and true boolean if TriggerUpdateRequestSum is ScheduleTriggerUpdateRequest.
+func (s TriggerUpdateRequestSum) GetScheduleTriggerUpdateRequest() (v ScheduleTriggerUpdateRequest, ok bool) {
+	if !s.IsScheduleTriggerUpdateRequest() {
+		return v, false
+	}
+	return s.ScheduleTriggerUpdateRequest, true
+}
+
+// NewScheduleTriggerUpdateRequestTriggerUpdateRequestSum returns new TriggerUpdateRequestSum from ScheduleTriggerUpdateRequest.
+func NewScheduleTriggerUpdateRequestTriggerUpdateRequestSum(v ScheduleTriggerUpdateRequest) TriggerUpdateRequestSum {
+	var s TriggerUpdateRequestSum
+	s.SetScheduleTriggerUpdateRequest(v)
+	return s
+}
+
+// SetStorageObjectCreatedTriggerUpdateRequest sets TriggerUpdateRequestSum to StorageObjectCreatedTriggerUpdateRequest.
+func (s *TriggerUpdateRequestSum) SetStorageObjectCreatedTriggerUpdateRequest(v StorageObjectCreatedTriggerUpdateRequest) {
+	s.Type = StorageObjectCreatedTriggerUpdateRequestTriggerUpdateRequestSum
+	s.StorageObjectCreatedTriggerUpdateRequest = v
+}
+
+// GetStorageObjectCreatedTriggerUpdateRequest returns StorageObjectCreatedTriggerUpdateRequest and true boolean if TriggerUpdateRequestSum is StorageObjectCreatedTriggerUpdateRequest.
+func (s TriggerUpdateRequestSum) GetStorageObjectCreatedTriggerUpdateRequest() (v StorageObjectCreatedTriggerUpdateRequest, ok bool) {
+	if !s.IsStorageObjectCreatedTriggerUpdateRequest() {
+		return v, false
+	}
+	return s.StorageObjectCreatedTriggerUpdateRequest, true
+}
+
+// NewStorageObjectCreatedTriggerUpdateRequestTriggerUpdateRequestSum returns new TriggerUpdateRequestSum from StorageObjectCreatedTriggerUpdateRequest.
+func NewStorageObjectCreatedTriggerUpdateRequestTriggerUpdateRequestSum(v StorageObjectCreatedTriggerUpdateRequest) TriggerUpdateRequestSum {
+	var s TriggerUpdateRequestSum
+	s.SetStorageObjectCreatedTriggerUpdateRequest(v)
+	return s
+}
+
+// Ref: #/components/schemas/TriggersListResponse
+type TriggersListResponse struct {
+	Triggers []Trigger `json:"triggers"`
+}
+
+// GetTriggers returns the value of Triggers.
+func (s *TriggersListResponse) GetTriggers() []Trigger {
+	return s.Triggers
+}
+
+// SetTriggers sets the value of Triggers.
+func (s *TriggersListResponse) SetTriggers(val []Trigger) {
+	s.Triggers = val
 }
 
 // Ref: #/components/schemas/UpdateNeonAuthAllowLocalhostRequest

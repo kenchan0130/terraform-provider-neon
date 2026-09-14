@@ -225,3 +225,27 @@ func (s *RestoreSnapshotReq) setDefaults() {
 		s.FinalizeRestore.SetTo(val)
 	}
 }
+
+// setDefaults set default value of fields.
+func (s *ScheduleTriggerCreateRequest) setDefaults() {
+	{
+		val := string("/")
+		s.FunctionPath.SetTo(val)
+	}
+	{
+		val := bool(true)
+		s.Enabled.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *StorageObjectCreatedTriggerCreateRequest) setDefaults() {
+	{
+		val := string("/")
+		s.FunctionPath.SetTo(val)
+	}
+	{
+		val := bool(true)
+		s.Enabled.SetTo(val)
+	}
+}

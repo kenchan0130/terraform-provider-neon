@@ -424,6 +424,20 @@ func encodeCreateProjectBranchRoleRequest(
 	return nil
 }
 
+func encodeCreateProjectBranchTriggerRequest(
+	req *TriggerCreateRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeCreateProjectEndpointRequest(
 	req *EndpointCreateRequest,
 	r *http.Request,
@@ -576,6 +590,20 @@ func encodePresignProjectBranchBucketObjectRequest(
 
 func encodeQueryProjectBranchLogsRequest(
 	req *ProjectBranchLogsQueryRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeRegisterProjectBranchCustomDomainRequest(
+	req *CustomDomainRegisterRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -994,6 +1022,20 @@ func encodeUpdateProjectBranchDatabaseRequest(
 
 func encodeUpdateProjectBranchFunctionRequest(
 	req *NeonFunctionUpdateRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateProjectBranchTriggerRequest(
+	req *TriggerUpdateRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

@@ -256,6 +256,20 @@ type Handler interface {
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/roles
 	CreateProjectBranchRole(ctx context.Context, req *RoleCreateRequest, params CreateProjectBranchRoleParams) (*RoleOperations, error)
+	// CreateProjectBranchTrigger implements createProjectBranchTrigger operation.
+	//
+	// Creates a trigger for a Function visible on the branch. The required `type` discriminator selects
+	// the trigger-specific configuration. The supported types are `schedule` and `storage_object_created`.
+	// A schedule trigger uses a numeric five-field cron expression interpreted in UTC. A
+	// storage-object-created trigger fires only after a successful upload to one exact bucket and may
+	// narrow matches to an object-key prefix.
+	//
+	// The name must be unique among triggers visible on the branch, including inherited triggers.
+	//
+	// Note: This endpoint is currently in Beta.
+	//
+	// POST /projects/{project_id}/branches/{branch_id}/triggers
+	CreateProjectBranchTrigger(ctx context.Context, req *TriggerCreateRequest, params CreateProjectBranchTriggerParams) (*TriggerResponse, error)
 	// CreateProjectEndpoint implements createProjectEndpoint operation.
 	//
 	// Creates a compute endpoint for the specified branch. A compute endpoint is a Neon compute instance.
@@ -372,9 +386,7 @@ type Handler interface {
 	// The deletion completes after all operations finish. You cannot delete a project's root or default
 	// branch, or a branch that has a child branch. A project must have at least one branch.
 	//
-	// By default, deleted branches can be recovered within a 7-day grace period. Use the `hard_delete`
-	// parameter to permanently delete the branch immediately. For related information, see
-	// [Manage branches].
+	// For related information, see [Manage branches].
 	//
 	// [Manage branches]: https://neon.com/docs/manage/branches/
 	//
@@ -415,6 +427,14 @@ type Handler interface {
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/buckets/{bucket_name}/objects-by-prefix
 	DeleteProjectBranchBucketObjectsByPrefix(ctx context.Context, params DeleteProjectBranchBucketObjectsByPrefixParams) (DeleteProjectBranchBucketObjectsByPrefixRes, error)
+	// DeleteProjectBranchCustomDomain implements deleteProjectBranchCustomDomain operation.
+	//
+	// Removes a custom domain registered on the branch and stops routing it.
+	//
+	// Note: This endpoint is currently in Beta.
+	//
+	// DELETE /projects/{project_id}/branches/{branch_id}/custom-domains/{domain}
+	DeleteProjectBranchCustomDomain(ctx context.Context, params DeleteProjectBranchCustomDomainParams) error
 	// DeleteProjectBranchDataAPI implements deleteProjectBranchDataAPI operation.
 	//
 	// Deletes the Neon Data API for the specified branch. Existing connections using the Data API endpoint
@@ -446,6 +466,17 @@ type Handler interface {
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/roles/{role_name}
 	DeleteProjectBranchRole(ctx context.Context, params DeleteProjectBranchRoleParams) (DeleteProjectBranchRoleRes, error)
+	// DeleteProjectBranchTrigger implements deleteProjectBranchTrigger operation.
+	//
+	// Deletes a branch-local trigger or writes a branch-local tombstone for an inherited trigger so it
+	// does not reappear. Deletion stops future scheduling or storage-event matching but does not cancel
+	// invocations already committed for delivery. The supported trigger types are `schedule` and
+	// `storage_object_created`.
+	//
+	// Note: This endpoint is currently in Beta.
+	//
+	// DELETE /projects/{project_id}/branches/{branch_id}/triggers/{trigger_id}
+	DeleteProjectBranchTrigger(ctx context.Context, params DeleteProjectBranchTriggerParams) error
 	// DeleteProjectEndpoint implements deleteProjectEndpoint operation.
 	//
 	// Deletes the specified compute endpoint. A compute endpoint is a Neon compute instance. Deleting a
@@ -833,6 +864,15 @@ type Handler interface {
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/storage
 	GetProjectBranchStorage(ctx context.Context, params GetProjectBranchStorageParams) (GetProjectBranchStorageRes, error)
+	// GetProjectBranchTrigger implements getProjectBranchTrigger operation.
+	//
+	// Returns the trigger visible on the branch. The supported trigger types are `schedule` and
+	// `storage_object_created`.
+	//
+	// Note: This endpoint is currently in Beta.
+	//
+	// GET /projects/{project_id}/branches/{branch_id}/triggers/{trigger_id}
+	GetProjectBranchTrigger(ctx context.Context, params GetProjectBranchTriggerParams) (*TriggerResponse, error)
 	// GetProjectEndpoint implements getProjectEndpoint operation.
 	//
 	// Retrieves information about the specified compute endpoint. A compute endpoint is a Neon compute
@@ -971,6 +1011,14 @@ type Handler interface {
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/buckets
 	ListProjectBranchBuckets(ctx context.Context, params ListProjectBranchBucketsParams) (*BucketsListResponse, error)
+	// ListProjectBranchCustomDomains implements listProjectBranchCustomDomains operation.
+	//
+	// Lists all custom domains registered on the branch, across every target entity.
+	//
+	// Note: This endpoint is currently in Beta.
+	//
+	// GET /projects/{project_id}/branches/{branch_id}/custom-domains
+	ListProjectBranchCustomDomains(ctx context.Context, params ListProjectBranchCustomDomainsParams) (*ListProjectBranchCustomDomainsOK, error)
 	// ListProjectBranchDatabases implements listProjectBranchDatabases operation.
 	//
 	// Retrieves a list of databases for the specified branch. A branch can have multiple databases. For
@@ -1029,6 +1077,19 @@ type Handler interface {
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/roles
 	ListProjectBranchRoles(ctx context.Context, params ListProjectBranchRolesParams) (*RolesResponse, error)
+	// ListProjectBranchTriggers implements listProjectBranchTriggers operation.
+	//
+	// Lists the complete project-bounded set of triggers visible on the branch, ordered by `trigger_id`.
+	// An inherited trigger keeps its project-wide ID and source branch, and is disabled on the child until
+	// explicitly enabled there.
+	//
+	// The supported trigger types are `schedule` and `storage_object_created`. A storage-object-created
+	// trigger watches one exact bucket and fires only after an object upload succeeds.
+	//
+	// Note: This endpoint is currently in Beta.
+	//
+	// GET /projects/{project_id}/branches/{branch_id}/triggers
+	ListProjectBranchTriggers(ctx context.Context, params ListProjectBranchTriggersParams) (*TriggersListResponse, error)
 	// ListProjectBranches implements listProjectBranches operation.
 	//
 	// Retrieves a list of branches for the specified project.
@@ -1167,6 +1228,22 @@ type Handler interface {
 	//
 	// POST /projects/{project_id}/recover
 	RecoverProject(ctx context.Context, params RecoverProjectParams) (*ProjectRecoverResponse, error)
+	// RegisterProjectBranchCustomDomain implements registerProjectBranchCustomDomain operation.
+	//
+	// Registers a customer-owned domain (for example `dashboard.acme.com`) on the branch and points it at
+	// a target entity, chosen by `entity_type` + `entity_id`. In v1 only `entity_type: function` is
+	// supported (an unsupported type is rejected with `400`), where `entity_id` is the function slug and
+	// the function must already exist on the branch (else `404`).
+	//
+	// The response includes the `cname_target` the customer must point their domain at with a CNAME
+	// record; the domain goes live only once that DNS resolves and a certificate is issued on the first
+	// request. A domain already registered to another resource is rejected with `409` and no detail about
+	// the owner. Re-registering the same domain for the same entity is idempotent.
+	//
+	// Note: This endpoint is currently in Beta.
+	//
+	// POST /projects/{project_id}/branches/{branch_id}/custom-domains
+	RegisterProjectBranchCustomDomain(ctx context.Context, req *CustomDomainRegisterRequest, params RegisterProjectBranchCustomDomainParams) (*CustomDomain, error)
 	// RemoveOrganizationMember implements removeOrganizationMember operation.
 	//
 	// Removes the specified member from the organization. Only organization admins can perform this
@@ -1218,6 +1295,22 @@ type Handler interface {
 	//
 	// POST /projects/{project_id}/snapshots/{snapshot_id}/restore
 	RestoreSnapshot(ctx context.Context, req OptRestoreSnapshotReq, params RestoreSnapshotParams) (*RestoredSnapshot, error)
+	// RevealCredential implements revealCredential operation.
+	//
+	// Returns the live `api_token` and `s3_secret_access_key` of an existing credential, so a credential
+	// whose issuance response was lost can be recovered without minting a new one.
+	//
+	// This is a POST with an explicit `/reveal` verb so the secrets never ride a GET, where they would
+	// land in access logs, browser history and proxy caches. Revoked and expired credentials return 404,
+	// as does a `token_id` that does not belong to this project.
+	//
+	// A credential issued before secret retrieval was supported has no recoverable secret and returns 409
+	// — rotate it to obtain one.
+	//
+	// Note: This endpoint is currently in Beta.
+	//
+	// POST /projects/{project_id}/branches/{branch_id}/credentials/{token_id}/reveal
+	RevealCredential(ctx context.Context, params RevealCredentialParams) (RevealCredentialRes, error)
 	// RevokeApiKey implements revokeApiKey operation.
 	//
 	// Revokes the specified API key. An API key that is no longer needed can be revoked. This action
@@ -1251,6 +1344,34 @@ type Handler interface {
 	//
 	// DELETE /projects/{project_id}/permissions/{permission_id}
 	RevokePermissionFromProject(ctx context.Context, params RevokePermissionFromProjectParams) (*ProjectPermission, error)
+	// RotateCredential implements rotateCredential operation.
+	//
+	// Replaces the secret material on an existing scoped credential in place. `token_id` is preserved —
+	// it is the `AWS_ACCESS_KEY_ID` for S3-compatible clients, so the access key id your application
+	// already holds keeps working and only the secret changes. This is the analog of resetting a Postgres
+	// password, not of issuing a second credential.
+	//
+	// The response carries the new `api_token` and `s3_secret_access_key` exactly once. Rotation is not
+	// idempotent: retrying after an ambiguous timeout mints another secret and supersedes the previous
+	// replacement, so a retry does not recover a lost response — it only invalidates the secret you did
+	// not receive. If you lose the response, issue a replacement credential and revoke this one.
+	//
+	// The old secret stops authenticating as soon as the rotation commits. Where a region caches
+	// credentials on its data-plane verifiers, a replica may briefly keep accepting the old secret — and
+	// rejecting the new one — until its cache entry expires; where it does not, the cutover is immediate
+	// apart from requests already in flight. Either way the changeover is not atomic across replicas, so
+	// retry an unexpected authentication failure right after rotating rather than treating the new secret
+	// as bad. `last_used_at` continues to report the logical credential's prior usage and says nothing
+	// about whether the new secret has been used yet.
+	//
+	// Only a live, unexpired, unrevoked customer-managed (`user`) credential on a live project and live
+	// branch is eligible. Anything else — including the platform-internal `function` and `system`
+	// credentials — is reported as not found, indistinguishable from an unknown `token_id`.
+	//
+	// Note: This endpoint is currently in Beta.
+	//
+	// POST /projects/{project_id}/branches/{branch_id}/credentials/{token_id}/rotate
+	RotateCredential(ctx context.Context, params RotateCredentialParams) (*RotateCredentialResponse, error)
 	// SendNeonAuthEmailProviderTest implements sendNeonAuthEmailProviderTest operation.
 	//
 	// Sends a test email using the branch's already-saved custom SMTP configuration. Only the
@@ -1519,6 +1640,23 @@ type Handler interface {
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/functions/{slug}
 	UpdateProjectBranchFunction(ctx context.Context, req *NeonFunctionUpdateRequest, params UpdateProjectBranchFunctionParams) (*NeonFunctionResponse, error)
+	// UpdateProjectBranchTrigger implements updateProjectBranchTrigger operation.
+	//
+	// Applies a partial update. The required `type` discriminator must identify the existing trigger kind.
+	// The supported types are `schedule` and `storage_object_created`. Editing an inherited trigger
+	// creates a child-local shadow with the same `trigger_id`; it remains disabled unless this request
+	// explicitly enables it. For a schedule trigger, updating the schedule or enabled state increments
+	// `version` and recomputes `next_run_at`.
+	//
+	// Disabling stops future scheduling but does not cancel occurrences already committed for delivery.
+	// For `storage_object_created`, the configuration selects one exact bucket. An omitted object-key
+	// prefix matches every key in that bucket; a present prefix is matched byte-for-byte and
+	// case-sensitively against the full key, without path normalization or a path-segment boundary.
+	//
+	// Note: This endpoint is currently in Beta.
+	//
+	// PATCH /projects/{project_id}/branches/{branch_id}/triggers/{trigger_id}
+	UpdateProjectBranchTrigger(ctx context.Context, req *TriggerUpdateRequest, params UpdateProjectBranchTriggerParams) (*TriggerResponse, error)
 	// UpdateProjectEndpoint implements updateProjectEndpoint operation.
 	//
 	// Updates the specified compute endpoint.
