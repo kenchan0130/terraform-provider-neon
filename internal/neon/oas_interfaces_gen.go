@@ -81,6 +81,10 @@ type QueryProjectBranchLogsRes interface {
 	queryProjectBranchLogsRes()
 }
 
+type RevealCredentialRes interface {
+	revealCredentialRes()
+}
+
 type RevokeCredentialRes interface {
 	revokeCredentialRes()
 }
