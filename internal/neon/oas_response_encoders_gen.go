@@ -354,6 +354,19 @@ func encodeCreateProjectBranchRoleResponse(response *RoleOperations, w http.Resp
 	return nil
 }
 
+func encodeCreateProjectBranchTriggerResponse(response *TriggerResponse, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(201)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeCreateProjectEndpointResponse(response *EndpointOperations, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
@@ -570,6 +583,12 @@ func encodeDeleteProjectBranchBucketObjectsByPrefixResponse(response DeleteProje
 	}
 }
 
+func encodeDeleteProjectBranchCustomDomainResponse(response *DeleteProjectBranchCustomDomainNoContent, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(204)
+
+	return nil
+}
+
 func encodeDeleteProjectBranchDataAPIResponse(response *EmptyResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
@@ -635,6 +654,12 @@ func encodeDeleteProjectBranchRoleResponse(response DeleteProjectBranchRoleRes, 
 	default:
 		return errors.Errorf("unexpected response type: %T", response)
 	}
+}
+
+func encodeDeleteProjectBranchTriggerResponse(response *DeleteProjectBranchTriggerNoContent, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(204)
+
+	return nil
 }
 
 func encodeDeleteProjectEndpointResponse(response DeleteProjectEndpointRes, w http.ResponseWriter, span trace.Span) error {
@@ -1519,6 +1544,19 @@ func encodeGetProjectBranchStorageResponse(response GetProjectBranchStorageRes, 
 	}
 }
 
+func encodeGetProjectBranchTriggerResponse(response *TriggerResponse, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeGetProjectEndpointResponse(response *EndpointResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
@@ -1748,6 +1786,19 @@ func encodeListProjectBranchBucketsResponse(response *BucketsListResponse, w htt
 	return nil
 }
 
+func encodeListProjectBranchCustomDomainsResponse(response *ListProjectBranchCustomDomainsOK, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeListProjectBranchDatabasesResponse(response *DatabasesResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
@@ -1862,6 +1913,19 @@ func encodeListProjectBranchLogFieldsResponse(response ListProjectBranchLogField
 }
 
 func encodeListProjectBranchRolesResponse(response *RolesResponse, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeListProjectBranchTriggersResponse(response *TriggersListResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 
@@ -2078,6 +2142,19 @@ func encodeRecoverProjectResponse(response *ProjectRecoverResponse, w http.Respo
 	return nil
 }
 
+func encodeRegisterProjectBranchCustomDomainResponse(response *CustomDomain, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(201)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeRemoveOrganizationMemberResponse(response *EmptyResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
@@ -2156,6 +2233,49 @@ func encodeRestoreSnapshotResponse(response *RestoredSnapshot, w http.ResponseWr
 	return nil
 }
 
+func encodeRevealCredentialResponse(response RevealCredentialRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *CredentialSecret:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(200)
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *RevealCredentialNotFound:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(404)
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *RevealCredentialConflict:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(409)
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
 func encodeRevokeApiKeyResponse(response *ApiKeyRevokeResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
@@ -2207,6 +2327,19 @@ func encodeRevokeOrgApiKeyResponse(response *OrgApiKeyRevokeResponse, w http.Res
 }
 
 func encodeRevokePermissionFromProjectResponse(response *ProjectPermission, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeRotateCredentialResponse(response *RotateCredentialResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 
@@ -2670,6 +2803,19 @@ func encodeUpdateProjectBranchDatabaseResponse(response *DatabaseOperations, w h
 }
 
 func encodeUpdateProjectBranchFunctionResponse(response *NeonFunctionResponse, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeUpdateProjectBranchTriggerResponse(response *TriggerResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 
