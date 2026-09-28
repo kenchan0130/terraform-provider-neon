@@ -41911,6 +41911,12 @@ func (s *Snapshot) encodeFields(e *jx.Encoder) {
 		e.Str(s.Name)
 	}
 	{
+		if s.Slug.Set {
+			e.FieldStart("slug")
+			s.Slug.Encode(e)
+		}
+	}
+	{
 		if s.Lsn.Set {
 			e.FieldStart("lsn")
 			s.Lsn.Encode(e)
@@ -41958,17 +41964,18 @@ func (s *Snapshot) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfSnapshot = [10]string{
-	0: "id",
-	1: "name",
-	2: "lsn",
-	3: "timestamp",
-	4: "source_branch_id",
-	5: "created_at",
-	6: "expires_at",
-	7: "manual",
-	8: "full_size",
-	9: "diff_size",
+var jsonFieldsNameOfSnapshot = [11]string{
+	0:  "id",
+	1:  "name",
+	2:  "slug",
+	3:  "lsn",
+	4:  "timestamp",
+	5:  "source_branch_id",
+	6:  "created_at",
+	7:  "expires_at",
+	8:  "manual",
+	9:  "full_size",
+	10: "diff_size",
 }
 
 // Decode decodes Snapshot from json.
@@ -42004,6 +42011,16 @@ func (s *Snapshot) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"name\"")
 			}
+		case "slug":
+			if err := func() error {
+				s.Slug.Reset()
+				if err := s.Slug.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"slug\"")
+			}
 		case "lsn":
 			if err := func() error {
 				s.Lsn.Reset()
@@ -42035,7 +42052,7 @@ func (s *Snapshot) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"source_branch_id\"")
 			}
 		case "created_at":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := d.Str()
 				s.CreatedAt = string(v)
@@ -42096,7 +42113,7 @@ func (s *Snapshot) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b00100011,
+		0b01000011,
 		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {

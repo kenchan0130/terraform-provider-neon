@@ -26,6 +26,7 @@ var regexMap = map[string]ogenregex.Regexp{
 	"^[^\\x00-\\x1f\\x7f-\\x9f]+$":                 ogenregex.MustCompile("^[^\\x00-\\x1f\\x7f-\\x9f]+$"),
 	"^[a-z0-9-]{1,60}$":                            ogenregex.MustCompile("^[a-z0-9-]{1,60}$"),
 	"^[a-z0-9]{1,20}$":                             ogenregex.MustCompile("^[a-z0-9]{1,20}$"),
+	"^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$":            ogenregex.MustCompile("^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$"),
 }
 var (
 	// Allocate option closure once.

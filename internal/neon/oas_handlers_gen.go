@@ -7658,6 +7658,10 @@ func (s *Server) handleCreateSnapshotRequest(args [2]string, argsEscaped bool, w
 					In:   "query",
 				}: params.Name,
 				{
+					Name: "slug",
+					In:   "query",
+				}: params.Slug,
+				{
 					Name: "expires_at",
 					In:   "query",
 				}: params.ExpiresAt,

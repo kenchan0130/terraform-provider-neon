@@ -4151,8 +4151,12 @@ type ConsumptionHistoryPerTimeframe struct {
 	ComputeTimeSeconds uint64 `json:"compute_time_seconds"`
 	// Bytes. The amount of written data for all branches.
 	WrittenDataBytes uint64 `json:"written_data_bytes"`
-	// Bytes. The space occupied in Postgres storage. Synthetic Postgres storage size combines the logical
-	// data size and Write-Ahead Log (WAL) size for all branches.
+	// Deprecated: always returns 0. Use the consumption history v2 endpoints
+	// (`/consumption_history/v2/projects`, `/consumption_history/v2/branches`) instead. Bytes. The space
+	// occupied in Postgres storage. Synthetic Postgres storage size combines the logical data size and
+	// Write-Ahead Log (WAL) size for all branches.
+	//
+	// Deprecated: schema marks this property as deprecated.
 	SyntheticStorageSizeBytes uint64 `json:"synthetic_storage_size_bytes"`
 	// Bytes-Hour. The amount of Postgres storage consumed hourly.
 	DataStorageBytesHour OptUint64 `json:"data_storage_bytes_hour"`
@@ -21098,6 +21102,9 @@ type Snapshot struct {
 	ID string `json:"id"`
 	// Human-readable label for the snapshot.
 	Name string `json:"name"`
+	// Snapshot resource ID, unique within the project. Distinct from the internal snapshot ID and display
+	// name.
+	Slug OptString `json:"slug"`
 	// WAL position (Log Sequence Number) at which the snapshot was captured, in Postgres LSN format (for
 	// example, `0/3000000`).
 	Lsn OptString `json:"lsn"`
@@ -21134,6 +21141,11 @@ func (s *Snapshot) GetID() string {
 // GetName returns the value of Name.
 func (s *Snapshot) GetName() string {
 	return s.Name
+}
+
+// GetSlug returns the value of Slug.
+func (s *Snapshot) GetSlug() OptString {
+	return s.Slug
 }
 
 // GetLsn returns the value of Lsn.
@@ -21184,6 +21196,11 @@ func (s *Snapshot) SetID(val string) {
 // SetName sets the value of Name.
 func (s *Snapshot) SetName(val string) {
 	s.Name = val
+}
+
+// SetSlug sets the value of Slug.
+func (s *Snapshot) SetSlug(val OptString) {
+	s.Slug = val
 }
 
 // SetLsn sets the value of Lsn.
