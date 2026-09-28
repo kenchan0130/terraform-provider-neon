@@ -3322,6 +3322,10 @@ type CreateSnapshotParams struct {
 	Timestamp OptString `json:",omitempty,omitzero"`
 	// A name for the snapshot.
 	Name OptString `json:",omitempty,omitzero"`
+	// User-defined snapshot resource ID. Must be unique within the project. Must start with a lowercase
+	// letter, contain only lowercase letters, numbers, and hyphens, and end with a letter or number. If
+	// omitted, the control plane generates a value.
+	Slug OptString `json:",omitempty,omitzero"`
 	// The time at which the snapshot will be automatically deleted. RFC 3339 format.
 	ExpiresAt OptString `json:",omitempty,omitzero"`
 	// The Neon project ID.
@@ -3356,6 +3360,15 @@ func unpackCreateSnapshotParams(packed middleware.Parameters) (params CreateSnap
 		}
 		if v, ok := packed[key]; ok {
 			params.Name = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "slug",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Slug = v.(OptString)
 		}
 	}
 	{
@@ -3505,6 +3518,74 @@ func decodeCreateSnapshotParams(args [2]string, argsEscaped bool, r *http.Reques
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "name",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: slug.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "slug",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotSlugVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotSlugVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Slug.SetTo(paramsDotSlugVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Slug.Get(); ok {
+					if err := func() error {
+						if err := (validate.String{
+							MinLength:     1,
+							MinLengthSet:  true,
+							MaxLength:     63,
+							MaxLengthSet:  true,
+							Email:         false,
+							Hostname:      false,
+							Regex:         regexMap["^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$"],
+							MinNumeric:    0,
+							MinNumericSet: false,
+							MaxNumeric:    0,
+							MaxNumericSet: false,
+						}).Validate(string(value)); err != nil {
+							return errors.Wrap(err, "string")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "slug",
 			In:   "query",
 			Err:  err,
 		}
@@ -9870,12 +9951,13 @@ type GetConsumptionHistoryPerProjectParams struct {
 	// Deprecated: schema marks this parameter as deprecated.
 	IncludeV1Metrics OptBool `json:",omitempty,omitzero"`
 	// Specify a list of metrics to include in the response. If omitted, active_time, compute_time,
-	// written_data, synthetic_storage_size are returned. Possible values:
+	// written_data are returned. Possible values:
 	//
 	//  - `active_time_seconds`
 	//  - `compute_time_seconds`
 	//  - `written_data_bytes`
-	//  - `synthetic_storage_size_bytes`
+	//  - `synthetic_storage_size_bytes` (deprecated: always returns 0; use the consumption history v2
+	//    endpoints instead)
 	//  - `data_storage_bytes_hour`
 	//  - `logical_size_bytes`
 	//  - `logical_size_bytes_hour`
