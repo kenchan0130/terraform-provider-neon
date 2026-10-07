@@ -9861,22 +9861,22 @@ type GetConsumptionHistoryPerProjectParams struct {
 	// parameter is not provided, the endpoint will return the metrics for the authenticated user's
 	// projects.
 	OrgID OptString `json:",omitempty,omitzero"`
-	// The field is deprecated. Please use `metrics` instead. If `metrics` is specified, this field is
-	// ignored. Include metrics utilized in previous pricing models.
-	//
-	//  - data_storage_bytes_hour: The sum of the maximum observed storage values for each hour, which
-	//    never decreases.
+	// The field is deprecated and no longer has any effect: the only metric it used to add
+	// (`data_storage_bytes_hour`) is retired and always returns 0. Please use `metrics` instead. If
+	// `metrics` is specified, this field is ignored.
 	//
 	// Deprecated: schema marks this parameter as deprecated.
 	IncludeV1Metrics OptBool `json:",omitempty,omitzero"`
 	// Specify a list of metrics to include in the response. If omitted, active_time, compute_time,
-	// written_data, synthetic_storage_size are returned. Possible values:
+	// written_data are returned. Possible values:
 	//
 	//  - `active_time_seconds`
 	//  - `compute_time_seconds`
 	//  - `written_data_bytes`
-	//  - `synthetic_storage_size_bytes`
-	//  - `data_storage_bytes_hour`
+	//  - `synthetic_storage_size_bytes` (deprecated: always returns 0; use the consumption history v2
+	//    endpoints instead)
+	//  - `data_storage_bytes_hour` (deprecated: always returns 0; use the consumption history v2 endpoints
+	//    instead)
 	//  - `logical_size_bytes`
 	//  - `logical_size_bytes_hour`
 	//

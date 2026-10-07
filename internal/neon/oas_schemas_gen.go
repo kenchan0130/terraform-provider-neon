@@ -4151,11 +4151,19 @@ type ConsumptionHistoryPerTimeframe struct {
 	ComputeTimeSeconds uint64 `json:"compute_time_seconds"`
 	// Bytes. The amount of written data for all branches.
 	WrittenDataBytes uint64 `json:"written_data_bytes"`
-	// Bytes. The space occupied in Postgres storage. Synthetic Postgres storage size combines the logical
-	// data size and Write-Ahead Log (WAL) size for all branches.
+	// Deprecated: always returns 0. Use the consumption history v2 endpoints
+	// (`/consumption_history/v2/projects`, `/consumption_history/v2/branches`) instead. Bytes. The space
+	// occupied in Postgres storage. Synthetic Postgres storage size combines the logical data size and
+	// Write-Ahead Log (WAL) size for all branches.
+	//
+	// Deprecated: schema marks this property as deprecated.
 	SyntheticStorageSizeBytes uint64 `json:"synthetic_storage_size_bytes"`
-	// Bytes-Hour. The amount of Postgres storage consumed hourly.
-	DataStorageBytesHour OptUint64 `json:"data_storage_bytes_hour"`
+	// Deprecated: always returns 0. Use the consumption history v2 endpoints
+	// (`/consumption_history/v2/projects`, `/consumption_history/v2/branches`) instead. Bytes-Hour. The
+	// amount of Postgres storage consumed hourly.
+	//
+	// Deprecated: schema marks this property as deprecated.
+	DataStorageBytesHour uint64 `json:"data_storage_bytes_hour"`
 	// Bytes. The amount of logical size consumed.
 	LogicalSizeBytes OptUint64 `json:"logical_size_bytes"`
 	// Bytes-Hour. The amount of logical size consumed hourly.
@@ -4193,7 +4201,7 @@ func (s *ConsumptionHistoryPerTimeframe) GetSyntheticStorageSizeBytes() uint64 {
 }
 
 // GetDataStorageBytesHour returns the value of DataStorageBytesHour.
-func (s *ConsumptionHistoryPerTimeframe) GetDataStorageBytesHour() OptUint64 {
+func (s *ConsumptionHistoryPerTimeframe) GetDataStorageBytesHour() uint64 {
 	return s.DataStorageBytesHour
 }
 
@@ -4238,7 +4246,7 @@ func (s *ConsumptionHistoryPerTimeframe) SetSyntheticStorageSizeBytes(val uint64
 }
 
 // SetDataStorageBytesHour sets the value of DataStorageBytesHour.
-func (s *ConsumptionHistoryPerTimeframe) SetDataStorageBytesHour(val OptUint64) {
+func (s *ConsumptionHistoryPerTimeframe) SetDataStorageBytesHour(val uint64) {
 	s.DataStorageBytesHour = val
 }
 
@@ -17029,8 +17037,12 @@ func (s *PresignResponseHeaders) init() PresignResponseHeaders {
 
 // Ref: #/components/schemas/Project
 type Project struct {
-	// Bytes-Hour. Project consumed that much Postgres storage hourly during the billing period. The value
-	// has some lag. The value is reset at the beginning of each billing period.
+	// Deprecated: always returns 0. Use the consumption history v2 endpoints
+	// (`/consumption_history/v2/projects`, `/consumption_history/v2/branches`) instead. Bytes-Hour.
+	// Project consumed that much Postgres storage hourly during the billing period. The value has some
+	// lag. The value is reset at the beginning of each billing period.
+	//
+	// Deprecated: schema marks this property as deprecated.
 	DataStorageBytesHour int64 `json:"data_storage_bytes_hour"`
 	// Bytes. Egress traffic from the Neon cloud to the client for given project over the billing period.
 	// Includes deleted endpoints. The value has some lag. The value is reset at the beginning of each

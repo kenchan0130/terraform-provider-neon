@@ -9594,10 +9594,8 @@ func (s *ConsumptionHistoryPerTimeframe) encodeFields(e *jx.Encoder) {
 		e.UInt64(s.SyntheticStorageSizeBytes)
 	}
 	{
-		if s.DataStorageBytesHour.Set {
-			e.FieldStart("data_storage_bytes_hour")
-			s.DataStorageBytesHour.Encode(e)
-		}
+		e.FieldStart("data_storage_bytes_hour")
+		e.UInt64(s.DataStorageBytesHour)
 	}
 	{
 		if s.LogicalSizeBytes.Set {
@@ -9707,9 +9705,11 @@ func (s *ConsumptionHistoryPerTimeframe) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"synthetic_storage_size_bytes\"")
 			}
 		case "data_storage_bytes_hour":
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
-				s.DataStorageBytesHour.Reset()
-				if err := s.DataStorageBytesHour.Decode(d); err != nil {
+				v, err := d.UInt64()
+				s.DataStorageBytesHour = uint64(v)
+				if err != nil {
 					return err
 				}
 				return nil
@@ -9746,7 +9746,7 @@ func (s *ConsumptionHistoryPerTimeframe) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b00111111,
+		0b01111111,
 		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
