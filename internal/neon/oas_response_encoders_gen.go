@@ -724,6 +724,18 @@ func encodeDisableNeonAuthResponse(response *DisableNeonAuthOK, w http.ResponseW
 	return nil
 }
 
+func encodeDisableProjectBranchRealtimeResponse(response *DisableProjectBranchRealtimeAccepted, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(202)
+
+	return nil
+}
+
+func encodeEnableProjectBranchRealtimeResponse(response *EnableProjectBranchRealtimeAccepted, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(202)
+
+	return nil
+}
+
 func encodeFinalizeRestoreBranchResponse(response *OperationsResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
@@ -1424,6 +1436,51 @@ func encodeGetProjectBranchFunctionResponse(response *NeonFunctionResponse, w ht
 
 	e := new(jx.Encoder)
 	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeGetProjectBranchRealtimeResponse(response *Realtime, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeGetProjectBranchRealtimeSecretResponse(response *RealtimeSecretHeaders, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	// Encoding response headers.
+	{
+		h := uri.NewHeaderEncoder(w.Header())
+		// Encode "Cache-Control" header.
+		{
+			cfg := uri.HeaderParameterEncodingConfig{
+				Name:    "Cache-Control",
+				Explode: false,
+			}
+			if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+				if val, ok := response.CacheControl.Get(); ok {
+					return e.EncodeValue(conv.StringToString(val))
+				}
+				return nil
+			}); err != nil {
+				return errors.Wrap(err, "encode Cache-Control header")
+			}
+		}
+	}
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Response.Encode(e)
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
@@ -2348,6 +2405,12 @@ func encodeRotateCredentialResponse(response *RotateCredentialResponse, w http.R
 	if _, err := e.WriteTo(w); err != nil {
 		return errors.Wrap(err, "write")
 	}
+
+	return nil
+}
+
+func encodeRotateProjectBranchRealtimeSecretResponse(response *RotateProjectBranchRealtimeSecretAccepted, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(202)
 
 	return nil
 }

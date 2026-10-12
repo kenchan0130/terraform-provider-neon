@@ -19,6 +19,7 @@ import (
 
 var regexMap = map[string]ogenregex.Regexp{
 	"^([a-z0-9-]{1,60}(,[a-z0-9-]{1,60}){0,99})?$": ogenregex.MustCompile("^([a-z0-9-]{1,60}(,[a-z0-9-]{1,60}){0,99})?$"),
+	"^(\\*|https?://[^/?#@,*\\s]+)$":               ogenregex.MustCompile("^(\\*|https?://[^/?#@,*\\s]+)$"),
 	"^[0-9]{1,6}(ms|s|m|h|d)$":                     ogenregex.MustCompile("^[0-9]{1,6}(ms|s|m|h|d)$"),
 	"^[0-9a-f]{32}$":                               ogenregex.MustCompile("^[0-9a-f]{32}$"),
 	"^[A-Za-z0-9.-]+$":                             ogenregex.MustCompile("^[A-Za-z0-9.-]+$"),
