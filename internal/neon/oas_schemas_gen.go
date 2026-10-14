@@ -1771,6 +1771,7 @@ const (
 	BillingSubscriptionTypeAWSMarketplace BillingSubscriptionType = "aws_marketplace"
 	BillingSubscriptionTypeFreeV2         BillingSubscriptionType = "free_v2"
 	BillingSubscriptionTypeFreeV3         BillingSubscriptionType = "free_v3"
+	BillingSubscriptionTypeBuild          BillingSubscriptionType = "build"
 	BillingSubscriptionTypeLaunch         BillingSubscriptionType = "launch"
 	BillingSubscriptionTypeLaunchV3       BillingSubscriptionType = "launch_v3"
 	BillingSubscriptionTypeScale          BillingSubscriptionType = "scale"
@@ -1788,6 +1789,7 @@ func (BillingSubscriptionType) AllValues() []BillingSubscriptionType {
 		BillingSubscriptionTypeAWSMarketplace,
 		BillingSubscriptionTypeFreeV2,
 		BillingSubscriptionTypeFreeV3,
+		BillingSubscriptionTypeBuild,
 		BillingSubscriptionTypeLaunch,
 		BillingSubscriptionTypeLaunchV3,
 		BillingSubscriptionTypeScale,
@@ -1811,6 +1813,8 @@ func (s BillingSubscriptionType) MarshalText() ([]byte, error) {
 	case BillingSubscriptionTypeFreeV2:
 		return []byte(s), nil
 	case BillingSubscriptionTypeFreeV3:
+		return []byte(s), nil
+	case BillingSubscriptionTypeBuild:
 		return []byte(s), nil
 	case BillingSubscriptionTypeLaunch:
 		return []byte(s), nil
@@ -1849,6 +1853,9 @@ func (s *BillingSubscriptionType) UnmarshalText(data []byte) error {
 		return nil
 	case BillingSubscriptionTypeFreeV3:
 		*s = BillingSubscriptionTypeFreeV3
+		return nil
+	case BillingSubscriptionTypeBuild:
+		*s = BillingSubscriptionTypeBuild
 		return nil
 	case BillingSubscriptionTypeLaunch:
 		*s = BillingSubscriptionTypeLaunch
@@ -2496,6 +2503,9 @@ type BranchCreateRequestBranch struct {
 	// archived, or reset, and block deletion of the project. Can be gated by `protected_branches_only` in
 	// the IP allowlist. Paid plans only.
 	Protected OptBool `json:"protected"`
+	// Enable Realtime for the branch with these options. A child of a Realtime branch is enabled even when
+	// this is omitted.
+	Realtime OptRealtimeOptions `json:"realtime"`
 	// Whether to create the branch in the archived state. When omitted, the branch is created as a normal
 	// (non-archived) branch.
 	Archived OptBool `json:"archived"`
@@ -2541,6 +2551,11 @@ func (s *BranchCreateRequestBranch) GetProtected() OptBool {
 	return s.Protected
 }
 
+// GetRealtime returns the value of Realtime.
+func (s *BranchCreateRequestBranch) GetRealtime() OptRealtimeOptions {
+	return s.Realtime
+}
+
 // GetArchived returns the value of Archived.
 func (s *BranchCreateRequestBranch) GetArchived() OptBool {
 	return s.Archived
@@ -2579,6 +2594,11 @@ func (s *BranchCreateRequestBranch) SetParentTimestamp(val OptDateTime) {
 // SetProtected sets the value of Protected.
 func (s *BranchCreateRequestBranch) SetProtected(val OptBool) {
 	s.Protected = val
+}
+
+// SetRealtime sets the value of Realtime.
+func (s *BranchCreateRequestBranch) SetRealtime(val OptRealtimeOptions) {
+	s.Realtime = val
 }
 
 // SetArchived sets the value of Archived.
@@ -4151,11 +4171,19 @@ type ConsumptionHistoryPerTimeframe struct {
 	ComputeTimeSeconds uint64 `json:"compute_time_seconds"`
 	// Bytes. The amount of written data for all branches.
 	WrittenDataBytes uint64 `json:"written_data_bytes"`
-	// Bytes. The space occupied in Postgres storage. Synthetic Postgres storage size combines the logical
-	// data size and Write-Ahead Log (WAL) size for all branches.
+	// Deprecated: always returns 0. Use the consumption history v2 endpoints
+	// (`/consumption_history/v2/projects`, `/consumption_history/v2/branches`) instead. Bytes. The space
+	// occupied in Postgres storage. Synthetic Postgres storage size combines the logical data size and
+	// Write-Ahead Log (WAL) size for all branches.
+	//
+	// Deprecated: schema marks this property as deprecated.
 	SyntheticStorageSizeBytes uint64 `json:"synthetic_storage_size_bytes"`
-	// Bytes-Hour. The amount of Postgres storage consumed hourly.
-	DataStorageBytesHour OptUint64 `json:"data_storage_bytes_hour"`
+	// Deprecated: always returns 0. Use the consumption history v2 endpoints
+	// (`/consumption_history/v2/projects`, `/consumption_history/v2/branches`) instead. Bytes-Hour. The
+	// amount of Postgres storage consumed hourly.
+	//
+	// Deprecated: schema marks this property as deprecated.
+	DataStorageBytesHour uint64 `json:"data_storage_bytes_hour"`
 	// Bytes. The amount of logical size consumed.
 	LogicalSizeBytes OptUint64 `json:"logical_size_bytes"`
 	// Bytes-Hour. The amount of logical size consumed hourly.
@@ -4193,7 +4221,7 @@ func (s *ConsumptionHistoryPerTimeframe) GetSyntheticStorageSizeBytes() uint64 {
 }
 
 // GetDataStorageBytesHour returns the value of DataStorageBytesHour.
-func (s *ConsumptionHistoryPerTimeframe) GetDataStorageBytesHour() OptUint64 {
+func (s *ConsumptionHistoryPerTimeframe) GetDataStorageBytesHour() uint64 {
 	return s.DataStorageBytesHour
 }
 
@@ -4238,7 +4266,7 @@ func (s *ConsumptionHistoryPerTimeframe) SetSyntheticStorageSizeBytes(val uint64
 }
 
 // SetDataStorageBytesHour sets the value of DataStorageBytesHour.
-func (s *ConsumptionHistoryPerTimeframe) SetDataStorageBytesHour(val OptUint64) {
+func (s *ConsumptionHistoryPerTimeframe) SetDataStorageBytesHour(val uint64) {
 	s.DataStorageBytesHour = val
 }
 
@@ -4622,6 +4650,9 @@ type CreateProjectBranchReqBranch struct {
 	// archived, or reset, and block deletion of the project. Can be gated by `protected_branches_only` in
 	// the IP allowlist. Paid plans only.
 	Protected OptBool `json:"protected"`
+	// Enable Realtime for the branch with these options. A child of a Realtime branch is enabled even when
+	// this is omitted.
+	Realtime OptRealtimeOptions `json:"realtime"`
 	// Whether to create the branch in the archived state. When omitted, the branch is created as a normal
 	// (non-archived) branch.
 	Archived OptBool `json:"archived"`
@@ -4667,6 +4698,11 @@ func (s *CreateProjectBranchReqBranch) GetProtected() OptBool {
 	return s.Protected
 }
 
+// GetRealtime returns the value of Realtime.
+func (s *CreateProjectBranchReqBranch) GetRealtime() OptRealtimeOptions {
+	return s.Realtime
+}
+
 // GetArchived returns the value of Archived.
 func (s *CreateProjectBranchReqBranch) GetArchived() OptBool {
 	return s.Archived
@@ -4705,6 +4741,11 @@ func (s *CreateProjectBranchReqBranch) SetParentTimestamp(val OptDateTime) {
 // SetProtected sets the value of Protected.
 func (s *CreateProjectBranchReqBranch) SetProtected(val OptBool) {
 	s.Protected = val
+}
+
+// SetRealtime sets the value of Realtime.
+func (s *CreateProjectBranchReqBranch) SetRealtime(val OptRealtimeOptions) {
+	s.Realtime = val
 }
 
 // SetArchived sets the value of Archived.
@@ -5778,6 +5819,10 @@ type DataAPIReponse struct {
 	Settings OptNilDataAPISettings `json:"settings"`
 	// List of available database schemas (SubZero only).
 	AvailableSchemas OptNilStringArray `json:"available_schemas"`
+	// When `settings` and `available_schemas` were read from the database. While the compute is suspended
+	// they are served from that read, so a change made directly in the database since then shows up in the
+	// first response served while the compute is active.
+	ObservedAt OptDateTime `json:"observed_at"`
 }
 
 // GetURL returns the value of URL.
@@ -5800,6 +5845,11 @@ func (s *DataAPIReponse) GetAvailableSchemas() OptNilStringArray {
 	return s.AvailableSchemas
 }
 
+// GetObservedAt returns the value of ObservedAt.
+func (s *DataAPIReponse) GetObservedAt() OptDateTime {
+	return s.ObservedAt
+}
+
 // SetURL sets the value of URL.
 func (s *DataAPIReponse) SetURL(val url.URL) {
 	s.URL = val
@@ -5818,6 +5868,11 @@ func (s *DataAPIReponse) SetSettings(val OptNilDataAPISettings) {
 // SetAvailableSchemas sets the value of AvailableSchemas.
 func (s *DataAPIReponse) SetAvailableSchemas(val OptNilStringArray) {
 	s.AvailableSchemas = val
+}
+
+// SetObservedAt sets the value of ObservedAt.
+func (s *DataAPIReponse) SetObservedAt(val OptDateTime) {
+	s.ObservedAt = val
 }
 
 // Configuration settings for the Neon Data API.
@@ -6358,6 +6413,9 @@ func (s *DisableNeonAuthReq) SetDeleteData(val OptBool) {
 	s.DeleteData = val
 }
 
+// DisableProjectBranchRealtimeAccepted is response for DisableProjectBranchRealtime operation.
+type DisableProjectBranchRealtimeAccepted struct{}
+
 // Empty response.
 // Ref: #/components/schemas/EmptyResponse
 type EmptyResponse struct{}
@@ -6392,6 +6450,9 @@ func (s *EnableNeonAuthIntegrationRequest) SetAuthProvider(val NeonAuthSupported
 func (s *EnableNeonAuthIntegrationRequest) SetDatabaseName(val OptString) {
 	s.DatabaseName = val
 }
+
+// EnableProjectBranchRealtimeAccepted is response for EnableProjectBranchRealtime operation.
+type EnableProjectBranchRealtimeAccepted struct{}
 
 // Ref: #/components/schemas/Endpoint
 type Endpoint struct {
@@ -7337,6 +7398,24 @@ func (s *FinalizeRestoreBranchReq) SetName(val OptString) {
 type FunctionDeployRequestMultipart struct {
 	// Optional ZIP archive of the function source code. Omit to reuse the latest version's bundle (a
 	// config-only change). Required for the first deployment of a function.
+	//
+	// Place `index.mjs` or `index.js` at the archive root, without a containing directory. If both exist,
+	// `index.mjs` is loaded. Export a request handler function or an object with a `fetch` method. Use
+	// `export default` for ESM or `module.exports` for CommonJS; prefer `index.mjs` for ESM.
+	//
+	// Upload JavaScript ready to run on Node.js 24. Compile TypeScript before uploading. Bundle
+	// dependencies into the entry module, or include the required modules and assets in the archive with
+	// their relative paths preserved (including `node_modules` for external packages). Node.js built-in
+	// modules do not need to be bundled. The API does not transpile, bundle, or install dependencies. The
+	// ZIP is limited to 32 MiB compressed and 128 MiB extracted, with at most 32,768 entries and 64 MiB
+	// per file. Bundle large dependency trees to keep the archive small. ZIPs larger than 32 MiB are
+	// rejected with HTTP 413 before creating a deployment. The extracted-size, entry-count, and per-file
+	// limits are enforced during the asynchronous build; an accepted upload that exceeds them fails the
+	// build.
+	//
+	// For example, a self-contained ESM bundle needs only `index.mjs` at the ZIP root. The Neon CLI
+	// bundles source into this layout by default; `neon function deploy --no-bundle` packages a prebuilt
+	// directory or an entry file named `index.mjs` or `index.js`.
 	Zip     OptMultipartFile                         `json:"zip"`
 	Runtime OptFunctionDeployRequestMultipartRuntime `json:"runtime"`
 	// Optional JSON object (a string-to-string map) of environment variables for the deployment, e.g.
@@ -15751,6 +15830,52 @@ func (o OptProvisioner) Or(d Provisioner) Provisioner {
 	return d
 }
 
+// NewOptRealtimeOptions returns new OptRealtimeOptions with value set to v.
+func NewOptRealtimeOptions(v RealtimeOptions) OptRealtimeOptions {
+	return OptRealtimeOptions{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptRealtimeOptions is optional RealtimeOptions.
+type OptRealtimeOptions struct {
+	Value RealtimeOptions
+	Set   bool
+}
+
+// IsSet returns true if OptRealtimeOptions was set.
+func (o OptRealtimeOptions) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptRealtimeOptions) Reset() {
+	var v RealtimeOptions
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptRealtimeOptions) SetTo(v RealtimeOptions) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptRealtimeOptions) Get() (v RealtimeOptions, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptRealtimeOptions) Or(d RealtimeOptions) RealtimeOptions {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptRestoreSnapshotReq returns new OptRestoreSnapshotReq with value set to v.
 func NewOptRestoreSnapshotReq(v RestoreSnapshotReq) OptRestoreSnapshotReq {
 	return OptRestoreSnapshotReq{
@@ -17029,8 +17154,12 @@ func (s *PresignResponseHeaders) init() PresignResponseHeaders {
 
 // Ref: #/components/schemas/Project
 type Project struct {
-	// Bytes-Hour. Project consumed that much Postgres storage hourly during the billing period. The value
-	// has some lag. The value is reset at the beginning of each billing period.
+	// Deprecated: always returns 0. Use the consumption history v2 endpoints
+	// (`/consumption_history/v2/projects`, `/consumption_history/v2/branches`) instead. Bytes-Hour.
+	// Project consumed that much Postgres storage hourly during the billing period. The value has some
+	// lag. The value is reset at the beginning of each billing period.
+	//
+	// Deprecated: schema marks this property as deprecated.
 	DataStorageBytesHour int64 `json:"data_storage_bytes_hour"`
 	// Bytes. Egress traffic from the Neon cloud to the client for given project over the billing period.
 	// Includes deleted endpoints. The value has some lag. The value is reset at the beginning of each
@@ -17091,8 +17220,12 @@ type Project struct {
 	CreatedAt time.Time `json:"created_at"`
 	// A timestamp indicating when the project was last updated.
 	UpdatedAt time.Time `json:"updated_at"`
-	// The current space occupied by the project in Postgres storage, in bytes. Synthetic Postgres storage
-	// size combines the logical data size and Write-Ahead Log (WAL) size for all branches in a project.
+	// Deprecated: always returns 0. Use the consumption history v2 endpoints
+	// (`/consumption_history/v2/projects`, `/consumption_history/v2/branches`) instead. The current space
+	// occupied by the project in Postgres storage, in bytes. Synthetic Postgres storage size combines the
+	// logical data size and Write-Ahead Log (WAL) size for all branches in a project.
+	//
+	// Deprecated: schema marks this property as deprecated.
 	SyntheticStorageSize OptInt64 `json:"synthetic_storage_size"`
 	// A date-time indicating when Neon Cloud started measuring consumption for current consumption period.
 	ConsumptionPeriodStart time.Time `json:"consumption_period_start"`
@@ -18368,6 +18501,8 @@ type ProjectCreateRequestProject struct {
 	Settings OptProjectSettingsData `json:"settings"`
 	// The project name. If not specified, the name will be identical to the generated project ID.
 	Name OptString `json:"name"`
+	// Enable Realtime for the default branch with these options.
+	Realtime OptRealtimeOptions `json:"realtime"`
 	// Configuration for the initial branch created with the project.
 	Branch OptProjectCreateRequestProjectBranch `json:"branch"`
 	// Deprecated. Use `default_endpoint_settings.autoscaling_limit_min_cu` instead.
@@ -18414,6 +18549,11 @@ func (s *ProjectCreateRequestProject) GetSettings() OptProjectSettingsData {
 // GetName returns the value of Name.
 func (s *ProjectCreateRequestProject) GetName() OptString {
 	return s.Name
+}
+
+// GetRealtime returns the value of Realtime.
+func (s *ProjectCreateRequestProject) GetRealtime() OptRealtimeOptions {
+	return s.Realtime
 }
 
 // GetBranch returns the value of Branch.
@@ -18474,6 +18614,11 @@ func (s *ProjectCreateRequestProject) SetSettings(val OptProjectSettingsData) {
 // SetName sets the value of Name.
 func (s *ProjectCreateRequestProject) SetName(val OptString) {
 	s.Name = val
+}
+
+// SetRealtime sets the value of Realtime.
+func (s *ProjectCreateRequestProject) SetRealtime(val OptRealtimeOptions) {
+	s.Realtime = val
 }
 
 // SetBranch sets the value of Branch.
@@ -18640,8 +18785,12 @@ type ProjectListItem struct {
 	CreatedAt time.Time `json:"created_at"`
 	// A timestamp indicating when the project was last updated.
 	UpdatedAt time.Time `json:"updated_at"`
-	// The current space occupied by the project in Postgres storage, in bytes. Synthetic Postgres storage
-	// size combines the logical data size and Write-Ahead Log (WAL) size for all branches in a project.
+	// Deprecated: always returns 0. Use the consumption history v2 endpoints
+	// (`/consumption_history/v2/projects`, `/consumption_history/v2/branches`) instead. The current space
+	// occupied by the project in Postgres storage, in bytes. Synthetic Postgres storage size combines the
+	// logical data size and Write-Ahead Log (WAL) size for all branches in a project.
+	//
+	// Deprecated: schema marks this property as deprecated.
 	SyntheticStorageSize OptInt64 `json:"synthetic_storage_size"`
 	// Deprecated. Use `consumption_period_end` from `GET /projects/{project_id}` instead. A timestamp
 	// indicating when the project quota resets.
@@ -20000,6 +20149,140 @@ func (s *ProjectsWithIntegrationResponseProjectsItem) SetIntegration(val string)
 
 type Provisioner string
 
+// Ref: #/components/schemas/Realtime
+type Realtime struct {
+	// Whether Realtime is enabled for the branch.
+	Enabled bool `json:"enabled"`
+	// Whether a provisioning, settings, rotation or deprovisioning change is still being applied.
+	Pending        bool      `json:"pending"`
+	InvocationURL  OptString `json:"invocation_url"`
+	Revision       OptInt32  `json:"revision"`
+	AllowedOrigins []string  `json:"allowed_origins"`
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *Realtime) GetEnabled() bool {
+	return s.Enabled
+}
+
+// GetPending returns the value of Pending.
+func (s *Realtime) GetPending() bool {
+	return s.Pending
+}
+
+// GetInvocationURL returns the value of InvocationURL.
+func (s *Realtime) GetInvocationURL() OptString {
+	return s.InvocationURL
+}
+
+// GetRevision returns the value of Revision.
+func (s *Realtime) GetRevision() OptInt32 {
+	return s.Revision
+}
+
+// GetAllowedOrigins returns the value of AllowedOrigins.
+func (s *Realtime) GetAllowedOrigins() []string {
+	return s.AllowedOrigins
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *Realtime) SetEnabled(val bool) {
+	s.Enabled = val
+}
+
+// SetPending sets the value of Pending.
+func (s *Realtime) SetPending(val bool) {
+	s.Pending = val
+}
+
+// SetInvocationURL sets the value of InvocationURL.
+func (s *Realtime) SetInvocationURL(val OptString) {
+	s.InvocationURL = val
+}
+
+// SetRevision sets the value of Revision.
+func (s *Realtime) SetRevision(val OptInt32) {
+	s.Revision = val
+}
+
+// SetAllowedOrigins sets the value of AllowedOrigins.
+func (s *Realtime) SetAllowedOrigins(val []string) {
+	s.AllowedOrigins = val
+}
+
+// Ref: #/components/schemas/RealtimeOptions
+type RealtimeOptions struct {
+	// The browser origins allowed to connect, each `http` or `https` with a host and optional port and no
+	// path. An empty list, or `*` alone, allows any origin. Omitted keeps the current or inherited value.
+	AllowedOrigins []string `json:"allowed_origins"`
+}
+
+// GetAllowedOrigins returns the value of AllowedOrigins.
+func (s *RealtimeOptions) GetAllowedOrigins() []string {
+	return s.AllowedOrigins
+}
+
+// SetAllowedOrigins sets the value of AllowedOrigins.
+func (s *RealtimeOptions) SetAllowedOrigins(val []string) {
+	s.AllowedOrigins = val
+}
+
+// Ref: #/components/schemas/RealtimeSecret
+type RealtimeSecret struct {
+	// The key the application backend issues Realtime tokens with, `nrt_live_1` followed by the unpadded
+	// base64url 32-byte AES-256-GCM key.
+	Secret string `json:"secret"`
+	// Whether a change is still being applied. After a rotation, the secret changes when this becomes
+	// false.
+	Pending bool `json:"pending"`
+}
+
+// GetSecret returns the value of Secret.
+func (s *RealtimeSecret) GetSecret() string {
+	return s.Secret
+}
+
+// GetPending returns the value of Pending.
+func (s *RealtimeSecret) GetPending() bool {
+	return s.Pending
+}
+
+// SetSecret sets the value of Secret.
+func (s *RealtimeSecret) SetSecret(val string) {
+	s.Secret = val
+}
+
+// SetPending sets the value of Pending.
+func (s *RealtimeSecret) SetPending(val bool) {
+	s.Pending = val
+}
+
+// RealtimeSecretHeaders wraps RealtimeSecret with response headers.
+type RealtimeSecretHeaders struct {
+	CacheControl OptString
+	Response     RealtimeSecret
+}
+
+// GetCacheControl returns the value of CacheControl.
+func (s *RealtimeSecretHeaders) GetCacheControl() OptString {
+	return s.CacheControl
+}
+
+// GetResponse returns the value of Response.
+func (s *RealtimeSecretHeaders) GetResponse() RealtimeSecret {
+	return s.Response
+}
+
+// SetCacheControl sets the value of CacheControl.
+func (s *RealtimeSecretHeaders) SetCacheControl(val OptString) {
+	s.CacheControl = val
+}
+
+// SetResponse sets the value of Response.
+func (s *RealtimeSecretHeaders) SetResponse(val RealtimeSecret) {
+	s.Response = val
+}
+
 // Ref: #/components/schemas/RegionResponse
 type RegionResponse struct {
 	// Cloud region where the resource's Postgres compute and storage reside (for example,
@@ -20170,7 +20453,7 @@ type Role struct {
 	Password OptString `json:"password"`
 	// Whether or not the role is system-protected.
 	Protected OptBool `json:"protected"`
-	// Authentication method configured for this role: `password`, `oauth`, or `no_login`.
+	// Authentication method configured for this role: `password`, `oauth`, `oidc`, or `no_login`.
 	AuthenticationMethod OptString `json:"authentication_method"`
 	// A timestamp indicating when the role was created.
 	CreatedAt time.Time `json:"created_at"`
@@ -20538,6 +20821,9 @@ func (s *RotateCredentialResponsePrincipalType) UnmarshalText(data []byte) error
 		return errors.Errorf("invalid value: %q", data)
 	}
 }
+
+// RotateProjectBranchRealtimeSecretAccepted is response for RotateProjectBranchRealtimeSecret operation.
+type RotateProjectBranchRealtimeSecretAccepted struct{}
 
 // A branch-effective schedule trigger for a Function.
 // Ref: #/components/schemas/ScheduleTrigger

@@ -518,6 +518,19 @@ type Handler interface {
 	//
 	// DELETE /projects/{project_id}/branches/{branch_id}/auth
 	DisableNeonAuth(ctx context.Context, req OptDisableNeonAuthReq, params DisableNeonAuthParams) error
+	// DisableProjectBranchRealtime implements disableProjectBranchRealtime operation.
+	//
+	// Disables Realtime for the branch and discards its shared secret. Deprovisioning is asynchronous.
+	//
+	// DELETE /projects/{project_id}/branches/{branch_id}/realtime
+	DisableProjectBranchRealtime(ctx context.Context, params DisableProjectBranchRealtimeParams) error
+	// EnableProjectBranchRealtime implements enableProjectBranchRealtime operation.
+	//
+	// Enables Realtime for the branch, or applies new options to an enabled branch. Provisioning is
+	// asynchronous; poll the Realtime state until it is no longer pending.
+	//
+	// POST /projects/{project_id}/branches/{branch_id}/realtime
+	EnableProjectBranchRealtime(ctx context.Context, req OptRealtimeOptions, params EnableProjectBranchRealtimeParams) error
 	// FinalizeRestoreBranch implements finalizeRestoreBranch operation.
 	//
 	// Finalize the restore operation for a branch created from a snapshot. This operation updates the
@@ -823,6 +836,22 @@ type Handler interface {
 	//
 	// GET /projects/{project_id}/branches/{branch_id}/functions/{slug}
 	GetProjectBranchFunction(ctx context.Context, params GetProjectBranchFunctionParams) (*NeonFunctionResponse, error)
+	// GetProjectBranchRealtime implements getProjectBranchRealtime operation.
+	//
+	// Retrieves whether Realtime is enabled for the branch, whether a change is still being applied, and,
+	// once provisioned, its invocation URL and allowed origins. The shared secret is returned by
+	// `GET /projects/{project_id}/branches/{branch_id}/realtime/secret`.
+	//
+	// GET /projects/{project_id}/branches/{branch_id}/realtime
+	GetProjectBranchRealtime(ctx context.Context, params GetProjectBranchRealtimeParams) (*Realtime, error)
+	// GetProjectBranchRealtimeSecret implements getProjectBranchRealtimeSecret operation.
+	//
+	// Retrieves the secret the application backend issues Realtime tokens with. Requires permission to
+	// read the project's credentials. Returns 404 while Realtime is disabled or before the secret is
+	// provisioned. After a rotation, this returns the previous secret until `pending` is false.
+	//
+	// GET /projects/{project_id}/branches/{branch_id}/realtime/secret
+	GetProjectBranchRealtimeSecret(ctx context.Context, params GetProjectBranchRealtimeSecretParams) (*RealtimeSecretHeaders, error)
 	// GetProjectBranchRole implements getProjectBranchRole operation.
 	//
 	// Retrieves details about the specified role. In Neon, the terms "role" and "user" are synonymous. For
@@ -1372,6 +1401,14 @@ type Handler interface {
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/credentials/{token_id}/rotate
 	RotateCredential(ctx context.Context, params RotateCredentialParams) (*RotateCredentialResponse, error)
+	// RotateProjectBranchRealtimeSecret implements rotateProjectBranchRealtimeSecret operation.
+	//
+	// Replaces the branch's Realtime shared secret. Rotation is asynchronous: once the Realtime state is
+	// no longer pending, the previous secret stops working and
+	// `GET /projects/{project_id}/branches/{branch_id}/realtime/secret` returns the new one.
+	//
+	// POST /projects/{project_id}/branches/{branch_id}/realtime/rotate_secret
+	RotateProjectBranchRealtimeSecret(ctx context.Context, params RotateProjectBranchRealtimeSecretParams) error
 	// SendNeonAuthEmailProviderTest implements sendNeonAuthEmailProviderTest operation.
 	//
 	// Sends a test email using the branch's already-saved custom SMTP configuration. Only the

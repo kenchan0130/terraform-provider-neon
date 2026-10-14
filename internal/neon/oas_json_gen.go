@@ -3774,6 +3774,8 @@ func (s *BillingSubscriptionType) Decode(d *jx.Decoder) error {
 		*s = BillingSubscriptionTypeFreeV2
 	case BillingSubscriptionTypeFreeV3:
 		*s = BillingSubscriptionTypeFreeV3
+	case BillingSubscriptionTypeBuild:
+		*s = BillingSubscriptionTypeBuild
 	case BillingSubscriptionTypeLaunch:
 		*s = BillingSubscriptionTypeLaunch
 	case BillingSubscriptionTypeLaunchV3:
@@ -4962,6 +4964,12 @@ func (s *BranchCreateRequestBranch) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.Realtime.Set {
+			e.FieldStart("realtime")
+			s.Realtime.Encode(e)
+		}
+	}
+	{
 		if s.Archived.Set {
 			e.FieldStart("archived")
 			s.Archived.Encode(e)
@@ -4981,15 +4989,16 @@ func (s *BranchCreateRequestBranch) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfBranchCreateRequestBranch = [8]string{
+var jsonFieldsNameOfBranchCreateRequestBranch = [9]string{
 	0: "parent_id",
 	1: "name",
 	2: "parent_lsn",
 	3: "parent_timestamp",
 	4: "protected",
-	5: "archived",
-	6: "init_source",
-	7: "expires_at",
+	5: "realtime",
+	6: "archived",
+	7: "init_source",
+	8: "expires_at",
 }
 
 // Decode decodes BranchCreateRequestBranch from json.
@@ -5050,6 +5059,16 @@ func (s *BranchCreateRequestBranch) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"protected\"")
+			}
+		case "realtime":
+			if err := func() error {
+				s.Realtime.Reset()
+				if err := s.Realtime.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"realtime\"")
 			}
 		case "archived":
 			if err := func() error {
@@ -9594,10 +9613,8 @@ func (s *ConsumptionHistoryPerTimeframe) encodeFields(e *jx.Encoder) {
 		e.UInt64(s.SyntheticStorageSizeBytes)
 	}
 	{
-		if s.DataStorageBytesHour.Set {
-			e.FieldStart("data_storage_bytes_hour")
-			s.DataStorageBytesHour.Encode(e)
-		}
+		e.FieldStart("data_storage_bytes_hour")
+		e.UInt64(s.DataStorageBytesHour)
 	}
 	{
 		if s.LogicalSizeBytes.Set {
@@ -9707,9 +9724,11 @@ func (s *ConsumptionHistoryPerTimeframe) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"synthetic_storage_size_bytes\"")
 			}
 		case "data_storage_bytes_hour":
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
-				s.DataStorageBytesHour.Reset()
-				if err := s.DataStorageBytesHour.Decode(d); err != nil {
+				v, err := d.UInt64()
+				s.DataStorageBytesHour = uint64(v)
+				if err != nil {
 					return err
 				}
 				return nil
@@ -9746,7 +9765,7 @@ func (s *ConsumptionHistoryPerTimeframe) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b00111111,
+		0b01111111,
 		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
@@ -10694,6 +10713,12 @@ func (s *CreateProjectBranchReqBranch) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.Realtime.Set {
+			e.FieldStart("realtime")
+			s.Realtime.Encode(e)
+		}
+	}
+	{
 		if s.Archived.Set {
 			e.FieldStart("archived")
 			s.Archived.Encode(e)
@@ -10713,15 +10738,16 @@ func (s *CreateProjectBranchReqBranch) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfCreateProjectBranchReqBranch = [8]string{
+var jsonFieldsNameOfCreateProjectBranchReqBranch = [9]string{
 	0: "parent_id",
 	1: "name",
 	2: "parent_lsn",
 	3: "parent_timestamp",
 	4: "protected",
-	5: "archived",
-	6: "init_source",
-	7: "expires_at",
+	5: "realtime",
+	6: "archived",
+	7: "init_source",
+	8: "expires_at",
 }
 
 // Decode decodes CreateProjectBranchReqBranch from json.
@@ -10782,6 +10808,16 @@ func (s *CreateProjectBranchReqBranch) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"protected\"")
+			}
+		case "realtime":
+			if err := func() error {
+				s.Realtime.Reset()
+				if err := s.Realtime.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"realtime\"")
 			}
 		case "archived":
 			if err := func() error {
@@ -13210,13 +13246,20 @@ func (s *DataAPIReponse) encodeFields(e *jx.Encoder) {
 			s.AvailableSchemas.Encode(e)
 		}
 	}
+	{
+		if s.ObservedAt.Set {
+			e.FieldStart("observed_at")
+			s.ObservedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
 }
 
-var jsonFieldsNameOfDataAPIReponse = [4]string{
+var jsonFieldsNameOfDataAPIReponse = [5]string{
 	0: "url",
 	1: "status",
 	2: "settings",
 	3: "available_schemas",
+	4: "observed_at",
 }
 
 // Decode decodes DataAPIReponse from json.
@@ -13271,6 +13314,16 @@ func (s *DataAPIReponse) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"available_schemas\"")
+			}
+		case "observed_at":
+			if err := func() error {
+				s.ObservedAt.Reset()
+				if err := s.ObservedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"observed_at\"")
 			}
 		default:
 			return d.Skip()
@@ -30349,6 +30402,39 @@ func (s *OptProvisioner) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes RealtimeOptions as json.
+func (o OptRealtimeOptions) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes RealtimeOptions from json.
+func (o *OptRealtimeOptions) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptRealtimeOptions to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptRealtimeOptions) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptRealtimeOptions) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes RestoreSnapshotReq as json.
 func (o OptRestoreSnapshotReq) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -35578,6 +35664,12 @@ func (s *ProjectCreateRequestProject) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.Realtime.Set {
+			e.FieldStart("realtime")
+			s.Realtime.Encode(e)
+		}
+	}
+	{
 		if s.Branch.Set {
 			e.FieldStart("branch")
 			s.Branch.Encode(e)
@@ -35639,19 +35731,20 @@ func (s *ProjectCreateRequestProject) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfProjectCreateRequestProject = [12]string{
+var jsonFieldsNameOfProjectCreateRequestProject = [13]string{
 	0:  "settings",
 	1:  "name",
-	2:  "branch",
-	3:  "autoscaling_limit_min_cu",
-	4:  "autoscaling_limit_max_cu",
-	5:  "provisioner",
-	6:  "region_id",
-	7:  "default_endpoint_settings",
-	8:  "pg_version",
-	9:  "store_passwords",
-	10: "history_retention_seconds",
-	11: "org_id",
+	2:  "realtime",
+	3:  "branch",
+	4:  "autoscaling_limit_min_cu",
+	5:  "autoscaling_limit_max_cu",
+	6:  "provisioner",
+	7:  "region_id",
+	8:  "default_endpoint_settings",
+	9:  "pg_version",
+	10: "store_passwords",
+	11: "history_retention_seconds",
+	12: "org_id",
 }
 
 // Decode decodes ProjectCreateRequestProject from json.
@@ -35682,6 +35775,16 @@ func (s *ProjectCreateRequestProject) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "realtime":
+			if err := func() error {
+				s.Realtime.Reset()
+				if err := s.Realtime.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"realtime\"")
 			}
 		case "branch":
 			if err := func() error {
@@ -38979,6 +39082,372 @@ func (s Provisioner) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *Provisioner) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *Realtime) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *Realtime) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("enabled")
+		e.Bool(s.Enabled)
+	}
+	{
+		e.FieldStart("pending")
+		e.Bool(s.Pending)
+	}
+	{
+		if s.InvocationURL.Set {
+			e.FieldStart("invocation_url")
+			s.InvocationURL.Encode(e)
+		}
+	}
+	{
+		if s.Revision.Set {
+			e.FieldStart("revision")
+			s.Revision.Encode(e)
+		}
+	}
+	{
+		if s.AllowedOrigins != nil {
+			e.FieldStart("allowed_origins")
+			e.ArrStart()
+			for _, elem := range s.AllowedOrigins {
+				e.Str(elem)
+			}
+			e.ArrEnd()
+		}
+	}
+}
+
+var jsonFieldsNameOfRealtime = [5]string{
+	0: "enabled",
+	1: "pending",
+	2: "invocation_url",
+	3: "revision",
+	4: "allowed_origins",
+}
+
+// Decode decodes Realtime from json.
+func (s *Realtime) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode Realtime to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "enabled":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Bool()
+				s.Enabled = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"enabled\"")
+			}
+		case "pending":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Bool()
+				s.Pending = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pending\"")
+			}
+		case "invocation_url":
+			if err := func() error {
+				s.InvocationURL.Reset()
+				if err := s.InvocationURL.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"invocation_url\"")
+			}
+		case "revision":
+			if err := func() error {
+				s.Revision.Reset()
+				if err := s.Revision.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"revision\"")
+			}
+		case "allowed_origins":
+			if err := func() error {
+				s.AllowedOrigins = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.AllowedOrigins = append(s.AllowedOrigins, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"allowed_origins\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode Realtime")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfRealtime) {
+					name = jsonFieldsNameOfRealtime[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *Realtime) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *Realtime) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *RealtimeOptions) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *RealtimeOptions) encodeFields(e *jx.Encoder) {
+	{
+		if s.AllowedOrigins != nil {
+			e.FieldStart("allowed_origins")
+			e.ArrStart()
+			for _, elem := range s.AllowedOrigins {
+				e.Str(elem)
+			}
+			e.ArrEnd()
+		}
+	}
+}
+
+var jsonFieldsNameOfRealtimeOptions = [1]string{
+	0: "allowed_origins",
+}
+
+// Decode decodes RealtimeOptions from json.
+func (s *RealtimeOptions) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RealtimeOptions to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "allowed_origins":
+			if err := func() error {
+				s.AllowedOrigins = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.AllowedOrigins = append(s.AllowedOrigins, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"allowed_origins\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode RealtimeOptions")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *RealtimeOptions) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RealtimeOptions) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *RealtimeSecret) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *RealtimeSecret) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("secret")
+		e.Str(s.Secret)
+	}
+	{
+		e.FieldStart("pending")
+		e.Bool(s.Pending)
+	}
+}
+
+var jsonFieldsNameOfRealtimeSecret = [2]string{
+	0: "secret",
+	1: "pending",
+}
+
+// Decode decodes RealtimeSecret from json.
+func (s *RealtimeSecret) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RealtimeSecret to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "secret":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Secret = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"secret\"")
+			}
+		case "pending":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Bool()
+				s.Pending = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pending\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode RealtimeSecret")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfRealtimeSecret) {
+					name = jsonFieldsNameOfRealtimeSecret[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *RealtimeSecret) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RealtimeSecret) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
