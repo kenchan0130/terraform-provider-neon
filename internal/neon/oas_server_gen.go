@@ -143,6 +143,14 @@ type Handler interface {
 	//
 	// POST /projects/auth/user
 	CreateNeonAuthNewUser(ctx context.Context, req *NeonAuthCreateNewUserRequest) (*NeonAuthCreateNewUserResponse, error)
+	// CreateNeonAuthOAuthClient implements createNeonAuthOAuthClient operation.
+	//
+	// Registers an OAuth client with the branch's Neon Auth OAuth provider. For `confidential` clients the
+	// response includes the `client_secret`, which is shown only once. Every entry in `resources` must be
+	// configured on the OAuth provider plugin.
+	//
+	// POST /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients
+	CreateNeonAuthOAuthClient(ctx context.Context, req *NeonAuthOAuthClientCreateRequest, params CreateNeonAuthOAuthClientParams) (*NeonAuthOAuthClientCreated, error)
 	// CreateNeonAuthProviderSDKKeys implements createNeonAuthProviderSDKKeys operation.
 	//
 	// Generates SDK or API Keys for the auth provider. These might be called different things depending on
@@ -336,6 +344,12 @@ type Handler interface {
 	//
 	// DELETE /projects/{project_id}/auth/integration/{auth_provider}
 	DeleteNeonAuthIntegration(ctx context.Context, req OptDeleteNeonAuthIntegrationReq, params DeleteNeonAuthIntegrationParams) error
+	// DeleteNeonAuthOAuthClient implements deleteNeonAuthOAuthClient operation.
+	//
+	// Deletes an OAuth client. Tokens already issued to the client are not revoked.
+	//
+	// DELETE /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}
+	DeleteNeonAuthOAuthClient(ctx context.Context, params DeleteNeonAuthOAuthClientParams) error
 	// DeleteNeonAuthOauthProvider implements deleteNeonAuthOauthProvider operation.
 	//
 	// Deprecated. Use
@@ -698,6 +712,20 @@ type Handler interface {
 	//
 	// GET /projects/{project_id}/auth/email_server
 	GetNeonAuthEmailServer(ctx context.Context, params GetNeonAuthEmailServerParams) (*NeonAuthEmailServerConfigResponse, error)
+	// GetNeonAuthOAuthClient implements getNeonAuthOAuthClient operation.
+	//
+	// Returns an OAuth client registered with the branch's Neon Auth OAuth provider. The client secret is
+	// never returned.
+	//
+	// GET /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}
+	GetNeonAuthOAuthClient(ctx context.Context, params GetNeonAuthOAuthClientParams) (*NeonAuthOAuthClient, error)
+	// GetNeonAuthOAuthProviderPlugin implements getNeonAuthOAuthProviderPlugin operation.
+	//
+	// Returns the OAuth provider plugin configuration for Neon Auth. The OAuth provider plugin lets Neon
+	// Auth act as an OAuth 2.1 authorization server for your own clients, such as MCP clients.
+	//
+	// GET /projects/{project_id}/branches/{branch_id}/auth/plugins/oauth-provider
+	GetNeonAuthOAuthProviderPlugin(ctx context.Context, params GetNeonAuthOAuthProviderPluginParams) (*NeonAuthOAuthProviderConfig, error)
 	// GetNeonAuthPhoneNumberPlugin implements getNeonAuthPhoneNumberPlugin operation.
 	//
 	// Returns the phone number plugin configuration for Neon Auth. The phone number plugin enables
@@ -978,6 +1006,13 @@ type Handler interface {
 	//
 	// GET /projects/{project_id}/auth/integrations
 	ListNeonAuthIntegrations(ctx context.Context, params ListNeonAuthIntegrationsParams) (*ListNeonAuthIntegrationsResponse, error)
+	// ListNeonAuthOAuthClients implements listNeonAuthOAuthClients operation.
+	//
+	// Lists the OAuth clients registered for the branch's Neon Auth OAuth provider. Client secrets are
+	// never returned.
+	//
+	// GET /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients
+	ListNeonAuthOAuthClients(ctx context.Context, params ListNeonAuthOAuthClientsParams) (*ListNeonAuthOAuthClientsResponse, error)
 	// ListNeonAuthOauthProviders implements listNeonAuthOauthProviders operation.
 	//
 	// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead. Removal
@@ -1401,6 +1436,13 @@ type Handler interface {
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/credentials/{token_id}/rotate
 	RotateCredential(ctx context.Context, params RotateCredentialParams) (*RotateCredentialResponse, error)
+	// RotateNeonAuthOAuthClientSecret implements rotateNeonAuthOAuthClientSecret operation.
+	//
+	// Generates a new secret for a confidential OAuth client and invalidates the previous one. The new
+	// secret is shown only once.
+	//
+	// POST /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}/rotate_secret
+	RotateNeonAuthOAuthClientSecret(ctx context.Context, params RotateNeonAuthOAuthClientSecretParams) (*NeonAuthOAuthClientSecret, error)
 	// RotateProjectBranchRealtimeSecret implements rotateProjectBranchRealtimeSecret operation.
 	//
 	// Replaces the branch's Realtime shared secret. Rotation is asynchronous: once the Realtime state is
@@ -1585,6 +1627,22 @@ type Handler interface {
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/magic-link
 	UpdateNeonAuthMagicLinkPlugin(ctx context.Context, req *NeonAuthMagicLinkConfigUpdate, params UpdateNeonAuthMagicLinkPluginParams) (*NeonAuthMagicLinkConfig, error)
+	// UpdateNeonAuthOAuthClient implements updateNeonAuthOAuthClient operation.
+	//
+	// Updates an OAuth client. Only the fields provided in the request body are updated. A provided
+	// `resources` list replaces the client's stored list. The client `type` cannot be changed.
+	//
+	// PATCH /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}
+	UpdateNeonAuthOAuthClient(ctx context.Context, req *NeonAuthOAuthClientUpdateRequest, params UpdateNeonAuthOAuthClientParams) (*NeonAuthOAuthClient, error)
+	// UpdateNeonAuthOAuthProviderPlugin implements updateNeonAuthOAuthProviderPlugin operation.
+	//
+	// Updates the OAuth provider plugin configuration for Neon Auth. Only the fields provided in the
+	// request body are updated; omitted fields retain their current values. A provided `resources` list
+	// replaces the stored list. A provided `mcp` object replaces the stored MCP configuration and must
+	// include `resource`. The plugin can only be enabled on the project's root branch.
+	//
+	// PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/oauth-provider
+	UpdateNeonAuthOAuthProviderPlugin(ctx context.Context, req *NeonAuthOAuthProviderConfigUpdate, params UpdateNeonAuthOAuthProviderPluginParams) (*NeonAuthOAuthProviderConfig, error)
 	// UpdateNeonAuthOauthProvider implements updateNeonAuthOauthProvider operation.
 	//
 	// Deprecated. Use
