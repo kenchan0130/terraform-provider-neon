@@ -1924,14 +1924,18 @@ type Branch struct {
 	// Deprecated: schema marks this property as deprecated.
 	CPUUsedSec int64 `json:"cpu_used_sec"`
 	// Total Postgres compute time consumed by this branch during the current billing period, in CU-seconds
-	// (weighted by compute size). Divide by 3600 for CU-hours.
+	// (weighted by compute size). Divide by 3600 for CU-hours. Not intended for billing or metering. For
+	// billing, use `/consumption_history/v2/branches`.
 	ComputeTimeSeconds int64 `json:"compute_time_seconds"`
 	// Total time this branch's compute has been active during the current billing period, in seconds (not
-	// weighted by compute size). Distinct from `compute_time_seconds`, which is CU-weighted.
+	// weighted by compute size). Distinct from `compute_time_seconds`, which is CU-weighted. Not intended
+	// for billing or metering. For billing, use `/consumption_history/v2/branches`.
 	ActiveTimeSeconds int64 `json:"active_time_seconds"`
-	// Data written by this branch during the current billing period, in bytes.
+	// Data written by this branch during the current billing period, in bytes. Not intended for billing or
+	// metering. For billing, use `/consumption_history/v2/branches`.
 	WrittenDataBytes int64 `json:"written_data_bytes"`
-	// Total data transferred out of the branch, in bytes. Used as a consumption metric.
+	// Total data transferred out of the branch, in bytes. Used as a consumption metric. Not intended for
+	// billing or metering. For billing, use `/consumption_history/v2/branches`.
 	DataTransferBytes int64 `json:"data_transfer_bytes"`
 	// A timestamp indicating when the branch was created.
 	CreatedAt time.Time `json:"created_at"`
@@ -6344,6 +6348,9 @@ func (s *DeleteNeonAuthIntegrationReq) SetDeleteData(val OptBool) {
 	s.DeleteData = val
 }
 
+// DeleteNeonAuthOAuthClientNoContent is response for DeleteNeonAuthOAuthClient operation.
+type DeleteNeonAuthOAuthClientNoContent struct{}
+
 // DeleteNeonAuthOauthProviderOK is response for DeleteNeonAuthOauthProvider operation.
 type DeleteNeonAuthOauthProviderOK struct{}
 
@@ -8476,6 +8483,22 @@ func (s *ListNeonAuthIntegrationsResponse) SetData(val []NeonAuthIntegration) {
 	s.Data = val
 }
 
+// Ref: #/components/schemas/ListNeonAuthOAuthClientsResponse
+type ListNeonAuthOAuthClientsResponse struct {
+	// OAuth clients registered for the branch.
+	Clients []NeonAuthOAuthClient `json:"clients"`
+}
+
+// GetClients returns the value of Clients.
+func (s *ListNeonAuthOAuthClientsResponse) GetClients() []NeonAuthOAuthClient {
+	return s.Clients
+}
+
+// SetClients sets the value of Clients.
+func (s *ListNeonAuthOAuthClientsResponse) SetClients(val []NeonAuthOAuthClient) {
+	s.Clients = val
+}
+
 // Ref: #/components/schemas/ListNeonAuthOauthProvidersResponse
 type ListNeonAuthOauthProvidersResponse struct {
 	// OAuth providers configured for Neon Auth on the project.
@@ -10206,6 +10229,654 @@ func (s *NeonAuthMagicLinkConfigUpdate) SetDisableSignUp(val OptBool) {
 	s.DisableSignUp = val
 }
 
+// Ref: #/components/schemas/NeonAuthOAuthClient
+type NeonAuthOAuthClient struct {
+	// The OAuth client ID.
+	ClientID string `json:"client_id"`
+	// Display name of the client.
+	Name string                  `json:"name"`
+	Type NeonAuthOAuthClientType `json:"type"`
+	// Redirect URIs the client may use.
+	RedirectUris []string `json:"redirect_uris"`
+	// Identifiers of the protected resources the client is linked to.
+	Resources []string `json:"resources"`
+	// Whether users are not asked for consent when authorizing this client.
+	SkipConsent bool `json:"skip_consent"`
+	// Whether the client is disabled.
+	Disabled bool `json:"disabled"`
+	// When the client was created.
+	CreatedAt OptDateTime `json:"created_at"`
+}
+
+// GetClientID returns the value of ClientID.
+func (s *NeonAuthOAuthClient) GetClientID() string {
+	return s.ClientID
+}
+
+// GetName returns the value of Name.
+func (s *NeonAuthOAuthClient) GetName() string {
+	return s.Name
+}
+
+// GetType returns the value of Type.
+func (s *NeonAuthOAuthClient) GetType() NeonAuthOAuthClientType {
+	return s.Type
+}
+
+// GetRedirectUris returns the value of RedirectUris.
+func (s *NeonAuthOAuthClient) GetRedirectUris() []string {
+	return s.RedirectUris
+}
+
+// GetResources returns the value of Resources.
+func (s *NeonAuthOAuthClient) GetResources() []string {
+	return s.Resources
+}
+
+// GetSkipConsent returns the value of SkipConsent.
+func (s *NeonAuthOAuthClient) GetSkipConsent() bool {
+	return s.SkipConsent
+}
+
+// GetDisabled returns the value of Disabled.
+func (s *NeonAuthOAuthClient) GetDisabled() bool {
+	return s.Disabled
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *NeonAuthOAuthClient) GetCreatedAt() OptDateTime {
+	return s.CreatedAt
+}
+
+// SetClientID sets the value of ClientID.
+func (s *NeonAuthOAuthClient) SetClientID(val string) {
+	s.ClientID = val
+}
+
+// SetName sets the value of Name.
+func (s *NeonAuthOAuthClient) SetName(val string) {
+	s.Name = val
+}
+
+// SetType sets the value of Type.
+func (s *NeonAuthOAuthClient) SetType(val NeonAuthOAuthClientType) {
+	s.Type = val
+}
+
+// SetRedirectUris sets the value of RedirectUris.
+func (s *NeonAuthOAuthClient) SetRedirectUris(val []string) {
+	s.RedirectUris = val
+}
+
+// SetResources sets the value of Resources.
+func (s *NeonAuthOAuthClient) SetResources(val []string) {
+	s.Resources = val
+}
+
+// SetSkipConsent sets the value of SkipConsent.
+func (s *NeonAuthOAuthClient) SetSkipConsent(val bool) {
+	s.SkipConsent = val
+}
+
+// SetDisabled sets the value of Disabled.
+func (s *NeonAuthOAuthClient) SetDisabled(val bool) {
+	s.Disabled = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *NeonAuthOAuthClient) SetCreatedAt(val OptDateTime) {
+	s.CreatedAt = val
+}
+
+// Ref: #/components/schemas/NeonAuthOAuthClientCreateRequest
+type NeonAuthOAuthClientCreateRequest struct {
+	// Display name of the client.
+	Name string `json:"name"`
+	// Redirect URIs the client may use. Must be https, or http on loopback hosts when localhost is
+	// allowed.
+	RedirectUris []string                `json:"redirect_uris"`
+	Type         NeonAuthOAuthClientType `json:"type"`
+	// Identifiers of the protected resources to link the client to. Each must be configured on the OAuth
+	// provider plugin.
+	Resources []string `json:"resources"`
+	// Whether to skip the consent prompt for this client.
+	SkipConsent OptBool `json:"skip_consent"`
+}
+
+// GetName returns the value of Name.
+func (s *NeonAuthOAuthClientCreateRequest) GetName() string {
+	return s.Name
+}
+
+// GetRedirectUris returns the value of RedirectUris.
+func (s *NeonAuthOAuthClientCreateRequest) GetRedirectUris() []string {
+	return s.RedirectUris
+}
+
+// GetType returns the value of Type.
+func (s *NeonAuthOAuthClientCreateRequest) GetType() NeonAuthOAuthClientType {
+	return s.Type
+}
+
+// GetResources returns the value of Resources.
+func (s *NeonAuthOAuthClientCreateRequest) GetResources() []string {
+	return s.Resources
+}
+
+// GetSkipConsent returns the value of SkipConsent.
+func (s *NeonAuthOAuthClientCreateRequest) GetSkipConsent() OptBool {
+	return s.SkipConsent
+}
+
+// SetName sets the value of Name.
+func (s *NeonAuthOAuthClientCreateRequest) SetName(val string) {
+	s.Name = val
+}
+
+// SetRedirectUris sets the value of RedirectUris.
+func (s *NeonAuthOAuthClientCreateRequest) SetRedirectUris(val []string) {
+	s.RedirectUris = val
+}
+
+// SetType sets the value of Type.
+func (s *NeonAuthOAuthClientCreateRequest) SetType(val NeonAuthOAuthClientType) {
+	s.Type = val
+}
+
+// SetResources sets the value of Resources.
+func (s *NeonAuthOAuthClientCreateRequest) SetResources(val []string) {
+	s.Resources = val
+}
+
+// SetSkipConsent sets the value of SkipConsent.
+func (s *NeonAuthOAuthClientCreateRequest) SetSkipConsent(val OptBool) {
+	s.SkipConsent = val
+}
+
+// Merged schema.
+// Ref: #/components/schemas/NeonAuthOAuthClientCreated
+type NeonAuthOAuthClientCreated struct {
+	// The OAuth client ID.
+	ClientID string `json:"client_id"`
+	// Display name of the client.
+	Name string                  `json:"name"`
+	Type NeonAuthOAuthClientType `json:"type"`
+	// Redirect URIs the client may use.
+	RedirectUris []string `json:"redirect_uris"`
+	// Identifiers of the protected resources the client is linked to.
+	Resources []string `json:"resources"`
+	// Whether users are not asked for consent when authorizing this client.
+	SkipConsent bool `json:"skip_consent"`
+	// Whether the client is disabled.
+	Disabled bool `json:"disabled"`
+	// When the client was created.
+	CreatedAt OptDateTime `json:"created_at"`
+	// The client secret. Returned only for confidential clients and only in this response.
+	ClientSecret OptString `json:"client_secret"`
+}
+
+// GetClientID returns the value of ClientID.
+func (s *NeonAuthOAuthClientCreated) GetClientID() string {
+	return s.ClientID
+}
+
+// GetName returns the value of Name.
+func (s *NeonAuthOAuthClientCreated) GetName() string {
+	return s.Name
+}
+
+// GetType returns the value of Type.
+func (s *NeonAuthOAuthClientCreated) GetType() NeonAuthOAuthClientType {
+	return s.Type
+}
+
+// GetRedirectUris returns the value of RedirectUris.
+func (s *NeonAuthOAuthClientCreated) GetRedirectUris() []string {
+	return s.RedirectUris
+}
+
+// GetResources returns the value of Resources.
+func (s *NeonAuthOAuthClientCreated) GetResources() []string {
+	return s.Resources
+}
+
+// GetSkipConsent returns the value of SkipConsent.
+func (s *NeonAuthOAuthClientCreated) GetSkipConsent() bool {
+	return s.SkipConsent
+}
+
+// GetDisabled returns the value of Disabled.
+func (s *NeonAuthOAuthClientCreated) GetDisabled() bool {
+	return s.Disabled
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *NeonAuthOAuthClientCreated) GetCreatedAt() OptDateTime {
+	return s.CreatedAt
+}
+
+// GetClientSecret returns the value of ClientSecret.
+func (s *NeonAuthOAuthClientCreated) GetClientSecret() OptString {
+	return s.ClientSecret
+}
+
+// SetClientID sets the value of ClientID.
+func (s *NeonAuthOAuthClientCreated) SetClientID(val string) {
+	s.ClientID = val
+}
+
+// SetName sets the value of Name.
+func (s *NeonAuthOAuthClientCreated) SetName(val string) {
+	s.Name = val
+}
+
+// SetType sets the value of Type.
+func (s *NeonAuthOAuthClientCreated) SetType(val NeonAuthOAuthClientType) {
+	s.Type = val
+}
+
+// SetRedirectUris sets the value of RedirectUris.
+func (s *NeonAuthOAuthClientCreated) SetRedirectUris(val []string) {
+	s.RedirectUris = val
+}
+
+// SetResources sets the value of Resources.
+func (s *NeonAuthOAuthClientCreated) SetResources(val []string) {
+	s.Resources = val
+}
+
+// SetSkipConsent sets the value of SkipConsent.
+func (s *NeonAuthOAuthClientCreated) SetSkipConsent(val bool) {
+	s.SkipConsent = val
+}
+
+// SetDisabled sets the value of Disabled.
+func (s *NeonAuthOAuthClientCreated) SetDisabled(val bool) {
+	s.Disabled = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *NeonAuthOAuthClientCreated) SetCreatedAt(val OptDateTime) {
+	s.CreatedAt = val
+}
+
+// SetClientSecret sets the value of ClientSecret.
+func (s *NeonAuthOAuthClientCreated) SetClientSecret(val OptString) {
+	s.ClientSecret = val
+}
+
+// Ref: #/components/schemas/NeonAuthOAuthClientSecret
+type NeonAuthOAuthClientSecret struct {
+	// The OAuth client ID.
+	ClientID string `json:"client_id"`
+	// The new client secret. Shown only once.
+	ClientSecret string `json:"client_secret"`
+}
+
+// GetClientID returns the value of ClientID.
+func (s *NeonAuthOAuthClientSecret) GetClientID() string {
+	return s.ClientID
+}
+
+// GetClientSecret returns the value of ClientSecret.
+func (s *NeonAuthOAuthClientSecret) GetClientSecret() string {
+	return s.ClientSecret
+}
+
+// SetClientID sets the value of ClientID.
+func (s *NeonAuthOAuthClientSecret) SetClientID(val string) {
+	s.ClientID = val
+}
+
+// SetClientSecret sets the value of ClientSecret.
+func (s *NeonAuthOAuthClientSecret) SetClientSecret(val string) {
+	s.ClientSecret = val
+}
+
+// Confidential clients authenticate with a client secret. Public clients have no secret.
+// Ref: #/components/schemas/NeonAuthOAuthClientType
+type NeonAuthOAuthClientType string
+
+const (
+	NeonAuthOAuthClientTypeConfidential NeonAuthOAuthClientType = "confidential"
+	NeonAuthOAuthClientTypePublic       NeonAuthOAuthClientType = "public"
+)
+
+// AllValues returns all NeonAuthOAuthClientType values.
+func (NeonAuthOAuthClientType) AllValues() []NeonAuthOAuthClientType {
+	return []NeonAuthOAuthClientType{
+		NeonAuthOAuthClientTypeConfidential,
+		NeonAuthOAuthClientTypePublic,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s NeonAuthOAuthClientType) MarshalText() ([]byte, error) {
+	switch s {
+	case NeonAuthOAuthClientTypeConfidential:
+		return []byte(s), nil
+	case NeonAuthOAuthClientTypePublic:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *NeonAuthOAuthClientType) UnmarshalText(data []byte) error {
+	switch NeonAuthOAuthClientType(data) {
+	case NeonAuthOAuthClientTypeConfidential:
+		*s = NeonAuthOAuthClientTypeConfidential
+		return nil
+	case NeonAuthOAuthClientTypePublic:
+		*s = NeonAuthOAuthClientTypePublic
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// At least one field must be provided.
+// Ref: #/components/schemas/NeonAuthOAuthClientUpdateRequest
+type NeonAuthOAuthClientUpdateRequest struct {
+	// Display name of the client.
+	Name OptString `json:"name"`
+	// Redirect URIs the client may use. When provided, replaces the stored list.
+	RedirectUris []string `json:"redirect_uris"`
+	// Whether to skip the consent prompt for this client.
+	SkipConsent OptBool `json:"skip_consent"`
+	// Whether the client is disabled.
+	Disabled OptBool `json:"disabled"`
+	// Identifiers of the protected resources to link the client to. When provided, replaces the stored
+	// list.
+	Resources []string `json:"resources"`
+}
+
+// GetName returns the value of Name.
+func (s *NeonAuthOAuthClientUpdateRequest) GetName() OptString {
+	return s.Name
+}
+
+// GetRedirectUris returns the value of RedirectUris.
+func (s *NeonAuthOAuthClientUpdateRequest) GetRedirectUris() []string {
+	return s.RedirectUris
+}
+
+// GetSkipConsent returns the value of SkipConsent.
+func (s *NeonAuthOAuthClientUpdateRequest) GetSkipConsent() OptBool {
+	return s.SkipConsent
+}
+
+// GetDisabled returns the value of Disabled.
+func (s *NeonAuthOAuthClientUpdateRequest) GetDisabled() OptBool {
+	return s.Disabled
+}
+
+// GetResources returns the value of Resources.
+func (s *NeonAuthOAuthClientUpdateRequest) GetResources() []string {
+	return s.Resources
+}
+
+// SetName sets the value of Name.
+func (s *NeonAuthOAuthClientUpdateRequest) SetName(val OptString) {
+	s.Name = val
+}
+
+// SetRedirectUris sets the value of RedirectUris.
+func (s *NeonAuthOAuthClientUpdateRequest) SetRedirectUris(val []string) {
+	s.RedirectUris = val
+}
+
+// SetSkipConsent sets the value of SkipConsent.
+func (s *NeonAuthOAuthClientUpdateRequest) SetSkipConsent(val OptBool) {
+	s.SkipConsent = val
+}
+
+// SetDisabled sets the value of Disabled.
+func (s *NeonAuthOAuthClientUpdateRequest) SetDisabled(val OptBool) {
+	s.Disabled = val
+}
+
+// SetResources sets the value of Resources.
+func (s *NeonAuthOAuthClientUpdateRequest) SetResources(val []string) {
+	s.Resources = val
+}
+
+// Ref: #/components/schemas/NeonAuthOAuthProviderConfig
+type NeonAuthOAuthProviderConfig struct {
+	// Whether the OAuth provider plugin is enabled.
+	Enabled bool `json:"enabled"`
+	// URL of the page that authorization requests redirect to for sign-in.
+	LoginPage OptString `json:"login_page"`
+	// URL of the page that authorization requests redirect to for consent.
+	ConsentPage OptString `json:"consent_page"`
+	// MCP resource configuration.
+	Mcp OptNeonAuthOAuthProviderMcp `json:"mcp"`
+	// Protected resources that clients can be linked to.
+	Resources []NeonAuthOAuthProviderResource `json:"resources"`
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *NeonAuthOAuthProviderConfig) GetEnabled() bool {
+	return s.Enabled
+}
+
+// GetLoginPage returns the value of LoginPage.
+func (s *NeonAuthOAuthProviderConfig) GetLoginPage() OptString {
+	return s.LoginPage
+}
+
+// GetConsentPage returns the value of ConsentPage.
+func (s *NeonAuthOAuthProviderConfig) GetConsentPage() OptString {
+	return s.ConsentPage
+}
+
+// GetMcp returns the value of Mcp.
+func (s *NeonAuthOAuthProviderConfig) GetMcp() OptNeonAuthOAuthProviderMcp {
+	return s.Mcp
+}
+
+// GetResources returns the value of Resources.
+func (s *NeonAuthOAuthProviderConfig) GetResources() []NeonAuthOAuthProviderResource {
+	return s.Resources
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *NeonAuthOAuthProviderConfig) SetEnabled(val bool) {
+	s.Enabled = val
+}
+
+// SetLoginPage sets the value of LoginPage.
+func (s *NeonAuthOAuthProviderConfig) SetLoginPage(val OptString) {
+	s.LoginPage = val
+}
+
+// SetConsentPage sets the value of ConsentPage.
+func (s *NeonAuthOAuthProviderConfig) SetConsentPage(val OptString) {
+	s.ConsentPage = val
+}
+
+// SetMcp sets the value of Mcp.
+func (s *NeonAuthOAuthProviderConfig) SetMcp(val OptNeonAuthOAuthProviderMcp) {
+	s.Mcp = val
+}
+
+// SetResources sets the value of Resources.
+func (s *NeonAuthOAuthProviderConfig) SetResources(val []NeonAuthOAuthProviderResource) {
+	s.Resources = val
+}
+
+// Ref: #/components/schemas/NeonAuthOAuthProviderConfigUpdate
+type NeonAuthOAuthProviderConfigUpdate struct {
+	// Whether the OAuth provider plugin is enabled.
+	Enabled OptBool `json:"enabled"`
+	// URL of the page that authorization requests redirect to for sign-in.
+	LoginPage OptString `json:"login_page"`
+	// URL of the page that authorization requests redirect to for consent.
+	ConsentPage OptString `json:"consent_page"`
+	// MCP resource configuration. When provided, `resource` is required and the stored MCP configuration
+	// is replaced as a whole.
+	Mcp OptNeonAuthOAuthProviderMcpUpdate `json:"mcp"`
+	// Protected resources that clients can be linked to. When provided, replaces the stored list.
+	Resources []NeonAuthOAuthProviderResource `json:"resources"`
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *NeonAuthOAuthProviderConfigUpdate) GetEnabled() OptBool {
+	return s.Enabled
+}
+
+// GetLoginPage returns the value of LoginPage.
+func (s *NeonAuthOAuthProviderConfigUpdate) GetLoginPage() OptString {
+	return s.LoginPage
+}
+
+// GetConsentPage returns the value of ConsentPage.
+func (s *NeonAuthOAuthProviderConfigUpdate) GetConsentPage() OptString {
+	return s.ConsentPage
+}
+
+// GetMcp returns the value of Mcp.
+func (s *NeonAuthOAuthProviderConfigUpdate) GetMcp() OptNeonAuthOAuthProviderMcpUpdate {
+	return s.Mcp
+}
+
+// GetResources returns the value of Resources.
+func (s *NeonAuthOAuthProviderConfigUpdate) GetResources() []NeonAuthOAuthProviderResource {
+	return s.Resources
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *NeonAuthOAuthProviderConfigUpdate) SetEnabled(val OptBool) {
+	s.Enabled = val
+}
+
+// SetLoginPage sets the value of LoginPage.
+func (s *NeonAuthOAuthProviderConfigUpdate) SetLoginPage(val OptString) {
+	s.LoginPage = val
+}
+
+// SetConsentPage sets the value of ConsentPage.
+func (s *NeonAuthOAuthProviderConfigUpdate) SetConsentPage(val OptString) {
+	s.ConsentPage = val
+}
+
+// SetMcp sets the value of Mcp.
+func (s *NeonAuthOAuthProviderConfigUpdate) SetMcp(val OptNeonAuthOAuthProviderMcpUpdate) {
+	s.Mcp = val
+}
+
+// SetResources sets the value of Resources.
+func (s *NeonAuthOAuthProviderConfigUpdate) SetResources(val []NeonAuthOAuthProviderResource) {
+	s.Resources = val
+}
+
+// Ref: #/components/schemas/NeonAuthOAuthProviderMcp
+type NeonAuthOAuthProviderMcp struct {
+	// The MCP server URL that MCP clients (Client ID Metadata Document and dynamically registered) are
+	// linked to. Required for either to be accepted.
+	Resource OptString `json:"resource"`
+	// Legacy: whether MCP clients may register themselves via dynamic client registration (RFC 7591).
+	// Deprecated in favor of Client ID Metadata Documents (CIMD), which are controlled by
+	// `client_id_metadata_documents`. Defaults to false, and takes effect only when an MCP resource is
+	// configured; reads report false otherwise. When false, only CIMD clients and clients created through
+	// the OAuth clients API can be used, and they can still be linked to the MCP resource.
+	DynamicRegistration OptBool `json:"dynamic_registration"`
+	// Whether MCP clients may identify themselves with an https Client ID Metadata Document (CIMD) URL.
+	// Recommended over dynamic registration. When false, new CIMD clients are rejected and existing CIMD
+	// clients fail closed.
+	ClientIDMetadataDocuments OptBool `json:"client_id_metadata_documents"`
+}
+
+// GetResource returns the value of Resource.
+func (s *NeonAuthOAuthProviderMcp) GetResource() OptString {
+	return s.Resource
+}
+
+// GetDynamicRegistration returns the value of DynamicRegistration.
+func (s *NeonAuthOAuthProviderMcp) GetDynamicRegistration() OptBool {
+	return s.DynamicRegistration
+}
+
+// GetClientIDMetadataDocuments returns the value of ClientIDMetadataDocuments.
+func (s *NeonAuthOAuthProviderMcp) GetClientIDMetadataDocuments() OptBool {
+	return s.ClientIDMetadataDocuments
+}
+
+// SetResource sets the value of Resource.
+func (s *NeonAuthOAuthProviderMcp) SetResource(val OptString) {
+	s.Resource = val
+}
+
+// SetDynamicRegistration sets the value of DynamicRegistration.
+func (s *NeonAuthOAuthProviderMcp) SetDynamicRegistration(val OptBool) {
+	s.DynamicRegistration = val
+}
+
+// SetClientIDMetadataDocuments sets the value of ClientIDMetadataDocuments.
+func (s *NeonAuthOAuthProviderMcp) SetClientIDMetadataDocuments(val OptBool) {
+	s.ClientIDMetadataDocuments = val
+}
+
+// Ref: #/components/schemas/NeonAuthOAuthProviderMcpUpdate
+type NeonAuthOAuthProviderMcpUpdate struct {
+	// The MCP server URL that MCP clients (Client ID Metadata Document and dynamically registered) are
+	// linked to. Required for either to be accepted.
+	Resource string `json:"resource"`
+	// Whether MCP clients may register themselves via dynamic client registration (RFC 7591). When
+	// omitted, the stored value is kept.
+	DynamicRegistration OptBool `json:"dynamic_registration"`
+	// Whether MCP clients may identify themselves with an https Client ID Metadata Document (CIMD) URL.
+	// When omitted, the stored value is kept.
+	ClientIDMetadataDocuments OptBool `json:"client_id_metadata_documents"`
+}
+
+// GetResource returns the value of Resource.
+func (s *NeonAuthOAuthProviderMcpUpdate) GetResource() string {
+	return s.Resource
+}
+
+// GetDynamicRegistration returns the value of DynamicRegistration.
+func (s *NeonAuthOAuthProviderMcpUpdate) GetDynamicRegistration() OptBool {
+	return s.DynamicRegistration
+}
+
+// GetClientIDMetadataDocuments returns the value of ClientIDMetadataDocuments.
+func (s *NeonAuthOAuthProviderMcpUpdate) GetClientIDMetadataDocuments() OptBool {
+	return s.ClientIDMetadataDocuments
+}
+
+// SetResource sets the value of Resource.
+func (s *NeonAuthOAuthProviderMcpUpdate) SetResource(val string) {
+	s.Resource = val
+}
+
+// SetDynamicRegistration sets the value of DynamicRegistration.
+func (s *NeonAuthOAuthProviderMcpUpdate) SetDynamicRegistration(val OptBool) {
+	s.DynamicRegistration = val
+}
+
+// SetClientIDMetadataDocuments sets the value of ClientIDMetadataDocuments.
+func (s *NeonAuthOAuthProviderMcpUpdate) SetClientIDMetadataDocuments(val OptBool) {
+	s.ClientIDMetadataDocuments = val
+}
+
+// Ref: #/components/schemas/NeonAuthOAuthProviderResource
+type NeonAuthOAuthProviderResource struct {
+	// Absolute URL identifying a protected resource. Issued access tokens carry it as their audience.
+	Identifier string `json:"identifier"`
+}
+
+// GetIdentifier returns the value of Identifier.
+func (s *NeonAuthOAuthProviderResource) GetIdentifier() string {
+	return s.Identifier
+}
+
+// SetIdentifier sets the value of Identifier.
+func (s *NeonAuthOAuthProviderResource) SetIdentifier(val string) {
+	s.Identifier = val
+}
+
 // Ref: #/components/schemas/NeonAuthOauthProvider
 type NeonAuthOauthProvider struct {
 	// The OAuth provider's ID.
@@ -10644,6 +11315,9 @@ type NeonAuthPluginConfigs struct {
 	MagicLink OptNeonAuthMagicLinkConfig `json:"magic_link"`
 	// Configuration for the phone number authentication plugin.
 	PhoneNumber OptNeonAuthPhoneNumberConfig `json:"phone_number"`
+	// Configuration for the OAuth provider plugin, which lets Neon Auth act as an OAuth authorization
+	// server for your own clients.
+	OAuthProvider OptNeonAuthOAuthProviderConfig `json:"oauth_provider"`
 	// Email server configuration used to send authentication emails.
 	EmailProvider OptNeonAuthEmailServerConfigResponse `json:"email_provider"`
 	// Configuration for email and password authentication.
@@ -10668,6 +11342,11 @@ func (s *NeonAuthPluginConfigs) GetMagicLink() OptNeonAuthMagicLinkConfig {
 // GetPhoneNumber returns the value of PhoneNumber.
 func (s *NeonAuthPluginConfigs) GetPhoneNumber() OptNeonAuthPhoneNumberConfig {
 	return s.PhoneNumber
+}
+
+// GetOAuthProvider returns the value of OAuthProvider.
+func (s *NeonAuthPluginConfigs) GetOAuthProvider() OptNeonAuthOAuthProviderConfig {
+	return s.OAuthProvider
 }
 
 // GetEmailProvider returns the value of EmailProvider.
@@ -10703,6 +11382,11 @@ func (s *NeonAuthPluginConfigs) SetMagicLink(val OptNeonAuthMagicLinkConfig) {
 // SetPhoneNumber sets the value of PhoneNumber.
 func (s *NeonAuthPluginConfigs) SetPhoneNumber(val OptNeonAuthPhoneNumberConfig) {
 	s.PhoneNumber = val
+}
+
+// SetOAuthProvider sets the value of OAuthProvider.
+func (s *NeonAuthPluginConfigs) SetOAuthProvider(val OptNeonAuthOAuthProviderConfig) {
+	s.OAuthProvider = val
 }
 
 // SetEmailProvider sets the value of EmailProvider.
@@ -14248,6 +14932,144 @@ func (o OptNeonAuthMagicLinkConfig) Or(d NeonAuthMagicLinkConfig) NeonAuthMagicL
 	return d
 }
 
+// NewOptNeonAuthOAuthProviderConfig returns new OptNeonAuthOAuthProviderConfig with value set to v.
+func NewOptNeonAuthOAuthProviderConfig(v NeonAuthOAuthProviderConfig) OptNeonAuthOAuthProviderConfig {
+	return OptNeonAuthOAuthProviderConfig{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNeonAuthOAuthProviderConfig is optional NeonAuthOAuthProviderConfig.
+type OptNeonAuthOAuthProviderConfig struct {
+	Value NeonAuthOAuthProviderConfig
+	Set   bool
+}
+
+// IsSet returns true if OptNeonAuthOAuthProviderConfig was set.
+func (o OptNeonAuthOAuthProviderConfig) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNeonAuthOAuthProviderConfig) Reset() {
+	var v NeonAuthOAuthProviderConfig
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptNeonAuthOAuthProviderConfig) SetTo(v NeonAuthOAuthProviderConfig) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNeonAuthOAuthProviderConfig) Get() (v NeonAuthOAuthProviderConfig, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNeonAuthOAuthProviderConfig) Or(d NeonAuthOAuthProviderConfig) NeonAuthOAuthProviderConfig {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNeonAuthOAuthProviderMcp returns new OptNeonAuthOAuthProviderMcp with value set to v.
+func NewOptNeonAuthOAuthProviderMcp(v NeonAuthOAuthProviderMcp) OptNeonAuthOAuthProviderMcp {
+	return OptNeonAuthOAuthProviderMcp{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNeonAuthOAuthProviderMcp is optional NeonAuthOAuthProviderMcp.
+type OptNeonAuthOAuthProviderMcp struct {
+	Value NeonAuthOAuthProviderMcp
+	Set   bool
+}
+
+// IsSet returns true if OptNeonAuthOAuthProviderMcp was set.
+func (o OptNeonAuthOAuthProviderMcp) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNeonAuthOAuthProviderMcp) Reset() {
+	var v NeonAuthOAuthProviderMcp
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptNeonAuthOAuthProviderMcp) SetTo(v NeonAuthOAuthProviderMcp) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNeonAuthOAuthProviderMcp) Get() (v NeonAuthOAuthProviderMcp, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNeonAuthOAuthProviderMcp) Or(d NeonAuthOAuthProviderMcp) NeonAuthOAuthProviderMcp {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNeonAuthOAuthProviderMcpUpdate returns new OptNeonAuthOAuthProviderMcpUpdate with value set to v.
+func NewOptNeonAuthOAuthProviderMcpUpdate(v NeonAuthOAuthProviderMcpUpdate) OptNeonAuthOAuthProviderMcpUpdate {
+	return OptNeonAuthOAuthProviderMcpUpdate{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNeonAuthOAuthProviderMcpUpdate is optional NeonAuthOAuthProviderMcpUpdate.
+type OptNeonAuthOAuthProviderMcpUpdate struct {
+	Value NeonAuthOAuthProviderMcpUpdate
+	Set   bool
+}
+
+// IsSet returns true if OptNeonAuthOAuthProviderMcpUpdate was set.
+func (o OptNeonAuthOAuthProviderMcpUpdate) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNeonAuthOAuthProviderMcpUpdate) Reset() {
+	var v NeonAuthOAuthProviderMcpUpdate
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptNeonAuthOAuthProviderMcpUpdate) SetTo(v NeonAuthOAuthProviderMcpUpdate) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNeonAuthOAuthProviderMcpUpdate) Get() (v NeonAuthOAuthProviderMcpUpdate, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNeonAuthOAuthProviderMcpUpdate) Or(d NeonAuthOAuthProviderMcpUpdate) NeonAuthOAuthProviderMcpUpdate {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptNeonAuthOrganizationConfig returns new OptNeonAuthOrganizationConfig with value set to v.
 func NewOptNeonAuthOrganizationConfig(v NeonAuthOrganizationConfig) OptNeonAuthOrganizationConfig {
 	return OptNeonAuthOrganizationConfig{
@@ -17163,20 +17985,24 @@ type Project struct {
 	DataStorageBytesHour int64 `json:"data_storage_bytes_hour"`
 	// Bytes. Egress traffic from the Neon cloud to the client for given project over the billing period.
 	// Includes deleted endpoints. The value has some lag. The value is reset at the beginning of each
-	// billing period.
+	// billing period. Not intended for billing or metering. For billing, use
+	// `/consumption_history/v2/projects`.
 	DataTransferBytes int64 `json:"data_transfer_bytes"`
 	// Bytes. Amount of WAL that travelled through Postgres storage for given project across all branches.
-	// The value has some lag. The value is reset at the beginning of each billing period.
+	// The value has some lag. The value is reset at the beginning of each billing period. Not intended for
+	// billing or metering. For billing, use `/consumption_history/v2/projects`.
 	WrittenDataBytes int64 `json:"written_data_bytes"`
 	// Seconds. The number of CPU seconds used by the project's compute endpoints, including compute
 	// endpoints that have been deleted. The value has some lag. The value is reset at the beginning of
 	// each billing period. Examples:
 	//
 	// 1. An endpoint that uses 1 CPU for 1 second is equal to `compute_time=1`.
-	// 2. An endpoint that uses 2 CPUs simultaneously for 1 second is equal to `compute_time=2`.
+	// 2. An endpoint that uses 2 CPUs simultaneously for 1 second is equal to `compute_time=2`. Not
+	//    intended for billing or metering. For billing, use `/consumption_history/v2/projects`.
 	ComputeTimeSeconds int64 `json:"compute_time_seconds"`
 	// Seconds. Control plane observed endpoints of this project being active this amount of wall-clock
-	// time. The value has some lag. The value is reset at the beginning of each billing period.
+	// time. The value has some lag. The value is reset at the beginning of each billing period. Not
+	// intended for billing or metering. For billing, use `/consumption_history/v2/projects`.
 	ActiveTimeSeconds int64 `json:"active_time_seconds"`
 	// Deprecated. Use `compute_time_seconds` instead.
 	//
@@ -18770,7 +19596,8 @@ type ProjectListItem struct {
 	// Whether or not passwords are stored for roles in the Neon project. Storing passwords facilitates
 	// access to Neon features that require authorization.
 	StorePasswords bool `json:"store_passwords"`
-	// Control plane observed endpoints of this project being active this amount of wall-clock time.
+	// Control plane observed endpoints of this project being active this amount of wall-clock time. Not
+	// intended for billing or metering. For billing, use `/consumption_history/v2/projects`.
 	ActiveTime int64 `json:"active_time"`
 	// Deprecated. Use `compute_time_seconds` from `GET /projects/{project_id}` instead.
 	//
@@ -20098,6 +20925,22 @@ func (s *ProjectUpdateRequestProject) SetDefaultEndpointSettings(val OptDefaultE
 // SetHistoryRetentionSeconds sets the value of HistoryRetentionSeconds.
 func (s *ProjectUpdateRequestProject) SetHistoryRetentionSeconds(val OptInt32) {
 	s.HistoryRetentionSeconds = val
+}
+
+// Ref: #/components/schemas/ProjectsCountResponse
+type ProjectsCountResponse struct {
+	// The total number of projects matching the query criteria.
+	Count int `json:"count"`
+}
+
+// GetCount returns the value of Count.
+func (s *ProjectsCountResponse) GetCount() int {
+	return s.Count
+}
+
+// SetCount sets the value of Count.
+func (s *ProjectsCountResponse) SetCount(val int) {
+	s.Count = val
 }
 
 // Ref: #/components/schemas/ProjectsWithIntegrationResponse
