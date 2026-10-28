@@ -131,6 +131,26 @@ func (s *NeonAuthMagicLinkConfig) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *NeonAuthOAuthProviderConfig) setDefaults() {
+	{
+		val := bool(false)
+		s.Enabled = val
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *NeonAuthOAuthProviderMcp) setDefaults() {
+	{
+		val := bool(false)
+		s.DynamicRegistration.SetTo(val)
+	}
+	{
+		val := bool(true)
+		s.ClientIDMetadataDocuments.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *NeonAuthOrganizationConfig) setDefaults() {
 	{
 		val := bool(true)
