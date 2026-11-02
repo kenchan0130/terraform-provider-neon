@@ -217,6 +217,20 @@ func encodeCreateNeonAuthNewUserRequest(
 	return nil
 }
 
+func encodeCreateNeonAuthOAuthClientRequest(
+	req *NeonAuthOAuthClientCreateRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeCreateNeonAuthProviderSDKKeysRequest(
 	req *NeonAuthCreateAuthProviderSDKKeysRequest,
 	r *http.Request,
@@ -882,6 +896,34 @@ func encodeUpdateNeonAuthEmailServerRequest(
 
 func encodeUpdateNeonAuthMagicLinkPluginRequest(
 	req *NeonAuthMagicLinkConfigUpdate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateNeonAuthOAuthClientRequest(
+	req *NeonAuthOAuthClientUpdateRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateNeonAuthOAuthProviderPluginRequest(
+	req *NeonAuthOAuthProviderConfigUpdate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

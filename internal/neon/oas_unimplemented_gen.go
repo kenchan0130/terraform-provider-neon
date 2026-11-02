@@ -120,6 +120,18 @@ func (UnimplementedHandler) CountProjectBranches(ctx context.Context, params Cou
 	return r, ht.ErrNotImplemented
 }
 
+// CountProjects implements countProjects operation.
+//
+// Retrieves the number of active projects you can access in the specified organization, without paging
+// through the list of projects. Projects that are being created or deleted are not counted. If using a
+// personal API key, include the `org_id` parameter to specify which organization to work with. If
+// using an org API key, `org_id` is automatically inferred from the key.
+//
+// GET /projects/count
+func (UnimplementedHandler) CountProjects(ctx context.Context, params CountProjectsParams) (r *ProjectsCountResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CreateApiKey implements createApiKey operation.
 //
 // Creates an API key. The `key_name` is a user-specified name for the key. Returns an `id` and `key`;
@@ -190,6 +202,17 @@ func (UnimplementedHandler) CreateNeonAuthIntegration(ctx context.Context, req *
 //
 // POST /projects/auth/user
 func (UnimplementedHandler) CreateNeonAuthNewUser(ctx context.Context, req *NeonAuthCreateNewUserRequest) (r *NeonAuthCreateNewUserResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateNeonAuthOAuthClient implements createNeonAuthOAuthClient operation.
+//
+// Registers an OAuth client with the branch's Neon Auth OAuth provider. For `confidential` clients the
+// response includes the `client_secret`, which is shown only once. Every entry in `resources` must be
+// configured on the OAuth provider plugin.
+//
+// POST /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients
+func (UnimplementedHandler) CreateNeonAuthOAuthClient(ctx context.Context, req *NeonAuthOAuthClientCreateRequest, params CreateNeonAuthOAuthClientParams) (r *NeonAuthOAuthClientCreated, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -443,6 +466,15 @@ func (UnimplementedHandler) DeleteNeonAuthDomainFromRedirectURIWhitelist(ctx con
 //
 // DELETE /projects/{project_id}/auth/integration/{auth_provider}
 func (UnimplementedHandler) DeleteNeonAuthIntegration(ctx context.Context, req OptDeleteNeonAuthIntegrationReq, params DeleteNeonAuthIntegrationParams) error {
+	return ht.ErrNotImplemented
+}
+
+// DeleteNeonAuthOAuthClient implements deleteNeonAuthOAuthClient operation.
+//
+// Deletes an OAuth client. Tokens already issued to the client are not revoked.
+//
+// DELETE /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}
+func (UnimplementedHandler) DeleteNeonAuthOAuthClient(ctx context.Context, params DeleteNeonAuthOAuthClientParams) error {
 	return ht.ErrNotImplemented
 }
 
@@ -791,9 +823,11 @@ func (UnimplementedHandler) GetConnectionURI(ctx context.Context, params GetConn
 //
 // History starts when the account first ingests branch-level consumption data.
 //
-// The `metrics` query parameter is required. Only these six values are supported on this endpoint:
+// The `metrics` query parameter is required. These values are supported on this endpoint:
 // `compute_unit_seconds`, `root_branch_bytes_month`, `child_branch_bytes_month`,
-// `instant_restore_bytes_month`, `public_network_transfer_bytes`, `private_network_transfer_bytes`.
+// `instant_restore_bytes_month`, `public_network_transfer_bytes`, `private_network_transfer_bytes`,
+// `functions_active_capacity_microseconds`, `functions_waiting_capacity_microseconds`,
+// `functions_invocations`, `functions_egress_bytes`.
 //
 // This endpoint does not support `extra_branches_month` or `snapshot_storage_bytes_month`. Use
 // `GET /consumption_history/v2/projects` for those.
@@ -829,7 +863,8 @@ func (UnimplementedHandler) GetConsumptionHistoryPerProject(ctx context.Context,
 // The `metrics` query parameter is required. Supported values: `compute_unit_seconds`,
 // `root_branch_bytes_month`, `child_branch_bytes_month`, `instant_restore_bytes_month`,
 // `public_network_transfer_bytes`, `private_network_transfer_bytes`, `extra_branches_month`,
-// `snapshot_storage_bytes_month`.
+// `snapshot_storage_bytes_month`, `functions_active_capacity_microseconds`,
+// `functions_waiting_capacity_microseconds`, `functions_invocations`, `functions_egress_bytes`.
 //
 // Consumption metrics within each project are returned in ascending time order (oldest first). This
 // request does not wake project computes.
@@ -925,6 +960,26 @@ func (UnimplementedHandler) GetNeonAuthEmailServer(ctx context.Context, params G
 	return r, ht.ErrNotImplemented
 }
 
+// GetNeonAuthOAuthClient implements getNeonAuthOAuthClient operation.
+//
+// Returns an OAuth client registered with the branch's Neon Auth OAuth provider. The client secret is
+// never returned.
+//
+// GET /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}
+func (UnimplementedHandler) GetNeonAuthOAuthClient(ctx context.Context, params GetNeonAuthOAuthClientParams) (r *NeonAuthOAuthClient, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetNeonAuthOAuthProviderPlugin implements getNeonAuthOAuthProviderPlugin operation.
+//
+// Returns the OAuth provider plugin configuration for Neon Auth. The OAuth provider plugin lets Neon
+// Auth act as an OAuth 2.1 authorization server for your own clients, such as MCP clients.
+//
+// GET /projects/{project_id}/branches/{branch_id}/auth/plugins/oauth-provider
+func (UnimplementedHandler) GetNeonAuthOAuthProviderPlugin(ctx context.Context, params GetNeonAuthOAuthProviderPluginParams) (r *NeonAuthOAuthProviderConfig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetNeonAuthPhoneNumberPlugin implements getNeonAuthPhoneNumberPlugin operation.
 //
 // Returns the phone number plugin configuration for Neon Auth. The phone number plugin enables
@@ -1014,7 +1069,9 @@ func (UnimplementedHandler) GetOrganizationVPCEndpointDetails(ctx context.Contex
 // GetProject implements getProject operation.
 //
 // Retrieves information about the specified project. Returned details include the project settings,
-// compute configuration, history retention, owner information, and current usage metrics.
+// compute configuration, history retention, owner information, and current usage metrics. The usage
+// metrics are not intended for billing or metering. For billing, use
+// `/consumption_history/v2/projects`.
 //
 // GET /projects/{project_id}
 func (UnimplementedHandler) GetProject(ctx context.Context, params GetProjectParams) (r *ProjectResponse, _ error) {
@@ -1039,7 +1096,8 @@ func (UnimplementedHandler) GetProjectAdvisorSecurityIssues(ctx context.Context,
 //
 // Each Neon project is initially created with a root and default branch named `main`. A project can
 // contain one or more branches. A parent branch is identified by a `parent_id` value, which is the
-// `id` of the parent branch. For related information, see [Manage branches].
+// `id` of the parent branch. For related information, see [Manage branches]. The usage metrics are not
+// intended for billing or metering. For billing, use `/consumption_history/v2/branches`.
 //
 // GET /projects/{project_id}/branches/{branch_id}
 //
@@ -1307,6 +1365,16 @@ func (UnimplementedHandler) ListCredentials(ctx context.Context, params ListCred
 //
 // GET /projects/{project_id}/auth/integrations
 func (UnimplementedHandler) ListNeonAuthIntegrations(ctx context.Context, params ListNeonAuthIntegrationsParams) (r *ListNeonAuthIntegrationsResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListNeonAuthOAuthClients implements listNeonAuthOAuthClients operation.
+//
+// Lists the OAuth clients registered for the branch's Neon Auth OAuth provider. Client secrets are
+// never returned.
+//
+// GET /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients
+func (UnimplementedHandler) ListNeonAuthOAuthClients(ctx context.Context, params ListNeonAuthOAuthClientsParams) (r *ListNeonAuthOAuthClientsResponse, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1853,6 +1921,16 @@ func (UnimplementedHandler) RotateCredential(ctx context.Context, params RotateC
 	return r, ht.ErrNotImplemented
 }
 
+// RotateNeonAuthOAuthClientSecret implements rotateNeonAuthOAuthClientSecret operation.
+//
+// Generates a new secret for a confidential OAuth client and invalidates the previous one. The new
+// secret is shown only once.
+//
+// POST /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}/rotate_secret
+func (UnimplementedHandler) RotateNeonAuthOAuthClientSecret(ctx context.Context, params RotateNeonAuthOAuthClientSecretParams) (r *NeonAuthOAuthClientSecret, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // RotateProjectBranchRealtimeSecret implements rotateProjectBranchRealtimeSecret operation.
 //
 // Replaces the branch's Realtime shared secret. Rotation is asynchronous: once the Realtime state is
@@ -2097,6 +2175,28 @@ func (UnimplementedHandler) UpdateNeonAuthEmailServer(ctx context.Context, req *
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/magic-link
 func (UnimplementedHandler) UpdateNeonAuthMagicLinkPlugin(ctx context.Context, req *NeonAuthMagicLinkConfigUpdate, params UpdateNeonAuthMagicLinkPluginParams) (r *NeonAuthMagicLinkConfig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateNeonAuthOAuthClient implements updateNeonAuthOAuthClient operation.
+//
+// Updates an OAuth client. Only the fields provided in the request body are updated. A provided
+// `resources` list replaces the client's stored list. The client `type` cannot be changed.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}
+func (UnimplementedHandler) UpdateNeonAuthOAuthClient(ctx context.Context, req *NeonAuthOAuthClientUpdateRequest, params UpdateNeonAuthOAuthClientParams) (r *NeonAuthOAuthClient, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateNeonAuthOAuthProviderPlugin implements updateNeonAuthOAuthProviderPlugin operation.
+//
+// Updates the OAuth provider plugin configuration for Neon Auth. Only the fields provided in the
+// request body are updated; omitted fields retain their current values. A provided `resources` list
+// replaces the stored list. A provided `mcp` object replaces the stored MCP configuration and must
+// include `resource`. The plugin can only be enabled on the project's root branch.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/oauth-provider
+func (UnimplementedHandler) UpdateNeonAuthOAuthProviderPlugin(ctx context.Context, req *NeonAuthOAuthProviderConfigUpdate, params UpdateNeonAuthOAuthProviderPluginParams) (r *NeonAuthOAuthProviderConfig, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

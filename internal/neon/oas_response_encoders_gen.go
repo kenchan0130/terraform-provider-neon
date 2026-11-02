@@ -115,6 +115,19 @@ func encodeCountProjectBranchesResponse(response *BranchesCountResponse, w http.
 	return nil
 }
 
+func encodeCountProjectsResponse(response *ProjectsCountResponse, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeCreateApiKeyResponse(response *ApiKeyCreateResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
@@ -181,6 +194,19 @@ func encodeCreateNeonAuthIntegrationResponse(response *NeonAuthCreateIntegration
 }
 
 func encodeCreateNeonAuthNewUserResponse(response *NeonAuthCreateNewUserResponse, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(201)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeCreateNeonAuthOAuthClientResponse(response *NeonAuthOAuthClientCreated, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(201)
 
@@ -432,6 +458,12 @@ func encodeDeleteNeonAuthDomainFromRedirectURIWhitelistResponse(response *Delete
 
 func encodeDeleteNeonAuthIntegrationResponse(response *DeleteNeonAuthIntegrationOK, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(200)
+
+	return nil
+}
+
+func encodeDeleteNeonAuthOAuthClientResponse(response *DeleteNeonAuthOAuthClientNoContent, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(204)
 
 	return nil
 }
@@ -1119,6 +1151,32 @@ func encodeGetNeonAuthEmailServerResponse(response *NeonAuthEmailServerConfigRes
 	return nil
 }
 
+func encodeGetNeonAuthOAuthClientResponse(response *NeonAuthOAuthClient, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeGetNeonAuthOAuthProviderPluginResponse(response *NeonAuthOAuthProviderConfig, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeGetNeonAuthPhoneNumberPluginResponse(response *NeonAuthPhoneNumberConfig, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
@@ -1736,6 +1794,19 @@ func encodeListCredentialsResponse(response *ListCredentialsResponse, w http.Res
 }
 
 func encodeListNeonAuthIntegrationsResponse(response *ListNeonAuthIntegrationsResponse, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeListNeonAuthOAuthClientsResponse(response *ListNeonAuthOAuthClientsResponse, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 
@@ -2409,6 +2480,19 @@ func encodeRotateCredentialResponse(response *RotateCredentialResponse, w http.R
 	return nil
 }
 
+func encodeRotateNeonAuthOAuthClientSecretResponse(response *NeonAuthOAuthClientSecret, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeRotateProjectBranchRealtimeSecretResponse(response *RotateProjectBranchRealtimeSecretAccepted, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(202)
 
@@ -2723,6 +2807,32 @@ func encodeUpdateNeonAuthEmailServerResponse(response *NeonAuthEmailServerConfig
 }
 
 func encodeUpdateNeonAuthMagicLinkPluginResponse(response *NeonAuthMagicLinkConfig, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeUpdateNeonAuthOAuthClientResponse(response *NeonAuthOAuthClient, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeUpdateNeonAuthOAuthProviderPluginResponse(response *NeonAuthOAuthProviderConfig, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 
