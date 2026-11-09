@@ -109,6 +109,15 @@ type Invoker interface {
 	//
 	// GET /projects/{project_id}/branches/count
 	CountProjectBranches(ctx context.Context, params CountProjectBranchesParams) (*BranchesCountResponse, error)
+	// CountProjects invokes countProjects operation.
+	//
+	// Retrieves the number of active projects you can access in the specified organization, without paging
+	// through the list of projects. Projects that are being created or deleted are not counted. If using a
+	// personal API key, include the `org_id` parameter to specify which organization to work with. If
+	// using an org API key, `org_id` is automatically inferred from the key.
+	//
+	// GET /projects/count
+	CountProjects(ctx context.Context, params CountProjectsParams) (*ProjectsCountResponse, error)
 	// CreateApiKey invokes createApiKey operation.
 	//
 	// Creates an API key. The `key_name` is a user-specified name for the key. Returns an `id` and `key`;
@@ -164,6 +173,14 @@ type Invoker interface {
 	//
 	// POST /projects/auth/user
 	CreateNeonAuthNewUser(ctx context.Context, request *NeonAuthCreateNewUserRequest) (*NeonAuthCreateNewUserResponse, error)
+	// CreateNeonAuthOAuthClient invokes createNeonAuthOAuthClient operation.
+	//
+	// Registers an OAuth client with the branch's Neon Auth OAuth provider. For `confidential` clients the
+	// response includes the `client_secret`, which is shown only once. Every entry in `resources` must be
+	// configured on the OAuth provider plugin.
+	//
+	// POST /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients
+	CreateNeonAuthOAuthClient(ctx context.Context, request *NeonAuthOAuthClientCreateRequest, params CreateNeonAuthOAuthClientParams) (*NeonAuthOAuthClientCreated, error)
 	// CreateNeonAuthProviderSDKKeys invokes createNeonAuthProviderSDKKeys operation.
 	//
 	// Generates SDK or API Keys for the auth provider. These might be called different things depending on
@@ -357,6 +374,12 @@ type Invoker interface {
 	//
 	// DELETE /projects/{project_id}/auth/integration/{auth_provider}
 	DeleteNeonAuthIntegration(ctx context.Context, request OptDeleteNeonAuthIntegrationReq, params DeleteNeonAuthIntegrationParams) error
+	// DeleteNeonAuthOAuthClient invokes deleteNeonAuthOAuthClient operation.
+	//
+	// Deletes an OAuth client. Tokens already issued to the client are not revoked.
+	//
+	// DELETE /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}
+	DeleteNeonAuthOAuthClient(ctx context.Context, params DeleteNeonAuthOAuthClientParams) error
 	// DeleteNeonAuthOauthProvider invokes deleteNeonAuthOauthProvider operation.
 	//
 	// Deprecated. Use
@@ -451,6 +474,10 @@ type Invoker interface {
 	// DeleteProjectBranchCustomDomain invokes deleteProjectBranchCustomDomain operation.
 	//
 	// Removes a custom domain registered on the branch and stops routing it.
+	//
+	// For organizations on the per-project role model, deleting a custom domain requires the project Admin
+	// role. Other callers receive `403` with code `CUSTOM_DOMAIN_ADMIN_REQUIRED`. Organization API keys
+	// keep write-level access.
 	//
 	// Note: This endpoint is currently in Beta.
 	//
@@ -618,9 +645,11 @@ type Invoker interface {
 	//
 	// History starts when the account first ingests branch-level consumption data.
 	//
-	// The `metrics` query parameter is required. Only these six values are supported on this endpoint:
+	// The `metrics` query parameter is required. These values are supported on this endpoint:
 	// `compute_unit_seconds`, `root_branch_bytes_month`, `child_branch_bytes_month`,
-	// `instant_restore_bytes_month`, `public_network_transfer_bytes`, `private_network_transfer_bytes`.
+	// `instant_restore_bytes_month`, `public_network_transfer_bytes`, `private_network_transfer_bytes`,
+	// `functions_active_capacity_microseconds`, `functions_waiting_capacity_microseconds`,
+	// `functions_invocations`, `functions_egress_bytes`.
 	//
 	// This endpoint does not support `extra_branches_month` or `snapshot_storage_bytes_month`. Use
 	// `GET /consumption_history/v2/projects` for those.
@@ -650,7 +679,8 @@ type Invoker interface {
 	// The `metrics` query parameter is required. Supported values: `compute_unit_seconds`,
 	// `root_branch_bytes_month`, `child_branch_bytes_month`, `instant_restore_bytes_month`,
 	// `public_network_transfer_bytes`, `private_network_transfer_bytes`, `extra_branches_month`,
-	// `snapshot_storage_bytes_month`.
+	// `snapshot_storage_bytes_month`, `functions_active_capacity_microseconds`,
+	// `functions_waiting_capacity_microseconds`, `functions_invocations`, `functions_egress_bytes`.
 	//
 	// Consumption metrics within each project are returned in ascending time order (oldest first). This
 	// request does not wake project computes.
@@ -719,6 +749,20 @@ type Invoker interface {
 	//
 	// GET /projects/{project_id}/auth/email_server
 	GetNeonAuthEmailServer(ctx context.Context, params GetNeonAuthEmailServerParams) (*NeonAuthEmailServerConfigResponse, error)
+	// GetNeonAuthOAuthClient invokes getNeonAuthOAuthClient operation.
+	//
+	// Returns an OAuth client registered with the branch's Neon Auth OAuth provider. The client secret is
+	// never returned.
+	//
+	// GET /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}
+	GetNeonAuthOAuthClient(ctx context.Context, params GetNeonAuthOAuthClientParams) (*NeonAuthOAuthClient, error)
+	// GetNeonAuthOAuthProviderPlugin invokes getNeonAuthOAuthProviderPlugin operation.
+	//
+	// Returns the OAuth provider plugin configuration for Neon Auth. The OAuth provider plugin lets Neon
+	// Auth act as an OAuth 2.1 authorization server for your own clients, such as MCP clients.
+	//
+	// GET /projects/{project_id}/branches/{branch_id}/auth/plugins/oauth-provider
+	GetNeonAuthOAuthProviderPlugin(ctx context.Context, params GetNeonAuthOAuthProviderPluginParams) (*NeonAuthOAuthProviderConfig, error)
 	// GetNeonAuthPhoneNumberPlugin invokes getNeonAuthPhoneNumberPlugin operation.
 	//
 	// Returns the phone number plugin configuration for Neon Auth. The phone number plugin enables
@@ -781,7 +825,9 @@ type Invoker interface {
 	// GetProject invokes getProject operation.
 	//
 	// Retrieves information about the specified project. Returned details include the project settings,
-	// compute configuration, history retention, owner information, and current usage metrics.
+	// compute configuration, history retention, owner information, and current usage metrics. The usage
+	// metrics are not intended for billing or metering. For billing, use
+	// `/consumption_history/v2/projects`.
 	//
 	// GET /projects/{project_id}
 	GetProject(ctx context.Context, params GetProjectParams) (*ProjectResponse, error)
@@ -800,7 +846,8 @@ type Invoker interface {
 	//
 	// Each Neon project is initially created with a root and default branch named `main`. A project can
 	// contain one or more branches. A parent branch is identified by a `parent_id` value, which is the
-	// `id` of the parent branch. For related information, see [Manage branches].
+	// `id` of the parent branch. For related information, see [Manage branches]. The usage metrics are not
+	// intended for billing or metering. For billing, use `/consumption_history/v2/branches`.
 	//
 	// [Manage branches]: https://neon.com/docs/manage/branches/
 	//
@@ -821,6 +868,9 @@ type Invoker interface {
 	// Streams the raw bytes of the named object from the bucket on the specified branch, including objects
 	// inherited from ancestor branches. Served by the user's session (no customer S3 credentials
 	// required).
+	//
+	// For organizations on the per-project role model, downloading object bytes requires the Editor role
+	// or higher. Viewers can list objects but not download them.
 	//
 	// The body is returned as `application/octet-stream` so a browser treats it as a download; the
 	// `Content-Length` and `ETag` response headers echo the stored object metadata.
@@ -999,6 +1049,13 @@ type Invoker interface {
 	//
 	// GET /projects/{project_id}/auth/integrations
 	ListNeonAuthIntegrations(ctx context.Context, params ListNeonAuthIntegrationsParams) (*ListNeonAuthIntegrationsResponse, error)
+	// ListNeonAuthOAuthClients invokes listNeonAuthOAuthClients operation.
+	//
+	// Lists the OAuth clients registered for the branch's Neon Auth OAuth provider. Client secrets are
+	// never returned.
+	//
+	// GET /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients
+	ListNeonAuthOAuthClients(ctx context.Context, params ListNeonAuthOAuthClientsParams) (*ListNeonAuthOAuthClientsResponse, error)
 	// ListNeonAuthOauthProviders invokes listNeonAuthOauthProviders operation.
 	//
 	// Deprecated. Use `/projects/{project_id}/branches/{branch_id}/auth/oauth_providers` instead. Removal
@@ -1231,7 +1288,8 @@ type Invoker interface {
 	//  - `upload` returns a presigned `PUT` URL (the caller `PUT`s the file bytes straight to `url` with
 	//    the returned `headers`). Authorized with project write access.
 	//  - `download` returns a presigned `GET` URL (the caller `GET`s the bytes straight from `url`).
-	//    Authorized with project read access.
+	//    Authorized with project read access. For organizations on the per-project role model, it also
+	//    requires the Editor role or higher, because the URL grants access to the object's bytes.
 	//
 	// The platform mints a short-lived credential and builds the SigV4-signed URL against the branch's S3
 	// data-plane host, returning it together with the HTTP method, any headers the caller must echo, and
@@ -1289,6 +1347,10 @@ type Invoker interface {
 	// record; the domain goes live only once that DNS resolves and a certificate is issued on the first
 	// request. A domain already registered to another resource is rejected with `409` and no detail about
 	// the owner. Re-registering the same domain for the same entity is idempotent.
+	//
+	// For organizations on the per-project role model, registering a custom domain requires the project
+	// Admin role. Other callers receive `403` with code `CUSTOM_DOMAIN_ADMIN_REQUIRED`. Organization API
+	// keys keep write-level access.
 	//
 	// Note: This endpoint is currently in Beta.
 	//
@@ -1422,6 +1484,13 @@ type Invoker interface {
 	//
 	// POST /projects/{project_id}/branches/{branch_id}/credentials/{token_id}/rotate
 	RotateCredential(ctx context.Context, params RotateCredentialParams) (*RotateCredentialResponse, error)
+	// RotateNeonAuthOAuthClientSecret invokes rotateNeonAuthOAuthClientSecret operation.
+	//
+	// Generates a new secret for a confidential OAuth client and invalidates the previous one. The new
+	// secret is shown only once.
+	//
+	// POST /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}/rotate_secret
+	RotateNeonAuthOAuthClientSecret(ctx context.Context, params RotateNeonAuthOAuthClientSecretParams) (*NeonAuthOAuthClientSecret, error)
 	// RotateProjectBranchRealtimeSecret invokes rotateProjectBranchRealtimeSecret operation.
 	//
 	// Replaces the branch's Realtime shared secret. Rotation is asynchronous: once the Realtime state is
@@ -1599,6 +1668,14 @@ type Invoker interface {
 	//
 	// PATCH /projects/{project_id}/auth/email_server
 	UpdateNeonAuthEmailServer(ctx context.Context, request *NeonAuthEmailServerConfig, params UpdateNeonAuthEmailServerParams) (*NeonAuthEmailServerConfigResponse, error)
+	// UpdateNeonAuthLogsExport invokes updateNeonAuthLogsExport operation.
+	//
+	// Enables or disables exporting Neon Auth events for the branch to Neon Platform logs. Only supported
+	// for Neon Auth (`better_auth`) integrations. When logs export is not available for the project, only
+	// disabling is accepted.
+	//
+	// PATCH /projects/{project_id}/branches/{branch_id}/auth/logs_export
+	UpdateNeonAuthLogsExport(ctx context.Context, request *NeonAuthLogsExportConfig, params UpdateNeonAuthLogsExportParams) (*NeonAuthLogsExportConfig, error)
 	// UpdateNeonAuthMagicLinkPlugin invokes updateNeonAuthMagicLinkPlugin operation.
 	//
 	// Updates the magic link plugin configuration for Neon Auth. The magic link plugin enables
@@ -1606,6 +1683,22 @@ type Invoker interface {
 	//
 	// PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/magic-link
 	UpdateNeonAuthMagicLinkPlugin(ctx context.Context, request *NeonAuthMagicLinkConfigUpdate, params UpdateNeonAuthMagicLinkPluginParams) (*NeonAuthMagicLinkConfig, error)
+	// UpdateNeonAuthOAuthClient invokes updateNeonAuthOAuthClient operation.
+	//
+	// Updates an OAuth client. Only the fields provided in the request body are updated. A provided
+	// `resources` list replaces the client's stored list. The client `type` cannot be changed.
+	//
+	// PATCH /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}
+	UpdateNeonAuthOAuthClient(ctx context.Context, request *NeonAuthOAuthClientUpdateRequest, params UpdateNeonAuthOAuthClientParams) (*NeonAuthOAuthClient, error)
+	// UpdateNeonAuthOAuthProviderPlugin invokes updateNeonAuthOAuthProviderPlugin operation.
+	//
+	// Updates the OAuth provider plugin configuration for Neon Auth. Only the fields provided in the
+	// request body are updated; omitted fields retain their current values. A provided `resources` list
+	// replaces the stored list. A provided `mcp` object replaces the stored MCP configuration and must
+	// include `resource`. The plugin can only be enabled on the project's root branch.
+	//
+	// PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/oauth-provider
+	UpdateNeonAuthOAuthProviderPlugin(ctx context.Context, request *NeonAuthOAuthProviderConfigUpdate, params UpdateNeonAuthOAuthProviderPluginParams) (*NeonAuthOAuthProviderConfig, error)
 	// UpdateNeonAuthOauthProvider invokes updateNeonAuthOauthProvider operation.
 	//
 	// Deprecated. Use
@@ -3366,6 +3459,167 @@ func (c *Client) sendCountProjectBranches(ctx context.Context, params CountProje
 	return result, nil
 }
 
+// CountProjects invokes countProjects operation.
+//
+// Retrieves the number of active projects you can access in the specified organization, without paging
+// through the list of projects. Projects that are being created or deleted are not counted. If using a
+// personal API key, include the `org_id` parameter to specify which organization to work with. If
+// using an org API key, `org_id` is automatically inferred from the key.
+//
+// GET /projects/count
+func (c *Client) CountProjects(ctx context.Context, params CountProjectsParams) (*ProjectsCountResponse, error) {
+	res, err := c.sendCountProjects(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendCountProjects(ctx context.Context, params CountProjectsParams) (res *ProjectsCountResponse, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("countProjects"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/projects/count"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CountProjectsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/projects/count"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "org_id" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "org_id",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.OrgID.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, CountProjectsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, CountProjectsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, CountProjectsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeCountProjectsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // CreateApiKey invokes createApiKey operation.
 //
 // Creates an API key. The `key_name` is a user-specified name for the key. Returns an `id` and `key`;
@@ -4332,6 +4586,186 @@ func (c *Client) sendCreateNeonAuthNewUser(ctx context.Context, request *NeonAut
 
 	stage = "DecodeResponse"
 	result, err := decodeCreateNeonAuthNewUserResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreateNeonAuthOAuthClient invokes createNeonAuthOAuthClient operation.
+//
+// Registers an OAuth client with the branch's Neon Auth OAuth provider. For `confidential` clients the
+// response includes the `client_secret`, which is shown only once. Every entry in `resources` must be
+// configured on the OAuth provider plugin.
+//
+// POST /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients
+func (c *Client) CreateNeonAuthOAuthClient(ctx context.Context, request *NeonAuthOAuthClientCreateRequest, params CreateNeonAuthOAuthClientParams) (*NeonAuthOAuthClientCreated, error) {
+	res, err := c.sendCreateNeonAuthOAuthClient(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendCreateNeonAuthOAuthClient(ctx context.Context, request *NeonAuthOAuthClientCreateRequest, params CreateNeonAuthOAuthClientParams) (res *NeonAuthOAuthClientCreated, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("createNeonAuthOAuthClient"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, CreateNeonAuthOAuthClientOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/auth/oauth-provider/clients"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateNeonAuthOAuthClientRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, CreateNeonAuthOAuthClientOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, CreateNeonAuthOAuthClientOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, CreateNeonAuthOAuthClientOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeCreateNeonAuthOAuthClientResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -7898,6 +8332,199 @@ func (c *Client) sendDeleteNeonAuthIntegration(ctx context.Context, request OptD
 	return result, nil
 }
 
+// DeleteNeonAuthOAuthClient invokes deleteNeonAuthOAuthClient operation.
+//
+// Deletes an OAuth client. Tokens already issued to the client are not revoked.
+//
+// DELETE /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}
+func (c *Client) DeleteNeonAuthOAuthClient(ctx context.Context, params DeleteNeonAuthOAuthClientParams) error {
+	_, err := c.sendDeleteNeonAuthOAuthClient(ctx, params)
+	return err
+}
+
+func (c *Client) sendDeleteNeonAuthOAuthClient(ctx context.Context, params DeleteNeonAuthOAuthClientParams) (res *DeleteNeonAuthOAuthClientNoContent, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("deleteNeonAuthOAuthClient"),
+		semconv.HTTPRequestMethodKey.String("DELETE"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, DeleteNeonAuthOAuthClientOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [6]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/auth/oauth-provider/clients/"
+	{
+		// Encode "client_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "client_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ClientID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, DeleteNeonAuthOAuthClientOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, DeleteNeonAuthOAuthClientOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, DeleteNeonAuthOAuthClientOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeDeleteNeonAuthOAuthClientResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // DeleteNeonAuthOauthProvider invokes deleteNeonAuthOauthProvider operation.
 //
 // Deprecated. Use
@@ -9581,6 +10208,10 @@ func (c *Client) sendDeleteProjectBranchBucketObjectsByPrefix(ctx context.Contex
 // DeleteProjectBranchCustomDomain invokes deleteProjectBranchCustomDomain operation.
 //
 // Removes a custom domain registered on the branch and stops routing it.
+//
+// For organizations on the per-project role model, deleting a custom domain requires the project Admin
+// role. Other callers receive `403` with code `CUSTOM_DOMAIN_ADMIN_REQUIRED`. Organization API keys
+// keep write-level access.
 //
 // Note: This endpoint is currently in Beta.
 //
@@ -13065,9 +13696,11 @@ func (c *Client) sendGetConnectionURI(ctx context.Context, params GetConnectionU
 //
 // History starts when the account first ingests branch-level consumption data.
 //
-// The `metrics` query parameter is required. Only these six values are supported on this endpoint:
+// The `metrics` query parameter is required. These values are supported on this endpoint:
 // `compute_unit_seconds`, `root_branch_bytes_month`, `child_branch_bytes_month`,
-// `instant_restore_bytes_month`, `public_network_transfer_bytes`, `private_network_transfer_bytes`.
+// `instant_restore_bytes_month`, `public_network_transfer_bytes`, `private_network_transfer_bytes`,
+// `functions_active_capacity_microseconds`, `functions_waiting_capacity_microseconds`,
+// `functions_invocations`, `functions_egress_bytes`.
 //
 // This endpoint does not support `extra_branches_month` or `snapshot_storage_bytes_month`. Use
 // `GET /consumption_history/v2/projects` for those.
@@ -13700,7 +14333,8 @@ func (c *Client) sendGetConsumptionHistoryPerProject(ctx context.Context, params
 // The `metrics` query parameter is required. Supported values: `compute_unit_seconds`,
 // `root_branch_bytes_month`, `child_branch_bytes_month`, `instant_restore_bytes_month`,
 // `public_network_transfer_bytes`, `private_network_transfer_bytes`, `extra_branches_month`,
-// `snapshot_storage_bytes_month`.
+// `snapshot_storage_bytes_month`, `functions_active_capacity_microseconds`,
+// `functions_waiting_capacity_microseconds`, `functions_invocations`, `functions_egress_bytes`.
 //
 // Consumption metrics within each project are returned in ascending time order (oldest first). This
 // request does not wake project computes.
@@ -15306,6 +15940,376 @@ func (c *Client) sendGetNeonAuthEmailServer(ctx context.Context, params GetNeonA
 	return result, nil
 }
 
+// GetNeonAuthOAuthClient invokes getNeonAuthOAuthClient operation.
+//
+// Returns an OAuth client registered with the branch's Neon Auth OAuth provider. The client secret is
+// never returned.
+//
+// GET /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}
+func (c *Client) GetNeonAuthOAuthClient(ctx context.Context, params GetNeonAuthOAuthClientParams) (*NeonAuthOAuthClient, error) {
+	res, err := c.sendGetNeonAuthOAuthClient(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetNeonAuthOAuthClient(ctx context.Context, params GetNeonAuthOAuthClientParams) (res *NeonAuthOAuthClient, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getNeonAuthOAuthClient"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetNeonAuthOAuthClientOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [6]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/auth/oauth-provider/clients/"
+	{
+		// Encode "client_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "client_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ClientID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, GetNeonAuthOAuthClientOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, GetNeonAuthOAuthClientOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, GetNeonAuthOAuthClientOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetNeonAuthOAuthClientResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetNeonAuthOAuthProviderPlugin invokes getNeonAuthOAuthProviderPlugin operation.
+//
+// Returns the OAuth provider plugin configuration for Neon Auth. The OAuth provider plugin lets Neon
+// Auth act as an OAuth 2.1 authorization server for your own clients, such as MCP clients.
+//
+// GET /projects/{project_id}/branches/{branch_id}/auth/plugins/oauth-provider
+func (c *Client) GetNeonAuthOAuthProviderPlugin(ctx context.Context, params GetNeonAuthOAuthProviderPluginParams) (*NeonAuthOAuthProviderConfig, error) {
+	res, err := c.sendGetNeonAuthOAuthProviderPlugin(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetNeonAuthOAuthProviderPlugin(ctx context.Context, params GetNeonAuthOAuthProviderPluginParams) (res *NeonAuthOAuthProviderConfig, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getNeonAuthOAuthProviderPlugin"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/auth/plugins/oauth-provider"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetNeonAuthOAuthProviderPluginOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/auth/plugins/oauth-provider"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, GetNeonAuthOAuthProviderPluginOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, GetNeonAuthOAuthProviderPluginOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, GetNeonAuthOAuthProviderPluginOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetNeonAuthOAuthProviderPluginResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetNeonAuthPhoneNumberPlugin invokes getNeonAuthPhoneNumberPlugin operation.
 //
 // Returns the phone number plugin configuration for Neon Auth. The phone number plugin enables
@@ -16901,7 +17905,9 @@ func (c *Client) sendGetOrganizationVPCEndpointDetails(ctx context.Context, para
 // GetProject invokes getProject operation.
 //
 // Retrieves information about the specified project. Returned details include the project settings,
-// compute configuration, history retention, owner information, and current usage metrics.
+// compute configuration, history retention, owner information, and current usage metrics. The usage
+// metrics are not intended for billing or metering. For billing, use
+// `/consumption_history/v2/projects`.
 //
 // GET /projects/{project_id}
 func (c *Client) GetProject(ctx context.Context, params GetProjectParams) (*ProjectResponse, error) {
@@ -17291,7 +18297,8 @@ func (c *Client) sendGetProjectAdvisorSecurityIssues(ctx context.Context, params
 //
 // Each Neon project is initially created with a root and default branch named `main`. A project can
 // contain one or more branches. A parent branch is identified by a `parent_id` value, which is the
-// `id` of the parent branch. For related information, see [Manage branches].
+// `id` of the parent branch. For related information, see [Manage branches]. The usage metrics are not
+// intended for billing or metering. For billing, use `/consumption_history/v2/branches`.
 //
 // GET /projects/{project_id}/branches/{branch_id}
 //
@@ -17649,6 +18656,9 @@ func (c *Client) sendGetProjectBranchAiGateway(ctx context.Context, params GetPr
 // Streams the raw bytes of the named object from the bucket on the specified branch, including objects
 // inherited from ancestor branches. Served by the user's session (no customer S3 credentials
 // required).
+//
+// For organizations on the per-project role model, downloading object bytes requires the Editor role
+// or higher. Viewers can list objects but not download them.
 //
 // The body is returned as `application/octet-stream` so a browser treats it as a download; the
 // `Content-Length` and `ETag` response headers echo the stored object metadata.
@@ -21766,6 +22776,182 @@ func (c *Client) sendListNeonAuthIntegrations(ctx context.Context, params ListNe
 
 	stage = "DecodeResponse"
 	result, err := decodeListNeonAuthIntegrationsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ListNeonAuthOAuthClients invokes listNeonAuthOAuthClients operation.
+//
+// Lists the OAuth clients registered for the branch's Neon Auth OAuth provider. Client secrets are
+// never returned.
+//
+// GET /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients
+func (c *Client) ListNeonAuthOAuthClients(ctx context.Context, params ListNeonAuthOAuthClientsParams) (*ListNeonAuthOAuthClientsResponse, error) {
+	res, err := c.sendListNeonAuthOAuthClients(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendListNeonAuthOAuthClients(ctx context.Context, params ListNeonAuthOAuthClientsParams) (res *ListNeonAuthOAuthClientsResponse, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("listNeonAuthOAuthClients"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, ListNeonAuthOAuthClientsOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/auth/oauth-provider/clients"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, ListNeonAuthOAuthClientsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, ListNeonAuthOAuthClientsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, ListNeonAuthOAuthClientsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeListNeonAuthOAuthClientsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -26414,7 +27600,8 @@ func (c *Client) sendListSnapshots(ctx context.Context, params ListSnapshotsPara
 //   - `upload` returns a presigned `PUT` URL (the caller `PUT`s the file bytes straight to `url` with
 //     the returned `headers`). Authorized with project write access.
 //   - `download` returns a presigned `GET` URL (the caller `GET`s the bytes straight from `url`).
-//     Authorized with project read access.
+//     Authorized with project read access. For organizations on the per-project role model, it also
+//     requires the Editor role or higher, because the URL grants access to the object's bytes.
 //
 // The platform mints a short-lived credential and builds the SigV4-signed URL against the branch's S3
 // data-plane host, returning it together with the HTTP method, any headers the caller must echo, and
@@ -27004,6 +28191,10 @@ func (c *Client) sendRecoverProject(ctx context.Context, params RecoverProjectPa
 // record; the domain goes live only once that DNS resolves and a certificate is issued on the first
 // request. A domain already registered to another resource is rejected with `409` and no detail about
 // the owner. Re-registering the same domain for the same entity is idempotent.
+//
+// For organizations on the per-project role model, registering a custom domain requires the project
+// Admin role. Other callers receive `403` with code `CUSTOM_DOMAIN_ADMIN_REQUIRED`. Organization API
+// keys keep write-level access.
 //
 // Note: This endpoint is currently in Beta.
 //
@@ -29430,6 +30621,201 @@ func (c *Client) sendRotateCredential(ctx context.Context, params RotateCredenti
 
 	stage = "DecodeResponse"
 	result, err := decodeRotateCredentialResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// RotateNeonAuthOAuthClientSecret invokes rotateNeonAuthOAuthClientSecret operation.
+//
+// Generates a new secret for a confidential OAuth client and invalidates the previous one. The new
+// secret is shown only once.
+//
+// POST /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}/rotate_secret
+func (c *Client) RotateNeonAuthOAuthClientSecret(ctx context.Context, params RotateNeonAuthOAuthClientSecretParams) (*NeonAuthOAuthClientSecret, error) {
+	res, err := c.sendRotateNeonAuthOAuthClientSecret(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendRotateNeonAuthOAuthClientSecret(ctx context.Context, params RotateNeonAuthOAuthClientSecretParams) (res *NeonAuthOAuthClientSecret, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("rotateNeonAuthOAuthClientSecret"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}/rotate_secret"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, RotateNeonAuthOAuthClientSecretOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [7]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/auth/oauth-provider/clients/"
+	{
+		// Encode "client_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "client_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ClientID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	pathParts[6] = "/rotate_secret"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, RotateNeonAuthOAuthClientSecretOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, RotateNeonAuthOAuthClientSecretOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, RotateNeonAuthOAuthClientSecretOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeRotateNeonAuthOAuthClientSecretResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -32945,6 +34331,186 @@ func (c *Client) sendUpdateNeonAuthEmailServer(ctx context.Context, request *Neo
 	return result, nil
 }
 
+// UpdateNeonAuthLogsExport invokes updateNeonAuthLogsExport operation.
+//
+// Enables or disables exporting Neon Auth events for the branch to Neon Platform logs. Only supported
+// for Neon Auth (`better_auth`) integrations. When logs export is not available for the project, only
+// disabling is accepted.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/auth/logs_export
+func (c *Client) UpdateNeonAuthLogsExport(ctx context.Context, request *NeonAuthLogsExportConfig, params UpdateNeonAuthLogsExportParams) (*NeonAuthLogsExportConfig, error) {
+	res, err := c.sendUpdateNeonAuthLogsExport(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateNeonAuthLogsExport(ctx context.Context, request *NeonAuthLogsExportConfig, params UpdateNeonAuthLogsExportParams) (res *NeonAuthLogsExportConfig, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateNeonAuthLogsExport"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/auth/logs_export"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateNeonAuthLogsExportOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/auth/logs_export"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateNeonAuthLogsExportRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, UpdateNeonAuthLogsExportOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, UpdateNeonAuthLogsExportOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, UpdateNeonAuthLogsExportOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateNeonAuthLogsExportResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // UpdateNeonAuthMagicLinkPlugin invokes updateNeonAuthMagicLinkPlugin operation.
 //
 // Updates the magic link plugin configuration for Neon Auth. The magic link plugin enables
@@ -33117,6 +34683,384 @@ func (c *Client) sendUpdateNeonAuthMagicLinkPlugin(ctx context.Context, request 
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateNeonAuthMagicLinkPluginResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateNeonAuthOAuthClient invokes updateNeonAuthOAuthClient operation.
+//
+// Updates an OAuth client. Only the fields provided in the request body are updated. A provided
+// `resources` list replaces the client's stored list. The client `type` cannot be changed.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}
+func (c *Client) UpdateNeonAuthOAuthClient(ctx context.Context, request *NeonAuthOAuthClientUpdateRequest, params UpdateNeonAuthOAuthClientParams) (*NeonAuthOAuthClient, error) {
+	res, err := c.sendUpdateNeonAuthOAuthClient(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateNeonAuthOAuthClient(ctx context.Context, request *NeonAuthOAuthClientUpdateRequest, params UpdateNeonAuthOAuthClientParams) (res *NeonAuthOAuthClient, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateNeonAuthOAuthClient"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateNeonAuthOAuthClientOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [6]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/auth/oauth-provider/clients/"
+	{
+		// Encode "client_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "client_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ClientID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateNeonAuthOAuthClientRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, UpdateNeonAuthOAuthClientOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, UpdateNeonAuthOAuthClientOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, UpdateNeonAuthOAuthClientOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateNeonAuthOAuthClientResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateNeonAuthOAuthProviderPlugin invokes updateNeonAuthOAuthProviderPlugin operation.
+//
+// Updates the OAuth provider plugin configuration for Neon Auth. Only the fields provided in the
+// request body are updated; omitted fields retain their current values. A provided `resources` list
+// replaces the stored list. A provided `mcp` object replaces the stored MCP configuration and must
+// include `resource`. The plugin can only be enabled on the project's root branch.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/oauth-provider
+func (c *Client) UpdateNeonAuthOAuthProviderPlugin(ctx context.Context, request *NeonAuthOAuthProviderConfigUpdate, params UpdateNeonAuthOAuthProviderPluginParams) (*NeonAuthOAuthProviderConfig, error) {
+	res, err := c.sendUpdateNeonAuthOAuthProviderPlugin(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateNeonAuthOAuthProviderPlugin(ctx context.Context, request *NeonAuthOAuthProviderConfigUpdate, params UpdateNeonAuthOAuthProviderPluginParams) (res *NeonAuthOAuthProviderConfig, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("updateNeonAuthOAuthProviderPlugin"),
+		semconv.HTTPRequestMethodKey.String("PATCH"),
+		semconv.URLTemplateKey.String("/projects/{project_id}/branches/{branch_id}/auth/plugins/oauth-provider"),
+	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, UpdateNeonAuthOAuthProviderPluginOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/projects/"
+	{
+		// Encode "project_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "project_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ProjectID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/branches/"
+	{
+		// Encode "branch_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "branch_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.BranchID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/auth/plugins/oauth-provider"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateNeonAuthOAuthProviderPluginRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, UpdateNeonAuthOAuthProviderPluginOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, UpdateNeonAuthOAuthProviderPluginOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 1
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+		{
+			stage = "Security:TokenCookieAuth"
+			switch err := c.securityTokenCookieAuth(ctx, UpdateNeonAuthOAuthProviderPluginOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 2
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"TokenCookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+				{0b00000010},
+				{0b00000100},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	stage = "DecodeResponse"
+	result, err := decodeUpdateNeonAuthOAuthProviderPluginResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

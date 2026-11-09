@@ -10565,6 +10565,82 @@ func (s *CreateCredentialResponse) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes CreateProjectBranchBucketForbidden as json.
+func (s *CreateProjectBranchBucketForbidden) Encode(e *jx.Encoder) {
+	unwrapped := (*GeneralError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes CreateProjectBranchBucketForbidden from json.
+func (s *CreateProjectBranchBucketForbidden) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CreateProjectBranchBucketForbidden to nil")
+	}
+	var unwrapped GeneralError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = CreateProjectBranchBucketForbidden(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *CreateProjectBranchBucketForbidden) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CreateProjectBranchBucketForbidden) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes CreateProjectBranchBucketGone as json.
+func (s *CreateProjectBranchBucketGone) Encode(e *jx.Encoder) {
+	unwrapped := (*GeneralError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes CreateProjectBranchBucketGone from json.
+func (s *CreateProjectBranchBucketGone) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CreateProjectBranchBucketGone to nil")
+	}
+	var unwrapped GeneralError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = CreateProjectBranchBucketGone(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *CreateProjectBranchBucketGone) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CreateProjectBranchBucketGone) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode implements json.Marshaler.
 func (s *CreateProjectBranchReq) Encode(e *jx.Encoder) {
 	e.ObjStart()
@@ -13252,14 +13328,42 @@ func (s *DataAPIReponse) encodeFields(e *jx.Encoder) {
 			s.ObservedAt.Encode(e, json.EncodeDateTime)
 		}
 	}
+	{
+		if s.AuthProvider.Set {
+			e.FieldStart("auth_provider")
+			s.AuthProvider.Encode(e)
+		}
+	}
+	{
+		if s.JwksURL.Set {
+			e.FieldStart("jwks_url")
+			s.JwksURL.Encode(e)
+		}
+	}
+	{
+		if s.ProviderName.Set {
+			e.FieldStart("provider_name")
+			s.ProviderName.Encode(e)
+		}
+	}
+	{
+		if s.JwtAudience.Set {
+			e.FieldStart("jwt_audience")
+			s.JwtAudience.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfDataAPIReponse = [5]string{
+var jsonFieldsNameOfDataAPIReponse = [9]string{
 	0: "url",
 	1: "status",
 	2: "settings",
 	3: "available_schemas",
 	4: "observed_at",
+	5: "auth_provider",
+	6: "jwks_url",
+	7: "provider_name",
+	8: "jwt_audience",
 }
 
 // Decode decodes DataAPIReponse from json.
@@ -13267,7 +13371,7 @@ func (s *DataAPIReponse) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode DataAPIReponse to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -13325,6 +13429,46 @@ func (s *DataAPIReponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"observed_at\"")
 			}
+		case "auth_provider":
+			if err := func() error {
+				s.AuthProvider.Reset()
+				if err := s.AuthProvider.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"auth_provider\"")
+			}
+		case "jwks_url":
+			if err := func() error {
+				s.JwksURL.Reset()
+				if err := s.JwksURL.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"jwks_url\"")
+			}
+		case "provider_name":
+			if err := func() error {
+				s.ProviderName.Reset()
+				if err := s.ProviderName.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"provider_name\"")
+			}
+		case "jwt_audience":
+			if err := func() error {
+				s.JwtAudience.Reset()
+				if err := s.JwtAudience.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"jwt_audience\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -13334,8 +13478,9 @@ func (s *DataAPIReponse) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
+	for i, mask := range [2]uint8{
 		0b00000011,
+		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -13377,6 +13522,46 @@ func (s *DataAPIReponse) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *DataAPIReponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes DataAPIReponseAuthProvider as json.
+func (s DataAPIReponseAuthProvider) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes DataAPIReponseAuthProvider from json.
+func (s *DataAPIReponseAuthProvider) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DataAPIReponseAuthProvider to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch DataAPIReponseAuthProvider(v) {
+	case DataAPIReponseAuthProviderNeonAuth:
+		*s = DataAPIReponseAuthProviderNeonAuth
+	case DataAPIReponseAuthProviderExternal:
+		*s = DataAPIReponseAuthProviderExternal
+	default:
+		*s = DataAPIReponseAuthProvider(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s DataAPIReponseAuthProvider) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DataAPIReponseAuthProvider) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -18232,6 +18417,82 @@ func (s *GetProjectAdvisorSecurityIssuesOK) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes GetProjectBranchBucketObjectForbidden as json.
+func (s *GetProjectBranchBucketObjectForbidden) Encode(e *jx.Encoder) {
+	unwrapped := (*GeneralError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes GetProjectBranchBucketObjectForbidden from json.
+func (s *GetProjectBranchBucketObjectForbidden) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetProjectBranchBucketObjectForbidden to nil")
+	}
+	var unwrapped GeneralError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GetProjectBranchBucketObjectForbidden(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetProjectBranchBucketObjectForbidden) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetProjectBranchBucketObjectForbidden) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes GetProjectBranchBucketObjectNotFound as json.
+func (s *GetProjectBranchBucketObjectNotFound) Encode(e *jx.Encoder) {
+	unwrapped := (*GeneralError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes GetProjectBranchBucketObjectNotFound from json.
+func (s *GetProjectBranchBucketObjectNotFound) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetProjectBranchBucketObjectNotFound to nil")
+	}
+	var unwrapped GeneralError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GetProjectBranchBucketObjectNotFound(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetProjectBranchBucketObjectNotFound) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetProjectBranchBucketObjectNotFound) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode implements json.Marshaler.
 func (s *GetProjectBranchOK) Encode(e *jx.Encoder) {
 	e.ObjStart()
@@ -19599,6 +19860,112 @@ func (s *ListNeonAuthIntegrationsResponse) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *ListNeonAuthIntegrationsResponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *ListNeonAuthOAuthClientsResponse) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ListNeonAuthOAuthClientsResponse) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("clients")
+		e.ArrStart()
+		for _, elem := range s.Clients {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfListNeonAuthOAuthClientsResponse = [1]string{
+	0: "clients",
+}
+
+// Decode decodes ListNeonAuthOAuthClientsResponse from json.
+func (s *ListNeonAuthOAuthClientsResponse) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ListNeonAuthOAuthClientsResponse to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "clients":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				s.Clients = make([]NeonAuthOAuthClient, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem NeonAuthOAuthClient
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Clients = append(s.Clients, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"clients\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ListNeonAuthOAuthClientsResponse")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfListNeonAuthOAuthClientsResponse) {
+					name = jsonFieldsNameOfListNeonAuthOAuthClientsResponse[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ListNeonAuthOAuthClientsResponse) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ListNeonAuthOAuthClientsResponse) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -21968,13 +22335,27 @@ func (s *NeonAuthAddOAuthProviderRequest) encodeFields(e *jx.Encoder) {
 			s.MicrosoftTenantID.Encode(e)
 		}
 	}
+	{
+		if s.AppleTeamID.Set {
+			e.FieldStart("apple_team_id")
+			s.AppleTeamID.Encode(e)
+		}
+	}
+	{
+		if s.AppleKeyID.Set {
+			e.FieldStart("apple_key_id")
+			s.AppleKeyID.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfNeonAuthAddOAuthProviderRequest = [4]string{
+var jsonFieldsNameOfNeonAuthAddOAuthProviderRequest = [6]string{
 	0: "id",
 	1: "client_id",
 	2: "client_secret",
 	3: "microsoft_tenant_id",
+	4: "apple_team_id",
+	5: "apple_key_id",
 }
 
 // Decode decodes NeonAuthAddOAuthProviderRequest from json.
@@ -22025,6 +22406,26 @@ func (s *NeonAuthAddOAuthProviderRequest) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"microsoft_tenant_id\"")
+			}
+		case "apple_team_id":
+			if err := func() error {
+				s.AppleTeamID.Reset()
+				if err := s.AppleTeamID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"apple_team_id\"")
+			}
+		case "apple_key_id":
+			if err := func() error {
+				s.AppleKeyID.Reset()
+				if err := s.AppleKeyID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"apple_key_id\"")
 			}
 		default:
 			return d.Skip()
@@ -23351,9 +23752,13 @@ func (s *NeonAuthEmailAndPasswordConfig) encodeFields(e *jx.Encoder) {
 		e.FieldStart("disable_sign_up")
 		e.Bool(s.DisableSignUp)
 	}
+	{
+		e.FieldStart("revoke_sessions_on_password_reset")
+		e.Bool(s.RevokeSessionsOnPasswordReset)
+	}
 }
 
-var jsonFieldsNameOfNeonAuthEmailAndPasswordConfig = [7]string{
+var jsonFieldsNameOfNeonAuthEmailAndPasswordConfig = [8]string{
 	0: "enabled",
 	1: "email_verification_method",
 	2: "require_email_verification",
@@ -23361,6 +23766,7 @@ var jsonFieldsNameOfNeonAuthEmailAndPasswordConfig = [7]string{
 	4: "send_verification_email_on_sign_up",
 	5: "send_verification_email_on_sign_in",
 	6: "disable_sign_up",
+	7: "revoke_sessions_on_password_reset",
 }
 
 // Decode decodes NeonAuthEmailAndPasswordConfig from json.
@@ -23454,6 +23860,18 @@ func (s *NeonAuthEmailAndPasswordConfig) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"disable_sign_up\"")
 			}
+		case "revoke_sessions_on_password_reset":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				v, err := d.Bool()
+				s.RevokeSessionsOnPasswordReset = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"revoke_sessions_on_password_reset\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -23464,7 +23882,7 @@ func (s *NeonAuthEmailAndPasswordConfig) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b01111111,
+		0b11111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -23561,9 +23979,15 @@ func (s *NeonAuthEmailAndPasswordConfigUpdate) encodeFields(e *jx.Encoder) {
 			s.DisableSignUp.Encode(e)
 		}
 	}
+	{
+		if s.RevokeSessionsOnPasswordReset.Set {
+			e.FieldStart("revoke_sessions_on_password_reset")
+			s.RevokeSessionsOnPasswordReset.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfNeonAuthEmailAndPasswordConfigUpdate = [7]string{
+var jsonFieldsNameOfNeonAuthEmailAndPasswordConfigUpdate = [8]string{
 	0: "enabled",
 	1: "email_verification_method",
 	2: "require_email_verification",
@@ -23571,6 +23995,7 @@ var jsonFieldsNameOfNeonAuthEmailAndPasswordConfigUpdate = [7]string{
 	4: "send_verification_email_on_sign_up",
 	5: "send_verification_email_on_sign_in",
 	6: "disable_sign_up",
+	7: "revoke_sessions_on_password_reset",
 }
 
 // Decode decodes NeonAuthEmailAndPasswordConfigUpdate from json.
@@ -23650,6 +24075,16 @@ func (s *NeonAuthEmailAndPasswordConfigUpdate) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"disable_sign_up\"")
+			}
+		case "revoke_sessions_on_password_reset":
+			if err := func() error {
+				s.RevokeSessionsOnPasswordReset.Reset()
+				if err := s.RevokeSessionsOnPasswordReset.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"revoke_sessions_on_password_reset\"")
 			}
 		default:
 			return d.Skip()
@@ -24334,6 +24769,102 @@ func (s *NeonAuthIntegration) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *NeonAuthLogsExportConfig) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *NeonAuthLogsExportConfig) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("enabled")
+		e.Bool(s.Enabled)
+	}
+}
+
+var jsonFieldsNameOfNeonAuthLogsExportConfig = [1]string{
+	0: "enabled",
+}
+
+// Decode decodes NeonAuthLogsExportConfig from json.
+func (s *NeonAuthLogsExportConfig) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NeonAuthLogsExportConfig to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "enabled":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Bool()
+				s.Enabled = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"enabled\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NeonAuthLogsExportConfig")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfNeonAuthLogsExportConfig) {
+					name = jsonFieldsNameOfNeonAuthLogsExportConfig[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NeonAuthLogsExportConfig) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NeonAuthLogsExportConfig) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *NeonAuthMagicLinkConfig) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -24562,6 +25093,1636 @@ func (s *NeonAuthMagicLinkConfigUpdate) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *NeonAuthOAuthClient) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *NeonAuthOAuthClient) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("client_id")
+		e.Str(s.ClientID)
+	}
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		e.FieldStart("type")
+		s.Type.Encode(e)
+	}
+	{
+		e.FieldStart("redirect_uris")
+		e.ArrStart()
+		for _, elem := range s.RedirectUris {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("resources")
+		e.ArrStart()
+		for _, elem := range s.Resources {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("skip_consent")
+		e.Bool(s.SkipConsent)
+	}
+	{
+		e.FieldStart("disabled")
+		e.Bool(s.Disabled)
+	}
+	{
+		if s.CreatedAt.Set {
+			e.FieldStart("created_at")
+			s.CreatedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
+}
+
+var jsonFieldsNameOfNeonAuthOAuthClient = [8]string{
+	0: "client_id",
+	1: "name",
+	2: "type",
+	3: "redirect_uris",
+	4: "resources",
+	5: "skip_consent",
+	6: "disabled",
+	7: "created_at",
+}
+
+// Decode decodes NeonAuthOAuthClient from json.
+func (s *NeonAuthOAuthClient) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NeonAuthOAuthClient to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "client_id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.ClientID = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"client_id\"")
+			}
+		case "name":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "type":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.Type.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"type\"")
+			}
+		case "redirect_uris":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				s.RedirectUris = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.RedirectUris = append(s.RedirectUris, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"redirect_uris\"")
+			}
+		case "resources":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				s.Resources = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Resources = append(s.Resources, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"resources\"")
+			}
+		case "skip_consent":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				v, err := d.Bool()
+				s.SkipConsent = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"skip_consent\"")
+			}
+		case "disabled":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := d.Bool()
+				s.Disabled = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"disabled\"")
+			}
+		case "created_at":
+			if err := func() error {
+				s.CreatedAt.Reset()
+				if err := s.CreatedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"created_at\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NeonAuthOAuthClient")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b01111111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfNeonAuthOAuthClient) {
+					name = jsonFieldsNameOfNeonAuthOAuthClient[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NeonAuthOAuthClient) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NeonAuthOAuthClient) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *NeonAuthOAuthClientCreateRequest) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *NeonAuthOAuthClientCreateRequest) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		e.FieldStart("redirect_uris")
+		e.ArrStart()
+		for _, elem := range s.RedirectUris {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("type")
+		s.Type.Encode(e)
+	}
+	{
+		e.FieldStart("resources")
+		e.ArrStart()
+		for _, elem := range s.Resources {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		if s.SkipConsent.Set {
+			e.FieldStart("skip_consent")
+			s.SkipConsent.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfNeonAuthOAuthClientCreateRequest = [5]string{
+	0: "name",
+	1: "redirect_uris",
+	2: "type",
+	3: "resources",
+	4: "skip_consent",
+}
+
+// Decode decodes NeonAuthOAuthClientCreateRequest from json.
+func (s *NeonAuthOAuthClientCreateRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NeonAuthOAuthClientCreateRequest to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "name":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "redirect_uris":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				s.RedirectUris = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.RedirectUris = append(s.RedirectUris, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"redirect_uris\"")
+			}
+		case "type":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.Type.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"type\"")
+			}
+		case "resources":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				s.Resources = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Resources = append(s.Resources, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"resources\"")
+			}
+		case "skip_consent":
+			if err := func() error {
+				s.SkipConsent.Reset()
+				if err := s.SkipConsent.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"skip_consent\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NeonAuthOAuthClientCreateRequest")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00001111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfNeonAuthOAuthClientCreateRequest) {
+					name = jsonFieldsNameOfNeonAuthOAuthClientCreateRequest[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NeonAuthOAuthClientCreateRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NeonAuthOAuthClientCreateRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *NeonAuthOAuthClientCreated) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *NeonAuthOAuthClientCreated) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("client_id")
+		e.Str(s.ClientID)
+	}
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		e.FieldStart("type")
+		s.Type.Encode(e)
+	}
+	{
+		e.FieldStart("redirect_uris")
+		e.ArrStart()
+		for _, elem := range s.RedirectUris {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("resources")
+		e.ArrStart()
+		for _, elem := range s.Resources {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("skip_consent")
+		e.Bool(s.SkipConsent)
+	}
+	{
+		e.FieldStart("disabled")
+		e.Bool(s.Disabled)
+	}
+	{
+		if s.CreatedAt.Set {
+			e.FieldStart("created_at")
+			s.CreatedAt.Encode(e, json.EncodeDateTime)
+		}
+	}
+	{
+		if s.ClientSecret.Set {
+			e.FieldStart("client_secret")
+			s.ClientSecret.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfNeonAuthOAuthClientCreated = [9]string{
+	0: "client_id",
+	1: "name",
+	2: "type",
+	3: "redirect_uris",
+	4: "resources",
+	5: "skip_consent",
+	6: "disabled",
+	7: "created_at",
+	8: "client_secret",
+}
+
+// Decode decodes NeonAuthOAuthClientCreated from json.
+func (s *NeonAuthOAuthClientCreated) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NeonAuthOAuthClientCreated to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "client_id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.ClientID = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"client_id\"")
+			}
+		case "name":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "type":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.Type.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"type\"")
+			}
+		case "redirect_uris":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				s.RedirectUris = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.RedirectUris = append(s.RedirectUris, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"redirect_uris\"")
+			}
+		case "resources":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				s.Resources = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Resources = append(s.Resources, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"resources\"")
+			}
+		case "skip_consent":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				v, err := d.Bool()
+				s.SkipConsent = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"skip_consent\"")
+			}
+		case "disabled":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := d.Bool()
+				s.Disabled = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"disabled\"")
+			}
+		case "created_at":
+			if err := func() error {
+				s.CreatedAt.Reset()
+				if err := s.CreatedAt.Decode(d, json.DecodeDateTime); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"created_at\"")
+			}
+		case "client_secret":
+			if err := func() error {
+				s.ClientSecret.Reset()
+				if err := s.ClientSecret.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"client_secret\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NeonAuthOAuthClientCreated")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b01111111,
+		0b00000000,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfNeonAuthOAuthClientCreated) {
+					name = jsonFieldsNameOfNeonAuthOAuthClientCreated[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NeonAuthOAuthClientCreated) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NeonAuthOAuthClientCreated) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *NeonAuthOAuthClientSecret) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *NeonAuthOAuthClientSecret) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("client_id")
+		e.Str(s.ClientID)
+	}
+	{
+		e.FieldStart("client_secret")
+		e.Str(s.ClientSecret)
+	}
+}
+
+var jsonFieldsNameOfNeonAuthOAuthClientSecret = [2]string{
+	0: "client_id",
+	1: "client_secret",
+}
+
+// Decode decodes NeonAuthOAuthClientSecret from json.
+func (s *NeonAuthOAuthClientSecret) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NeonAuthOAuthClientSecret to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "client_id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.ClientID = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"client_id\"")
+			}
+		case "client_secret":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.ClientSecret = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"client_secret\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NeonAuthOAuthClientSecret")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfNeonAuthOAuthClientSecret) {
+					name = jsonFieldsNameOfNeonAuthOAuthClientSecret[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NeonAuthOAuthClientSecret) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NeonAuthOAuthClientSecret) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes NeonAuthOAuthClientType as json.
+func (s NeonAuthOAuthClientType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes NeonAuthOAuthClientType from json.
+func (s *NeonAuthOAuthClientType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NeonAuthOAuthClientType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch NeonAuthOAuthClientType(v) {
+	case NeonAuthOAuthClientTypeConfidential:
+		*s = NeonAuthOAuthClientTypeConfidential
+	case NeonAuthOAuthClientTypePublic:
+		*s = NeonAuthOAuthClientTypePublic
+	default:
+		*s = NeonAuthOAuthClientType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s NeonAuthOAuthClientType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NeonAuthOAuthClientType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *NeonAuthOAuthClientUpdateRequest) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *NeonAuthOAuthClientUpdateRequest) encodeFields(e *jx.Encoder) {
+	{
+		if s.Name.Set {
+			e.FieldStart("name")
+			s.Name.Encode(e)
+		}
+	}
+	{
+		if s.RedirectUris != nil {
+			e.FieldStart("redirect_uris")
+			e.ArrStart()
+			for _, elem := range s.RedirectUris {
+				e.Str(elem)
+			}
+			e.ArrEnd()
+		}
+	}
+	{
+		if s.SkipConsent.Set {
+			e.FieldStart("skip_consent")
+			s.SkipConsent.Encode(e)
+		}
+	}
+	{
+		if s.Disabled.Set {
+			e.FieldStart("disabled")
+			s.Disabled.Encode(e)
+		}
+	}
+	{
+		if s.Resources != nil {
+			e.FieldStart("resources")
+			e.ArrStart()
+			for _, elem := range s.Resources {
+				e.Str(elem)
+			}
+			e.ArrEnd()
+		}
+	}
+}
+
+var jsonFieldsNameOfNeonAuthOAuthClientUpdateRequest = [5]string{
+	0: "name",
+	1: "redirect_uris",
+	2: "skip_consent",
+	3: "disabled",
+	4: "resources",
+}
+
+// Decode decodes NeonAuthOAuthClientUpdateRequest from json.
+func (s *NeonAuthOAuthClientUpdateRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NeonAuthOAuthClientUpdateRequest to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "name":
+			if err := func() error {
+				s.Name.Reset()
+				if err := s.Name.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "redirect_uris":
+			if err := func() error {
+				s.RedirectUris = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.RedirectUris = append(s.RedirectUris, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"redirect_uris\"")
+			}
+		case "skip_consent":
+			if err := func() error {
+				s.SkipConsent.Reset()
+				if err := s.SkipConsent.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"skip_consent\"")
+			}
+		case "disabled":
+			if err := func() error {
+				s.Disabled.Reset()
+				if err := s.Disabled.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"disabled\"")
+			}
+		case "resources":
+			if err := func() error {
+				s.Resources = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Resources = append(s.Resources, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"resources\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NeonAuthOAuthClientUpdateRequest")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NeonAuthOAuthClientUpdateRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NeonAuthOAuthClientUpdateRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *NeonAuthOAuthProviderConfig) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *NeonAuthOAuthProviderConfig) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("enabled")
+		e.Bool(s.Enabled)
+	}
+	{
+		if s.LoginPage.Set {
+			e.FieldStart("login_page")
+			s.LoginPage.Encode(e)
+		}
+	}
+	{
+		if s.ConsentPage.Set {
+			e.FieldStart("consent_page")
+			s.ConsentPage.Encode(e)
+		}
+	}
+	{
+		if s.Mcp.Set {
+			e.FieldStart("mcp")
+			s.Mcp.Encode(e)
+		}
+	}
+	{
+		if s.Resources != nil {
+			e.FieldStart("resources")
+			e.ArrStart()
+			for _, elem := range s.Resources {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
+}
+
+var jsonFieldsNameOfNeonAuthOAuthProviderConfig = [5]string{
+	0: "enabled",
+	1: "login_page",
+	2: "consent_page",
+	3: "mcp",
+	4: "resources",
+}
+
+// Decode decodes NeonAuthOAuthProviderConfig from json.
+func (s *NeonAuthOAuthProviderConfig) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NeonAuthOAuthProviderConfig to nil")
+	}
+	var requiredBitSet [1]uint8
+	s.setDefaults()
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "enabled":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Bool()
+				s.Enabled = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"enabled\"")
+			}
+		case "login_page":
+			if err := func() error {
+				s.LoginPage.Reset()
+				if err := s.LoginPage.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"login_page\"")
+			}
+		case "consent_page":
+			if err := func() error {
+				s.ConsentPage.Reset()
+				if err := s.ConsentPage.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"consent_page\"")
+			}
+		case "mcp":
+			if err := func() error {
+				s.Mcp.Reset()
+				if err := s.Mcp.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"mcp\"")
+			}
+		case "resources":
+			if err := func() error {
+				s.Resources = make([]NeonAuthOAuthProviderResource, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem NeonAuthOAuthProviderResource
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Resources = append(s.Resources, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"resources\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NeonAuthOAuthProviderConfig")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfNeonAuthOAuthProviderConfig) {
+					name = jsonFieldsNameOfNeonAuthOAuthProviderConfig[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NeonAuthOAuthProviderConfig) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NeonAuthOAuthProviderConfig) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *NeonAuthOAuthProviderConfigUpdate) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *NeonAuthOAuthProviderConfigUpdate) encodeFields(e *jx.Encoder) {
+	{
+		if s.Enabled.Set {
+			e.FieldStart("enabled")
+			s.Enabled.Encode(e)
+		}
+	}
+	{
+		if s.LoginPage.Set {
+			e.FieldStart("login_page")
+			s.LoginPage.Encode(e)
+		}
+	}
+	{
+		if s.ConsentPage.Set {
+			e.FieldStart("consent_page")
+			s.ConsentPage.Encode(e)
+		}
+	}
+	{
+		if s.Mcp.Set {
+			e.FieldStart("mcp")
+			s.Mcp.Encode(e)
+		}
+	}
+	{
+		if s.Resources != nil {
+			e.FieldStart("resources")
+			e.ArrStart()
+			for _, elem := range s.Resources {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
+}
+
+var jsonFieldsNameOfNeonAuthOAuthProviderConfigUpdate = [5]string{
+	0: "enabled",
+	1: "login_page",
+	2: "consent_page",
+	3: "mcp",
+	4: "resources",
+}
+
+// Decode decodes NeonAuthOAuthProviderConfigUpdate from json.
+func (s *NeonAuthOAuthProviderConfigUpdate) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NeonAuthOAuthProviderConfigUpdate to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "enabled":
+			if err := func() error {
+				s.Enabled.Reset()
+				if err := s.Enabled.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"enabled\"")
+			}
+		case "login_page":
+			if err := func() error {
+				s.LoginPage.Reset()
+				if err := s.LoginPage.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"login_page\"")
+			}
+		case "consent_page":
+			if err := func() error {
+				s.ConsentPage.Reset()
+				if err := s.ConsentPage.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"consent_page\"")
+			}
+		case "mcp":
+			if err := func() error {
+				s.Mcp.Reset()
+				if err := s.Mcp.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"mcp\"")
+			}
+		case "resources":
+			if err := func() error {
+				s.Resources = make([]NeonAuthOAuthProviderResource, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem NeonAuthOAuthProviderResource
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Resources = append(s.Resources, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"resources\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NeonAuthOAuthProviderConfigUpdate")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NeonAuthOAuthProviderConfigUpdate) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NeonAuthOAuthProviderConfigUpdate) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *NeonAuthOAuthProviderMcp) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *NeonAuthOAuthProviderMcp) encodeFields(e *jx.Encoder) {
+	{
+		if s.Resource.Set {
+			e.FieldStart("resource")
+			s.Resource.Encode(e)
+		}
+	}
+	{
+		if s.DynamicRegistration.Set {
+			e.FieldStart("dynamic_registration")
+			s.DynamicRegistration.Encode(e)
+		}
+	}
+	{
+		if s.ClientIDMetadataDocuments.Set {
+			e.FieldStart("client_id_metadata_documents")
+			s.ClientIDMetadataDocuments.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfNeonAuthOAuthProviderMcp = [3]string{
+	0: "resource",
+	1: "dynamic_registration",
+	2: "client_id_metadata_documents",
+}
+
+// Decode decodes NeonAuthOAuthProviderMcp from json.
+func (s *NeonAuthOAuthProviderMcp) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NeonAuthOAuthProviderMcp to nil")
+	}
+	s.setDefaults()
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "resource":
+			if err := func() error {
+				s.Resource.Reset()
+				if err := s.Resource.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"resource\"")
+			}
+		case "dynamic_registration":
+			if err := func() error {
+				s.DynamicRegistration.Reset()
+				if err := s.DynamicRegistration.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"dynamic_registration\"")
+			}
+		case "client_id_metadata_documents":
+			if err := func() error {
+				s.ClientIDMetadataDocuments.Reset()
+				if err := s.ClientIDMetadataDocuments.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"client_id_metadata_documents\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NeonAuthOAuthProviderMcp")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NeonAuthOAuthProviderMcp) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NeonAuthOAuthProviderMcp) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *NeonAuthOAuthProviderMcpUpdate) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *NeonAuthOAuthProviderMcpUpdate) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("resource")
+		e.Str(s.Resource)
+	}
+	{
+		if s.DynamicRegistration.Set {
+			e.FieldStart("dynamic_registration")
+			s.DynamicRegistration.Encode(e)
+		}
+	}
+	{
+		if s.ClientIDMetadataDocuments.Set {
+			e.FieldStart("client_id_metadata_documents")
+			s.ClientIDMetadataDocuments.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfNeonAuthOAuthProviderMcpUpdate = [3]string{
+	0: "resource",
+	1: "dynamic_registration",
+	2: "client_id_metadata_documents",
+}
+
+// Decode decodes NeonAuthOAuthProviderMcpUpdate from json.
+func (s *NeonAuthOAuthProviderMcpUpdate) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NeonAuthOAuthProviderMcpUpdate to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "resource":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Resource = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"resource\"")
+			}
+		case "dynamic_registration":
+			if err := func() error {
+				s.DynamicRegistration.Reset()
+				if err := s.DynamicRegistration.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"dynamic_registration\"")
+			}
+		case "client_id_metadata_documents":
+			if err := func() error {
+				s.ClientIDMetadataDocuments.Reset()
+				if err := s.ClientIDMetadataDocuments.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"client_id_metadata_documents\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NeonAuthOAuthProviderMcpUpdate")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfNeonAuthOAuthProviderMcpUpdate) {
+					name = jsonFieldsNameOfNeonAuthOAuthProviderMcpUpdate[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NeonAuthOAuthProviderMcpUpdate) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NeonAuthOAuthProviderMcpUpdate) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *NeonAuthOAuthProviderResource) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *NeonAuthOAuthProviderResource) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("identifier")
+		e.Str(s.Identifier)
+	}
+}
+
+var jsonFieldsNameOfNeonAuthOAuthProviderResource = [1]string{
+	0: "identifier",
+}
+
+// Decode decodes NeonAuthOAuthProviderResource from json.
+func (s *NeonAuthOAuthProviderResource) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NeonAuthOAuthProviderResource to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "identifier":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Identifier = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"identifier\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode NeonAuthOAuthProviderResource")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfNeonAuthOAuthProviderResource) {
+					name = jsonFieldsNameOfNeonAuthOAuthProviderResource[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NeonAuthOAuthProviderResource) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NeonAuthOAuthProviderResource) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *NeonAuthOauthProvider) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -24590,13 +26751,34 @@ func (s *NeonAuthOauthProvider) encodeFields(e *jx.Encoder) {
 			s.ClientSecret.Encode(e)
 		}
 	}
+	{
+		if s.MicrosoftTenantID.Set {
+			e.FieldStart("microsoft_tenant_id")
+			s.MicrosoftTenantID.Encode(e)
+		}
+	}
+	{
+		if s.AppleTeamID.Set {
+			e.FieldStart("apple_team_id")
+			s.AppleTeamID.Encode(e)
+		}
+	}
+	{
+		if s.AppleKeyID.Set {
+			e.FieldStart("apple_key_id")
+			s.AppleKeyID.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfNeonAuthOauthProvider = [4]string{
+var jsonFieldsNameOfNeonAuthOauthProvider = [7]string{
 	0: "id",
 	1: "type",
 	2: "client_id",
 	3: "client_secret",
+	4: "microsoft_tenant_id",
+	5: "apple_team_id",
+	6: "apple_key_id",
 }
 
 // Decode decodes NeonAuthOauthProvider from json.
@@ -24647,6 +26829,36 @@ func (s *NeonAuthOauthProvider) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"client_secret\"")
+			}
+		case "microsoft_tenant_id":
+			if err := func() error {
+				s.MicrosoftTenantID.Reset()
+				if err := s.MicrosoftTenantID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"microsoft_tenant_id\"")
+			}
+		case "apple_team_id":
+			if err := func() error {
+				s.AppleTeamID.Reset()
+				if err := s.AppleTeamID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"apple_team_id\"")
+			}
+		case "apple_key_id":
+			if err := func() error {
+				s.AppleKeyID.Reset()
+				if err := s.AppleKeyID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"apple_key_id\"")
 			}
 		default:
 			return d.Skip()
@@ -24728,6 +26940,8 @@ func (s *NeonAuthOauthProviderId) Decode(d *jx.Decoder) error {
 		*s = NeonAuthOauthProviderIdMicrosoft
 	case NeonAuthOauthProviderIdVercel:
 		*s = NeonAuthOauthProviderIdVercel
+	case NeonAuthOauthProviderIdApple:
+		*s = NeonAuthOauthProviderIdApple
 	default:
 		*s = NeonAuthOauthProviderId(v)
 	}
@@ -25384,6 +27598,12 @@ func (s *NeonAuthPluginConfigs) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.OAuthProvider.Set {
+			e.FieldStart("oauth_provider")
+			s.OAuthProvider.Encode(e)
+		}
+	}
+	{
 		if s.EmailProvider.Set {
 			e.FieldStart("email_provider")
 			s.EmailProvider.Encode(e)
@@ -25411,16 +27631,24 @@ func (s *NeonAuthPluginConfigs) encodeFields(e *jx.Encoder) {
 			s.AllowLocalhost.Encode(e)
 		}
 	}
+	{
+		if s.LogsExport.Set {
+			e.FieldStart("logs_export")
+			s.LogsExport.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfNeonAuthPluginConfigs = [7]string{
+var jsonFieldsNameOfNeonAuthPluginConfigs = [9]string{
 	0: "organization",
 	1: "magic_link",
 	2: "phone_number",
-	3: "email_provider",
-	4: "email_and_password",
-	5: "oauth_providers",
-	6: "allow_localhost",
+	3: "oauth_provider",
+	4: "email_provider",
+	5: "email_and_password",
+	6: "oauth_providers",
+	7: "allow_localhost",
+	8: "logs_export",
 }
 
 // Decode decodes NeonAuthPluginConfigs from json.
@@ -25460,6 +27688,16 @@ func (s *NeonAuthPluginConfigs) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"phone_number\"")
+			}
+		case "oauth_provider":
+			if err := func() error {
+				s.OAuthProvider.Reset()
+				if err := s.OAuthProvider.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"oauth_provider\"")
 			}
 		case "email_provider":
 			if err := func() error {
@@ -25507,6 +27745,16 @@ func (s *NeonAuthPluginConfigs) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"allow_localhost\"")
+			}
+		case "logs_export":
+			if err := func() error {
+				s.LogsExport.Reset()
+				if err := s.LogsExport.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"logs_export\"")
 			}
 		default:
 			return d.Skip()
@@ -26105,12 +28353,26 @@ func (s *NeonAuthUpdateOAuthProviderRequest) encodeFields(e *jx.Encoder) {
 			s.MicrosoftTenantID.Encode(e)
 		}
 	}
+	{
+		if s.AppleTeamID.Set {
+			e.FieldStart("apple_team_id")
+			s.AppleTeamID.Encode(e)
+		}
+	}
+	{
+		if s.AppleKeyID.Set {
+			e.FieldStart("apple_key_id")
+			s.AppleKeyID.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfNeonAuthUpdateOAuthProviderRequest = [3]string{
+var jsonFieldsNameOfNeonAuthUpdateOAuthProviderRequest = [5]string{
 	0: "client_id",
 	1: "client_secret",
 	2: "microsoft_tenant_id",
+	3: "apple_team_id",
+	4: "apple_key_id",
 }
 
 // Decode decodes NeonAuthUpdateOAuthProviderRequest from json.
@@ -26150,6 +28412,26 @@ func (s *NeonAuthUpdateOAuthProviderRequest) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"microsoft_tenant_id\"")
+			}
+		case "apple_team_id":
+			if err := func() error {
+				s.AppleTeamID.Reset()
+				if err := s.AppleTeamID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"apple_team_id\"")
+			}
+		case "apple_key_id":
+			if err := func() error {
+				s.AppleKeyID.Reset()
+				if err := s.AppleKeyID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"apple_key_id\"")
 			}
 		default:
 			return d.Skip()
@@ -28578,6 +30860,39 @@ func (s *OptDataAPICreateRequestAuthProvider) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes DataAPIReponseAuthProvider as json.
+func (o OptDataAPIReponseAuthProvider) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes DataAPIReponseAuthProvider from json.
+func (o *OptDataAPIReponseAuthProvider) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptDataAPIReponseAuthProvider to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptDataAPIReponseAuthProvider) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptDataAPIReponseAuthProvider) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes DataAPISettings as json.
 func (o OptDataAPISettings) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -29213,6 +31528,39 @@ func (s *OptNeonAuthEmailVerificationMethod) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes NeonAuthLogsExportConfig as json.
+func (o OptNeonAuthLogsExportConfig) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes NeonAuthLogsExportConfig from json.
+func (o *OptNeonAuthLogsExportConfig) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptNeonAuthLogsExportConfig to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptNeonAuthLogsExportConfig) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptNeonAuthLogsExportConfig) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes NeonAuthMagicLinkConfig as json.
 func (o OptNeonAuthMagicLinkConfig) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -29242,6 +31590,105 @@ func (s OptNeonAuthMagicLinkConfig) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptNeonAuthMagicLinkConfig) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes NeonAuthOAuthProviderConfig as json.
+func (o OptNeonAuthOAuthProviderConfig) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes NeonAuthOAuthProviderConfig from json.
+func (o *OptNeonAuthOAuthProviderConfig) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptNeonAuthOAuthProviderConfig to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptNeonAuthOAuthProviderConfig) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptNeonAuthOAuthProviderConfig) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes NeonAuthOAuthProviderMcp as json.
+func (o OptNeonAuthOAuthProviderMcp) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes NeonAuthOAuthProviderMcp from json.
+func (o *OptNeonAuthOAuthProviderMcp) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptNeonAuthOAuthProviderMcp to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptNeonAuthOAuthProviderMcp) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptNeonAuthOAuthProviderMcp) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes NeonAuthOAuthProviderMcpUpdate as json.
+func (o OptNeonAuthOAuthProviderMcpUpdate) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes NeonAuthOAuthProviderMcpUpdate from json.
+func (o *OptNeonAuthOAuthProviderMcpUpdate) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptNeonAuthOAuthProviderMcpUpdate to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptNeonAuthOAuthProviderMcpUpdate) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptNeonAuthOAuthProviderMcpUpdate) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -32977,6 +35424,82 @@ func (s *PreloadLibraries) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *PreloadLibraries) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes PresignProjectBranchBucketObjectForbidden as json.
+func (s *PresignProjectBranchBucketObjectForbidden) Encode(e *jx.Encoder) {
+	unwrapped := (*GeneralError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes PresignProjectBranchBucketObjectForbidden from json.
+func (s *PresignProjectBranchBucketObjectForbidden) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode PresignProjectBranchBucketObjectForbidden to nil")
+	}
+	var unwrapped GeneralError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = PresignProjectBranchBucketObjectForbidden(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *PresignProjectBranchBucketObjectForbidden) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *PresignProjectBranchBucketObjectForbidden) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes PresignProjectBranchBucketObjectNotFound as json.
+func (s *PresignProjectBranchBucketObjectNotFound) Encode(e *jx.Encoder) {
+	unwrapped := (*GeneralError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes PresignProjectBranchBucketObjectNotFound from json.
+func (s *PresignProjectBranchBucketObjectNotFound) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode PresignProjectBranchBucketObjectNotFound to nil")
+	}
+	var unwrapped GeneralError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = PresignProjectBranchBucketObjectNotFound(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *PresignProjectBranchBucketObjectNotFound) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *PresignProjectBranchBucketObjectNotFound) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -38823,6 +41346,102 @@ func (s *ProjectUpdateRequestProject) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *ProjectUpdateRequestProject) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *ProjectsCountResponse) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ProjectsCountResponse) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("count")
+		e.Int(s.Count)
+	}
+}
+
+var jsonFieldsNameOfProjectsCountResponse = [1]string{
+	0: "count",
+}
+
+// Decode decodes ProjectsCountResponse from json.
+func (s *ProjectsCountResponse) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ProjectsCountResponse to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "count":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int()
+				s.Count = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"count\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ProjectsCountResponse")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfProjectsCountResponse) {
+					name = jsonFieldsNameOfProjectsCountResponse[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ProjectsCountResponse) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ProjectsCountResponse) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
