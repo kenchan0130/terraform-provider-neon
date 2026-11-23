@@ -120,6 +120,18 @@ func (UnimplementedHandler) CountProjectBranches(ctx context.Context, params Cou
 	return r, ht.ErrNotImplemented
 }
 
+// CountProjects implements countProjects operation.
+//
+// Retrieves the number of active projects you can access in the specified organization, without paging
+// through the list of projects. Projects that are being created or deleted are not counted. If using a
+// personal API key, include the `org_id` parameter to specify which organization to work with. If
+// using an org API key, `org_id` is automatically inferred from the key.
+//
+// GET /projects/count
+func (UnimplementedHandler) CountProjects(ctx context.Context, params CountProjectsParams) (r *ProjectsCountResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CreateApiKey implements createApiKey operation.
 //
 // Creates an API key. The `key_name` is a user-specified name for the key. Returns an `id` and `key`;
@@ -190,6 +202,17 @@ func (UnimplementedHandler) CreateNeonAuthIntegration(ctx context.Context, req *
 //
 // POST /projects/auth/user
 func (UnimplementedHandler) CreateNeonAuthNewUser(ctx context.Context, req *NeonAuthCreateNewUserRequest) (r *NeonAuthCreateNewUserResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreateNeonAuthOAuthClient implements createNeonAuthOAuthClient operation.
+//
+// Registers an OAuth client with the branch's Neon Auth OAuth provider. For `confidential` clients the
+// response includes the `client_secret`, which is shown only once. Every entry in `resources` must be
+// configured on the OAuth provider plugin.
+//
+// POST /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients
+func (UnimplementedHandler) CreateNeonAuthOAuthClient(ctx context.Context, req *NeonAuthOAuthClientCreateRequest, params CreateNeonAuthOAuthClientParams) (r *NeonAuthOAuthClientCreated, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -446,6 +469,15 @@ func (UnimplementedHandler) DeleteNeonAuthIntegration(ctx context.Context, req O
 	return ht.ErrNotImplemented
 }
 
+// DeleteNeonAuthOAuthClient implements deleteNeonAuthOAuthClient operation.
+//
+// Deletes an OAuth client. Tokens already issued to the client are not revoked.
+//
+// DELETE /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}
+func (UnimplementedHandler) DeleteNeonAuthOAuthClient(ctx context.Context, params DeleteNeonAuthOAuthClientParams) error {
+	return ht.ErrNotImplemented
+}
+
 // DeleteNeonAuthOauthProvider implements deleteNeonAuthOauthProvider operation.
 //
 // Deprecated. Use
@@ -567,6 +599,10 @@ func (UnimplementedHandler) DeleteProjectBranchBucketObjectsByPrefix(ctx context
 // DeleteProjectBranchCustomDomain implements deleteProjectBranchCustomDomain operation.
 //
 // Removes a custom domain registered on the branch and stops routing it.
+//
+// For organizations on the per-project role model, deleting a custom domain requires the project Admin
+// role. Other callers receive `403` with code `CUSTOM_DOMAIN_ADMIN_REQUIRED`. Organization API keys
+// keep write-level access.
 //
 // Note: This endpoint is currently in Beta.
 //
@@ -791,12 +827,17 @@ func (UnimplementedHandler) GetConnectionURI(ctx context.Context, params GetConn
 //
 // History starts when the account first ingests branch-level consumption data.
 //
-// The `metrics` query parameter is required. Only these six values are supported on this endpoint:
+// The `metrics` query parameter is required. These values are supported on this endpoint:
 // `compute_unit_seconds`, `root_branch_bytes_month`, `child_branch_bytes_month`,
-// `instant_restore_bytes_month`, `public_network_transfer_bytes`, `private_network_transfer_bytes`.
+// `instant_restore_bytes_month`, `public_network_transfer_bytes`, `private_network_transfer_bytes`,
+// `functions_active_capacity_microseconds`, `functions_waiting_capacity_microseconds`,
+// `functions_invocations`, `functions_egress_bytes`, `ai_gateway_input_tokens`,
+// `ai_gateway_output_tokens`, `ai_gateway_total_tokens`, `ai_gateway_cached_input_tokens`,
+// `ai_gateway_cache_creation_tokens`, `ai_gateway_reasoning_tokens`,
+// `object_storage_network_transfer_bytes`.
 //
-// This endpoint does not support `extra_branches_month` or `snapshot_storage_bytes_month`. Use
-// `GET /consumption_history/v2/projects` for those.
+// This endpoint does not support `extra_branches_month`, `snapshot_storage_bytes_month`, or
+// `object_storage_bytes_month`. Use `GET /consumption_history/v2/projects` for those.
 //
 // Consumption metrics within each branch are returned in ascending time order (oldest first). This
 // request does not wake project computes.
@@ -829,7 +870,11 @@ func (UnimplementedHandler) GetConsumptionHistoryPerProject(ctx context.Context,
 // The `metrics` query parameter is required. Supported values: `compute_unit_seconds`,
 // `root_branch_bytes_month`, `child_branch_bytes_month`, `instant_restore_bytes_month`,
 // `public_network_transfer_bytes`, `private_network_transfer_bytes`, `extra_branches_month`,
-// `snapshot_storage_bytes_month`.
+// `snapshot_storage_bytes_month`, `functions_active_capacity_microseconds`,
+// `functions_waiting_capacity_microseconds`, `functions_invocations`, `functions_egress_bytes`,
+// `ai_gateway_input_tokens`, `ai_gateway_output_tokens`, `ai_gateway_total_tokens`,
+// `ai_gateway_cached_input_tokens`, `ai_gateway_cache_creation_tokens`, `ai_gateway_reasoning_tokens`,
+// `object_storage_bytes_month`, `object_storage_network_transfer_bytes`.
 //
 // Consumption metrics within each project are returned in ascending time order (oldest first). This
 // request does not wake project computes.
@@ -925,6 +970,26 @@ func (UnimplementedHandler) GetNeonAuthEmailServer(ctx context.Context, params G
 	return r, ht.ErrNotImplemented
 }
 
+// GetNeonAuthOAuthClient implements getNeonAuthOAuthClient operation.
+//
+// Returns an OAuth client registered with the branch's Neon Auth OAuth provider. The client secret is
+// never returned.
+//
+// GET /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}
+func (UnimplementedHandler) GetNeonAuthOAuthClient(ctx context.Context, params GetNeonAuthOAuthClientParams) (r *NeonAuthOAuthClient, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetNeonAuthOAuthProviderPlugin implements getNeonAuthOAuthProviderPlugin operation.
+//
+// Returns the OAuth provider plugin configuration for Neon Auth. The OAuth provider plugin lets Neon
+// Auth act as an OAuth 2.1 authorization server for your own clients, such as MCP clients.
+//
+// GET /projects/{project_id}/branches/{branch_id}/auth/plugins/oauth-provider
+func (UnimplementedHandler) GetNeonAuthOAuthProviderPlugin(ctx context.Context, params GetNeonAuthOAuthProviderPluginParams) (r *NeonAuthOAuthProviderConfig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetNeonAuthPhoneNumberPlugin implements getNeonAuthPhoneNumberPlugin operation.
 //
 // Returns the phone number plugin configuration for Neon Auth. The phone number plugin enables
@@ -1014,7 +1079,9 @@ func (UnimplementedHandler) GetOrganizationVPCEndpointDetails(ctx context.Contex
 // GetProject implements getProject operation.
 //
 // Retrieves information about the specified project. Returned details include the project settings,
-// compute configuration, history retention, owner information, and current usage metrics.
+// compute configuration, history retention, owner information, and current usage metrics. The usage
+// metrics are not intended for billing or metering. For billing, use
+// `/consumption_history/v2/projects`.
 //
 // GET /projects/{project_id}
 func (UnimplementedHandler) GetProject(ctx context.Context, params GetProjectParams) (r *ProjectResponse, _ error) {
@@ -1039,7 +1106,8 @@ func (UnimplementedHandler) GetProjectAdvisorSecurityIssues(ctx context.Context,
 //
 // Each Neon project is initially created with a root and default branch named `main`. A project can
 // contain one or more branches. A parent branch is identified by a `parent_id` value, which is the
-// `id` of the parent branch. For related information, see [Manage branches].
+// `id` of the parent branch. For related information, see [Manage branches]. The usage metrics are not
+// intended for billing or metering. For billing, use `/consumption_history/v2/branches`.
 //
 // GET /projects/{project_id}/branches/{branch_id}
 //
@@ -1066,6 +1134,9 @@ func (UnimplementedHandler) GetProjectBranchAiGateway(ctx context.Context, param
 // Streams the raw bytes of the named object from the bucket on the specified branch, including objects
 // inherited from ancestor branches. Served by the user's session (no customer S3 credentials
 // required).
+//
+// For organizations on the per-project role model, downloading object bytes requires the Editor role
+// or higher. Viewers can list objects but not download them.
 //
 // The body is returned as `application/octet-stream` so a browser treats it as a download; the
 // `Content-Length` and `ETag` response headers echo the stored object metadata.
@@ -1237,6 +1308,21 @@ func (UnimplementedHandler) GetProjectOperation(ctx context.Context, params GetP
 	return r, ht.ErrNotImplemented
 }
 
+// GetRegionVPCEndpointServices implements getRegionVPCEndpointServices operation.
+//
+// Lists the AWS VPC endpoint service names Neon currently offers in the given region, for PrivateLink
+// / Neon Private Networking. Add every name returned for your region when configuring your VPC
+// endpoint. The list is always empty for non-AWS regions, and for AWS regions without PrivateLink.
+//
+// Note: Not all regions are available to all organizations. Pass the `org_id` parameter to check
+// region availability for your organization. Unknown regions, and regions not available to the caller,
+// return 404.
+//
+// GET /regions/{region_id}/vpc_endpoint_services
+func (UnimplementedHandler) GetRegionVPCEndpointServices(ctx context.Context, params GetRegionVPCEndpointServicesParams) (r *RegionVPCEndpointServicesResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetSnapshotSchedule implements getSnapshotSchedule operation.
 //
 // Returns the backup schedule for the specified branch, including the configured snapshot frequencies.
@@ -1307,6 +1393,16 @@ func (UnimplementedHandler) ListCredentials(ctx context.Context, params ListCred
 //
 // GET /projects/{project_id}/auth/integrations
 func (UnimplementedHandler) ListNeonAuthIntegrations(ctx context.Context, params ListNeonAuthIntegrationsParams) (r *ListNeonAuthIntegrationsResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListNeonAuthOAuthClients implements listNeonAuthOAuthClients operation.
+//
+// Lists the OAuth clients registered for the branch's Neon Auth OAuth provider. Client secrets are
+// never returned.
+//
+// GET /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients
+func (UnimplementedHandler) ListNeonAuthOAuthClients(ctx context.Context, params ListNeonAuthOAuthClientsParams) (r *ListNeonAuthOAuthClientsResponse, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -1614,7 +1710,8 @@ func (UnimplementedHandler) ListSnapshots(ctx context.Context, params ListSnapsh
 //   - `upload` returns a presigned `PUT` URL (the caller `PUT`s the file bytes straight to `url` with
 //     the returned `headers`). Authorized with project write access.
 //   - `download` returns a presigned `GET` URL (the caller `GET`s the bytes straight from `url`).
-//     Authorized with project read access.
+//     Authorized with project read access. For organizations on the per-project role model, it also
+//     requires the Editor role or higher, because the URL grants access to the object's bytes.
 //
 // The platform mints a short-lived credential and builds the SigV4-signed URL against the branch's S3
 // data-plane host, returning it together with the HTTP method, any headers the caller must echo, and
@@ -1641,6 +1738,9 @@ func (UnimplementedHandler) PresignProjectBranchBucketObject(ctx context.Context
 // Supply `logql` instead of the structured filters to run a raw LogQL expression. Combining it with
 // any structured filter is rejected rather than silently ignored; `limit`, `sort_order`, and the time
 // window still apply, because those bound the query rather than form part of the expression.
+//
+// `source=neon_auth` returns a 404 `telemetry_not_enabled` response when Neon Auth logs are not
+// enabled for this project.
 //
 // Give the window either as `since` — a duration ending at `end_time`, or at the current time when
 // `end_time` is omitted — or as an explicit `start_time`. Supplying both is rejected.
@@ -1681,6 +1781,10 @@ func (UnimplementedHandler) RecoverProject(ctx context.Context, params RecoverPr
 // record; the domain goes live only once that DNS resolves and a certificate is issued on the first
 // request. A domain already registered to another resource is rejected with `409` and no detail about
 // the owner. Re-registering the same domain for the same entity is idempotent.
+//
+// For organizations on the per-project role model, registering a custom domain requires the project
+// Admin role. Other callers receive `403` with code `CUSTOM_DOMAIN_ADMIN_REQUIRED`. Organization API
+// keys keep write-level access.
 //
 // Note: This endpoint is currently in Beta.
 //
@@ -1850,6 +1954,16 @@ func (UnimplementedHandler) RevokePermissionFromProject(ctx context.Context, par
 //
 // POST /projects/{project_id}/branches/{branch_id}/credentials/{token_id}/rotate
 func (UnimplementedHandler) RotateCredential(ctx context.Context, params RotateCredentialParams) (r *RotateCredentialResponse, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// RotateNeonAuthOAuthClientSecret implements rotateNeonAuthOAuthClientSecret operation.
+//
+// Generates a new secret for a confidential OAuth client and invalidates the previous one. The new
+// secret is shown only once.
+//
+// POST /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}/rotate_secret
+func (UnimplementedHandler) RotateNeonAuthOAuthClientSecret(ctx context.Context, params RotateNeonAuthOAuthClientSecretParams) (r *NeonAuthOAuthClientSecret, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -2090,6 +2204,17 @@ func (UnimplementedHandler) UpdateNeonAuthEmailServer(ctx context.Context, req *
 	return r, ht.ErrNotImplemented
 }
 
+// UpdateNeonAuthLogsExport implements updateNeonAuthLogsExport operation.
+//
+// Enables or disables exporting Neon Auth events for the branch to Neon Platform logs. Only supported
+// for Neon Auth (`better_auth`) integrations. When logs export is not available for the project, only
+// disabling is accepted.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/auth/logs_export
+func (UnimplementedHandler) UpdateNeonAuthLogsExport(ctx context.Context, req *NeonAuthLogsExportConfig, params UpdateNeonAuthLogsExportParams) (r *NeonAuthLogsExportConfig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // UpdateNeonAuthMagicLinkPlugin implements updateNeonAuthMagicLinkPlugin operation.
 //
 // Updates the magic link plugin configuration for Neon Auth. The magic link plugin enables
@@ -2097,6 +2222,28 @@ func (UnimplementedHandler) UpdateNeonAuthEmailServer(ctx context.Context, req *
 //
 // PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/magic-link
 func (UnimplementedHandler) UpdateNeonAuthMagicLinkPlugin(ctx context.Context, req *NeonAuthMagicLinkConfigUpdate, params UpdateNeonAuthMagicLinkPluginParams) (r *NeonAuthMagicLinkConfig, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateNeonAuthOAuthClient implements updateNeonAuthOAuthClient operation.
+//
+// Updates an OAuth client. Only the fields provided in the request body are updated. A provided
+// `resources` list replaces the client's stored list. The client `type` cannot be changed.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/auth/oauth-provider/clients/{client_id}
+func (UnimplementedHandler) UpdateNeonAuthOAuthClient(ctx context.Context, req *NeonAuthOAuthClientUpdateRequest, params UpdateNeonAuthOAuthClientParams) (r *NeonAuthOAuthClient, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdateNeonAuthOAuthProviderPlugin implements updateNeonAuthOAuthProviderPlugin operation.
+//
+// Updates the OAuth provider plugin configuration for Neon Auth. Only the fields provided in the
+// request body are updated; omitted fields retain their current values. A provided `resources` list
+// replaces the stored list. A provided `mcp` object replaces the stored MCP configuration and must
+// include `resource`. The plugin can only be enabled on the project's root branch.
+//
+// PATCH /projects/{project_id}/branches/{branch_id}/auth/plugins/oauth-provider
+func (UnimplementedHandler) UpdateNeonAuthOAuthProviderPlugin(ctx context.Context, req *NeonAuthOAuthProviderConfigUpdate, params UpdateNeonAuthOAuthProviderPluginParams) (r *NeonAuthOAuthProviderConfig, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
